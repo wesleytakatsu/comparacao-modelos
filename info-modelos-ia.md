@@ -556,7 +556,7 @@ O catálogo oficial do OpenCode Go (conforme documentado em `https://opencode.ai
 | **DeepSeek V4 Flash Vision Exp** (Off-Peak) | `deepseek-v4-flash-vision-exp` | `/v1/chat/completions` | `@ai-sdk/openai-compatible` | $0,22 | $0,66 | $0,007 | — | $15 | 0 dias | Visão nativa (~384 tokens/img) |
 | **DeepSeek V4 Flash Vision Exp** (Peak) | `deepseek-v4-flash-vision-exp` | `/v1/chat/completions` | `@ai-sdk/openai-compatible` | $0,44 | $1,32 | $0,014 | — | $15 | 0 dias | Imagens cobradas como tokens de input |
 | **Hy3** | `hy3` | `/v1/chat/completions` | `@ai-sdk/openai-compatible` | $0,14 | $0,58 | $0,035 | — | **$60 (6×)** | 0 dias | Ultra-barato para automações |
-| **Ox Alpha Free** | `ox-alpha-free` | `/v1/chat/completions` | `@ai-sdk/openai-compatible` | Gratuito | Gratuito | Gratuito | — | Ilimitado | 0 dias | Modelo gratuito temporário |
+| **GLM-5.3-Flash** | `zai/glm-5.3-flash` | `/v1/chat/completions` | `@ai-sdk/openai-compatible` | $0,15 ($0,075 promo) | $0,50 ($0,25 promo) | $0,03 ($0,015 promo) | — | $15 (0.8×) | 0 dias | Z.ai MoE 320B/18B MIT 1M (ex-Ox Alpha) |
 
 ---
 
@@ -874,7 +874,7 @@ Para evitar a contaminação de benchmarks e misturas incorretas de versões na 
 | **19** | DeepSeek V4 Flash | `opencode-go/deepseek-v4-flash` | DeepSeek | `documented` | Alias de serviço; snapshot provável `0731` (a confirmar) |
 | **20** | DeepSeek V4 Flash Vision Exp | `opencode-go/deepseek-v4-flash-vision-exp` | DeepSeek | `documented` | Serviço experimental multimodal |
 | **21** | Hy3 | `opencode-go/hy3` | Tencent | `documented` | Open weights |
-| **22** | Ox Alpha Free | `opencode-go/ox-alpha-free` | Não divulgado | `documented` | Alias gratuito experimental |
+| **22** | GLM-5.3-Flash | `zai/glm-5.3-flash` | Z.ai (Zhipu) | `documented` | MoE 320B/18B MIT 1M (ex-Ox Alpha) |
 | **23** | MiniMax M2.5 | `opencode-go/minimax-m2.5` | MiniMax | `documented_secondary` | Presente em pricing/endpoints; ausente da lista principal |
 | **24** | Kimi K2.5 | `opencode-go/kimi-k2.5` | Moonshot AI | `live_only` | Checkpoint anterior ainda retornado pela API ao vivo |
 | **25** | GLM-5 | `opencode-go/glm-5` | Z.ai | `live_only` | Checkpoint anterior retornado pela API ao vivo |
@@ -929,7 +929,7 @@ As seguintes 5 questões permanecem marcadas como `unresolved / N/D` aguardando 
 - [ ] Confirmação de que `opencode-go/deepseek-v4-flash` está congelado no checkpoint `DeepSeek-V4-Flash-0731`.
 - [ ] Confirmação de que `opencode-go/deepseek-v4-pro` está congelado no checkpoint `DeepSeek-V4-Pro-0813`.
 - [ ] Não assumir equivalência de pesos/comportamento entre `qwen3.8-max` API e `Qwen3.8-2.4T-A95B`.
-- [ ] Identificação do modelo/arquitetura por trás de `opencode-go/ox-alpha-free`.
+- [x] Identificação do modelo/arquitetura por trás de `ox-alpha-free`: Confirmado oficialmente como **GLM-5.3-Flash** (Z.ai / MoE 320B/18B MIT).
 - [ ] Suporte oficial versus status de alias legado para os 6 modelos `live_only` no OpenCode Go.
 
 ---
@@ -1342,7 +1342,7 @@ O modo como o raciocínio é tratado entre turnos impacta brutalmente o **consum
 ### 19.8 Protocolos de Adaptação no OpenCode Go
 Os 29 modelos do catálogo OpenCode Go são roteados através de três adaptadores fundamentais:
 1. **OpenAI Responses Protocol**: `gpt-5.6-luna`, `grok-4.5`, `muse-spark-1.2-contributor`.
-2. **OpenAI-Compatible Chat Completions Protocol**: `glm-5.x`, `deepseek-v4-flash`, `deepseek-v4-pro`, `deepseek-v4-flash-vision-exp`, `kimi-k3`, `kimi-k2.x`, `mimo-v2.5`, `mimo-v2.5-pro`, `hy3`, `ox-alpha-free`.
+2. **OpenAI-Compatible Chat Completions Protocol**: `glm-5.x`, `glm-5.3-flash`, `deepseek-v4-flash`, `deepseek-v4-pro`, `deepseek-v4-flash-vision-exp`, `kimi-k3`, `kimi-k2.x`, `mimo-v2.5`, `mimo-v2.5-pro`, `hy3`.
 3. **Anthropic Messages Protocol**: `minimax-m3`, `minimax-m2.7`, `minimax-m2.5`, `qwen3.8-max`, `qwen3.7-max`, `qwen3.7-plus`, `qwen3.6-plus`.
 
 ---
@@ -2631,29 +2631,30 @@ A capacidade de raciocínio é comprovada. Seus pontos fracos residem na **confi
 
 ---
 
-### 25.2 Ficha Canônica e Identidade Operacional
+### 25.2 Ficha Canônica: GLM-5.3-Flash (Z.ai — Anteriormente Ox Alpha)
+
+> [!IMPORTANT]
+> **Identidade Oficial Revelada (26/08/2026):** O modelo testado anonimamente entre 20/08 e 26/08/2026 sob o rótulo stealth `ox-alpha` (`stealth/ox-alpha` no OpenRouter e `ox-alpha-free` no OpenCode) foi oficialmente confirmado pela **Z.ai (Zhipu AI)** como **GLM-5.3-Flash**. Os endpoints provisórios foram descontinuados e substituídos pelos endpoints canônicos estáveis (`z-ai/glm-5.3-flash` e `glm-5.3-flash`).
 
 | Atributo Técnico | Especificação Oficial | Observações de Engenharia |
 | :--- | :--- | :--- |
-| **Nome Oficial** | Ox Alpha | Modelo em regime stealth preview |
-| **OpenRouter ID** | `stealth/ox-alpha` | Slug canônico no OpenRouter |
-| **OpenCode Go ID** | `ox-alpha-free` (`opencode-go/ox-alpha-free`)| Adapter: `@ai-sdk/openai-compatible` (Alias histórico: `x-preview-f-free`) |
-| **Data de Lançamento** | 20/08/2026 | Disponibilizado publicamente em preview gratuito |
-| **Desenvolvedor / Fabricante**| **Desconhecido** (Provider anônimo sob rótulo *Stealth*) | Fortes indícios comunitários apontam para a linhagem **GLM / Z.ai** |
-| **Pesos Abertos (Open Weights)**| ❌ **Não** (Serviço exclusivo em nuvem) | Sem arquivos safetensors para download ou auto-hospedagem |
-| **Parâmetros & Arquitetura** | *N/D* | Especula-se arquitetura MoE de alta capacidade |
-| **Context Window** | **1.048.576 tokens (1M)** | Janela de 1 milhão de tokens; comportamento no fim da janela ainda `N/D` |
-| **Max Completion Output** | **131.072 tokens (~128k)** | Classe de saída longa para refatoração de múltiplos arquivos |
-| **Modalidades de Entrada** | **Texto + Imagem + Vídeo** | Multimodal nativo (processa frames de vídeo e imagens em 1M) |
-| **Modalidade de Saída** | Texto | Respostas e raciocínio textual |
-| **Mecanismo de Reasoning** | **Obrigatório (Always ON)** | Não pode ser desativado (`can_disable = false`) |
-| **Níveis de Reasoning Suportados**| `low`, `high`, `max` (Default: `max`) | Não existem os níveis `medium` ou `xhigh` |
-| **Sampling Padrão** | `temperature = 1.0` / `top_p = 0.95` | Padrão recomendado para reasoning agêntico |
-| **Tool Calling** | ✅ **Nativo** (`tools`, `tool_choice`) | Suporte a chamadas de funções, sujeito a falhas de formatação |
-| **Structured Output** | ✅ `json_mode` (via `response_format`) | ❌ `json_schema` strict não anunciado oficialmente |
-| **Moderação Declarada** | `is_moderated = false` | Filtro externo do OpenRouter desligado; filtros internos de política ativos |
-| **Preço Atual** | **US$ 0,00 Input / US$ 0,00 Output** | Gratuito em período promocional de preview |
-| **Capacidade Declarada** | ~100T tokens/dia | Atendimento de alto volume no pool OpenCode Go |
+| **Nome Oficial** | **GLM-5.3-Flash** | Identidade canônica definitiva da Z.ai |
+| **Alias Histórico / Stealth**| `Ox Alpha` / `stealth/ox-alpha` | Preview anônimo ativo de 20 a 26 de agosto de 2026 |
+| **Z.ai API ID** | `glm-5.3-flash` | Endpoint primário oficial Zhipu |
+| **OpenRouter ID** | `z-ai/glm-5.3-flash` | Slug oficial ativo (`stealth/ox-alpha` aposentado) |
+| **OpenCode ID** | `zai/glm-5.3-flash` | Anteriormente `opencode-go/ox-alpha-free` |
+| **Data de Lançamento** | 26/08/2026 (Oficial) / 20/08/2026 (Preview) | Lançamento oficial de pesos abertos sob licença MIT |
+| **Desenvolvedor / Fabricante**| **Z.ai (Zhipu AI)** | Criadora das famílias GLM e CodeGeeX |
+| **Pesos Abertos (Open Weights)**| ✅ **Sim (Licença MIT)** | Checkpoints para auto-hospedagem e cluster corporativo |
+| **Parâmetros Totais / Ativos**| **320B Total / 18B Ativos por token** | Arquitetura MoE híbrida com 45 camadas (vs 92 do GLM-4.5) |
+| **Atenção / Otimizações** | **Sparse + Linear Attention (mHC + IndexPool)**| 3.01× menor attention compute e 4.44× menor KV-cache vs GLM-5.3 |
+| **Context Window** | **1.048.576 tokens (1M)** | Janela de 1M com IndexPool para redução de latência |
+| **Max Output Tokens** | **131.072 tokens (~128k)** | Classe de saída extensa para geração e refatoração |
+| **Modalidades Nativas** | **Texto + Imagem + Vídeo + Arquivos** | Primeiro modelo da série GLM-5 nativamente multimodal |
+| **Mecanismo de Reasoning** | **Obrigatório (Always ON)** | Controlável por `reasoning_effort` (`low`, `high`, `max` — default: `max`) |
+| **Tool Calling & Structured** | ✅ **Nativo** (`tools`, `tool_choice`, `json_mode`) | Context caching, streaming de ferramentas e suporte a Computer Use |
+| **Throughput / Latência** | **~43–45 tok/s (P50)** / TTFT ~1.5–1.7 s | Decode moderado em avaliações independentes (não confundir com Flash de velocidade) |
+| **Tarifas Comerciais** | **$0,15 in / $0,50 out** / Cache Read: **$0,03** | Lançamento com 50% de desconto: $0,075 in / $0,25 out / Cache: $0,015 |
 
 ---
 
@@ -3672,7 +3673,7 @@ quadrantChart
 ### 27.10 Modelos com Status N/D Preservado na Artificial Analysis
 
 Para manter a integridade científica do banco de dados, os seguintes modelos **permanecem formalmente como N/D** até a publicação de baterias auditadas pela AA:
-- **Ox Alpha (`stealth/ox-alpha`)**: Nenhuma bateria padronizada AA localizada. Mantém-se a avaliação comunitária auditável do *DeepSWE Completo (58,4%)* e *LiveCodeBench v6 (28,0%)*.
+- **GLM-5.3-Flash (`zai/glm-5.3-flash`, ex-`stealth/ox-alpha`)**: A Artificial Analysis registrou Intelligence Index de **57,0** (44 tok/s, TTFT 1,6 s, ~$0,09/task). O resultado de 58,4% no DeepSWE foi mantido como histórico da fase stealth preview.
 - **DeepSeek V4 Flash Vision Exp**: Sem suite multimodal dedicada na AA pública.
 - **Composer 2.5**: Sem entrada standalone LLM isolada.
 - **Hy3 Preview**: Avaliação mantida estritamente na versão de release oficial.

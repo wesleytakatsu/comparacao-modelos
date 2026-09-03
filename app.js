@@ -195,6 +195,10 @@
 
     // Rota Especial: Dossiê do Modelo
     if (route === 'model' && param) {
+      if (param === 'ox-alpha' || param === 'stealth-ox-alpha' || param === 'stealth/ox-alpha') {
+        location.hash = '#model/glm-5-3-flash';
+        return;
+      }
       AppState.activeModelId = param;
       const detailView = document.getElementById('view-model-detail');
       if (detailView) {
@@ -777,16 +781,16 @@
         </div>
       </button>
 
-      <!-- Card 8: OpenCode Go Quota Free -->
-      <button type="button" class="kpi-card card-go" data-model-id="ox-alpha">
-        <div class="kpi-tag">🎁 Grátis no OpenCode Go</div>
+      <!-- Card 8: GLM-5.3-Flash Open Weights MIT -->
+      <button type="button" class="kpi-card card-go" data-model-id="glm-5-3-flash">
+        <div class="kpi-tag">🎁 Aberto MIT & 1M Multimodal</div>
         <div class="kpi-body">
-          <div class="kpi-model-name">Ox Alpha (Preview)</div>
-          <div class="kpi-primary-score">0.0x</div>
+          <div class="kpi-model-name">GLM-5.3-Flash</div>
+          <div class="kpi-primary-score">320B MoE</div>
         </div>
         <div class="kpi-footer">
-          <span>100T tok/dia • 1M Contexto</span>
-          <span class="kpi-badge pool-stealth">Preview 1M</span>
+          <span>84,3% TB 2.1 • Ex-Ox Alpha</span>
+          <span class="kpi-badge pool-zai">Open Weights MIT</span>
         </div>
       </button>
     `;
@@ -820,7 +824,8 @@
     // Filtro por Busca de Texto
     if (AppState.dashboardSearchQuery) {
       filtered = filtered.filter(m => {
-        const fullText = `${m.id} ${m.name} ${m.providerName} ${m.family} ${m.architectureType || ''} ${m.sweetSpot || ''} ${(m.badges || []).join(' ')} ${m.antigravity ? m.antigravity.poolLabel + ' ' + m.antigravity.role : ''} ${m.openWeights ? 'local open weights gratuito open-source' : 'api cloud pay-as-you-go'}`.toLowerCase();
+        const aliases = (m.historicalAliases || []).join(' ');
+        const fullText = `${m.id} ${m.name} ${aliases} ${m.providerName} ${m.family} ${m.architectureType || ''} ${m.sweetSpot || ''} ${(m.badges || []).join(' ')} ${m.antigravity ? m.antigravity.poolLabel + ' ' + m.antigravity.role : ''} ${m.openWeights ? 'local open weights gratuito open-source' : 'api cloud pay-as-you-go'}`.toLowerCase();
         return fullText.includes(AppState.dashboardSearchQuery);
       });
     }
@@ -874,7 +879,7 @@
             <div class="table-model-cell">
               ${brandIconHtml}
               <div>
-                <div class="model-name-text">${model.name}</div>
+                <div class="model-name-text">${model.name}${model.previewHistory ? ` <span style="font-size: 0.72rem; color: #facc15; font-weight: 500;">(ex-${model.previewHistory.alias})</span>` : ''}</div>
                 <div style="font-size: 0.72rem; color: var(--text-muted);">${model.providerName}</div>
               </div>
             </div>
@@ -959,7 +964,7 @@
     const sCached = parseInt(document.getElementById('sliderCachedInput').value);
     const sOut = parseInt(document.getElementById('sliderOutput').value);
 
-    const showcaseModels = ['grok-4-6', 'gpt-5-6-sol', 'gpt-5-6-luna', 'deepseek-v4-flash-0731', 'claude-sonnet-5', 'ox-alpha'];
+    const showcaseModels = ['grok-4-6', 'gpt-5-6-sol', 'gpt-5-6-luna', 'deepseek-v4-flash-0731', 'claude-sonnet-5', 'glm-5-3-flash'];
 
     container.innerHTML = showcaseModels.map(id => {
       const model = AI_MODELS_DATA[id];
@@ -1043,6 +1048,11 @@
               <div class="model-badges-list">
                 ${(model.badges || []).map(b => `<span class="badge-tag badge-frontier">${b}</span>`).join('')}
               </div>
+              ${model.previewHistory ? `
+                <div style="margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: rgba(234, 179, 8, 0.12); border: 1px solid rgba(234, 179, 8, 0.4); border-radius: 4px; font-size: 0.78rem; color: #facc15;">
+                  <span>ℹ️</span> Testado anonimamente no OpenCode e OpenRouter como <strong>${model.previewHistory.alias}</strong> (revelado oficialmente pela Z.ai em 26/08/2026)
+                </div>
+              ` : ''}
             </div>
           </div>
           <div style="display: flex; gap: 8px;">
@@ -1184,6 +1194,32 @@
               <div style="background: var(--bg-surface-dim); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px; font-size: 0.8rem; color: var(--text-secondary);">
                 📌 <em>${model.officialBenchmarks.methodology}</em>
               </div>
+            </div>
+          ` : ''}
+
+          ${model.historicalEvaluations && model.historicalEvaluations.length > 0 ? `
+            <div class="content-box" style="margin-top: 20px; border-color: rgba(234, 179, 8, 0.4); background: rgba(234, 179, 8, 0.04);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h4 style="color: #facc15; margin: 0;">📜 Avaliações Históricas Pré-Revelação (Fase Stealth Preview)</h4>
+                <span class="badge-tag badge-warning">Histórico</span>
+              </div>
+              <p style="font-size: 0.83rem; color: var(--text-secondary); margin-bottom: 12px;">
+                Métricas auditadas registradas enquanto o modelo operava sob o codinome anônimo <strong>${model.historicalEvaluations[0].alias}</strong>:
+              </p>
+              <table class="data-table">
+                <thead><tr><th>Benchmark</th><th>Score</th><th>Tarefas</th><th>Fase</th><th>Notas</th></tr></thead>
+                <tbody>
+                  ${model.historicalEvaluations.map(h => `
+                    <tr>
+                      <td><strong>${h.benchmark}</strong></td>
+                      <td class="score-cell">${h.score}%</td>
+                      <td>${h.solved ? `${h.solved} / ${h.tasks}` : `${h.tasks} tarefas`}</td>
+                      <td><span class="badge-tag badge-frontier">${h.phase}</span></td>
+                      <td style="font-size: 0.8rem; color: var(--text-muted);">${h.notes}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
             </div>
           ` : ''}
 
@@ -1412,14 +1448,14 @@
               </div>
             </div>
           ` : ''}
-          ${model.id === 'ox-alpha' ? `
-            <div style="margin-top: 14px; padding: 14px; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-md); font-size: 0.85rem;">
-              <h5 style="color: #f87171; margin-bottom: 6px;">⚠️ Diretriz de Segurança e Privacidade para Ox Alpha</h5>
+          ${model.previewHistory ? `
+            <div style="margin-top: 14px; padding: 14px; background: rgba(234, 179, 8, 0.08); border: 1px solid rgba(234, 179, 8, 0.35); border-radius: var(--radius-md); font-size: 0.85rem;">
+              <h5 style="color: #facc15; margin-bottom: 6px;">ℹ️ Histórico de Governança & Revelação de Identidade (${model.previewHistory.alias} → ${model.name})</h5>
               <p style="color: var(--text-secondary); margin-bottom: 8px;">
-                Existe uma inconsistência jurídica formal: a página do modelo no OpenRouter declara que dados não são usados para treino, mas o <strong>Stealth Program EULA geral autoriza expressamente a coleta e licença de conteúdo para treinamento e melhoria do provedor anônimo</strong>.
+                Este modelo foi testado em sigilo no OpenRouter (<code>stealth/ox-alpha</code>) e OpenCode (<code>opencode-go/ox-alpha-free</code>) entre 20/08 e 26/08/2026. A Z.ai revelou formalmente sua identidade como <strong>GLM-5.3-Flash</strong> em 26/08/2026, encerrando os termos provisórios do programa stealth.
               </p>
               <p style="color: var(--text-secondary); margin: 0;">
-                🔒 <strong>Recomendação Estrita:</strong> Não envie pelo OpenRouter código proprietário fechado, chaves de API, arquivos <code>.env</code> ou dados de clientes. Para experimentação com maior proteção documental, utilize a rota do <strong>OpenCode Go (ox-alpha-free)</strong>, cuja documentação de 24/08 garante <em>0 dias de retenção</em> e ausência de treinamento.
+                🔒 <strong>Diretriz de Produção:</strong> Os endpoints de preview foram descontinuados. Em produção, utilize a rota oficial da Z.ai API (<code>glm-5.3-flash</code>) com garantia de ZDR empresarial ou o endpoint canônico do OpenRouter (<code>z-ai/glm-5.3-flash</code>).
               </p>
             </div>
           ` : ''}

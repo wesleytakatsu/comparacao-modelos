@@ -135,6 +135,18 @@ const DATA_SOURCES = {
     official: true,
     notes: 'Arquitetura MLA 1M, DeepSeek-V4-Pro 87.9% Terminal-Bench 2.1, DeepSeek-V4-Flash 82.7%.'
   },
+  'zai-glm-53-flash': {
+    id: 'zai-glm-53-flash',
+    publisher: 'Z.ai (Zhipu AI)',
+    sourceType: 'official',
+    title: 'GLM-5.3-Flash Model Card & Technical Report (formerly Ox Alpha)',
+    sourceUrl: 'https://zhipuai.cn/models/glm-5.3-flash',
+    publishedAt: '2026-08-26',
+    retrievedAt: '2026-09-02',
+    official: true,
+    notes: 'Relatório oficial Z.ai revelando a identidade do teste stealth ox-alpha como GLM-5.3-Flash: MoE 320B/18B, 1M contexto, 128k output, licença MIT, Terminal-Bench 2.1 84.3%, DeepSWE 63.4%, Toolathlon 78.4%.'
+  },
+
 
 };
 
@@ -303,17 +315,6 @@ const AI_PROVIDERS_DATA = {
     iconSvg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5zm0 2.8l6.8 3.8-6.8 3.8-6.8-3.8L12 4.8zm-7.6 5.4l6.8 3.8v7.6l-6.8-3.8V10.2zm8.4 11.4v-7.6l6.8-3.8v7.6l-6.8 3.8z"/></svg>',
     description: 'Desenvolvedora do Composer 2.5 e mantenedora do benchmark independente CursorBench 3.2.',
     website: 'https://cursor.com'
-  },
-  'stealth': {
-    id: 'stealth',
-    name: 'Stealth / Anônimo',
-    country: 'Internacional',
-    logo: '🎭',
-    brandColor: '#10b981',
-    iconUrl: '',
-    iconSvg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4 7v6c0 5.5 3.4 10.7 8 12 4.6-1.3 8-6.5 8-12V7l-8-5zm0 3.5l5 3.1v4.4c0 3.6-2.1 6.9-5 7.9-2.9-1-5-4.3-5-7.9V8.6l5-3.1z"/></svg>',
-    description: 'Provedor anônimo do modelo preview multimodal de 1M Ox Alpha (58,4% DeepSWE completo em 113 tarefas).',
-    website: 'https://openrouter.ai'
   }
 };
 
@@ -4616,25 +4617,30 @@ const AI_MODELS_DATA = {
       "orchestrationFlow": "Modelo Frontier (Planejamento & Arquitetura) → Composer 2.5 (Aplicação & Edição Rápida no Editor)"
     }
   },
-  "ox-alpha": {
-    "id": "ox-alpha",
-    "name": "Ox Alpha",
-    "family": "stealth",
-    "provider": "stealth",
-    "providerName": "Stealth / Anônimo",
-    "color": "#10b981",
-    "status": "preview",
-    "openWeights": false,
-    "paramsTotal": "N/D (Stealth Preview)",
-    "paramsActive": "N/D",
-    "architectureType": "Stealth Multimodal Preview 1M",
-    "attentionType": "Multi-Head Attention 1M",
+  "glm-5-3-flash": {
+    "id": "glm-5-3-flash",
+    "name": "GLM-5.3-Flash",
+    "family": "zai",
+    "provider": "zai",
+    "providerName": "Z.ai (Zhipu)",
+    "color": "#eab308",
+    "status": "stable",
+    "openWeights": true,
+    "license": "MIT",
+    "paramsTotal": "320B MoE",
+    "paramsActive": "18B / token",
+    "paramsBillion": 320,
+    "layers": 45,
+    "architectureType": "MoE Multimodal Nativo (Sparse Attention + Linear Attention + mHC)",
+    "attentionType": "Hybrid Sparse-Linear Attention 1M (mHC + IndexPool)",
     "contextWindow": 1048576,
-    "maxOutputTokens": 65536,
+    "maxOutputTokens": 131072,
     "modalities": {
       "input": [
         "text",
-        "image"
+        "image",
+        "video",
+        "file"
       ],
       "output": [
         "text"
@@ -4644,62 +4650,138 @@ const AI_MODELS_DATA = {
       "mandatory": true,
       "canDisable": false,
       "supportedEfforts": [
-        "none",
-        "medium"
+        "low",
+        "high",
+        "max"
       ],
-      "defaultEffort": "medium"
+      "defaultEffort": "max",
+      "clearThinking": true
     },
     "tools": {
-      "functionCalling": false,
-      "structuredOutput": "json_mode",
+      "functionCalling": true,
+      "structuredOutput": "schema_guaranteed",
+      "contextCaching": true,
+      "streaming": true,
+      "toolStreaming": true,
+      "computerUse": true,
+      "visualCoding": true,
       "fim": false
     },
     "pricing": {
       "standard": {
-        "input": 0,
-        "cacheRead": 0,
+        "input": 0.15,
+        "cacheRead": 0.03,
         "cacheWrite": null,
-        "output": 0
+        "output": 0.50
       },
-      "offPeakDiscount": 100
+      "promotionalPeriod": {
+        "effectiveFrom": "2026-08-26",
+        "effectiveUntil": "2026-10-31",
+        "input": 0.075,
+        "cacheRead": 0.015,
+        "cacheWrite": null,
+        "output": 0.25,
+        "discountPercent": 50
+      },
+      "afterPromotion": {
+        "input": 0.15,
+        "cacheRead": 0.03,
+        "cacheWrite": null,
+        "output": 0.50
+      }
     },
     "cursorPool": {
       "pool": "other-models",
-      "poolLabel": "Via OpenRouter Free",
+      "poolLabel": "Other Models (OpenRouter / Z.ai API)",
       "fastDefault": false,
       "fastMultiplier": 1
     },
     "openCodeGo": {
       "available": true,
-      "id": "opencode-go/ox-alpha-free",
-      "quotaMultiplier": 0,
-      "estReqMonth": 999999
+      "id": "zai/glm-5.3-flash",
+      "displayName": "GLM-5.3-Flash (formerly ox-alpha)",
+      "quotaMultiplier": 0.8,
+      "estReqMonth": 15000,
+      "zdr": true
     },
-    "sweetSpot": "Free Preview (Capacidade massiva declarada de 100T tokens/dia)",
+    "officialBenchmarks": {
+      "terminalBench21": 84.3,
+      "deepSwe11": 63.4,
+      "nl2Repo": 56.3,
+      "toolathlon": 78.4,
+      "automationBench": 48.8,
+      "agentsLastExam": 26.3,
+      "hleWithTools": 55.3,
+      "gdpvalElo": 1773,
+      "officeQaPro": 79.1,
+      "charXivReasoning": 68.4,
+      "chartography": 71.2,
+      "mmvu": 74.8,
+      "babyVision": 86.5,
+      "mvBench": 81.0,
+      "zaiCodeBench": 72.9,
+      "methodology": "Z.ai Official Technical Card (26/08/2026): DeepSWE com mini-swe-agent, 400k context, timeout 6h. Terminal-Bench 2.1 via Claude Code 2.1.207 com max_new_tokens 65536 e 6h timeout. Toolathlon Verified em avaliação pass@1 (média de 3 runs independentes). AutomationBench v1.0.6 com correção do null-type."
+    },
+    "historicalAliases": [
+      "Ox Alpha",
+      "stealth/ox-alpha"
+    ],
+    "previewHistory": {
+      "alias": "Ox Alpha",
+      "startedAt": "2026-08-20",
+      "endedAt": "2026-08-26",
+      "freePreview": true,
+      "providerHiddenDuringPreview": true,
+      "revealedAs": "GLM-5.3-Flash",
+      "notes": "A Z.ai utilizou o codinome stealth Ox Alpha entre 20/08 e 26/08/2026 no OpenCode e OpenRouter para testes anônimos de campo e coleta de feedback antes do anúncio oficial."
+    },
+    "historicalEvaluations": [
+      {
+        "alias": "Ox Alpha",
+        "benchmark": "DeepSWE",
+        "score": 58.4,
+        "solved": 66,
+        "tasks": 113,
+        "sourceType": "independent",
+        "phase": "stealth-preview",
+        "notes": "Resultado obtido durante o período de preview anônimo no OpenRouter antes das otimizações finais de harness e liberação oficial."
+      }
+    ],
+    "sweetSpot": "Max Reasoning (Raciocínio Mandatório Eficiente)",
     "strengths": [
-      "Acesso gratuito no OpenCode Go (ox-alpha-free) com 1M de contexto",
-      "Excelente fluência para prototipagem e exploração rápida"
+      "Primeiro GLM-5 nativamente multimodal com 320B total e 18B ativos (Sparse + Linear Attention)",
+      "84,3% no Terminal-Bench 2.1 e 63,4% no DeepSWE 1.1 (~$0,24/task, 123 steps, 73k tokens)",
+      "Pesos abertos sob licença MIT e janela de 1M de tokens com 128k de output máximo",
+      "Custo extremamente competitivo de $0,15 input / $0,50 output (com 50% de desconto promocional: $0,075/$0,25)"
     ],
     "weaknesses": [
-      "Provedor anônimo / stealth sem model card nem ledger auditado oficial",
-      "Telemetria de comunidade indica falta de garantias de ZDR e estabilidade"
+      "Throughput de decode independente modesto (~43–45 tok/s), inferior a outros modelos Flash da indústria",
+      "Peso total de 320B exige cluster multi-GPU ou offloading agressivo (KTransformers/vLLM) para inferência local"
     ],
     "badges": [
-      "🎭 STEALTH PREVIEW",
-      "⚠️ NÃO VERIFICADO",
-      "GRATUITO GO (0.0x)",
-      "1M CTX"
+      "OPEN WEIGHTS (MIT)",
+      "MULTIMODAL 1M",
+      "SUB-DÓLAR",
+      "FORMERLY OX ALPHA",
+      "Z.AI"
     ],
-    "sourceConfidence": "unverified",
+    "sourceConfidence": "official",
+    "sources": [
+      "zai-glm-53-flash",
+      "deepswe-datacurve",
+      "artificial-analysis-v41"
+    ],
     "operationalGuidance": {
       "idealFor": [
-        "Prototipagem rápida gratuita de código sem dados confidenciais",
-        "Exploração de grandes volumes de texto"
+        "Tarefas agênticas multimodais de código com restrição orçamentária severa",
+        "Deploy local/privado on-premise de modelo frontier aberto (320B MoE com licença MIT)",
+        "Análise de grandes bases de código e documentos com 1M de tokens e 128k de saída"
       ],
       "avoidFor": [
-        "Projetos comerciais com requisitos rígidos de governança e privacidade"
+        "Aplicações que exigem latência ultra-baixa de geração (decode de 43-45 tok/s pode ser gargalo)",
+        "Ambientes locais com GPU única modesta sem suporte a offload"
       ],
-      "orchestrationFlow": "Ox Alpha (Prototipagem Livre) → Modelos Auditados (Produção)"
+      "orchestrationFlow": "GLM-5.3-Flash (Leitura Multimodal & Implementação) → GLM-5.3 (Revisão Arquitetural)"
     }
   }
 };
@@ -4879,7 +4961,7 @@ const MULTI_BENCHMARK_LEDGER = [
   { modelId: 'composer-2-5', modelName: 'Composer 2.5', terminalBench21: null, terminalBench30: null, deepSwe11: null, sweBenchPro: null, sweBenchVerified: null, mrcr1m: null, gpqaDiamond: null, osworld: null, aaIndex: 45.0 },
   { modelId: 'gpt-5-6-pro', modelName: 'GPT-5.6 Sol Pro', terminalBench21: 88.0, terminalBench30: null, deepSwe11: 71.0, sweBenchPro: null, sweBenchVerified: null, mrcr1m: null, gpqaDiamond: 93.8, osworld: null, aaIndex: 60.0 },
   { modelId: 'deepseek-v4-vision-exp', modelName: 'DeepSeek-V4-Flash-Vision-Exp (Preview)', terminalBench21: 83.9, terminalBench30: null, deepSwe11: 59.3, sweBenchPro: null, sweBenchVerified: null, mrcr1m: null, gpqaDiamond: null, osworld: null, aaIndex: 52.0 },
-  { modelId: 'ox-alpha', modelName: 'Ox Alpha (Stealth Preview 1M)', terminalBench21: null, terminalBench30: null, deepSwe11: 58.4, sweBenchPro: null, sweBenchVerified: null, mrcr1m: null, gpqaDiamond: null, osworld: null, aaIndex: 48.0 }
+  { modelId: 'glm-5-3-flash', modelName: 'GLM-5.3-Flash (Max)', terminalBench21: 84.3, terminalBench30: null, deepSwe11: 63.4, sweBenchPro: null, sweBenchVerified: null, mrcr1m: 89.2, gpqaDiamond: null, osworld: null, hleWithTools: 55.3, aaIndex: 57.0, historicalAlias: 'Ox Alpha' }
 ];
 
 
@@ -4932,7 +5014,7 @@ const CAPABILITY_RADAR_10D = {
   'longcat-2-0': { reasoning: 91, agentic: 82, sweBench: 80, longContext: 97, multimodal: 8, throughput: 38, costEfficiency: 86, toolAdherence: 90, ttftLatency: 39, openAccess: 100 },
   'muse-spark-1-2': { reasoning: 95, agentic: 93, sweBench: 85, longContext: 94, multimodal: 100, throughput: 87, costEfficiency: 92, toolAdherence: 95, ttftLatency: 84, openAccess: 82 },
   'composer-2-5': { reasoning: 83, agentic: 82, sweBench: 78, longContext: 58, multimodal: 30, throughput: 97, costEfficiency: 100, toolAdherence: 93, ttftLatency: 97, openAccess: 25 },
-  'ox-alpha': { reasoning: 85, agentic: 78, sweBench: 72, longContext: 95, multimodal: 82, throughput: 85, costEfficiency: 100, toolAdherence: 70, ttftLatency: 80, openAccess: 90 }
+  'glm-5-3-flash': { reasoning: 86, agentic: 84, sweBench: 82, longContext: 96, multimodal: 88, throughput: 55, costEfficiency: 98, toolAdherence: 88, ttftLatency: 72, openAccess: 100 }
 };
 
 
@@ -4941,7 +5023,7 @@ const CAPABILITY_RADAR_10D = {
 // ==========================================
 
 const OPENCODE_GO_CATALOG = [
-  { id: 'opencode-go/ox-alpha-free', name: 'Ox Alpha (Preview)', multiplier: 0.0, estReqMonth: 999999, zdr: true, context: '1M', notes: 'Capacidade declarada de ~100T tokens/dia' },
+  { id: 'zai/glm-5.3-flash', name: 'GLM-5.3-Flash (formerly ox-alpha)', multiplier: 0.8, estReqMonth: 15000, zdr: true, context: '1M', notes: 'Z.ai Flash Multimodal 1M (ex-Ox Alpha)' },
   { id: 'meta/muse-spark-1.2-contributor', name: 'Muse Spark 1.2 Contributor', multiplier: 0.5, estReqMonth: 226600, zdr: false, context: '1M', notes: 'Treinamento autorizado pela Meta' },
   { id: 'xiaomi/mimo-v2.5', name: 'MiMo-V2.5', multiplier: 1.5, estReqMonth: 150400, zdr: true, context: '1M', notes: 'Recorde de volume' },
   { id: 'deepseek/deepseek-v4-flash', name: 'DeepSeek-V4-Flash-0731', multiplier: 1.5, estReqMonth: 37800, zdr: true, context: '1M', notes: 'ZDR formal até 31/08/2026' },
@@ -4977,6 +5059,15 @@ const OPENCODE_GO_CATALOG = [
 // 8. BANCO DE HARDWARE, VRAM E NÓS RECOMENDADOS (MODELOS ABERTOS)
 // ==========================================
 const HARDWARE_LOCAL_MODELS_DATA = [
+  {
+    modelId: 'glm-5-3-flash',
+    name: 'GLM-5.3-Flash (320B MoE / 18B Active)',
+    minVramInt4: '~160–180 GB (INT4/GGUF) ou 32 GB VRAM + 256 GB RAM via KTransformers/CPU offload',
+    recommendedBf16: '~640 GB (8x H100 80GB) ou ~320 GB em FP8 (4x H100/H200)',
+    recommendedNode: 'Cluster 4x H200 (FP8) ou 8x H100/H200 (BF16) / Workstation com KTransformers + CPU offload',
+    estimatedDecodeTps: '43–45 tok/s (vLLM/SGLang/TokenSpeed)',
+    notes: 'MoE de 320B com 18B ativos por token sob licença permissiva MIT. A atenção híbrida Sparse-Linear reduz o KV cache em 4.44x vs GLM-5.3. Exige residência total dos 320B pesos em memória ou offload de experts.'
+  },
   {
     modelId: 'gpt-oss-20b',
     name: 'GPT-OSS-20B',
@@ -5193,6 +5284,14 @@ const HARNESS_COMPATIBILITY_DATA = {
 
 const TROUBLESHOOTER_DATABASE = [
   {
+    id: 'stealth-ox-alpha-endpoint-retired',
+    title: 'Endpoint stealth/ox-alpha aposentado / Modelo não encontrado (404/410)',
+    harness: 'OpenRouter / OpenCode / CLI',
+    models: ['Ox Alpha', 'stealth/ox-alpha', 'GLM-5.3-Flash'],
+    cause: 'A fase stealth preview anônima do Ox Alpha foi formalmente encerrada em 26/08/2026 quando a Z.ai revelou a identidade oficial do modelo como GLM-5.3-Flash, aposentando os endpoints stealth/ox-alpha e opencode-go/ox-alpha-free.',
+    solution: 'Migre as chamadas para o endpoint canônico correspondente: no OpenRouter utilize z-ai/glm-5.3-flash; na Z.ai API utilize glm-5.3-flash; no OpenCode utilize zai/glm-5.3-flash.'
+  },
+  {
     id: 'fable-5-1-tool-choice-breaking',
     title: 'Erro 400 em tool_choice com Claude Fable 5.1 (Incompatibilidade com "any" ou "tool" restrito)',
     harness: 'Anthropic API / Cursor / Cline / Roo Code',
@@ -5235,7 +5334,7 @@ const TROUBLESHOOTER_DATABASE = [
   },
   {
     id: 'ox-alpha-premature-stops',
-    title: 'Ox Alpha parando a geração no meio de raciocínios longos no OpenCode',
+    title: '[Histórico Preview] Ox Alpha parando a geração no meio de raciocínios longos no OpenCode',
     harness: 'OpenCode / OpenRouter',
     models: ['Ox Alpha (stealth/ox-alpha)'],
     cause: 'Comportamento relatado onde o modelo esgota o limite padrão de tokens de completion ou falha ao emitir a terceira tool call consecutiva.',
@@ -5243,7 +5342,7 @@ const TROUBLESHOOTER_DATABASE = [
   },
   {
     id: 'ox-alpha-repeated-format-error',
-    title: 'RepeatedFormatError: No tool calls found in the response no Ox Alpha',
+    title: '[Histórico Preview] RepeatedFormatError: No tool calls found in the response no Ox Alpha',
     harness: 'Docker / Pier / Mini-SWE-Agent / OpenRouter',
     models: ['Ox Alpha (stealth/ox-alpha)'],
     cause: 'O modelo responde em texto puro em vez de emitir JSON de tool call 3 vezes seguidas (responsável por 9,7% de perdas no DeepSWE 1.1).',
@@ -5251,7 +5350,7 @@ const TROUBLESHOOTER_DATABASE = [
   },
   {
     id: 'ox-alpha-opencode-503-tools',
-    title: 'Erro 503 / Network Error / Endpoint Unavailable no OpenCode Go com tools[]',
+    title: '[Histórico Preview] Erro 503 / Network Error no OpenCode Go com tools[] (ox-alpha-free)',
     harness: 'OpenCode Go / Hermes Agent',
     models: ['Ox Alpha (ox-alpha-free)'],
     cause: 'Falha no adapter upstream do OpenCode Go ao serializar esquemas de ferramentas (Issues #44382 e #44332).',
@@ -5265,14 +5364,15 @@ const TROUBLESHOOTER_DATABASE = [
 // ==========================================
 
 const PRIVACY_ZDR_DATABASE = {
-  'opencode-go-general': { provider: 'OpenCode Go (Geral)', retentionDays: 0, trainingOnPrompts: false, zdrGuaranteed: true, notes: 'ZDR formal garantido em contrato para Ox Alpha, GLM, Kimi, MiMo, Qwen, MiniMax e Hy3.' },
+  'opencode-go-general': { provider: 'OpenCode Go (Geral)', retentionDays: 0, trainingOnPrompts: false, zdrGuaranteed: true, notes: 'ZDR formal garantido em contrato para GLM-5.3-Flash, GLM, Kimi, MiMo, Qwen, MiniMax e Hy3.' },
   'deepseek-direct': { provider: 'DeepSeek Direct API', retentionDays: 0, trainingOnPrompts: false, zdrGuaranteed: true, notes: 'Política ZDR formal revalidada em Setembro/2026; dados de API comercial não são utilizados para treinamento.' },
   'anthropic-fable-5-1': { provider: 'Anthropic (Claude Fable 5.1)', modelId: 'claude-fable-5-1', retentionDays: 30, trainingOnPrompts: false, zdrGuaranteed: false, notes: 'Retenção padrão de até 30 dias para moderação de segurança em contas comerciais; ZDR (0 dias) requer contrato Enterprise com Frontier Safeguards Compliance. No Cursor exige aprovação explícita do administrador.' },
   'cursor-privacy-mode': { provider: 'Cursor Privacy Mode', retentionDays: 0, trainingOnPrompts: false, zdrGuaranteed: true, notes: 'Código local e prompts não são armazenados nos servidores da Anysphere. Fable 5.1 requer opt-in prévio de administrador.' },
   'google-gemini-enterprise': { provider: 'Google Gemini API / Cloud', retentionDays: 0, trainingOnPrompts: false, zdrGuaranteed: true, notes: 'Dados de clientes comerciais na Gemini API e Google Cloud Vertex AI não são utilizados para treinamento de modelos.' },
   'openai-enterprise': { provider: 'OpenAI API (Tier 1-5)', retentionDays: 0, trainingOnPrompts: false, zdrGuaranteed: true, notes: 'Sem treinamento com dados de API; retenção padrão de 30 dias para moderação (0 dias sob ZDR empresarial).' },
   'anthropic-direct': { provider: 'Anthropic Commercial API', retentionDays: 0, trainingOnPrompts: false, zdrGuaranteed: true, notes: 'Dados de API comercial nunca são utilizados para treinamento.' },
-  'openrouter-stealth': { provider: 'OpenRouter (Stealth Program)', retentionDays: 30, trainingOnPrompts: true, zdrGuaranteed: false, notes: '⚠️ CONFLITO: O EULA geral do programa Stealth permite licença de dados para treinamento do provedor anônimo.' },
+  'zai-api': { provider: 'Z.ai (Zhipu API)', retentionDays: 0, trainingOnPrompts: false, zdrGuaranteed: true, notes: 'API comercial Z.ai com política ZDR estrita para clientes empresariais. Prompts não são utilizados para treino.' },
+  'openrouter-glm-53-flash': { provider: 'OpenRouter (GLM-5.3-Flash)', retentionDays: 0, trainingOnPrompts: false, zdrGuaranteed: true, notes: 'Endpoint z-ai/glm-5.3-flash sob termos de privacidade padrão sem treinamento não autorizado.' },
   'meta-contributor': { provider: 'Meta (Muse Spark Contributor)', retentionDays: 30, trainingOnPrompts: true, zdrGuaranteed: false, notes: '⚠️ Treinamento autorizado pela Meta em troca da tarifa ultra-subsidiada no OpenCode Go.' }
 };
 
@@ -5416,6 +5516,7 @@ const AI_DATA_HELPERS = {
       else if (modelId === 'minimax-m2-7') paramsB = 230.0;
       else if (modelId === 'minimax-m3') paramsB = 420.0;
       else if (modelId === 'kimi-k2-6' || modelId === 'kimi-k2-7-code') paramsB = 1000.0;
+      else if (modelId === 'glm-5-3-flash') paramsB = 320.0;
       else if (modelId === 'glm-5-2') paramsB = 750.0;
       else if (modelId === 'glm-5-1') paramsB = 600.0;
       else if (modelId === 'mimo-v2-5-pro') paramsB = 500.0;
@@ -5546,7 +5647,7 @@ const AI_DATA_HELPERS = {
         primaryModelName: 'Gemini 3.8 Flash (High) / Gemini 3.7',
         rationale: 'Líder em multimodalidade nativa total (Vídeo, Áudio, Imagem e PDF) em 1M de tokens com throughput de ~305 tok/s e 90,8% no TB 2.1.',
         rationale: 'Líder em ferramentas visuais (75,9% Toolathlon) com custo por imagem de ~$0,000084.',
-        fallbackCascade: ['gemini-3-7-flash', 'mimo-v2-5-pro', 'ox-alpha'],
+        fallbackCascade: ['gemini-3-7-flash', 'mimo-v2-5-pro', 'glm-5-3-flash'],
         planner: 'gemini-3-7-flash',
         executor: 'deepseek-v4-vision-exp',
         reviewer: 'gemini-3-7-flash'
@@ -5555,11 +5656,11 @@ const AI_DATA_HELPERS = {
 
     if (budgetTier === 'free_economy') {
       return {
-        primaryModelId: 'ox-alpha',
-        primaryModelName: 'Ox Alpha (Preview Grátis) / DeepSeek V4 Flash',
-        rationale: 'Gratuito em preview com 1M de tokens e 58,4% no DeepSWE completo.',
-        fallbackCascade: ['deepseek-v4-flash-0731', 'gpt-5-6-luna'],
-        planner: 'ox-alpha',
+        primaryModelId: 'gpt-5-6-luna',
+        primaryModelName: 'GPT-5.6 Luna / DeepSeek-V4-Flash',
+        rationale: 'Campeões de ultra-baixo custo ($0,20/$1,20 por milhão e sub-dólar com 10.250 req/mês no OpenCode Go e $0,39/tarefa no CursorBench Max). Para inferência 100% gratuita, utilize gpt-oss-20b em hardware local.',
+        fallbackCascade: ['deepseek-v4-flash-0731', 'gpt-oss-20b', 'glm-5-3-flash'],
+        planner: 'gpt-5-6-luna',
         executor: 'deepseek-v4-flash-0731',
         reviewer: 'gpt-5-6-luna'
       };
@@ -5689,7 +5790,7 @@ const ARTIFICIAL_ANALYSIS_DATA = {
     { rank: 34, modelId: 'gpt-5-6-luna', modelName: 'GPT-5.6 Luna (XHigh)', effort: 'XHigh', aaIndex: 50.0, costPerTask: 0.03, throughputTps: 170.0, contextWindow: '1M', gdpvalElo: 1520, openWeights: false, tier: 'sub-dollar' },
     { rank: 35, modelId: 'claude-sonnet-4-6', modelName: 'Claude Sonnet 4.6 (Adaptive Max)', effort: 'Adaptive Max', aaIndex: 48.0, costPerTask: 0.28, throughputTps: 58.0, contextWindow: '1M', gdpvalElo: 1610, openWeights: false, tier: 'frontier' },
     { rank: 36, modelId: 'kimi-k3', modelName: 'Kimi K3 (Low)', effort: 'Low', aaIndex: 48.0, costPerTask: 0.35, throughputTps: 37.0, contextWindow: '1M', gdpvalElo: 1420, openWeights: true, tier: 'open-weights' },
-    { rank: 37, modelId: 'ox-alpha', modelName: 'Ox Alpha (Preview Grátis)', effort: 'Standard', aaIndex: 48.0, costPerTask: 0.00, throughputTps: 85.0, contextWindow: '1M', gdpvalElo: 1440, openWeights: true, tier: 'sub-dollar' },
+    { rank: 16, modelId: 'glm-5-3-flash', modelName: 'GLM-5.3-Flash (Max)', effort: 'Max', aaIndex: 57.0, costPerTask: 0.09, throughputTps: 44.0, contextWindow: '1M', gdpvalElo: 1773, openWeights: true, tier: 'open-weights' },
     { rank: 38, modelId: 'qwen3-7-max', modelName: 'Qwen3.7 Max (Legado)', effort: 'High', aaIndex: 47.0, costPerTask: 0.30, throughputTps: 200.0, contextWindow: '1M', gdpvalElo: 1470, openWeights: false, tier: 'balanced' },
     { rank: 39, modelId: 'gpt-5-6-luna', modelName: 'GPT-5.6 Luna (High)', effort: 'High', aaIndex: 47.0, costPerTask: 0.025, throughputTps: 170.0, contextWindow: '1M', gdpvalElo: 1480, openWeights: false, tier: 'sub-dollar' },
     { rank: 40, modelId: 'gemini-3-5-flash', modelName: 'Gemini 3.5 Flash', effort: 'Standard', aaIndex: 46.0, costPerTask: 0.08, throughputTps: 300.0, contextWindow: '1M', gdpvalElo: 1350, openWeights: false, tier: 'sub-dollar' },

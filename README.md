@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 [![Vanilla JS](https://img.shields.io/badge/Vanilla-JavaScript-f7df1e?style=flat-square&logo=javascript&logoColor=black)](index.html)
 
-Portal analítico e interativo para engenharia de software e comparação multidimensional de **44 modelos de Inteligência Artificial** de ponta (incluindo Claude Fable 5.1, Gemini 3.8 Flash, Grok 4.6, GPT-5.6, Claude 5, Gemini 3.7, DeepSeek V4, Ox Alpha, gpt-oss, Nemotron 3.5, etc. — Edição Setembro/2026).
+Portal analítico e interativo para engenharia de software e comparação multidimensional de **44 modelos de Inteligência Artificial** de ponta (incluindo Claude Fable 5.1, Gemini 3.8 Flash, Grok 4.6, GPT-5.6, Claude 5, Gemini 3.7, DeepSeek V4, GLM-5.3-Flash, gpt-oss, Nemotron 3.5, etc. — Edição Setembro/2026).
 
 🌐 **Acesse a versão online:** [https://wesleytakatsu.github.io/comparacao-modelos/](https://wesleytakatsu.github.io/comparacao-modelos/)
 

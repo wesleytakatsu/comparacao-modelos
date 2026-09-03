@@ -86,11 +86,17 @@ modelIds.forEach(id => {
   }
 });
 
-// 3. Verificação dos Novos Modelos Obrigatórios
+// 3. Verificação dos Novos Modelos Obrigatórios e Substituição Ox Alpha -> GLM-5.3-Flash
 assert(AI_MODELS_DATA['gemini-3-8-flash'], 'Modelo "gemini-3-8-flash" não encontrado em AI_MODELS_DATA');
 assert(AI_MODELS_DATA['claude-fable-5-1'], 'Modelo "claude-fable-5-1" não encontrado em AI_MODELS_DATA');
+assert(AI_MODELS_DATA['glm-5-3-flash'], 'Modelo "glm-5-3-flash" não encontrado em AI_MODELS_DATA');
+assert(AI_MODELS_DATA['glm-5-3'], 'Modelo "glm-5-3" deve continuar existindo separadamente de "glm-5-3-flash"');
+assert(!AI_MODELS_DATA['ox-alpha'], 'Modelo "ox-alpha" não deve existir como modelo ativo independente (substituído por glm-5-3-flash)');
+assert(!AI_PROVIDERS_DATA['stealth'], 'Provedor órfão "stealth" não deve existir como provedor ativo');
+assert(AI_MODELS_DATA['glm-5-3-flash'].historicalAliases && AI_MODELS_DATA['glm-5-3-flash'].historicalAliases.includes('Ox Alpha'), 'GLM-5.3-Flash deve registrar "Ox Alpha" em historicalAliases');
 assert(AI_MODELS_DATA['gemini-3-7-flash'], 'Modelo predecessor "gemini-3-7-flash" foi removido indevidamente');
 assert(AI_MODELS_DATA['claude-fable-5'], 'Modelo predecessor "claude-fable-5" foi removido indevidamente');
+assert(HARDWARE_LOCAL_MODELS_DATA.some(h => h.modelId === 'glm-5-3-flash'), 'GLM-5.3-Flash deve estar cadastrado em HARDWARE_LOCAL_MODELS_DATA');
 
 // 4. CursorBench 3.2
 console.log(`📋 Total de runs no CursorBench: ${CURSORBENCH_32_DATA.length}`);
