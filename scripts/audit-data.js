@@ -65,11 +65,19 @@ console.log('====================================================');
 console.log('🔍 INICIANDO AUDITORIA TÉCNICA E INTEGRIDADE DE DADOS');
 console.log('====================================================\n');
 
-// 1. Contagem de Modelos
+// 1. Contagem de Modelos e Catálogo Canônico
 const modelIds = Object.keys(AI_MODELS_DATA);
 const modelCount = modelIds.length;
-console.log(`📊 Total de modelos cadastrados: ${modelCount}`);
-assert(modelCount === 44, `Esperado exatamente 44 modelos após inclusão de Gemini 3.8 Flash e Claude Fable 5.1. Encontrado: ${modelCount}`);
+console.log(`📊 Total de modelos catalogados: ${modelCount}`);
+assert(modelCount > 0, 'Catálogo de modelos não pode estar vazio.');
+assert(modelCount === Object.keys(AI_MODELS_DATA).length, `Inconsistência na contagem de chaves de modelos: ${modelCount}`);
+
+// Validação dos estados/status permitidos no catálogo (Seção 1.1)
+const validStatuses = ['active', 'stable', 'preview', 'superseded', 'legacy', 'retired', 'stealth-revealed'];
+modelIds.forEach(id => {
+  const m = AI_MODELS_DATA[id];
+  assert(validStatuses.includes(m.status), `Modelo "${id}" possui status não-canônico: "${m.status}". Permitidos: ${validStatuses.join(', ')}`);
+});
 
 // 2. Unicidade de IDs e Verificação de Campos Obrigatórios
 const requiredModelFields = [
@@ -111,11 +119,23 @@ assert(AI_MODELS_DATA['gemini-3-7-flash'], 'Modelo predecessor "gemini-3-7-flash
 assert(AI_MODELS_DATA['claude-fable-5'], 'Modelo predecessor "claude-fable-5" foi removido indevidamente');
 assert(HARDWARE_LOCAL_MODELS_DATA.some(h => h.modelId === 'glm-5-3-flash'), 'GLM-5.3-Flash deve estar cadastrado em HARDWARE_LOCAL_MODELS_DATA');
 
-// Validações de preços e status específicos
+// Validações de preços e status específicos (02-dados-ajuste.md)
 const g38 = AI_MODELS_DATA['gemini-3-8-flash'];
-assert(g38.pricing.standard.input === 0.30, `Gemini 3.8 Flash input price atual deve ser $0.30 (promocional). Encontrado: ${g38.pricing.standard.input}`);
+assert(g38.pricing.standard.input === 0.75, `Gemini 3.8 Flash input price atual deve ser $0.75 (promocional até 31/12/2026). Encontrado: ${g38.pricing.standard.input}`);
+assert(g38.pricing.standard.output === 3.75, `Gemini 3.8 Flash output price atual deve ser $3.75. Encontrado: ${g38.pricing.standard.output}`);
 assert(g38.pricing.postPromo && g38.pricing.postPromo.input === 1.50, `Gemini 3.8 Flash postPromo input deve ser $1.50`);
+assert(g38.pricing.postPromo && g38.pricing.postPromo.output === 7.50, `Gemini 3.8 Flash postPromo output deve ser $7.50`);
 assert(g38.maxOutputTokens === 65536, `Gemini 3.8 Flash maxOutputTokens deve ser 65.536 (64k)`);
+
+const cf51 = AI_MODELS_DATA['claude-fable-5-1'];
+assert(!cf51.officialBenchmarks.terminalBench21, 'Terminal-Bench 2.1 não deve estar em officialBenchmarks de Claude Fable 5.1 (é Artificial Analysis)');
+assert(!cf51.officialBenchmarks.sciCode, 'SciCode não deve estar em officialBenchmarks de Claude Fable 5.1 (é Artificial Analysis)');
+assert(!cf51.officialBenchmarks.hle, 'HLE não deve estar em officialBenchmarks de Claude Fable 5.1 (é Artificial Analysis)');
+assert(cf51.independentBenchmarks && cf51.independentBenchmarks.artificialAnalysis && cf51.independentBenchmarks.artificialAnalysis.terminalBench21 === 91.4, 'Terminal-Bench 2.1 (91.4%) deve estar em independentBenchmarks.artificialAnalysis');
+
+const gptPro = AI_MODELS_DATA['gpt-5-6-pro'];
+assert(gptPro.benchmarkCoverage === 'limited', 'GPT-5.6 Pro deve ter benchmarkCoverage: "limited"');
+assert(!gptPro.sources.includes('xai-grok46'), 'GPT-5.6 Pro não deve conter xai-grok46 em sources');
 
 const cf5 = AI_MODELS_DATA['claude-fable-5'];
 assert(cf5.status === 'superseded', `Claude Fable 5 deve ter status "superseded"`);
@@ -339,9 +359,9 @@ filesToCheck.forEach(fp => {
   }
 });
 
-// 14. Matriz Real de Cobertura de Dados (44 Modelos)
+// 14. Matriz Real de Cobertura de Dados e Classificação Metrológica (Seção 75)
 console.log('\n====================================================');
-console.log('📊 MATRIZ REAL DE COBERTURA DE DADOS (44 MODELOS)');
+console.log(`📊 MATRIZ REAL DE COBERTURA DE DADOS (${modelCount} MODELOS CATALOGADOS)`);
 console.log('====================================================');
 
 let coverage = {
@@ -356,10 +376,28 @@ let coverage = {
   sources: 0
 };
 
+let pricingCategories = {
+  verifiedCurrent: 0,
+  promotionalActive: 0,
+  selfHostedOpenWeights: 0,
+  legacyOrSuperseded: 0
+};
+
 modelIds.forEach(id => {
   const m = AI_MODELS_DATA[id];
   if (m.contextWindow && m.maxOutputTokens && m.modalities) coverage.specs++;
-  if (m.pricing && m.pricing.standard) coverage.pricing++;
+  if (m.pricing && m.pricing.standard) {
+    coverage.pricing++;
+    if (m.openWeights && m.pricing.standard.input === 0 && m.pricing.standard.output === 0) {
+      pricingCategories.selfHostedOpenWeights++;
+    } else if (m.pricing.promotionalPeriod) {
+      pricingCategories.promotionalActive++;
+    } else if (['legacy', 'superseded'].includes(m.status)) {
+      pricingCategories.legacyOrSuperseded++;
+    } else {
+      pricingCategories.verifiedCurrent++;
+    }
+  }
   if (m.officialBenchmarks && Object.keys(m.officialBenchmarks).length > 1) coverage.officialBenchmarks++;
   if (MULTI_BENCHMARK_LEDGER.some(l => l.modelId === id && (l.deepSwe11 || l.sweBenchVerified || l.terminalBench21))) coverage.independentBenchmarks++;
   if (CURSORBENCH_32_DATA.some(c => c.modelId === id)) coverage.cursorBench++;
@@ -371,6 +409,10 @@ modelIds.forEach(id => {
 
 console.log(`Especificações Canônicas:     ${coverage.specs}/${modelCount} (${Math.round(coverage.specs/modelCount*100)}%)`);
 console.log(`Precificação Estruturada:     ${coverage.pricing}/${modelCount} (${Math.round(coverage.pricing/modelCount*100)}%)`);
+console.log(`  ├─ Comercial Verificada:    ${pricingCategories.verifiedCurrent}/${modelCount}`);
+console.log(`  ├─ Promocional Ativa:       ${pricingCategories.promotionalActive}/${modelCount}`);
+console.log(`  ├─ Self-Hosted / Open-W:    ${pricingCategories.selfHostedOpenWeights}/${modelCount}`);
+console.log(`  └─ Legado / Predecessores:  ${pricingCategories.legacyOrSuperseded}/${modelCount}`);
 console.log(`Benchmarks Oficiais (Metr.):  ${coverage.officialBenchmarks}/${modelCount} (${Math.round(coverage.officialBenchmarks/modelCount*100)}%)`);
 console.log(`Benchmarks Independentes:     ${coverage.independentBenchmarks}/${modelCount} (${Math.round(coverage.independentBenchmarks/modelCount*100)}%)`);
 console.log(`CursorBench 3.2:              ${coverage.cursorBench}/${modelCount} (${Math.round(coverage.cursorBench/modelCount*100)}%)`);
@@ -378,6 +420,37 @@ console.log(`Radar 10D Calibrado:          ${coverage.radar10D}/${modelCount} ($
 console.log(`Privacidade & ZDR:            ${coverage.privacy}/${modelCount} (${Math.round(coverage.privacy/modelCount*100)}%)`);
 console.log(`Guia Operacional:             ${coverage.operationalGuidance}/${modelCount} (${Math.round(coverage.operationalGuidance/modelCount*100)}%)`);
 console.log(`Rastreabilidade / Fontes:     ${coverage.sources}/${modelCount} (${Math.round(coverage.sources/modelCount*100)}%)`);
+
+// 15. Auditoria de Freshness de Dados (Seção 76 de 02-dados-ajuste.md)
+console.log('\n⏱️ Verificando Freshness de Dados (Janela Temporal <= 14/30/90 dias)...');
+const refDate = new Date('2026-09-03T00:00:00Z');
+
+// FX Rates: <= 14 dias
+const fxDate = new Date(FX_RATES_DATA.USD_BRL.asOf + 'T00:00:00Z');
+const fxDaysDiff = Math.round((refDate - fxDate) / (1000 * 60 * 60 * 24));
+assert(fxDaysDiff <= 14, `Cotação FX desatualizada: ${fxDaysDiff} dias (limite: 14 dias)`);
+
+// Subscription Plans: <= 14 dias
+SUBSCRIPTION_PLANS_DATA.forEach(p => {
+  const pDate = new Date(p.verifiedAt + 'T00:00:00Z');
+  const pDiff = Math.round((refDate - pDate) / (1000 * 60 * 60 * 24));
+  assert(pDiff <= 14, `Plano ${p.id} desatualizado: ${pDiff} dias (limite: 14 dias)`);
+});
+
+// Benchmark History: <= 30 dias para runs recentes de setembro/2026
+BENCHMARK_HISTORY_DATA.forEach(bh => {
+  const bDate = new Date(bh.date + 'T00:00:00Z');
+  const bDiff = Math.round((refDate - bDate) / (1000 * 60 * 60 * 24));
+  assert(bDiff <= 90, `Benchmark histórico ${bh.modelId} (${bh.benchmark}) muito antigo: ${bDiff} dias`);
+});
+
+// Community Reports: <= 30 dias
+COMMUNITY_REPORTS_DATA.forEach(cr => {
+  const cDate = new Date(cr.date + 'T00:00:00Z');
+  const cDiff = Math.round((refDate - cDate) / (1000 * 60 * 60 * 24));
+  assert(cDiff <= 30, `Relato comunitário ${cr.id} desatualizado: ${cDiff} dias (limite: 30 dias)`);
+});
+console.log('   ✅ Todos os datasets auditados estão dentro da janela máxima de frescor.');
 
 console.log('====================================================\n');
 

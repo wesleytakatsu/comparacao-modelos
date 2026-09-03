@@ -888,6 +888,7 @@ const AI_MODELS_DATA = {
       }
     },
     "sourceConfidence": "official",
+    "benchmarkCoverage": "limited",
     "sources": [
       "openai-gpt56",
       "cursorbench-32",
@@ -1324,15 +1325,12 @@ const AI_MODELS_DATA = {
     "officialBenchmarks": {
       "terminalBenchScience01": 52.6,
       "terminalBench40": 55.8,
-      "terminalBench21": 91.4,
       "gdpvalElo": 1853,
       "osworld2Partial": 77.9,
       "osworld2Strict": 41.7,
       "hleWithoutTools": 60.9,
       "hleWithTools": 65.0,
       "automationBench": 31.4,
-      "sciCode": 62.0,
-      "hle": 59.1,
       "methodology": "Anthropic Claude Fable 5.1 System Card & Official Announcement (Setembro/2026)."
     },
     "independentBenchmarks": {
@@ -1977,7 +1975,7 @@ const AI_MODELS_DATA = {
     "provider": "google",
     "providerName": "Google DeepMind",
     "color": "#1d4ed8",
-    "status": "preview / ga (conforme plataforma)",
+    "status": "preview",
     "platformStatus": {
       "geminiApi": "preview",
       "antigravity": "available",
@@ -2247,30 +2245,47 @@ const AI_MODELS_DATA = {
     },
     "pricing": {
       "standard": {
-        "input": 0.30,
-        "cacheRead": 0.03,
+        "input": 0.75,
+        "cacheRead": 0.075,
         "cacheWrite": null,
-        "output": 2.50
+        "cacheStoragePerMillionPerHour": 0.50,
+        "output": 3.75
       },
       "postPromo": {
         "effectiveFrom": "2027-01-01",
         "input": 1.50,
         "output": 7.50,
         "cacheRead": 0.15,
-        "cacheStorage": 1.00
+        "cacheStoragePerMillionPerHour": 1.00,
+        "batch": {
+          "input": 0.75,
+          "output": 3.75,
+          "cacheRead": 0.075
+        }
       },
       "googleApi": {
-        "input": 0.30,
-        "cacheRead": 0.03,
+        "input": 0.75,
+        "cacheRead": 0.075,
         "cacheWrite": null,
-        "output": 2.50
+        "output": 3.75
       },
       "promotionalPeriod": {
         "effectiveFrom": "2026-09-02",
-        "effectiveUntil": "2027-01-01",
-        "input": 0.30,
-        "output": 2.50,
-        "cacheRead": 0.03
+        "effectiveUntil": "2026-12-31",
+        "input": 0.75,
+        "output": 3.75,
+        "cacheRead": 0.075,
+        "cacheStoragePerMillionPerHour": 0.50,
+        "batch": {
+          "input": 0.375,
+          "output": 1.875,
+          "cacheRead": 0.0375
+        }
+      },
+      "batch": {
+        "input": 0.375,
+        "output": 1.875,
+        "cacheRead": 0.0375
       },
       "afterPromotion": {
         "effectiveFrom": "2027-01-01",
@@ -2278,6 +2293,16 @@ const AI_MODELS_DATA = {
         "output": 7.50,
         "cacheRead": 0.15,
         "cacheStorage": 1.00
+      },
+      "toolPricing": {
+        "search": {
+          "freeMonthlyRequests": 5000,
+          "ratePer1kAfterFree": 14.00,
+          "notes": "Franquia compartilhada de 5.000 requisições de Google Search/mês; excedente a $14 / 1.000 requisições (não convertido em tokens)."
+        },
+        "maps": {
+          "notes": "Tarifação de chamadas de Google Maps estruturadas (não convertidas em tokens)."
+        }
       },
       "cursor": {
         "input": 0.75,
@@ -2316,8 +2341,8 @@ const AI_MODELS_DATA = {
       "Suporte oficial a Search as a Tool, Code Execution e Thought Signatures para MCP"
     ],
     "weaknesses": [
-      "No nível High de raciocínio consome volume expressivo de tokens (143k tokens/task no DeepSWE)",
-      "TTFT significativamente mais alto no nível High (~1.20s vs 0.25s no Low)"
+      "No nível High de raciocínio consome volume expressivo de tokens (143k tokens/task no DeepSWE; volume de output ~30% maior no High medido por AA)",
+      "TTFT significativamente mais alto no nível High (13,39s vs 0,70s no Low e 6,44s no Medium; custo por task até ~40% maior)"
     ],
     "badges": [
       "⚡ NOVO — SET/2026",
@@ -2681,7 +2706,7 @@ const AI_MODELS_DATA = {
     "provider": "deepseek",
     "providerName": "DeepSeek",
     "color": "#0284c7",
-    "status": "experimental",
+    "status": "preview",
     "releaseDate": "21/08/2026",
     "openWeights": false,
     "paramsTotal": "304B MoE",

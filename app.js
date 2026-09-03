@@ -1813,7 +1813,7 @@
         <!-- Subtab 8: Governança & ZDR -->
         <div class="subtab-panel" id="tab-governance">
           <div class="specs-grid">
-            <div class="spec-item-card"><div class="spec-label">Zero Data Retention (ZDR)</div><div class="spec-value">${model.privacy ? (model.privacy.retentionDays === 0 ? '✅ ZDR Ativo (0 dias)' : `⚠️ Retenção de até ${model.privacy.retentionDays} dias`) : (model.openCodeGo && model.openCodeGo.trainingConsent ? '❌ Prompts usados para treino (Contributor)' : (model.id === 'ox-alpha' ? '⚠️ Conflito (ZDR no Go / Treino no EULA OpenRouter)' : '✅ ZDR Ativo / Sem Treinamento'))}</div></div>
+            <div class="spec-item-card"><div class="spec-label">Zero Data Retention (ZDR)</div><div class="spec-value">${model.privacy ? (model.privacy.retentionDays === 0 ? '✅ ZDR Ativo (0 dias)' : `⚠️ Retenção de até ${model.privacy.retentionDays} dias`) : (model.openCodeGo && model.openCodeGo.trainingConsent ? '❌ Prompts usados para treino (Contributor)' : (model.id === 'glm-5-3-flash' ? '✅ ZDR Oficial Z.ai API / OpenRouter' : '✅ ZDR Ativo / Sem Treinamento'))}</div></div>
             <div class="spec-item-card"><div class="spec-label">Status dos Pesos</div><div class="spec-value">${model.openWeights ? 'Pesos Abertos Auditáveis' : 'Proprietário de Código Fechado'}</div></div>
             <div class="spec-item-card"><div class="spec-label">Nível de Confiança da Fonte</div><div class="spec-value highlight-green">${(model.sourceConfidence || 'oficial').toUpperCase()}</div></div>
           </div>
