@@ -1552,20 +1552,24 @@
                 </select>
               </div>
 
-              <!-- Filtros de Recursos Especiais (Seções 79, 80, 81) -->
+              <!-- Filtros de Recursos Especiais (Seções 79, 80, 81, 82) -->
               <div class="plan-filter-section">
                 <div class="plan-filter-title">Recursos & Custo</div>
                 <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; margin-bottom: 8px; cursor: pointer;">
                   <input type="checkbox" id="filterPredictableOnly">
-                  <span>💵 Apenas Custo Previsível (sem cobrança variável)</span>
+                  <span>💵 Custo 100% Previsível (sem variáveis)</span>
                 </label>
                 <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; margin-bottom: 8px; cursor: pointer;">
                   <input type="checkbox" id="filterByokOnly">
                   <span>🔑 Aceita Chaves Próprias (BYOK)</span>
                 </label>
                 <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; margin-bottom: 8px; cursor: pointer;">
+                  <input type="checkbox" id="filterApiIncluded">
+                  <span>🌐 Inclui Acesso à API / Créditos de API</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; margin-bottom: 8px; cursor: pointer;">
                   <input type="checkbox" id="filterCloudStorageOnly">
-                  <span>☁️ Inclui Cloud Storage (>= 1 TB)</span>
+                  <span>☁️ Inclui Cloud Storage (≥ 1 TB)</span>
                 </label>
               </div>
 
@@ -1577,6 +1581,7 @@
                   <option value="no-training">🔒 No-training por Padrão</option>
                   <option value="zdr">🛡️ ZDR Formal sob Contrato</option>
                   <option value="consumer">👤 Consumer / Opt-out</option>
+                  <option value="retention-warning">⚠️ Alerta de Treinamento/Retenção</option>
                 </select>
               </div>
             </aside>

@@ -43,6 +43,7 @@
     planSearchQuery: '',
     filterPredictableOnly: false,
     filterByokOnly: false,
+    filterApiIncluded: false,
     filterCloudStorageOnly: false,
     planPrivacyFilter: 'all',
     planSelectedModel: 'claude-fable-5-1',
@@ -195,6 +196,9 @@
       } else if (parts[1] === 'model' && parts[2]) {
         AppState.planActiveTab = 'models';
         AppState.planSelectedModel = parts[2].toLowerCase();
+      } else if (parts[1] === 'plan' && parts[2]) {
+        AppState.planActiveTab = 'plans';
+        setTimeout(() => openPlanDetailsModal(parts[2]), 100);
       } else if (parts[1] === 'compare') {
         AppState.planActiveTab = 'compare';
       } else if (queryPart) {
@@ -204,6 +208,11 @@
         if (urlParams.get('model')) {
           AppState.planActiveTab = 'models';
           AppState.planSelectedModel = urlParams.get('model');
+        }
+        if (urlParams.get('id') || urlParams.get('plan')) {
+          AppState.planActiveTab = 'plans';
+          const pId = urlParams.get('id') || urlParams.get('plan');
+          setTimeout(() => openPlanDetailsModal(pId), 100);
         }
         if (urlParams.get('compare') || urlParams.get('ids')) {
           AppState.planActiveTab = 'compare';
@@ -565,6 +574,13 @@
     if (filterByok) {
       filterByok.addEventListener('change', (e) => {
         AppState.filterByokOnly = e.target.checked;
+        renderPlansView();
+      });
+    }
+    const filterApi = document.getElementById('filterApiIncluded');
+    if (filterApi) {
+      filterApi.addEventListener('change', (e) => {
+        AppState.filterApiIncluded = e.target.checked;
         renderPlansView();
       });
     }
@@ -3406,9 +3422,10 @@
     // 3. Atualiza Badges de Contagem (Header, Comparador e Favoritos)
     const totalPlans = SUBSCRIPTION_PLANS_DATA.length;
     const totalModels = typeof AI_MODELS_DATA !== 'undefined' ? (Array.isArray(AI_MODELS_DATA) ? AI_MODELS_DATA.length : Object.keys(AI_MODELS_DATA).length) : 44;
+    const totalCompanies = (typeof PlanExplorer !== 'undefined' && PlanExplorer.PLAN_UI_CONFIG?.companiesOrder) ? PlanExplorer.PLAN_UI_CONFIG.companiesOrder.length : 9;
     const countersBadge = document.getElementById('planCountersBadge');
     if (countersBadge) {
-      countersBadge.textContent = `9 empresas · ${totalPlans} planos · ${totalModels} modelos`;
+      countersBadge.textContent = `${totalCompanies} empresas · ${totalPlans} planos · ${totalModels} modelos`;
     }
 
     const compareBadge = document.getElementById('compareBadgeCount');
@@ -3501,6 +3518,9 @@
     const byokCheck = document.getElementById('filterByokOnly');
     if (byokCheck) byokCheck.checked = !!AppState.filterByokOnly;
 
+    const apiCheck = document.getElementById('filterApiIncluded');
+    if (apiCheck) apiCheck.checked = !!AppState.filterApiIncluded;
+
     const storageCheck = document.getElementById('filterCloudStorageOnly');
     if (storageCheck) storageCheck.checked = !!AppState.filterCloudStorageOnly;
 
@@ -3548,7 +3568,7 @@
       plans = plans.filter(p => p.profileTags && p.profileTags.includes(AppState.planProfile));
     }
 
-    // 5. Filtro por Custo Previsível
+    // 5. Filtro por Custo Previsível (Seção 79)
     if (AppState.filterPredictableOnly) {
       plans = plans.filter(p => {
         const vb = PlanExplorer.getPlanVariableBilling(p);
@@ -3556,7 +3576,7 @@
       });
     }
 
-    // 6. Filtro por BYOK
+    // 6. Filtro por BYOK (Seção 80)
     if (AppState.filterByokOnly) {
       plans = plans.filter(p => {
         const feats = (p.features || []).join(' ').toLowerCase();
@@ -3564,12 +3584,17 @@
       });
     }
 
-    // 7. Filtro por Cloud Storage (>= 1 TB)
+    // 7. Filtro por API Incluída / Créditos de API (Seção 81)
+    if (AppState.filterApiIncluded) {
+      plans = plans.filter(p => p.apiIncluded || (p.credits && (p.credits.agentSdkMonthlyCreditUsd > 0 || p.credits.premiumModelCreditsUsd > 0)) || (p.surfaces || []).includes('api') || (p.features || []).some(f => f.toLowerCase().includes('api')));
+    }
+
+    // 8. Filtro por Cloud Storage (>= 1 TB) (Seção 82)
     if (AppState.filterCloudStorageOnly) {
       plans = plans.filter(p => p.storage && p.storage.includedGb >= 1000);
     }
 
-    // 8. Filtro por Privacidade
+    // 9. Filtro por Privacidade (Seção 83)
     if (AppState.planPrivacyFilter && AppState.planPrivacyFilter !== 'all') {
       plans = plans.filter(p => {
         if (!p.privacy) return false;
@@ -3582,28 +3607,31 @@
         if (AppState.planPrivacyFilter === 'consumer') {
           return p.privacy.modelTrainingControl === 'opt-out' || p.privacy.modelTrainingControl === 'opt-in';
         }
+        if (AppState.planPrivacyFilter === 'retention-warning') {
+          return p.privacyNotes?.toLowerCase().includes('treino') || p.privacyNotes?.toLowerCase().includes('training') || p.id === 'camelai-stream-flat';
+        }
         return true;
       });
     }
 
-    // 9. Busca Textual
+    // 10. Busca Textual
     if (AppState.planSearchQuery && AppState.planSearchQuery.trim()) {
       plans = PlanExplorer.searchPlans(plans, AppState.planSearchQuery);
     }
 
-    // 10. Ordenação
+    // 11. Ordenação
     plans = sortPlansList(plans, AppState.planSort);
 
-    // 11. Renderiza Chips de Filtros Ativos (Seção 107)
+    // 12. Renderiza Chips de Filtros Ativos (Seção 107)
     renderActiveFilterChips();
 
-    // 12. Atualiza Texto do Contador (Seção 108)
+    // 13. Atualiza Texto do Contador (Seção 108)
     const countText = document.getElementById('planResultsCountText');
     if (countText) {
       countText.textContent = `Exibindo ${plans.length} de ${SUBSCRIPTION_PLANS_DATA.length} planos`;
     }
 
-    // 13. Renderiza Container Principal com base no Agrupamento
+    // 14. Renderiza Container Principal com base no Agrupamento
     const container = document.getElementById('companiesContainer');
     if (!container) return;
 
@@ -3611,8 +3639,13 @@
       container.innerHTML = `
         <div style="text-align: center; padding: 48px 20px; background: var(--bg-card); border-radius: var(--radius-md); border: 1px dashed var(--border-subtle); color: var(--text-muted);">
           <div style="font-size: 2rem; margin-bottom: 8px;">🔍</div>
-          <h4 style="color: var(--text-primary); margin-bottom: 6px;">Nenhum plano corresponde aos filtros selecionados</h4>
-          <p style="font-size: 0.85rem; max-width: 450px; margin: 0 auto 16px auto;">Tente aumentar o teto de preço, desmarcar filtros específicos ou limpar a busca.</p>
+          <h4 style="color: var(--text-primary); margin-bottom: 6px;">Nenhum plano atende a todos os filtros selecionados</h4>
+          <p style="font-size: 0.85rem; max-width: 460px; margin: 0 auto 16px auto; line-height: 1.5;">
+            Tente:<br>
+            • Aumentar o teto de orçamento no slider;<br>
+            • Permitir planos com opções de chave própria (BYOK);<br>
+            • Permitir custos ou créditos variáveis adicionais.
+          </p>
           <button class="btn-secondary btn-sm" onclick="window.AIApp.resetAllPlanFilters()">Limpar Todos os Filtros</button>
         </div>
       `;
@@ -3667,7 +3700,7 @@
       });
     }
     if (sortKey === 'models') {
-      return list.sort((a, b) => (b.includedModels?.length || 0) - (a.includedModels?.length || 0));
+      return list.sort((a, b) => (b.modelAccess?.length || b.includedModels?.length || 0) - (a.modelAccess?.length || a.includedModels?.length || 0));
     }
     return list;
   }
@@ -3721,16 +3754,26 @@
       });
     }
 
+    if (AppState.filterApiIncluded) {
+      chips.push({
+        label: 'Acesso / Créditos API',
+        removeFn: `window.AIApp.toggleApiIncludedOnly()`
+      });
+    }
+
     if (AppState.filterCloudStorageOnly) {
       chips.push({
-        label: 'Cloud Storage (>=1TB)',
+        label: 'Cloud Storage (≥ 1 TB)',
         removeFn: `window.AIApp.toggleStorageOnly()`
       });
     }
 
     if (AppState.planPrivacyFilter && AppState.planPrivacyFilter !== 'all') {
+      const privLabel = AppState.planPrivacyFilter === 'no-training' ? 'No-training default' :
+                        AppState.planPrivacyFilter === 'zdr' ? 'ZDR sob contrato' :
+                        AppState.planPrivacyFilter === 'retention-warning' ? 'Alerta de Treinamento' : 'Consumer / opt-out';
       chips.push({
-        label: `Privacidade: ${AppState.planPrivacyFilter}`,
+        label: `Privacidade: ${privLabel}`,
         removeFn: `window.AIApp.setPrivacyFilter('all')`
       });
     }
@@ -3860,15 +3903,22 @@
     // Destaque para Recursos Especiais (Seções 44 a 49)
     let specialBadge = '';
     if (plan.id === 'google-ai-pro') {
-      specialBadge = `<div style="font-size: 0.72rem; color: #34d399; font-weight: 700; margin-top: 4px;">☁️ Inclui 5 TB Google Drive + Gemini no Gmail/Docs</div>`;
+      specialBadge = `<div style="font-size: 0.72rem; color: #34d399; font-weight: 700; margin-top: 4px;">☁️ R$ 96,99 · 5 TB Storage no Brasil · 1.000 Flow credits · 4× vs Free</div>`;
     } else if (plan.id === 'google-ai-ultra-5x') {
       specialBadge = `<div style="font-size: 0.72rem; color: #38bdf8; font-weight: 700; margin-top: 4px;">⚡ 5× Mais Quota + 5 TB Storage + Gemini no Workspace</div>`;
     } else if (plan.id === 'opencode-go' || plan.id === 'opencode-go-standard') {
-      specialBadge = `<div style="font-size: 0.72rem; color: #fbbf24; font-weight: 700; margin-top: 4px;">🔥 Burn rate variável: 1× (Haiku), 2× (Sonnet), 4× (Opus) na franquia de $60</div>`;
+      specialBadge = `
+        <div style="font-size: 0.72rem; color: #fbbf24; font-weight: 700; margin-top: 4px;">
+          🔥 US$ 10/mês (até $60 nominal) · Burn rate 1×/2×/4×
+        </div>
+        <button type="button" class="btn-secondary btn-sm" style="font-size: 0.68rem; padding: 2px 6px; margin-top: 3px; cursor: pointer;" onclick="window.AIApp.openPlanDetails('${plan.id}')">
+          📊 Ver tabela de consumo
+        </button>
+      `;
     } else if (plan.id === 'camelai-stream-flat') {
-      specialBadge = `<div style="font-size: 0.72rem; color: #f87171; font-weight: 700; margin-top: 4px;">⚠ Standard camelStream: 1 stream simultâneo · Dados sujeitos a training</div>`;
+      specialBadge = `<div style="font-size: 0.72rem; color: #f87171; font-weight: 700; margin-top: 4px;">⚠ Standard camelStream: 1 stream concorrente · Unlimited tokens · Dados sujeitos a treino</div>`;
     } else if (plan.id === 'claude-pro' || plan.id === 'anthropic-claude-pro') {
-      specialBadge = `<div style="font-size: 0.72rem; color: #a78bfa; font-weight: 700; margin-top: 4px;">💳 Fable 5.1 disponível via créditos pré-pagos extras</div>`;
+      specialBadge = `<div style="font-size: 0.72rem; color: #a78bfa; font-weight: 700; margin-top: 4px;">💳 Fable 5.1 disponível via créditos extras pré-pagos</div>`;
     }
 
     // Badges de Modelos Inclusos
@@ -3882,6 +3932,18 @@
     }).join('');
 
     const moreModelsCount = (plan.modelAccess || []).length - 4;
+
+    // Resumo de Privacidade (Seção 84)
+    let privacyTag = '';
+    if (plan.privacy?.zeroDataRetentionContract) {
+      privacyTag = `<span class="badge-tag badge-subdollar" style="font-size: 0.7rem;" title="Retenção Zero formal sob contrato">🛡️ ZDR Contratual</span>`;
+    } else if (plan.privacy?.noTrainingByDefault) {
+      privacyTag = `<span class="badge-tag badge-subdollar" style="font-size: 0.7rem;" title="Dados não usados para treinamento por padrão">🔒 No-training default</span>`;
+    } else if (plan.privacyNotes?.toLowerCase().includes('treino') || plan.privacyNotes?.toLowerCase().includes('training') || plan.id === 'camelai-stream-flat') {
+      privacyTag = `<span class="badge-tag badge-danger" style="font-size: 0.7rem;" title="Dados sujeitos a retenção ou uso em treinamento">⚠️ Training possible</span>`;
+    } else {
+      privacyTag = `<span class="badge-tag badge-warning" style="font-size: 0.7rem;" title="Política de consumidor com opção de opt-out">👤 Consumer / opt-out</span>`;
+    }
 
     return `
       <div class="plan-card" data-plan-id="${plan.id}">
@@ -3910,7 +3972,7 @@
           </div>
 
           <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px;">
-            <strong>Franquia:</strong> ${plan.quotaDescription}
+            <strong title="Quota & Franquia: A capacidade real varia conforme tokens gerados, ferramentas e horários de pico.">Franquia:</strong> ${plan.quotaDescription}
           </div>
 
           <div style="margin-bottom: 10px;">
@@ -3921,10 +3983,11 @@
             </div>
           </div>
 
-          <div style="font-size: 0.76rem; margin-bottom: 8px;">
-            <span class="badge-tag ${varBilling.predictable ? 'badge-subdollar' : 'badge-warning'}">
+          <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 8px;">
+            <span class="badge-tag ${varBilling.predictable ? 'badge-subdollar' : 'badge-warning'}" title="Tipo de Cobrança: ${varBilling.predictable ? 'Included / 100% Previsível' : 'Usage credits / Variável'}">
               ${varBilling.predictable ? '💵 Custo 100% Previsível' : '📈 Custo com Variáveis'}
             </span>
+            ${privacyTag}
           </div>
 
           <div style="font-size: 0.78rem; color: var(--accent-cyan); line-height: 1.35; margin-bottom: 4px;">
@@ -4245,7 +4308,12 @@
       },
       {
         label: 'Modelos Principais Incluídos',
-        getValue: p => (p.includedModels || []).map(m => `<span class="badge-tag badge-frontier" style="font-size: 0.7rem; margin: 1px;">${m}</span>`).join('')
+        getValue: p => {
+          const list = (p.includedModels && p.includedModels.length > 0)
+            ? p.includedModels
+            : (p.modelAccess || []).map(m => m.modelName || m.modelId);
+          return list.slice(0, 6).map(m => `<span class="badge-tag badge-frontier" style="font-size: 0.7rem; margin: 1px;">${m}</span>`).join('') + (list.length > 6 ? `<span class="badge-tag badge-frontier">+${list.length - 6}</span>` : '');
+        }
       },
       {
         label: 'Franquia & Quotas',
@@ -4470,16 +4538,32 @@
           <strong>Previsibilidade:</strong> ${varBilling.predictable ? '✓ Custo 100% fixo' : `⚠ Custos variáveis possíveis: ${varBilling.items.join(', ')}`}
         </div>
         ${plan.overageAllowed ? `<div style="font-size: 0.8rem; color: #fbbf24; margin-top: 4px;">Permite faturamento de overage excedente no cartão.</div>` : ''}
+        ${(plan.id.includes('opencode-go')) ? `
+          <div style="background: rgba(16, 185, 129, 0.08); border-left: 3px solid #10b981; padding: 10px 14px; margin-top: 10px; border-radius: var(--radius-xs); font-size: 0.8rem;">
+            <strong>🔥 Dinâmica de Queima de Franquia (Burn Rate — Seção 47):</strong>
+            <div style="margin-top: 6px; display: flex; flex-direction: column; gap: 4px;">
+              <div>🟢 <strong>Modelos tier US$ 60</strong> → <strong>1× burn</strong> (consumo normal na franquia)</div>
+              <div>🟡 <strong>Modelos tier US$ 30</strong> → <strong>2× burn</strong> (consome 2× mais rápido)</div>
+              <div>🔴 <strong>Modelos tier US$ 15</strong> → <strong>4× burn</strong> (consome 4× mais rápido)</div>
+            </div>
+            <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 4px;">
+              Exemplo: modelos com raciocínio profundo consom 4× da cota nominal mensal de $60.
+            </div>
+          </div>
+        ` : ''}
       </div>
 
-      <!-- Seção 4: Ferramentas & Storage -->
+      <!-- Seção 4: Plataformas, Superfícies & Cloud Storage -->
       <div class="content-box" style="margin-bottom: 16px;">
-        <h4 style="margin-bottom: 6px;">☁️ Recursos, Cloud Storage & Integrações</h4>
+        <h4 style="margin-bottom: 6px;">☁️ Plataformas, Superfícies & Recursos</h4>
         <div style="font-size: 0.84rem; margin-bottom: 6px;">
-          <strong>Storage:</strong> ${plan.storage ? `${plan.storage.includedGb >= 1000 ? `${plan.storage.includedGb / 1000} TB` : `${plan.storage.includedGb} GB`} (${plan.storage.type})` : 'Nenhum armazenamento incluído'}
+          <strong>Superfícies & Clientes:</strong> ${(plan.surfaces || []).map(s => `<span class="badge-tag badge-subdollar" style="font-size: 0.72rem; margin-right: 4px;">${s}</span>`).join('') || '<span class="badge-tag badge-frontier" style="font-size: 0.72rem;">Chat Web</span>'}
+        </div>
+        <div style="font-size: 0.84rem; margin-bottom: 6px;">
+          <strong>Storage na Nuvem:</strong> ${plan.storage?.includedGb ? `${plan.storage.includedGb >= 1000 ? `${plan.storage.includedGb / 1000} TB` : `${plan.storage.includedGb} GB`} (${plan.storage.type})` : 'Nenhum armazenamento incluído'}
         </div>
         <div style="font-size: 0.8rem; color: var(--text-secondary);">
-          <strong>Recursos:</strong> ${(plan.features || []).join(' · ')}
+          <strong>Recursos & Ferramentas:</strong> ${(plan.features || []).join(' · ')}
         </div>
       </div>
 
@@ -4495,7 +4579,18 @@
         <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">${plan.privacyNotes || ''}</div>
       </div>
 
-      <!-- Seção 6: Fontes Auditadas & Freshness (Seções 91, 102) -->
+      <!-- Seção 6: Limitações & Histórico (Seções 8, 85, 86) -->
+      <div class="content-box" style="margin-bottom: 16px;">
+        <h4 style="margin-bottom: 6px;">📜 Limitações Conhecidas & Histórico</h4>
+        <div style="font-size: 0.82rem; margin-bottom: 4px;">
+          <strong>Limitações:</strong> ${plan.limitations || (plan.usage?.notes ? plan.usage.notes : 'Sem restrições extraordinárias reportadas para a cota nominal.')}
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">
+          <strong>Histórico Recente:</strong> ${plan.historyNotes || `Plano comercialmente ativo e mantido na linhagem oficial de ${plan.provider.toUpperCase()} (${plan.product}).`}
+        </div>
+      </div>
+
+      <!-- Seção 7: Fontes Auditadas & Freshness (Seções 91, 102) -->
       <div style="background: var(--bg-surface); padding: 12px; border-radius: var(--radius-sm); font-size: 0.76rem; color: var(--text-muted);">
         <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
           <span><strong>Fontes Oficiais:</strong> ${Object.entries(plan.sources || {}).map(([k, v]) => `<a href="${v}" target="_blank" rel="noopener" style="color: var(--accent-cyan); margin-right: 8px;">[${k}]</a>`).join('')}</span>
@@ -4774,6 +4869,7 @@
     AppState.planPrivacyFilter = 'all';
     AppState.filterPredictableOnly = false;
     AppState.filterByokOnly = false;
+    AppState.filterApiIncluded = false;
     AppState.filterCloudStorageOnly = false;
     AppState.planSearchQuery = '';
     AppState.planSort = 'default';
@@ -5940,6 +6036,10 @@
     },
     toggleByokOnly() {
       AppState.filterByokOnly = !AppState.filterByokOnly;
+      renderPlansView();
+    },
+    toggleApiIncludedOnly() {
+      AppState.filterApiIncluded = !AppState.filterApiIncluded;
       renderPlansView();
     },
     toggleStorageOnly() {
