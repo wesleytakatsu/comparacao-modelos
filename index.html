@@ -15,13 +15,13 @@
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Portal de Inteligência de Modelos de IA 2026 | Benchmarks, Hardware & Economia</title>
-  <meta name="description" content="Portal definitivo para engenharia de software e comparação multidimensional de 42 modelos de IA (Grok 4.6, GPT-5.6, Claude 5, Gemini 3.7, DeepSeek V4, Ox Alpha, gpt-oss, Nemotron 3.5).">
+  <meta name="description" content="Portal definitivo para engenharia de software e comparação multidimensional de 44 modelos de IA (Claude Fable 5.1, Gemini 3.8 Flash, Grok 4.6, GPT-5.6, Claude 5, Gemini 3.7, DeepSeek V4, Ox Alpha, gpt-oss, Nemotron 3.5).">
   <meta name="theme-color" content="#0a0d14">
   <meta name="color-scheme" content="light dark">
   
   <!-- Open Graph / Meta -->
   <meta property="og:title" content="Portal de Inteligência de Modelos de IA 2026">
-  <meta property="og:description" content="Benchmarks, Hardware Local, Economia de Tokens e Análise de 42 Modelos de IA para Desenvolvimento de Software.">
+  <meta property="og:description" content="Benchmarks, Hardware Local, Economia de Tokens e Análise de 44 Modelos de IA para Desenvolvimento de Software (Edição Setembro/2026).">
   <meta property="og:type" content="website">
 
   <!-- Favicon -->
@@ -248,7 +248,7 @@
       <div class="sidebar-footer">
         <div class="sidebar-stats">
           <div style="font-size: 0.76rem; color: var(--text-muted); line-height: 1.4;">
-            Dados: ago/2026 · 42 modelos · 34 runs
+            Dados: set/2026 · <span id="hdrModelCount">44</span> modelos · <span id="hdrRunCount">58</span> runs
           </div>
         </div>
       </div>
@@ -263,9 +263,9 @@
       <!-- ========================================== -->
       <section class="spa-view active" id="view-dashboard">
         <div class="view-header">
-          <div class="view-title">
-            <h2>📊 Painel Executivo de Inteligência</h2>
-            <p>Visão panorâmica dos líderes de inteligência, melhores custos por tarefa e status das cotas.</p>
+          <div class="view-title-group">
+            <h2>Visão Geral da Fronteira de IA</h2>
+            <p class="view-subtitle">Metrologia rigorosa, benchmarks agênticos e economia real de tokens de 44 modelos para desenvolvimento de software.</p>
           </div>
           <div class="view-actions">
             <a href="#dashboard-catalog" class="btn-secondary" style="font-size: 0.8rem; padding: 6px 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
@@ -289,29 +289,29 @@
             </div>
           </button>
 
-          <!-- Card 2: Grok 4.6 XHigh Líder Absoluto -->
-          <button type="button" class="kpi-card card-top" data-model-id="grok-4-6">
+          <!-- Card 2: Claude Fable 5.1 Max Novo Líder CursorBench -->
+          <button type="button" class="kpi-card card-top" data-model-id="claude-fable-5-1">
             <div class="kpi-tag">👑 1º Lugar Geral CursorBench</div>
             <div class="kpi-body">
-              <div class="kpi-model-name">Grok 4.6 (XHigh)</div>
-              <div class="kpi-primary-score">70,8%</div>
+              <div class="kpi-model-name">Claude Fable 5.1 (Max)</div>
+              <div class="kpi-primary-score">73,4%</div>
             </div>
             <div class="kpi-footer">
-              <span>$2,81 / task • 41,1k tokens</span>
-              <span class="kpi-badge pool-cursor">Cursor Pool</span>
+              <span>$9,64 / task • 72,1k tokens</span>
+              <span class="kpi-badge pool-anthropic">Frontier #1</span>
             </div>
           </button>
 
-          <!-- Card 3: GPT-5.6 Sol Max Campeão Terminal -->
-          <button type="button" class="kpi-card card-sol" data-model-id="gpt-5-6-sol">
+          <!-- Card 3: Claude Fable 5.1 Max Campeão Terminal -->
+          <button type="button" class="kpi-card card-sol" data-model-id="claude-fable-5-1">
             <div class="kpi-tag">👑 1º Lugar Terminal-Bench</div>
             <div class="kpi-body">
-              <div class="kpi-model-name">GPT-5.6 Sol (Max)</div>
-              <div class="kpi-primary-score">88,8%</div>
+              <div class="kpi-model-name">Claude Fable 5.1 (Max)</div>
+              <div class="kpi-primary-score">91,4%</div>
             </div>
             <div class="kpi-footer">
-              <span>72,7% DeepSWE • 64,6% SWE-Pro</span>
-              <span class="kpi-badge pool-openai">OpenAI Frontier</span>
+              <span>71,5% DeepSWE • 81,2% SWE-Pro</span>
+              <span class="kpi-badge pool-anthropic">Anthropic Frontier</span>
             </div>
           </button>
 
@@ -341,16 +341,16 @@
             </div>
           </button>
 
-          <!-- Card 6: Nemotron 3.5 Lightning Velocidade -->
-          <button type="button" class="kpi-card card-speed" data-model-id="nemotron-3-5-lightning">
-            <div class="kpi-tag">⚡ Ultra Velocidade</div>
+          <!-- Card 6: Gemini 3.8 Flash Velocidade & Throughput -->
+          <button type="button" class="kpi-card card-speed" data-model-id="gemini-3-8-flash">
+            <div class="kpi-tag">⚡ Ultra Velocidade & 1M</div>
             <div class="kpi-body">
-              <div class="kpi-model-name">Nemotron 3.5 Lightning</div>
-              <div class="kpi-primary-score">135 tok/s</div>
+              <div class="kpi-model-name">Gemini 3.8 Flash</div>
+              <div class="kpi-primary-score">305 tok/s</div>
             </div>
             <div class="kpi-footer">
-              <span>45 ms TTFT • Mamba-2 SSM 1M</span>
-              <span class="kpi-badge pool-nvidia">NVFP4 RTX 5090</span>
+              <span>90,8% TB 2.1 • 1M Multimodal</span>
+              <span class="kpi-badge pool-google">Google Flash</span>
             </div>
           </button>
 
@@ -363,20 +363,20 @@
             </div>
             <div class="kpi-footer">
               <span>~$0,000084/img • Toolathlon</span>
-              <span class="kpi-badge pool-deepseek">DeepSeek API / Go</span>
+              <span class="kpi-badge pool-deepseek">DeepSeek API</span>
             </div>
           </button>
 
-          <!-- Card 8: Ox Alpha Preview Grátis -->
-          <button type="button" class="kpi-card card-stealth" data-model-id="ox-alpha">
-            <div class="kpi-tag">🎁 1M Multimodal Grátis</div>
+          <!-- Card 8: OpenCode Go Quota Free -->
+          <button type="button" class="kpi-card card-go" data-model-id="ox-alpha">
+            <div class="kpi-tag">🎁 Grátis no OpenCode Go</div>
             <div class="kpi-body">
               <div class="kpi-model-name">Ox Alpha (Preview)</div>
-              <div class="kpi-primary-score">58,4%</div>
+              <div class="kpi-primary-score">0.0x</div>
             </div>
             <div class="kpi-footer">
-              <span>113 tarefas DeepSWE • Texto+Vídeo+Img</span>
-              <span class="kpi-badge pool-stealth">Grátis Preview</span>
+              <span>100T tok/dia • 1M Contexto</span>
+              <span class="kpi-badge pool-stealth">Preview 1M</span>
             </div>
           </button>
 
@@ -422,7 +422,7 @@
         <!-- Tabela Densa Consolidada -->
         <div class="content-box" id="dashboard-catalog">
           <div class="box-header">
-            <h3>📋 Catálogo Consolidado de Modelos (42 Entidades)</h3>
+            <h3>📋 Catálogo Consolidado de Modelos (<span id="catTotalCount">44</span> Entidades)</h3>
             <div class="table-search-bar">
               <input type="text" id="dashboardSearchInput" class="input-search" placeholder="Filtrar o catálogo por nome, família, contexto...">
             </div>
@@ -431,7 +431,7 @@
           <!-- Filter Controls: Segmented Axis + More Filters Details -->
           <div class="catalog-filters-wrapper">
             <div class="catalog-filter-tabs" id="dashboardFilterChips" role="tablist" aria-label="Eixos de Filtro do Catálogo">
-              <button type="button" class="chip-btn active" data-filter="all" role="tab" aria-selected="true">Todos (42)</button>
+              <button type="button" class="chip-btn active" data-filter="all" role="tab" aria-selected="true">Todos (<span id="chipAllCount">44</span>)</button>
               <button type="button" class="chip-btn" data-filter="frontier" role="tab" aria-selected="false">Frontier</button>
               <button type="button" class="chip-btn" data-filter="subagents" role="tab" aria-selected="false">Worker</button>
               <button type="button" class="chip-btn" data-filter="open-weights" role="tab" aria-selected="false">Local</button>

@@ -40,6 +40,8 @@
     initTheme();
     initRouter();
     initGlobalEvents();
+    updateDynamicCounters();
+    renderDynamicDashboardKpis();
     initEstimator();
     initVramCalculator();
     initRoiCalculator();
@@ -640,7 +642,158 @@
   }
 
   // ==========================================
-  // 4. MÓDULO DASHBOARD & CATÁLOGO (45 MODELOS)
+  // CONTADORES DINÂMICOS & KPIS DO DASHBOARD
+  // ==========================================
+  function updateDynamicCounters() {
+    if (typeof AI_MODELS_DATA === 'undefined') return;
+    const totalModels = Object.keys(AI_MODELS_DATA).length;
+    const totalRuns = typeof CURSORBENCH_32_DATA !== 'undefined' ? CURSORBENCH_32_DATA.length : 58;
+
+    const hdrModel = document.getElementById('hdrModelCount');
+    if (hdrModel) hdrModel.innerText = totalModels;
+
+    const hdrRun = document.getElementById('hdrRunCount');
+    if (hdrRun) hdrRun.innerText = totalRuns;
+
+    const catTotal = document.getElementById('catTotalCount');
+    if (catTotal) catTotal.innerText = totalModels;
+
+    const chipAll = document.getElementById('chipAllCount');
+    if (chipAll) chipAll.innerText = totalModels;
+  }
+
+  function renderDynamicDashboardKpis() {
+    const kpiGrid = document.querySelector('.kpi-grid');
+    if (!kpiGrid || typeof CURSORBENCH_32_DATA === 'undefined') return;
+
+    // 1. Líder CursorBench (Top 1)
+    const sortedCursor = [...CURSORBENCH_32_DATA].sort((a, b) => b.score - a.score);
+    const topCursor = sortedCursor[0] || { modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1', effort: 'Max', score: 73.4, costUsd: 9.64, tokensPerTask: 72060, pool: 'other-models' };
+
+    // 2. Sweet Spot Geral
+    const sweetSpotRun = CURSORBENCH_32_DATA.find(r => r.isSweetSpot) || { modelId: 'grok-4-6', modelName: 'Grok 4.6', effort: 'Medium', score: 67.1, costUsd: 1.28, tokensPerTask: 17942, pool: 'cursor-models' };
+
+    // 3. Líder Terminal-Bench 2.1
+    const sortedTerminal = (typeof MULTI_BENCHMARK_LEDGER !== 'undefined')
+      ? [...MULTI_BENCHMARK_LEDGER].filter(l => l.terminalBench21).sort((a, b) => b.terminalBench21 - a.terminalBench21)
+      : [];
+    const topTerminal = sortedTerminal[0] || { modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1 (Max)', terminalBench21: 91.4, deepSwe11: 71.5, sweBenchPro: 81.2 };
+
+    // 4. Ultra Custo-Benefício
+    const lunaRun = CURSORBENCH_32_DATA.find(r => r.modelId === 'gpt-5-6-luna' && r.effort === 'Max') || { modelId: 'gpt-5-6-luna', score: 61.1, costUsd: 0.39 };
+
+    // 5. Campeão 100% Local
+    const ossRun = CURSORBENCH_32_DATA.find(r => r.modelId === 'gpt-oss-20b') || { modelId: 'gpt-oss-20b', score: 60.7 };
+
+    kpiGrid.innerHTML = `
+      <!-- Card 1: Sweet Spot Geral -->
+      <button type="button" class="kpi-card card-sweetspot" data-model-id="${sweetSpotRun.modelId}">
+        <div class="kpi-tag">🌟 Sweet Spot Geral</div>
+        <div class="kpi-body">
+          <div class="kpi-model-name">${sweetSpotRun.modelName} (${sweetSpotRun.effort})</div>
+          <div class="kpi-primary-score">${sweetSpotRun.score.toFixed(1)}%</div>
+        </div>
+        <div class="kpi-footer">
+          <span>$${sweetSpotRun.costUsd.toFixed(2)} / task • ${(sweetSpotRun.tokensPerTask / 1000).toFixed(1)}k tokens</span>
+          <span class="kpi-badge pool-cursor">${sweetSpotRun.pool === 'cursor-models' ? 'Cursor Pool' : 'Standard'}</span>
+        </div>
+      </button>
+
+      <!-- Card 2: 1º Lugar Geral CursorBench -->
+      <button type="button" class="kpi-card card-top" data-model-id="${topCursor.modelId}">
+        <div class="kpi-tag">👑 1º Lugar Geral CursorBench</div>
+        <div class="kpi-body">
+          <div class="kpi-model-name">${topCursor.modelName} (${topCursor.effort})</div>
+          <div class="kpi-primary-score">${topCursor.score.toFixed(1)}%</div>
+        </div>
+        <div class="kpi-footer">
+          <span>$${topCursor.costUsd.toFixed(2)} / task • ${(topCursor.tokensPerTask / 1000).toFixed(1)}k tokens</span>
+          <span class="kpi-badge pool-anthropic">Frontier #1</span>
+        </div>
+      </button>
+
+      <!-- Card 3: 1º Lugar Terminal-Bench -->
+      <button type="button" class="kpi-card card-sol" data-model-id="${topTerminal.modelId}">
+        <div class="kpi-tag">👑 1º Lugar Terminal-Bench</div>
+        <div class="kpi-body">
+          <div class="kpi-model-name">${topTerminal.modelName}</div>
+          <div class="kpi-primary-score">${topTerminal.terminalBench21 ? topTerminal.terminalBench21.toFixed(1) + '%' : 'N/D'}</div>
+        </div>
+        <div class="kpi-footer">
+          <span>${topTerminal.deepSwe11 ? topTerminal.deepSwe11.toFixed(1) + '% DeepSWE' : ''} • ${topTerminal.sweBenchPro ? topTerminal.sweBenchPro.toFixed(1) + '% Pro' : ''}</span>
+          <span class="kpi-badge pool-anthropic">Anthropic Frontier</span>
+        </div>
+      </button>
+
+      <!-- Card 4: GPT-5.6 Luna Ultra Custo-Benefício -->
+      <button type="button" class="kpi-card card-luna" data-model-id="${lunaRun.modelId}">
+        <div class="kpi-tag">💎 Ultra Custo/Benefício</div>
+        <div class="kpi-body">
+          <div class="kpi-model-name">GPT-5.6 Luna (Max)</div>
+          <div class="kpi-primary-score">${lunaRun.score ? lunaRun.score.toFixed(1) + '%' : '61,1%'}</div>
+        </div>
+        <div class="kpi-footer">
+          <span>$${lunaRun.costUsd ? lunaRun.costUsd.toFixed(2) : '0,39'} / task • 10.250 req/mês no Go</span>
+          <span class="kpi-badge pool-openai">OpenCode Go</span>
+        </div>
+      </button>
+
+      <!-- Card 5: gpt-oss-20b Campeão Local -->
+      <button type="button" class="kpi-card card-local" data-model-id="gpt-oss-20b">
+        <div class="kpi-tag">🏠 Campeão 100% Local</div>
+        <div class="kpi-body">
+          <div class="kpi-model-name">gpt-oss-20b (High)</div>
+          <div class="kpi-primary-score">60,7%</div>
+        </div>
+        <div class="kpi-footer">
+          <span>Roda em 16 GB • 3,79 score/GB</span>
+          <span class="kpi-badge pool-local">Open Weights</span>
+        </div>
+      </button>
+
+      <!-- Card 6: Gemini 3.8 Flash Velocidade & Throughput -->
+      <button type="button" class="kpi-card card-speed" data-model-id="gemini-3-8-flash">
+        <div class="kpi-tag">⚡ Ultra Velocidade & 1M</div>
+        <div class="kpi-body">
+          <div class="kpi-model-name">Gemini 3.8 Flash</div>
+          <div class="kpi-primary-score">305 tok/s</div>
+        </div>
+        <div class="kpi-footer">
+          <span>90,8% TB 2.1 • 1M Multimodal</span>
+          <span class="kpi-badge pool-google">Google Flash</span>
+        </div>
+      </button>
+
+      <!-- Card 7: DeepSeek V4 Flash Vision Exp -->
+      <button type="button" class="kpi-card card-vision" data-model-id="deepseek-v4-vision-exp">
+        <div class="kpi-tag">👁️ Visão Nativa Barata</div>
+        <div class="kpi-body">
+          <div class="kpi-model-name">DeepSeek V4 Flash Vision Exp</div>
+          <div class="kpi-primary-score">75,9%</div>
+        </div>
+        <div class="kpi-footer">
+          <span>~$0,000084/img • Toolathlon</span>
+          <span class="kpi-badge pool-deepseek">DeepSeek API</span>
+        </div>
+      </button>
+
+      <!-- Card 8: OpenCode Go Quota Free -->
+      <button type="button" class="kpi-card card-go" data-model-id="ox-alpha">
+        <div class="kpi-tag">🎁 Grátis no OpenCode Go</div>
+        <div class="kpi-body">
+          <div class="kpi-model-name">Ox Alpha (Preview)</div>
+          <div class="kpi-primary-score">0.0x</div>
+        </div>
+        <div class="kpi-footer">
+          <span>100T tok/dia • 1M Contexto</span>
+          <span class="kpi-badge pool-stealth">Preview 1M</span>
+        </div>
+      </button>
+    `;
+  }
+
+  // ==========================================
+  // 4. MÓDULO DASHBOARD & CATÁLOGO (44 MODELOS)
   // ==========================================
   function renderDashboardTable() {
     const tbody = document.getElementById('dashboardTableBody');
@@ -1228,9 +1381,37 @@
         <!-- Subtab 6: Governança & ZDR -->
         <div class="subtab-panel" id="tab-governance">
           <div class="specs-grid">
-            <div class="spec-item-card"><div class="spec-label">Zero Data Retention (ZDR)</div><div class="spec-value">${model.openCodeGo && model.openCodeGo.trainingConsent ? '❌ Prompts usados para treino (Contributor)' : (model.id === 'ox-alpha' ? '⚠️ Conflito (ZDR no Go / Treino no EULA OpenRouter)' : '✅ ZDR Ativo / Sem Treinamento')}</div></div>
+            <div class="spec-item-card"><div class="spec-label">Zero Data Retention (ZDR)</div><div class="spec-value">${model.privacy ? (model.privacy.retentionDays === 0 ? '✅ ZDR Ativo (0 dias)' : `⚠️ Retenção de até ${model.privacy.retentionDays} dias`) : (model.openCodeGo && model.openCodeGo.trainingConsent ? '❌ Prompts usados para treino (Contributor)' : (model.id === 'ox-alpha' ? '⚠️ Conflito (ZDR no Go / Treino no EULA OpenRouter)' : '✅ ZDR Ativo / Sem Treinamento'))}</div></div>
             <div class="spec-item-card"><div class="spec-label">Status dos Pesos</div><div class="spec-value">${model.openWeights ? 'Pesos Abertos Auditáveis' : 'Proprietário de Código Fechado'}</div></div>
+            <div class="spec-item-card"><div class="spec-label">Nível de Confiança da Fonte</div><div class="spec-value highlight-green">${(model.sourceConfidence || 'oficial').toUpperCase()}</div></div>
           </div>
+          ${model.privacy && model.privacy.notes ? `
+            <div style="margin-top: 14px; padding: 12px 16px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: var(--radius-md); font-size: 0.85rem; color: var(--text-secondary);">
+              <strong>🔒 Diretriz de Governança & Retenção:</strong> ${model.privacy.notes}
+            </div>
+          ` : ''}
+          ${model.sources && typeof DATA_SOURCES !== 'undefined' ? `
+            <div style="margin-top: 20px;">
+              <h4 style="margin-bottom: 8px;">📚 Fontes Primárias e Rastreabilidade do Dossiê:</h4>
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                ${model.sources.map(sId => {
+                  const s = DATA_SOURCES[sId];
+                  if (!s) return '';
+                  return `
+                    <div style="padding: 10px 14px; background: var(--bg-surface-dim); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 0.83rem;">
+                      <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <strong style="color: var(--accent-cyan);">${s.title}</strong>
+                        <span class="badge-tag ${s.sourceType === 'official' ? 'badge-warning' : 'badge-frontier'}">${s.sourceType.toUpperCase()}</span>
+                      </div>
+                      <div style="color: var(--text-muted); font-size: 0.78rem; margin: 4px 0;">Publicador: ${s.publisher} • Data: ${s.publishedAt} • Acessado: ${s.retrievedAt}</div>
+                      <div style="color: var(--text-secondary);">${s.notes}</div>
+                      <a href="${s.sourceUrl}" target="_blank" rel="noopener" style="font-size: 0.78rem; color: var(--accent-blue); text-decoration: underline; margin-top: 4px; display: inline-block;">Consultar fonte oficial ↗</a>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          ` : ''}
           ${model.id === 'ox-alpha' ? `
             <div style="margin-top: 14px; padding: 14px; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-md); font-size: 0.85rem;">
               <h5 style="color: #f87171; margin-bottom: 6px;">⚠️ Diretriz de Segurança e Privacidade para Ox Alpha</h5>

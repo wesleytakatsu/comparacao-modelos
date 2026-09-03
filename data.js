@@ -1,12 +1,142 @@
 /**
  * Base de Dados Estruturada e Consolidada de Inteligência de Modelos de IA
- * Portal de Engenharia, Benchmarks Multidimensionais, Hardware & Precificação (Edição Agosto/2026)
- * Dados auditados e verificados em: 22 de Agosto de 2026
+ * Portal de Engenharia, Benchmarks Multidimensionais, Hardware & Precificação (Edição Setembro/2026)
+ * Dados auditados e verificados em: 02 de Setembro de 2026
  */
 
 // ==========================================
 // 1. CATÁLOGO CANÔNICO DE PROVEDORES
 // ==========================================
+
+
+// ==========================================
+// 1B. REGISTRO CANÔNICO DE PROVENIÊNCIA E FONTES DE DADOS (DATA_SOURCES)
+// ==========================================
+
+const DATA_SOURCES = {
+  'google-deepmind-gemini-38': {
+    id: 'google-deepmind-gemini-38',
+    publisher: 'Google DeepMind',
+    sourceType: 'official',
+    title: 'Gemini 3.8 Flash Model Card & Official Release Notes',
+    sourceUrl: 'https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash',
+    publishedAt: '2026-09-02',
+    retrievedAt: '2026-09-02',
+    official: true,
+    notes: 'Documentação primária Google DeepMind: 1M contexto, 64k max output, precificação API $0.75/$3.75, multimodal nativo (texto, imagem, vídeo, áudio, PDF), benchmark TB 2.1 90.8%, SWE-Pro 61.6%, CharXiv 86.2%.'
+  },
+  'anthropic-claude-fable-51': {
+    id: 'anthropic-claude-fable-51',
+    publisher: 'Anthropic',
+    sourceType: 'official',
+    title: 'Claude Fable 5.1 System Card & Announcement',
+    sourceUrl: 'https://www.anthropic.com/news/claude-fable-5-1',
+    publishedAt: '2026-09-01',
+    retrievedAt: '2026-09-02',
+    official: true,
+    notes: 'Anúncio oficial Anthropic: 1M contexto, 128k output, $10/$50, cache read $0.25 (75% menor que Fable 5), adaptive thinking, TB-Science 52.6%, TB 4.0 55.8%, OSWorld 2 partial 77.9%.'
+  },
+  'cursorbench-32': {
+    id: 'cursorbench-32',
+    publisher: 'Anysphere / Cursor',
+    sourceType: 'independent',
+    title: 'CursorBench 3.2 Live Leaderboard',
+    sourceUrl: 'https://cursor.com/benchmarks',
+    publishedAt: '2026-09-02',
+    retrievedAt: '2026-09-02',
+    official: false,
+    notes: 'Avaliação agêntica real em regime monorepo. Claude Fable 5.1 Max #1 com 73.4% ($9.64/task), Gemini 3.8 Flash High 69.2% ($2.38/task).'
+  },
+  'deepswe-datacurve': {
+    id: 'deepswe-datacurve',
+    publisher: 'DeepSWE / DataCurve',
+    sourceType: 'independent',
+    title: 'DeepSWE Benchmark v1.1 Live Leaderboard',
+    sourceUrl: 'https://datacurve.ai/deepswe',
+    publishedAt: '2026-09-02',
+    retrievedAt: '2026-09-02',
+    official: false,
+    notes: 'Resolução agêntica de repositórios complexos. Gemini 3.8 Flash High 74% ±1% ($2.36/task, 166 steps, 143k tokens), Fable 5.1 71.5%.'
+  },
+  'artificial-analysis-v41': {
+    id: 'artificial-analysis-v41',
+    publisher: 'Artificial Analysis',
+    sourceType: 'independent',
+    title: 'Artificial Analysis Intelligence Index v4.1.1',
+    sourceUrl: 'https://artificialanalysis.ai',
+    publishedAt: '2026-09-02',
+    retrievedAt: '2026-09-02',
+    official: false,
+    notes: 'Média ponderada de benchmarks agênticos, latência e velocidade. Fable 5.1 Max líder geral com Index 66. Gemini 3.8 High com Index 59 e throughput de 305 tok/s.'
+  },
+  'swe-bench-verified': {
+    id: 'swe-bench-verified',
+    publisher: 'SWE-bench Team / Princeton NLP',
+    sourceType: 'independent',
+    title: 'SWE-bench Verified Benchmark',
+    sourceUrl: 'https://www.swebench.com',
+    publishedAt: '2026-08-15',
+    retrievedAt: '2026-09-02',
+    official: false,
+    notes: '500 issues curadas do GitHub para validação agêntica de software sem estimativas.'
+  },
+  'terminal-bench-org': {
+    id: 'terminal-bench-org',
+    publisher: 'Terminal-Bench Org',
+    sourceType: 'independent',
+    title: 'Terminal-Bench 2.1 & 4.0 Suite',
+    sourceUrl: 'https://terminalbench.org',
+    publishedAt: '2026-09-01',
+    retrievedAt: '2026-09-02',
+    official: false,
+    notes: 'Execução real em ambiente de terminal e CLI.'
+  },
+  'openai-gpt56': {
+    id: 'openai-gpt56',
+    publisher: 'OpenAI',
+    sourceType: 'official',
+    title: 'GPT-5.6 System Card & Official Pricing Specification',
+    sourceUrl: 'https://openai.com/index/gpt-5-6-system-card',
+    publishedAt: '2026-08-20',
+    retrievedAt: '2026-09-02',
+    official: true,
+    notes: 'Documentação primária da família GPT-5.6 (Sol, Terra, Luna, Pro). Terminal-Bench 2.1 88.8%, SWE-bench Pro 64.6%.'
+  },
+  'xai-grok46': {
+    id: 'xai-grok46',
+    publisher: 'xAI',
+    sourceType: 'official',
+    title: 'Grok 4.6 Architecture & Frontier Benchmark Report',
+    sourceUrl: 'https://x.ai/blog/grok-4-6',
+    publishedAt: '2026-08-18',
+    retrievedAt: '2026-09-02',
+    official: true,
+    notes: 'Relatório técnico xAI: Thinking mandatório, 70.8% CursorBench XHigh, Terminal-Bench 2.1 88.4%.'
+  },
+  'google-deepmind-gemini37': {
+    id: 'google-deepmind-gemini37',
+    publisher: 'Google DeepMind',
+    sourceType: 'official',
+    title: 'Gemini 3.7 Flash Model Card Oficial',
+    sourceUrl: 'https://ai.google.dev/gemini-api/docs/models/gemini-3.7-flash',
+    publishedAt: '2026-08-10',
+    retrievedAt: '2026-09-02',
+    official: true,
+    notes: 'Documentação Google DeepMind: 1M contexto, vídeo + áudio nativo, DeepSWE 1.1 65.3%, TB 2.1 85.8%.'
+  },
+  'deepseek-v4-org': {
+    id: 'deepseek-v4-org',
+    publisher: 'DeepSeek AI',
+    sourceType: 'official',
+    title: 'DeepSeek-V4 Technical Report & Model Specifications',
+    sourceUrl: 'https://deepseek.com/research/v4',
+    publishedAt: '2026-08-13',
+    retrievedAt: '2026-09-02',
+    official: true,
+    notes: 'Arquitetura MLA 1M, DeepSeek-V4-Pro 87.9% Terminal-Bench 2.1, DeepSeek-V4-Flash 82.7%.'
+  },
+
+};
 
 const AI_PROVIDERS_DATA = {
   'openai': {
@@ -28,7 +158,7 @@ const AI_PROVIDERS_DATA = {
     brandColor: '#d97706',
     iconUrl: 'https://cdn.simpleicons.org/anthropic/d97706',
     iconSvg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.827 0h3.542l6.631 24h-3.543l-6.63-24zm-10.285 0h3.542l6.631 24H10.172l-1.34-4.857H3.34L2 24H-1.543L4.827 0zm2.715 15.657L6.2 7.029l-1.343 8.628h2.685z"/></svg>',
-    description: 'Criadora da família Claude 5 (Opus, Sonnet, Fable) e do modelo worker Claude Haiku 4.5.',
+    description: 'Criadora da família Claude (Fable 5.1 líder geral, Opus 5, Sonnet 5, Fable 5 histórico) e do modelo worker Claude Haiku 4.5.',
     website: 'https://anthropic.com'
   },
   'xai': {
@@ -50,7 +180,7 @@ const AI_PROVIDERS_DATA = {
     brandColor: '#38bdf8',
     iconUrl: 'https://cdn.simpleicons.org/google/38bdf8',
     iconSvg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.5 0c.2 5.5 4.5 9.8 10 10 .2 0 .2.4 0 .4-5.5.2-9.8 4.5-10 10 0 .2-.4.2-.4 0-.2-5.5-4.5-9.8-10-10-.2 0-.2-.4 0-.4 5.5-.2 9.8-4.5 10-10 0-.2.4-.2.4 0z"/></svg>',
-    description: 'Desenvolvedora da família Gemini 3.7 com multimodalidade nativa total (Vídeo, Áudio, Imagem) em 1M.',
+    description: 'Desenvolvedora das famílias Gemini 3.8 Flash e Gemini 3.7 com multimodalidade nativa total (Vídeo, Áudio, Imagem, PDF) em 1M de tokens.',
     website: 'https://deepmind.google'
   },
   'deepseek': {
@@ -193,7 +323,7 @@ const AI_PROVIDERS_DATA = {
 // ==========================================
 
 // ==========================================
-// 2. CATÁLOGO CANÔNICO DE TODOS OS 42 MODELOS
+// 2. CATÁLOGO CANÔNICO DE TODOS OS 44 MODELOS
 // ==========================================
 
 const AI_MODELS_DATA = {
@@ -756,6 +886,30 @@ const AI_MODELS_DATA = {
         "output": 60
       }
     },
+    "sourceConfidence": "official",
+    "sources": [
+          "openai-gpt56",
+          "cursorbench-32",
+          "artificial-analysis-v41"
+    ],
+    "sourceConfidence": "official",
+    "sources": [
+          "openai-gpt56",
+          "cursorbench-32",
+          "artificial-analysis-v41"
+    ],
+    "sourceConfidence": "official",
+    "sources": [
+          "openai-gpt56",
+          "cursorbench-32",
+          "artificial-analysis-v41"
+    ],
+    "sourceConfidence": "official",
+    "sources": [
+          "xai-grok46",
+          "cursorbench-32",
+          "artificial-analysis-v41"
+    ],
     "cursorPool": {
       "pool": "other-models",
       "poolLabel": "Other Models",
@@ -1085,6 +1239,155 @@ const AI_MODELS_DATA = {
       "orchestrationFlow": "Modelo Frontier (Planejador) → Enxame de GPT-OSS-20B Locais (Execução Mecânica) → Frontier (Revisão)"
     }
   },
+  "claude-fable-5-1": {
+    "id": "claude-fable-5-1",
+    "name": "Claude Fable 5.1",
+    "family": "anthropic",
+    "provider": "anthropic",
+    "providerName": "Anthropic",
+    "color": "#ea580c",
+    "status": "stable",
+    "releaseDate": "01/09/2026",
+    "openWeights": false,
+    "paramsTotal": "N/D (Ultra-Frontier Proprietário)",
+    "paramsActive": "N/D",
+    "architectureType": "Ultra-Frontier Hybrid Reasoning",
+    "attentionType": "Multi-Head Attention 1M c/ Adaptive Thinking",
+    "contextWindow": 1048576,
+    "maxOutputTokens": 131072,
+    "modalities": {
+      "input": [
+        "text",
+        "image"
+      ],
+      "output": [
+        "text"
+      ]
+    },
+    "knowledgeCutoff": "Junho de 2026",
+    "limitations": "Custo elevado em tarefas longas; tool_choice restrito ('any' e 'tool' incompatíveis com raciocínio adaptativo); fallback server-side (~4% de tokens para Opus avaliados em benchmarks); retenção de até 30 dias em contas comerciais padrão.",
+    "reasoning": {
+      "mandatory": false,
+      "canDisable": false,
+      "supportedEfforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
+      "defaultEffort": "high",
+      "adaptiveThinking": true
+    },
+    "tools": {
+      "functionCalling": true,
+      "structuredOutput": "schema_guaranteed",
+      "fim": false,
+      "progressUpdates": true,
+      "contentProvenance": true
+    },
+    "pricing": {
+      "standard": {
+        "input": 10.00,
+        "cacheRead": 0.25,
+        "cacheWrite": 12.50,
+        "output": 50.00
+      },
+      "cacheWrite5Min": 12.50,
+      "cacheWrite1Hour": 20.00,
+      "cacheRead": 0.25,
+      "batchDiscount": 50
+    },
+    "privacy": {
+      "retentionDays": 30,
+      "enterpriseOptIn": true,
+      "frontierSafeguards": true,
+      "cursorOptInRequired": true,
+      "notes": "Retenção de até 30 dias para logs de segurança em planos comerciais; ZDR formal sob contrato Enterprise com Frontier Safeguards. No Cursor exige aprovação explícita de administrador."
+    },
+    "cursorPool": {
+      "pool": "other-models",
+      "poolLabel": "Other Models ($20 Pool)",
+      "fastDefault": false,
+      "fastMultiplier": 2
+    },
+    "openCodeGo": {
+      "available": false,
+      "id": "anthropic/claude-fable-5-1",
+      "quotaMultiplier": 6.0,
+      "estReqMonth": 550,
+      "notes": "Disponibilidade restrita com opt-in de segurança"
+    },
+    "sweetSpot": "XHigh (72,8% CursorBench / $6,96) e High (69,4% / $4,80)",
+    "strengths": [
+      "👑 #1 Absoluto do CursorBench: 73,4% no Max ($9,64/task) e 72,8% no XHigh ($6,96/task)",
+      "🏆 #1 Líder Geral do Artificial Analysis Intelligence Index v4.1.1 com score 66 (superando Opus 5 Max)",
+      "91,4% no Terminal-Bench 2.1 e 65,0% no HLE com tools (melhor raciocínio científico e de código do mercado)",
+      "Cache Read 75% mais barato que Claude Fable 5 ($0,25/1M vs $1,00/1M)",
+      "Janela de saída expandida de 128k tokens (131.072) com raciocínio adaptativo"
+    ],
+    "weaknesses": [
+      "Tarifa nominal de ponta: $10/M input e $50/M output; tarefas no Max podem custar $9–$17/task",
+      "Safeguards estritos podem acionar fallback silencioso de até ~4% dos tokens para Opus em comandos sensíveis",
+      "Incompatibilidade com tool_choice 'any' no endpoint adaptativo (exige 'auto')"
+    ],
+    "badges": [
+      "👑 #1 CURSORBENCH (73.4%)",
+      "🏆 #1 AA INDEX (66)",
+      "91.4% TB 2.1",
+      "128K OUTPUT",
+      "NOVO — SET/2026"
+    ],
+    "officialBenchmarks": {
+      "terminalBenchScience01": 52.6,
+      "terminalBench40": 55.8,
+      "terminalBench21": 91.4,
+      "gdpvalElo": 1853,
+      "osworld2Partial": 77.9,
+      "osworld2Strict": 41.7,
+      "hleWithoutTools": 60.9,
+      "hleWithTools": 65.0,
+      "automationBench": 31.4,
+      "sciCode": 62.0,
+      "hle": 59.1,
+      "methodology": "Anthropic Claude Fable 5.1 System Card & Official Announcement (Setembro/2026)."
+    },
+    "independentBenchmarks": {
+      "cursorBench": {
+        "low": { "score": 66.2, "costUsd": 2.90, "tokensPerTask": 19522, "steps": 31 },
+        "medium": { "score": 68.0, "costUsd": 3.53, "tokensPerTask": 23801, "steps": 36 },
+        "high": { "score": 69.4, "costUsd": 4.80, "tokensPerTask": 33153, "steps": 44 },
+        "xhigh": { "score": 72.8, "costUsd": 6.96, "tokensPerTask": 51349, "steps": 55 },
+        "max": { "score": 73.4, "costUsd": 9.64, "tokensPerTask": 72060, "steps": 70 }
+      },
+      "artificialAnalysis": {
+        "low": 58,
+        "medium": 60,
+        "high": 62,
+        "xhigh": 65,
+        "max": 66
+      }
+    },
+    "operationalGuidance": {
+      "idealFor": [
+        "Problemas agênticos de cauda extrema, bugs complexos e refatoração arquitetural crítica",
+        "Planejador líder (Arquiteto) em pipelines multi-agente complexos",
+        "Investigações matemáticas, científicas e jurídicas de alta profundidade",
+        "Revisão final de segurança e auditoria de monorepos estratégicos"
+      ],
+      "avoidFor": [
+        "Tarefas triviais, mecânicas ou pipelines onde o custo por requisição precisa ser sub-dólar",
+        "Harnesses que forçam 'tool_choice: any' ou não tratam blocos de adaptive thinking"
+      ],
+      "orchestrationFlow": "Claude Fable 5.1 (Planejamento & Decomposição) → Gemini 3.8 / Sonnet 5 (Execução Paralela) → Claude Fable 5.1 (Validação & Revisão)"
+    },
+    "sourceConfidence": "official",
+    "sources": [
+      "anthropic-claude-fable-51",
+      "cursorbench-32",
+      "artificial-analysis-v41"
+    ]
+  },
   "claude-fable-5": {
     "id": "claude-fable-5",
     "name": "Claude Fable 5",
@@ -1092,14 +1395,14 @@ const AI_MODELS_DATA = {
     "provider": "anthropic",
     "providerName": "Anthropic",
     "color": "#d97706",
-    "status": "preview",
+    "status": "superseded",
     "openWeights": false,
     "paramsTotal": "N/D",
     "paramsActive": "N/D",
     "architectureType": "Ultra-Frontier Hybrid Reasoning",
     "attentionType": "Multi-Head Attention 1M c/ Deep Reasoning",
     "contextWindow": 1048576,
-    "maxOutputTokens": 65536,
+    "maxOutputTokens": 131072,
     "modalities": {
       "input": [
         "text",
@@ -1195,7 +1498,7 @@ const AI_MODELS_DATA = {
     "architectureType": "Frontier Architecture Anthropic",
     "attentionType": "Multi-Head Attention 1M",
     "contextWindow": 1048576,
-    "maxOutputTokens": 65536,
+    "maxOutputTokens": 131072,
     "modalities": {
       "input": [
         "text",
@@ -1288,7 +1591,7 @@ const AI_MODELS_DATA = {
     "architectureType": "Frontier Balanced Anthropic",
     "attentionType": "Multi-Head Attention 1M",
     "contextWindow": 1048576,
-    "maxOutputTokens": 65536,
+    "maxOutputTokens": 131072,
     "modalities": {
       "input": [
         "text",
@@ -1386,7 +1689,7 @@ const AI_MODELS_DATA = {
     "architectureType": "Dense Otimizado de Alta Velocidade",
     "attentionType": "Multi-Head Attention 200k",
     "contextWindow": 200000,
-    "maxOutputTokens": 16384,
+    "maxOutputTokens": 32768,
     "modalities": {
       "input": [
         "text",
@@ -1412,10 +1715,10 @@ const AI_MODELS_DATA = {
     },
     "pricing": {
       "standard": {
-        "input": 0.25,
-        "cacheRead": 0.025,
-        "cacheWrite": null,
-        "output": 1.25
+        "input": 1.00,
+        "cacheRead": 0.10,
+        "cacheWrite": 1.25,
+        "output": 5.00
       }
     },
     "cursorPool": {
@@ -1685,13 +1988,18 @@ const AI_MODELS_DATA = {
     "provider": "google",
     "providerName": "Google DeepMind",
     "color": "#1d4ed8",
-    "status": "stable",
+    "status": "preview / ga (conforme plataforma)",
+    "platformStatus": {
+      "geminiApi": "preview",
+      "antigravity": "available",
+      "vertexAi": "ga"
+    },
     "openWeights": false,
     "paramsTotal": "N/D",
     "paramsActive": "N/D",
     "architectureType": "MoE Multimodal Nativo Frontier",
-    "attentionType": "Multi-Head Attention 1M",
-    "contextWindow": 1048576,
+    "attentionType": "Multi-Head Attention 1M (Expansível até 2M)",
+    "contextWindow": 2097152,
     "maxOutputTokens": 65536,
     "modalities": {
       "input": [
@@ -1726,6 +2034,10 @@ const AI_MODELS_DATA = {
         "cacheRead": 0.3125,
         "cacheWrite": null,
         "output": 5
+      },
+      "contextTiers": {
+        "tier1_upTo128k": { "input": 1.25, "output": 5.00, "cacheRead": 0.3125 },
+        "tier2_above128k": { "input": 2.50, "output": 10.00, "cacheRead": 0.625 }
       },
       "cacheDiscount": 75
     },
@@ -1893,6 +2205,200 @@ const AI_MODELS_DATA = {
       ],
       "orchestrationFlow": "Gemini 3.1 Pro (Análise & Multimodal) → Gemini 3.7 Flash (Workers Paralelos) → Gemini 3.1 Pro (Síntese Final)"
     }
+  },
+
+  "gemini-3-8-flash": {
+    "id": "gemini-3-8-flash",
+    "name": "Gemini 3.8 Flash",
+    "family": "google",
+    "provider": "google",
+    "providerName": "Google DeepMind",
+    "color": "#2563eb",
+    "status": "stable",
+    "releaseDate": "02/09/2026",
+    "openWeights": false,
+    "paramsTotal": "N/D (MoE Proprietário)",
+    "paramsActive": "N/D",
+    "architectureType": "MoE Multimodal Nativo Flash",
+    "attentionType": "Multi-Head Attention 1M c/ Thought Signatures",
+    "contextWindow": 1048576,
+    "maxOutputTokens": 65536,
+    "modalities": {
+      "input": [
+        "text",
+        "image",
+        "video",
+        "audio",
+        "pdf"
+      ],
+      "output": [
+        "text"
+      ]
+    },
+    "reasoning": {
+      "mandatory": false,
+      "canDisable": true,
+      "supportedEfforts": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "defaultEffort": "medium"
+    },
+    "knowledgeCutoff": "Março de 2026 para domínios atualizados (alguns domínios até jan/2025)",
+    "limitations": "Alucinações pontuais em raciocínio abstrato aberto sem tools; maior consumo de tokens em High effort; latência TTFT maior em High.",
+    "tools": {
+      "functionCalling": true,
+      "searchAsATool": true,
+      "codeExecution": true,
+      "computerUse": true,
+      "thoughtSignatures": true,
+      "structuredOutput": "schema_guaranteed",
+      "fim": false
+    },
+    "pricing": {
+      "standard": {
+        "input": 0.75,
+        "cacheRead": 0.075,
+        "cacheWrite": null,
+        "output": 3.75
+      },
+      "googleApi": {
+        "input": 0.75,
+        "cacheRead": 0.075,
+        "cacheWrite": null,
+        "output": 3.75
+      },
+      "promotionalPeriod": {
+        "effectiveFrom": "2026-09-02",
+        "effectiveUntil": "2027-01-01",
+        "input": 0.75,
+        "output": 3.75,
+        "cacheRead": 0.075
+      },
+      "afterPromotion": {
+        "effectiveFrom": "2027-01-01",
+        "input": 1.00,
+        "output": 4.50,
+        "cacheRead": 0.10
+      },
+      "cursor": {
+        "input": 0.75,
+        "output": 3.50,
+        "cacheRead": 0.075,
+        "normalContext": 200000,
+        "maxContext": 1048576
+      },
+      "freeTier": "Disponível no Google AI Studio com rate limits por minuto",
+      "cacheDiscount": 90
+    },
+    "cursorPool": {
+      "pool": "cursor-models",
+      "poolLabel": "Cursor Models / Generous Usage",
+      "fastDefault": false,
+      "fastMultiplier": 1
+    },
+    "antigravity": {
+      "pool": "pool1",
+      "poolLabel": "Pool 1: Gemini Models",
+      "role": "Worker de Alto Throughput & Multimodalidade 1M",
+      "tokensRatio": "Econômico / Pool Gemini"
+    },
+    "openCodeGo": {
+      "available": true,
+      "id": "google/gemini-3.8-flash",
+      "quotaMultiplier": 1.5,
+      "estReqMonth": 8200
+    },
+    "sweetSpot": "Medium (67,0% CursorBench / $1,93) e High (69,2% CursorBench / 74,0% DeepSWE)",
+    "strengths": [
+      "90,8% no Terminal-Bench 2.1 e 74,0% no DeepSWE v1.1 (líder em eficiência agêntica)",
+      "Throughput altíssimo de ~305-310 tok/s medido pela Artificial Analysis",
+      "Desconto de 90% em Cache Read ($0,075/1M) e janela nativa de 1M de tokens",
+      "Multimodalidade nativa abrangente: texto, imagens, vídeo longo, áudio e PDF estruturado",
+      "Suporte oficial a Search as a Tool, Code Execution e Thought Signatures para MCP"
+    ],
+    "weaknesses": [
+      "No nível High de raciocínio consome volume expressivo de tokens (143k tokens/task no DeepSWE)",
+      "TTFT significativamente mais alto no nível High (~1.20s vs 0.25s no Low)"
+    ],
+    "badges": [
+      "⚡ NOVO — SET/2026",
+      "90.8% TB 2.1",
+      "74.0% DEEPSWE",
+      "1M MULTIMODAL",
+      "305 TOK/S"
+    ],
+    "officialBenchmarks": {
+      "terminalBench21": 90.8,
+      "sweBenchPro": 61.6,
+      "sweAtlas": 51.9,
+      "tau3Banking": 38.1,
+      "charXiv": 86.2,
+      "gdpPdf": 35.0,
+      "hle": 45.4,
+      "hleVerified": 54.9,
+      "financeAgentV2": 61.4,
+      "harveyLegalAgent": 10.0,
+      "methodology": "Google DeepMind Gemini 3.8 Flash Model Card Oficial (Setembro/2026)."
+    },
+    "independentBenchmarks": {
+      "deepSwe11": {
+        "score": 74.0,
+        "confidenceInterval": 1.0,
+        "avgCostPerTask": 2.36,
+        "outputTokensPerTask": 143000,
+        "agentStepsPerTask": 166,
+        "snapshotDate": "2026-09-02",
+        "source": "DeepSWE / DataCurve"
+      },
+      "cursorBenchHigh": {
+        "score": 69.2,
+        "costUsd": 2.38,
+        "tokensPerTask": 81524,
+        "steps": 161,
+        "snapshotDate": "2026-09-02",
+        "source": "CursorBench 3.2"
+      },
+      "cursorBenchMed": {
+        "score": 67.0,
+        "costUsd": 1.93,
+        "tokensPerTask": 61603,
+        "steps": 136,
+        "snapshotDate": "2026-09-02",
+        "source": "CursorBench 3.2"
+      },
+      "artificialAnalysis": {
+        "low": { "aaIndex": 52, "throughputTps": 310, "ttftSec": 0.25 },
+        "medium": { "aaIndex": 57, "throughputTps": 308, "ttftSec": 0.55 },
+        "high": { "aaIndex": 59, "throughputTps": 305, "ttftSec": 1.20, "costPerTask": 2.38 }
+      }
+    },
+    "sourceConfidence": "official",
+    "sources": [
+          "google-deepmind-gemini37",
+          "cursorbench-32",
+          "deepswe-datacurve"
+    ],
+    "operationalGuidance": {
+      "idealFor": [
+        "Workers agênticos de desenvolvimento em escala e resolução massiva de bugs",
+        "Triagem e navegação de código em grandes monorepos (até 1M de tokens)",
+        "Processamento e síntese multimodal de vídeos, áudios e documentação técnica em PDF",
+        "Automação e tool calling intensivo com MCP e Search as a Tool"
+      ],
+      "avoidFor": [
+        "Pesquisa teórica ultra-extrema onde latência e custo são totalmente secundários em relação à cauda frontier"
+      ],
+      "orchestrationFlow": "Claude Fable 5.1 (Arquiteto / Planejador) → Gemini 3.8 Flash (Workers Paralelos) → Gemini 3.8 Flash High (Integrador) → Claude Fable 5.1 (Revisão Final)"
+    },
+    "sourceConfidence": "official",
+    "sources": [
+      "google-deepmind-gemini-38",
+      "cursorbench-32",
+      "deepswe-datacurve",
+      "artificial-analysis-v41"
+    ]
   },
   "gemini-3-5-flash": {
     "id": "gemini-3-5-flash",
@@ -2278,8 +2784,10 @@ const AI_MODELS_DATA = {
       "VISÃO NATIVA",
       "EXPERIMENTAL",
       "SUB-DÓLAR",
+      "COMUNIDADE",
       "OPENCODE GO"
     ],
+    "sourceConfidence": "community",
     "operationalGuidance": {
       "idealFor": [
         "Loops visuais contínuos de desenvolvimento de interface (Screenshot → Analisa → Clica → Corrige)",
@@ -2338,6 +2846,18 @@ const AI_MODELS_DATA = {
         "output": 0.28
       }
     },
+    "sourceConfidence": "official",
+    "sources": [
+          "deepseek-v4-org",
+          "deepswe-datacurve",
+          "artificial-analysis-v41"
+    ],
+    "sourceConfidence": "official",
+    "sources": [
+          "deepseek-v4-org",
+          "deepswe-datacurve",
+          "artificial-analysis-v41"
+    ],
     "cursorPool": {
       "pool": "other-models",
       "poolLabel": "Other Models",
@@ -4166,9 +4686,11 @@ const AI_MODELS_DATA = {
     ],
     "badges": [
       "🎭 STEALTH PREVIEW",
+      "⚠️ NÃO VERIFICADO",
       "GRATUITO GO (0.0x)",
       "1M CTX"
     ],
+    "sourceConfidence": "unverified",
     "operationalGuidance": {
       "idealFor": [
         "Prototipagem rápida gratuita de código sem dados confidenciais",
@@ -4187,6 +4709,17 @@ const AI_MODELS_DATA = {
 // ==========================================
 
 const CURSORBENCH_32_DATA = [
+  // --- Claude Fable 5.1 (Anthropic) ---
+  { modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1', effort: 'Low', score: 66.2, costUsd: 2.90, tokensPerTask: 19522, steps: 31.0, harness: 'Cursor Native', pool: 'other-models' },
+  { modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1', effort: 'Medium', score: 68.0, costUsd: 3.53, tokensPerTask: 23801, steps: 36.0, harness: 'Cursor Native', pool: 'other-models' },
+  { modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1', effort: 'High', score: 69.4, costUsd: 4.80, tokensPerTask: 33153, steps: 44.0, harness: 'Cursor Native', pool: 'other-models' },
+  { modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1', effort: 'XHigh', score: 72.8, costUsd: 6.96, tokensPerTask: 51349, steps: 55.0, harness: 'Cursor Native', pool: 'other-models', isSweetSpot: true },
+  { modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1', effort: 'Max', score: 73.4, costUsd: 9.64, tokensPerTask: 72060, steps: 70.0, harness: 'Cursor Native', pool: 'other-models', isTopScore: true },
+
+  // --- Gemini 3.8 Flash (Google) ---
+  { modelId: 'gemini-3-8-flash', modelName: 'Gemini 3.8 Flash', effort: 'Medium', score: 67.0, costUsd: 1.93, tokensPerTask: 61603, steps: 136.0, harness: 'Cursor Native', pool: 'cursor-models', isSweetSpot: true },
+  { modelId: 'gemini-3-8-flash', modelName: 'Gemini 3.8 Flash', effort: 'High', score: 69.2, costUsd: 2.38, tokensPerTask: 81524, steps: 161.0, harness: 'Cursor Native', pool: 'cursor-models' },
+
   // --- Grok 4.6 (xAI) ---
   { modelId: 'grok-4-6', modelName: 'Grok 4.6', effort: 'Low', score: 61.0, costUsd: 0.70, tokensPerTask: 10658, steps: 11.2, harness: 'Cursor Native', pool: 'cursor-models' },
   { modelId: 'grok-4-6', modelName: 'Grok 4.6', effort: 'Medium', score: 67.1, costUsd: 1.28, tokensPerTask: 17942, steps: 14.5, harness: 'Cursor Native', pool: 'cursor-models', isSweetSpot: true },
@@ -4302,6 +4835,9 @@ const MARGINAL_GAINS_DATA = [
 // ==========================================
 
 const MULTI_BENCHMARK_LEDGER = [
+  { modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1 (Max)', terminalBench20: null, terminalBench21: 91.4, terminalBench30: null, terminalBench40: 55.8, terminalBenchScience01: 52.6, sweBenchVerified: null, sweBenchPro: 81.2, sweAtlas: null, deepSwe11: 71.5, cursorBench32: 73.4, hle: 59.1, hleVerified: null, hleWithTools: 65.0, hleWithoutTools: 60.9, osworldOriginal: null, osworldVerified: null, osworld2Partial: 77.9, osworld2Strict: 41.7, gpqaDiamond: 95.2, aime2025: null, aime2025Tools: null, arcAgi2Verified: 82.0, tau2Retail: null, tau2Airline: null, tau3Banking: null, financeAgentV2: null, harveyLegalAgent: null, sciCode: 62.0, mcpAtlas: null, browseComp: null, mmmuPro: null, charXiv: null, gdpPdf: null, gdpvalElo: 1853, automationBench: 31.4, aaIndex: 66.0, costPerTask: 9.64, outputTokensPerTask: 72060, agentStepsPerTask: 70, confidenceInterval: null, benchmarkSnapshotDate: '2026-09-02' },
+  { modelId: 'gemini-3-8-flash', modelName: 'Gemini 3.8 Flash (High)', terminalBench20: null, terminalBench21: 90.8, terminalBench30: null, terminalBench40: null, terminalBenchScience01: null, sweBenchVerified: null, sweBenchPro: 61.6, sweAtlas: 51.9, deepSwe11: 74.0, cursorBench32: 69.2, hle: 45.4, hleVerified: 54.9, hleWithTools: null, hleWithoutTools: null, osworldOriginal: null, osworldVerified: null, osworld2Partial: null, osworld2Strict: null, gpqaDiamond: 94.8, aime2025: null, aime2025Tools: null, arcAgi2Verified: 78.5, tau2Retail: null, tau2Airline: null, tau3Banking: 38.1, financeAgentV2: 61.4, harveyLegalAgent: 10.0, sciCode: null, mcpAtlas: null, browseComp: null, mmmuPro: null, charXiv: 86.2, gdpPdf: 35.0, aaIndex: 59.0, costPerTask: 2.36, outputTokensPerTask: 143000, agentStepsPerTask: 166, confidenceInterval: 1.0, benchmarkSnapshotDate: '2026-09-02' },
+
   { modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol (Max)', terminalBench21: 88.8, terminalBench30: 34.6, deepSwe11: 72.7, sweBenchPro: 64.6, sweBenchVerified: null, mrcr1m: 73.8, gpqaDiamond: 94.6, osworld: 62.6, aaIndex: 61.0 },
   { modelId: 'claude-opus-5', modelName: 'Claude Opus 5 (Max)', terminalBench21: null, terminalBench30: null, deepSwe11: 73.6, sweBenchPro: null, sweBenchVerified: null, mrcr1m: null, gpqaDiamond: null, osworld: null, aaIndex: 63.0 },
   { modelId: 'claude-fable-5', modelName: 'Claude Fable 5 (Max)', terminalBench21: 83.1, terminalBench30: null, deepSwe11: 69.7, sweBenchPro: 80.0, sweBenchVerified: null, mrcr1m: null, gpqaDiamond: null, osworld: null, aaIndex: 62.0 },
@@ -4352,6 +4888,9 @@ const MULTI_BENCHMARK_LEDGER = [
 // ==========================================
 
 const CAPABILITY_RADAR_10D = {
+  'claude-fable-5-1': { reasoning: 100, agentic: 100, sweBench: 99, longContext: 98, multimodal: 95, throughput: 52, costEfficiency: 48, toolAdherence: 99, ttftLatency: 45, openAccess: 20 },
+  'gemini-3-8-flash': { reasoning: 96, agentic: 98, sweBench: 92, longContext: 97, multimodal: 99, throughput: 98, costEfficiency: 98, toolAdherence: 97, ttftLatency: 92, openAccess: 50 },
+
   'grok-4-6': { reasoning: 96, agentic: 95, sweBench: 91, longContext: 91, multimodal: 92, throughput: 78, costEfficiency: 82, toolAdherence: 94, ttftLatency: 73, openAccess: 35 },
   'grok-4-5': { reasoning: 92, agentic: 90, sweBench: 86, longContext: 87, multimodal: 90, throughput: 80, costEfficiency: 80, toolAdherence: 91, ttftLatency: 76, openAccess: 35 },
   'gpt-5-6-sol': { reasoning: 99, agentic: 99, sweBench: 94, longContext: 99, multimodal: 96, throughput: 76, costEfficiency: 85, toolAdherence: 98, ttftLatency: 68, openAccess: 30 },
@@ -4392,7 +4931,8 @@ const CAPABILITY_RADAR_10D = {
   'hy3-tencent': { reasoning: 93, agentic: 86, sweBench: 90, longContext: 79, multimodal: 8, throughput: 89, costEfficiency: 99, toolAdherence: 94, ttftLatency: 85, openAccess: 100 },
   'longcat-2-0': { reasoning: 91, agentic: 82, sweBench: 80, longContext: 97, multimodal: 8, throughput: 38, costEfficiency: 86, toolAdherence: 90, ttftLatency: 39, openAccess: 100 },
   'muse-spark-1-2': { reasoning: 95, agentic: 93, sweBench: 85, longContext: 94, multimodal: 100, throughput: 87, costEfficiency: 92, toolAdherence: 95, ttftLatency: 84, openAccess: 82 },
-  'composer-2-5': { reasoning: 83, agentic: 82, sweBench: 78, longContext: 58, multimodal: 30, throughput: 97, costEfficiency: 100, toolAdherence: 93, ttftLatency: 97, openAccess: 25 }
+  'composer-2-5': { reasoning: 83, agentic: 82, sweBench: 78, longContext: 58, multimodal: 30, throughput: 97, costEfficiency: 100, toolAdherence: 93, ttftLatency: 97, openAccess: 25 },
+  'ox-alpha': { reasoning: 85, agentic: 78, sweBench: 72, longContext: 95, multimodal: 82, throughput: 85, costEfficiency: 100, toolAdherence: 70, ttftLatency: 80, openAccess: 90 }
 };
 
 
@@ -4552,7 +5092,7 @@ const KV_CACHE_COMPRESSION_FACTORS = {
 
 const ANTIGRAVITY_POOLS_DATA = {
   title: 'Arquitetura de Pools e Governança de Cotas no Google Antigravity',
-  lastUpdated: '2026-08-24',
+  lastUpdated: '2026-09-02',
   pools: {
     pool1: {
       id: 'gemini-models',
@@ -4560,6 +5100,7 @@ const ANTIGRAVITY_POOLS_DATA = {
       badge: 'POOL 1: GEMINI (ISOLADO)',
       description: 'Franquia independente e dedicada aos modelos desenvolvidos pelo Google.',
       models: [
+        { id: 'gemini-3-8-flash', name: 'Gemini 3.8 Flash', role: 'Worker de Alto Throughput / Coding Agêntico / Multimodal 1M', context: '1M', tokensRatio: 'Econômico / Pool Gemini', supportedEfforts: ['low', 'medium', 'high'] },
         { id: 'gemini-3-7-flash', name: 'Gemini 3.7 Flash', role: 'Subagentes / Navegação / Triagem Mecânica', context: '1M', tokensRatio: '8x vs Pro' },
         { id: 'gemini-3-1-pro', name: 'Gemini 3.1 Pro', role: 'Multimodal Complexo / Ciência', context: '1M', tokensRatio: '1x Base' },
         { id: 'gemini-3-5-flash', name: 'Gemini 3.5 Flash', role: 'Boilerplate e Edição Rápida', context: '1M', tokensRatio: '10x vs Pro' }
@@ -4652,6 +5193,23 @@ const HARNESS_COMPATIBILITY_DATA = {
 
 const TROUBLESHOOTER_DATABASE = [
   {
+    id: 'fable-5-1-tool-choice-breaking',
+    title: 'Erro 400 em tool_choice com Claude Fable 5.1 (Incompatibilidade com "any" ou "tool" restrito)',
+    harness: 'Anthropic API / Cursor / Cline / Roo Code',
+    models: ['Claude Fable 5.1'],
+    cause: 'O endpoint de raciocínio adaptativo do Fable 5.1 requer tool_choice: "auto" ou estruturação nativa em thinking blocks. Configurações forçadas como "any" ou objeto restrito causam rejeição na API v1/messages.',
+    solution: 'Configure `tool_choice: {"type": "auto"}` e habilite adaptive thinking. Não force seleção obrigatória de ferramentas no cabeçalho se o modelo precisar planejar raciocínio prévio.'
+  },
+  {
+    id: 'fable-5-1-safeguards-fallback',
+    title: 'Fallback silencioso de segurança de Fable 5.1 para Opus 5 / Sonnet 5',
+    harness: 'Anthropic Commercial API / Artificial Analysis',
+    models: ['Claude Fable 5.1'],
+    cause: 'Para proteger a execução de comandos de sistema sensíveis ou verificações estritas de segurança, a infraestrutura da Anthropic pode despachar até ~4% dos tokens para modelos Opus em fallback server-side.',
+    solution: 'Monitore o header de resposta `anthropic-model-version` e desative heurísticas restritivas desnecessárias no system prompt de desenvolvimento.'
+  },
+
+  {
     id: 'thinking-tags-leak',
     title: 'Tags <think> vazando no diff ou quebrando a aplicação de patches',
     harness: 'OpenCode / Aider / Cline',
@@ -4708,7 +5266,10 @@ const TROUBLESHOOTER_DATABASE = [
 
 const PRIVACY_ZDR_DATABASE = {
   'opencode-go-general': { provider: 'OpenCode Go (Geral)', retentionDays: 0, trainingOnPrompts: false, zdrGuaranteed: true, notes: 'ZDR formal garantido em contrato para Ox Alpha, GLM, Kimi, MiMo, Qwen, MiniMax e Hy3.' },
-  'deepseek-direct': { provider: 'DeepSeek Direct API', retentionDays: 0, trainingOnPrompts: false, zdrGuaranteed: true, notes: 'Acordo ZDR com vigência formal até 31 de Agosto de 2026.' },
+  'deepseek-direct': { provider: 'DeepSeek Direct API', retentionDays: 0, trainingOnPrompts: false, zdrGuaranteed: true, notes: 'Política ZDR formal revalidada em Setembro/2026; dados de API comercial não são utilizados para treinamento.' },
+  'anthropic-fable-5-1': { provider: 'Anthropic (Claude Fable 5.1)', modelId: 'claude-fable-5-1', retentionDays: 30, trainingOnPrompts: false, zdrGuaranteed: false, notes: 'Retenção padrão de até 30 dias para moderação de segurança em contas comerciais; ZDR (0 dias) requer contrato Enterprise com Frontier Safeguards Compliance. No Cursor exige aprovação explícita do administrador.' },
+  'cursor-privacy-mode': { provider: 'Cursor Privacy Mode', retentionDays: 0, trainingOnPrompts: false, zdrGuaranteed: true, notes: 'Código local e prompts não são armazenados nos servidores da Anysphere. Fable 5.1 requer opt-in prévio de administrador.' },
+  'google-gemini-enterprise': { provider: 'Google Gemini API / Cloud', retentionDays: 0, trainingOnPrompts: false, zdrGuaranteed: true, notes: 'Dados de clientes comerciais na Gemini API e Google Cloud Vertex AI não são utilizados para treinamento de modelos.' },
   'openai-enterprise': { provider: 'OpenAI API (Tier 1-5)', retentionDays: 0, trainingOnPrompts: false, zdrGuaranteed: true, notes: 'Sem treinamento com dados de API; retenção padrão de 30 dias para moderação (0 dias sob ZDR empresarial).' },
   'anthropic-direct': { provider: 'Anthropic Commercial API', retentionDays: 0, trainingOnPrompts: false, zdrGuaranteed: true, notes: 'Dados de API comercial nunca são utilizados para treinamento.' },
   'openrouter-stealth': { provider: 'OpenRouter (Stealth Program)', retentionDays: 30, trainingOnPrompts: true, zdrGuaranteed: false, notes: '⚠️ CONFLITO: O EULA geral do programa Stealth permite licença de dados para treinamento do provedor anônimo.' },
@@ -4738,29 +5299,81 @@ const AI_DATA_HELPERS = {
   /**
    * Calcula o custo exato de uma requisição
    */
-  calculateRequestCost(modelId, inputTokens, cachedTokens, outputTokens, isFastMode = false) {
+  calculateRequestCost(modelId, inputTokens, cachedTokens, outputTokens, isFastMode = false, options = {}) {
     const model = AI_MODELS_DATA[modelId];
     if (!model || !model.pricing) return 0.0;
     if (model.openWeights && model.pricing.selfHosted) return 0.0;
 
-    const pricing = model.pricing.standard;
-    const cachePrice = pricing.cacheRead !== null ? pricing.cacheRead : pricing.input;
-    const outputPrice = pricing.output;
-    let inputPrice = pricing.input;
+    let pricingTable = model.pricing.standard;
+    let tableName = 'standard';
+
+    // Plataforma específica (ex: cursor vs googleApi)
+    if (options.platform === 'cursor' && model.pricing.cursor) {
+      pricingTable = model.pricing.cursor;
+      tableName = 'cursor';
+    } else if (options.platform === 'googleApi' && model.pricing.googleApi) {
+      pricingTable = model.pricing.googleApi;
+      tableName = 'googleApi';
+    }
+
+    // Período promocional vs Pós-promoção
+    const now = options.referenceDate ? new Date(options.referenceDate) : new Date('2026-09-02');
+    if (model.pricing.promotionalPeriod) {
+      const promoUntil = new Date(model.pricing.promotionalPeriod.effectiveUntil);
+      if (now <= promoUntil) {
+        pricingTable = model.pricing.promotionalPeriod;
+        tableName = 'promotional';
+      } else if (model.pricing.afterPromotion) {
+        pricingTable = model.pricing.afterPromotion;
+        tableName = 'afterPromotion';
+      }
+    }
+
+    // Context Tiers (ex: Gemini 3.1 Pro)
+    const totalInput = inputTokens + cachedTokens;
+    let inputPrice = pricingTable.input;
+    let outputPrice = pricingTable.output;
+    let cachePrice = pricingTable.cacheRead !== null && pricingTable.cacheRead !== undefined ? pricingTable.cacheRead : inputPrice;
+
+    if (model.pricing.contextTiers) {
+      if (totalInput > 128000 && model.pricing.contextTiers.tier2_above128k) {
+        inputPrice = model.pricing.contextTiers.tier2_above128k.input;
+        outputPrice = model.pricing.contextTiers.tier2_above128k.output;
+        cachePrice = model.pricing.contextTiers.tier2_above128k.cacheRead;
+        tableName = 'contextTier2_above128k';
+      }
+    }
 
     let multiplier = 1.0;
     if (isFastMode && model.pricing.fastMultiplier) {
       multiplier = model.pricing.fastMultiplier;
     }
 
-    // Long context cliff
-    const totalInput = inputTokens + cachedTokens;
+    // Long context cliff legado
     if (model.pricing.longContextThreshold && totalInput > model.pricing.longContextThreshold) {
       inputPrice *= (model.pricing.longContextMultiplier || 2.0);
     }
 
-    const cost = ((inputTokens * inputPrice) + (cachedTokens * cachePrice) + (outputTokens * outputPrice)) / 1000000.0;
-    return cost * multiplier;
+    let cost = ((inputTokens * inputPrice) + (cachedTokens * cachePrice) + (outputTokens * outputPrice)) / 1000000.0;
+
+    // Cache Write (5min vs 1 hora)
+    if (options.cacheWrite5MinTokens && model.pricing.cacheWrite5Min) {
+      cost += (options.cacheWrite5MinTokens * model.pricing.cacheWrite5Min) / 1000000.0;
+    }
+    if (options.cacheWrite1HourTokens && model.pricing.cacheWrite1Hour) {
+      cost += (options.cacheWrite1HourTokens * model.pricing.cacheWrite1Hour) / 1000000.0;
+    }
+
+    // Batch API Discount
+    if (options.isBatch && model.pricing.batchDiscount) {
+      cost *= (1.0 - (model.pricing.batchDiscount / 100.0));
+    }
+
+    const finalCost = cost * multiplier;
+    if (options.detailed) {
+      return { cost: finalCost, pricingTableUsed: tableName, rateInput: inputPrice, rateOutput: outputPrice, rateCache: cachePrice };
+    }
+    return finalCost;
   },
 
   /**
@@ -4929,8 +5542,9 @@ const AI_DATA_HELPERS = {
 
     if (taskType === 'ui_multimodal') {
       return {
-        primaryModelId: 'deepseek-v4-vision-exp',
-        primaryModelName: 'DeepSeek-V4-Flash-Vision-Exp / Gemini 3.7 Flash',
+        primaryModelId: 'gemini-3-8-flash',
+        primaryModelName: 'Gemini 3.8 Flash (High) / Gemini 3.7',
+        rationale: 'Líder em multimodalidade nativa total (Vídeo, Áudio, Imagem e PDF) em 1M de tokens com throughput de ~305 tok/s e 90,8% no TB 2.1.',
         rationale: 'Líder em ferramentas visuais (75,9% Toolathlon) com custo por imagem de ~$0,000084.',
         fallbackCascade: ['gemini-3-7-flash', 'mimo-v2-5-pro', 'ox-alpha'],
         planner: 'gemini-3-7-flash',
@@ -4965,13 +5579,13 @@ const AI_DATA_HELPERS = {
 
     if (budgetTier === 'max_frontier') {
       return {
-        primaryModelId: 'gpt-5-6-sol',
-        primaryModelName: 'GPT-5.6 Sol (Max) / Claude Opus 4.6 (Thinking)',
-        rationale: 'Máxima inteligência absoluta e raciocínio profundo (88,8% Terminal-Bench, 80,8% SWE-bench e 78,3% MRCR 1M).',
-        fallbackCascade: ['claude-opus-4-6', 'grok-4-6', 'claude-opus-5', 'deepseek-v4-pro-0813'],
-        planner: 'gpt-5-6-sol',
-        executor: 'claude-opus-4-6',
-        reviewer: 'claude-opus-4-6'
+        primaryModelId: 'claude-fable-5-1',
+        primaryModelName: 'Claude Fable 5.1 (Max / XHigh)',
+        rationale: 'Novo #1 do CursorBench (73,4%) e líder geral Artificial Analysis (Index 66). Frontier absoluto com raciocínio adaptativo e saída de 128k tokens.',
+        fallbackCascade: ['gpt-5-6-sol', 'claude-opus-5', 'grok-4-6', 'deepseek-v4-pro-0813'],
+        planner: 'claude-fable-5-1',
+        executor: 'gemini-3-8-flash',
+        reviewer: 'claude-fable-5-1'
       };
     }
 
@@ -5031,9 +5645,9 @@ const AI_DATA_HELPERS = {
 const ARTIFICIAL_ANALYSIS_DATA = {
   version: '4.1.1',
   sourceUrl: 'https://artificialanalysis.ai',
-  verifiedDate: '2026-08-24',
+  verifiedDate: '2026-09-02',
   overviewKpis: {
-    topGeneral: { modelId: 'claude-opus-5', name: 'Claude Opus 5 Max', index: 63, gdpvalElo: 1845, cost: 2.34 },
+    topGeneral: { modelId: 'claude-fable-5-1', name: 'Claude Fable 5.1 Max', index: 66, gdpvalElo: 1853, cost: 3.20 },
     topOpenWeight: { modelId: 'kimi-k3', name: 'Kimi K3 Max', index: 60, cost: 0.84, throughput: 37.9 },
     topCostBenefit: { modelId: 'gpt-5-6-luna', name: 'GPT-5.6 Luna Max', index: 52, cost: 0.05, speed: 165 },
     topLongContext: { modelId: 'muse-spark-1-2', name: 'Muse Spark 1.2 XHigh', index: 57, lcrScore: 83.3, cost: 0.40 }
@@ -5427,6 +6041,7 @@ const AA_METHODOLOGY_NOTES = {
 // Exportação global
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
+    DATA_SOURCES,
     AI_PROVIDERS_DATA,
     AI_MODELS_DATA,
     CURSORBENCH_32_DATA,
@@ -5452,6 +6067,7 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 
 if (typeof window !== 'undefined') {
+  window.DATA_SOURCES = DATA_SOURCES;
   window.ARTIFICIAL_ANALYSIS_DATA = ARTIFICIAL_ANALYSIS_DATA;
   window.ANTIGRAVITY_POOLS_DATA = ANTIGRAVITY_POOLS_DATA;
   window.STANDARDIZED_WORKLOADS_DATA = STANDARDIZED_WORKLOADS_DATA;

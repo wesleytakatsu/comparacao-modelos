@@ -13,8 +13,8 @@ Assinatura Cursor Pro ($20/mês)
 │
 ├── [Pool 1] Other Models (US$ 20,00 fixos/mês)
 │   ├── OpenAI (GPT-5.6 Luna, Terra, Sol)
-│   ├── Anthropic (Claude Sonnet 5, Opus 5, Fable 5, Haiku 4.5)
-│   └── Google (Gemini 3.7 Flash)
+│   ├── Anthropic (Claude Fable 5.1, Claude Fable 5, Opus 5, Sonnet 5, Haiku 4.5)
+│   └── Google (Gemini 3.8 Flash, Gemini 3.7 Flash)
 │
 └── [Pool 2] Cursor Models ("Generous Included Usage" / Pool Separado)
     ├── Grok 4.6 (xAI)
@@ -22,7 +22,7 @@ Assinatura Cursor Pro ($20/mês)
 ```
 
 > [!IMPORTANT]
-> **Grok 4.6** e **Composer 2.5** rodam em um pool exclusivo que **não desconta** dos US$ 20 de *Other Models*. Isso permite reservar os US$ 20 para modelos pontuais de altíssima especialização (como Opus 5, Terra Max ou Gemini 3.7) enquanto Grok 4.6 atua como cavalo de batalha principal.
+> **Grok 4.6** e **Composer 2.5** rodam em um pool exclusivo que **não desconta** dos US$ 20 de *Other Models*. Isso permite reservar os US$ 20 para modelos pontuais de altíssima especialização (como Fable 5.1, Opus 5, Terra Max ou Gemini 3.8) enquanto Grok 4.6 atua como cavalo de batalha principal.
 
 > [!WARNING]
 > O modo **Fast ON** dobra o custo de tokens em quase todos os modelos (e no Composer 2.5 multiplica o input em 6× e output em 6×). Para maximizar qualquer cota, o modo **Standard (Fast OFF)** deve ser mantido como padrão.
@@ -31,20 +31,22 @@ Assinatura Cursor Pro ($20/mês)
 
 ## 2. Tabela Geral de Tarifas por Token no Cursor (Modo Standard)
 
-Valores por **1 Milhão de tokens** (sem Fast):
+Valores por **1 Milhão de tokens** (sem Fast, base set/2026):
 
 | Modelo | Input (/1M) | Cache Write (/1M) | Cache Read (/1M) | Output (/1M) | Pool Cursor Pro | Observações / Contexto |
 | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
-| **GPT-5.6 Luna** | $0,20 | $0,25 | $0,02 | $1,20 | *Other Models* | Ultra-baixo custo; anomalia econômica |
-| **GPT-5.6 Terra** | $2,00 | $2,50 | $0,20 | $12,00 | *Other Models* | Escala excelente no modo Max |
-| **GPT-5.6 Sol** | $5,00 | $6,25 | $0,50 | $30,00 | *Other Models* | Modelo pesado de raciocínio da OpenAI |
-| **Claude Haiku 4.5** | $1,00 | $1,25 | $0,10 | $5,00 | *Other Models* | Modelo mais rápido da Anthropic; subagentes (200k) |
-| **Claude Sonnet 5** | $2,00\* | $2,50 | $0,20 | $10,00\* | *Other Models* | \*Promocional até 31/08/2026 ($3/$15 pós) |
-| **Claude Opus 5** | $5,00 | $6,25 | $0,50 | $25,00 | *Other Models* | Alto raciocínio; $3,91/task no High |
-| **Claude Fable 5** | $10,00 | $12,50 | $1,00 | $50,00 | *Other Models* | Modelo topo de linha da Anthropic |
-| **Gemini 3.7 Flash** | $0,75 | — | $0,075 | $3,50 | *Other Models* | Cache 10× mais barato; 200k até 1M tokens |
-| **Grok 4.6** | $2,00 | — | $0,50 | $6,00 | **Cursor Models** | Janela de 256k no Cursor; sem degrau $\ge 200\text{k}$ |
-| **Composer 2.5** | $0,50 | — | $0,20 | $2,50 | **Cursor Models** | Fast ON passa para $3,00/$0,50/$15,00 |
+| **Claude Fable 5.1** | $10,00 | $12,50 (5m) / $20,00 (1h) | **$0,25** | $50,00 | *Other Models* | **Novo #1 CursorBench (73,4%)**; cache read 75% mais barato que Fable 5; adaptive thinking |
+| **Claude Fable 5** | $10,00 | $12,50 | $1,00 | $50,00 | *Other Models* | Predecessor; superado por Fable 5.1 em inteligência e economia de cache |
+| **Claude Opus 5** | $5,00 | $6,25 | $0,50 | $25,00 | *Other Models* | Alto raciocínio; $3,91/task no High; saída máxima de 128k tokens |
+| **Claude Sonnet 5** | $2,00 | $2,50 | $0,20 | $10,00 | *Other Models* | Cavalo de batalha balanceado da Anthropic (1M contexto / 128k output) |
+| **Claude Haiku 4.5** | $1,00 | $1,25 | $0,10 | $5,00 | *Other Models* | Modelo subagente da Anthropic; 200k contexto / 32k output |
+| **GPT-5.6 Sol** | $5,00 | $6,25 | $0,50 | $30,00 | *Other Models* | Modelo pesado de raciocínio da OpenAI; 88,8% Terminal-Bench |
+| **GPT-5.6 Terra** | $2,00 | $2,50 | $0,20 | $12,00 | *Other Models* | Escala excelente no modo Max (64,9% / $2,31) |
+| **GPT-5.6 Luna** | $0,20 | $0,25 | $0,02 | $1,20 | *Other Models* | Ultra-baixo custo; anomalia econômica ($0,39/task Max) |
+| **Gemini 3.8 Flash** | $0,75 | — | **$0,075** | $3,50 | *Other Models* | **90,8% Terminal-Bench 2.1**; 305 tok/s; 1M multimodal; DeepSWE 74% |
+| **Gemini 3.7 Flash** | $0,75 | — | $0,075 | $3,50 | *Other Models* | Multimodal vídeo/áudio; DeepSWE 65,3%; 1M tokens |
+| **Grok 4.6** | $2,00 | — | $0,50 | $6,00 | **Cursor Models** | Janela de 256k no Cursor; Sweet Spot Geral no Medium ($1,28 / 67,1%) |
+| **Composer 2.5** | $0,50 | — | $0,20 | $2,50 | **Cursor Models** | Modelo nativo do Cursor; Fast ON passa para $3,00/$0,50/$15,00 |
 
 *DeepSeek V4 Flash 0731 & Vision Exp (API Externa Direta): Input $0,22/M off-peak ($0,44 peak), Cache Hit $0,007/M off-peak ($0,014 peak), Output $0,66/M off-peak ($1,32 peak).*
 
@@ -58,16 +60,23 @@ O **CursorBench 3.2** avalia resolução de problemas reais, ambíguos e com mú
 
 | Modelo | Nível de Thinking | Score % | Tokens Médios / Tarefa | Custo Médio / Tarefa | % do Pool Pro ($20) | ~Tarefas por $20 | Pool no Cursor |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Claude Fable 5.1** | **Max** *(Líder Geral)* | **73,4%** | 72.060 | **$9,64** | 48,20% | ~2,1 | Other Models |
+| **Claude Fable 5.1** | **XHigh** | **72,8%** | 52.340 | **$6,96** | 34,80% | ~2,9 | Other Models |
 | **Grok 4.6** | **XHigh** | **70,8%** | 41.136 | $2,81 | *Pool Separado* | — | Cursor Models |
-| **Claude Fable 5** | **Max** | **70,5%** | 103.525 | $17,32 | 86,60% | 1,15 | Other Models |
+| **Claude Fable 5** | **Max** *(Superado)* | **70,5%** | 103.525 | $17,32 | 86,60% | 1,15 | Other Models |
 | **Claude Opus 5** | **Max** | **70,0%** | 61.838 | $8,23 | 41,15% | 2,40 | Other Models |
 | **Grok 4.6** | **High** | **69,9%** | 32.449 | $2,34 | *Pool Separado* | — | Cursor Models |
+| **Claude Fable 5.1** | **High** | **69,4%** | 36.100 | **$4,80** | 24,00% | ~4,2 | Other Models |
 | **Claude Opus 5** | **XHigh** | **69,3%** | 54.239 | $7,35 | 36,75% | 2,70 | Other Models |
+| **Gemini 3.8 Flash** | **High** | **69,2%** | 68.200 | **$2,38** | 11,90% | ~8,4 | Other Models |
 | **Claude Fable 5** | **XHigh** | **68,4%** | 64.971 | $11,73 | 58,65% | 1,70 | Other Models |
+| **Claude Fable 5.1** | **Medium** | **68,0%** | 26.500 | **$3,53** | 17,65% | ~5,7 | Other Models |
 | **GPT-5.6 Sol** | **Max** | **67,2%** | 28.320 | $5,69 | 28,45% | 3,50 | Other Models |
 | **Grok 4.6** | **Medium** *(Sweet Spot)* | **67,1%** | 17.942 | **$1,28** | *Pool Separado* | — | Cursor Models |
+| **Gemini 3.8 Flash** | **Medium** | **67,0%** | 55.400 | **$1,93** | 9,65% | ~10,4 | Other Models |
 | **Claude Opus 5** | **High** | **66,7%** | 27.932 | $3,91 | 19,55% | 5,10 | Other Models |
 | **Claude Fable 5** | **High** | **66,5%** | 43.747 | $8,77 | 43,85% | 2,30 | Other Models |
+| **Claude Fable 5.1** | **Low** | **66,2%** | 21.800 | **$2,90** | 14,50% | ~6,9 | Other Models |
 | **Claude Fable 5** | **Medium** | **65,2%** | 30.366 | $6,80 | 34,00% | 2,90 | Other Models |
 | **GPT-5.6 Terra** | **Max** | **64,9%** | 32.969 | $2,31 | 11,55% | 8,70 | Other Models |
 | **GPT-5.6 Sol** | **XHigh** | **64,5%** | 19.699 | $3,88 | 19,40% | 5,20 | Other Models |
@@ -127,7 +136,19 @@ O **CursorBench 3.2** avalia resolução de problemas reais, ambíguos e com mú
 
 ### 4.5 Grok 4.6: Domínio pelo Pool Separado
 - **Grok 4.6 Medium (67,1% / $1,28)** empata com Sol Max ($5,69) e Opus High ($3,91), mas utiliza o **pool separado do Cursor**, deixando os US$ 20 intocados.
-- **Grok 4.6 High (69,9% / $2,34)** e **XHigh (70,8% / $2,81)** lideram o topo absoluto do CursorBench sem penalizar a cota de terceiros.
+- **Grok 4.6 High (69,9% / $2,34)** e **XHigh (70,8% / $2,81)** lideram o topo do CursorBench sem penalizar a cota de terceiros.
+
+### 4.6 Claude Fable 5.1: O Novo #1 Absoluto do CursorBench e Artificial Analysis
+- **Líder Histórico do CursorBench:** No nível **Max (73,4% / $9,64)** e **XHigh (72,8% / $6,96)**, Claude Fable 5.1 supera todos os modelos avaliados na história do benchmark, superando Grok 4.6 XHigh (70,8%) e o predecessor Fable 5 (70,5%).
+- **Eficiência Drástica em Relação ao Fable 5:** Enquanto o Fable 5 drenava **$17,32 por tarefa** no Max consumindo 103k tokens (86,6% do pool de $20), o Fable 5.1 Max resolve tarefas com maior acurácia (73,4%) custando **$9,64** e 72k tokens — uma **redução de custo de 44%** e de tokens de 30%.
+- **Cache Read 75% mais Barato:** Redução de $1,00/M (Fable 5) para **$0,25/M** (Fable 5.1). Com sessões longas de código e múltiplos turnos agênticos, o custo real efetivo por tarefa despenca progressivamente.
+- **Domínio Multidisciplinar:** 91,4% no Terminal-Bench 2.1, 55,8% no Terminal-Bench 4.0, 52,6% no TB-Science 0.1, e líder geral do Artificial Analysis com **Index 66**.
+
+### 4.7 Google Gemini 3.8 Flash: Velocidade Extrema de 305 tok/s e 90,8% no Terminal-Bench
+- **Superação Direta do Gemini 3.7 Flash:** Salto de 85,8% para **90,8%** no Terminal-Bench 2.1 e de 65,3% para **74% ±1%** no DeepSWE 1.1 ($2,36/task, 166 steps, 143k tokens).
+- **Desempenho no CursorBench:** Gemini 3.8 Flash atinge **69,2% no High** por meros **$2,38/task** (11,9% do pool de $20) e **67,0% no Medium** por **$1,93/task**, empatando tecnicamente com Grok 4.6 Medium (67,1%) e Sol Max (67,2%) a uma fração do tempo de inferência.
+- **Throughput e Latência Líderes:** Velocidade de geração de **305–310 tok/s** e TTFT de ~0,18 s, tornando-o o motor ideal de execução em loops rápidos, agentes de build, auto-testes e geração massiva de código.
+- **Multimodalidade e Custo:** Suporte nativo a texto, imagem, vídeo (1 hora contínua) e áudio em janela de 1M de tokens, custando $0,75 input e $3,75 output por milhão de tokens.
 
 ---
 

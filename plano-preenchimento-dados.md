@@ -1,147 +1,67 @@
-# 🗺️ Planejamento em Etapas: Preenchimento e Enriquecimento de Dados dos 42 Modelos
+# 🗺️ Matriz Real de Cobertura e Auditoria Técnica de Dados (44 Modelos)
 
-> **Status:** ✅ 100% Concluído e Validado  
-> **Escopo:** Exclusivamente os **42 modelos ativos** cadastrados no projeto.  
-> **Data de Conclusão:** 24 de Agosto de 2026  
-
----
-
-## 🎯 Objetivo
-Garantir que **100% dos 42 modelos** tenham dados completos, consistentes e auditados em todos os módulos da aplicação:
-- **Ledger Multi-Benchmark** e **CursorBench 3.2**
-- **Radar de 10 Dimensões**
-- **Simulador de 5 Workloads Padronizados**
-- **Dossiê Canônico** (Guia Operacional, Benchmarks Oficiais, Requisitos de Hardware Local e Recomendações de Cota)
+> **Status:** ✅ Auditado e Validado com Metrologia Rigorosa  
+> **Escopo:** Catálogo canônico consolidado de **44 modelos ativos** (incluindo `gemini-3-8-flash` e `claude-fable-5-1`).  
+> **Data de Referência da Auditoria:** 2 de setembro de 2026  
+> **Integridade de Código:** `scripts/audit-data.js` executado com 100% de sucesso (Zero erros, Zero NaNs).
 
 ---
 
-## 📊 Matriz de Cobertura de Dados (Conclusão)
+## 🎯 Diretriz Metrológica da Auditoria
 
-| Módulo | Status Final | Meta | Resultado |
+1. **Hierarquia de Veracidade das Fontes:**
+   - **(O) Oficial:** Model cards, papers e documentações técnicas primárias dos fabricantes (Google DeepMind, Anthropic, OpenAI, xAI, DeepSeek, Meta, Alibaba, etc.).
+   - **(T) Terceiro Independente:** Ledgers reproduzíveis com protocolo aberto (CursorBench 3.2, Artificial Analysis v4.1.1, DeepSWE 1.1, Terminal-Bench 2.1/4.0, SWE-bench Verified).
+   - **(E) Estimativa Calibrada:** Vetores normalizados para visualização (Radar 10D) e projeções de workload.
+   - **(C) Comunidade / Telemetria:** Casos experimentais explicitamente rotulados (ex: `deepseek-v4-vision-exp`).
+2. **Política de Células Vazias (`N/D` / `null`):**
+   - É terminantemente proibido inventar scores ou interpolar benchmarks inexistentes. Modelos sem testes oficiais ou independentes publicados mantêm seus campos como `null` / `N/D`.
+3. **Preservação Histórica:**
+   - Modelos como `gemini-3-7-flash` e `claude-fable-5` foram integralmente preservados com marcação adequada de status para viabilizar análises comparativas e geracionais.
+
+---
+
+## 📊 Matriz Real de Cobertura de Dados (Auditado em Setembro/2026)
+
+| Módulo / Dimensão de Dados | Modelos Cobertos | % Cobertura Real | Status e Critério de Auditoria |
 | :--- | :---: | :---: | :--- |
-| **Multi-Benchmark Ledger** | 42/42 | **42/42** | ✅ 100% dos modelos mapeados com metrologia rigorosa (SWE, Terminal, DeepSWE, MRCR, Tau, GPQA, ARC, HLE, OSWorld, AA). |
-| **CursorBench 3.2** | 51 runs | **42/42** | ✅ 100% dos modelos contemplados com múltiplos níveis de esforço (Low, Med, High, Max, Sweet Spot). |
-| **Radar 10D** | 42/42 | **42/42** | ✅ 100% dos modelos calibrados nas 10 dimensões analíticas de capacidade. |
-| **Simulador de 5 Workloads** | 42/42 | **42/42** | ✅ Todos os 42 modelos calculados dinamicamente nos 5 cenários com ordenação por custo e multiplicadores. |
-| **Dossiês: Guia Operacional** | 42/42 | **42/42** | ✅ 100% dos modelos com `idealFor`, `avoidFor` e `orchestrationFlow`. |
-| **Dossiês: Benchmarks Oficiais** | 42/42 | **42/42** | ✅ Fichas técnicas preenchidas com métricas do fabricante e metodologia. |
-| **Hardware & VRAM (Modelos Locais)** | 9/9 | **100%** | ✅ Topologia de GPUs, VRAM (INT4/BF16), decode tps e nós recomendados para todos os modelos abertos. |
+| **Especificações Canônicas** | **44 / 44** | **100%** | Arquitetura, atenção, janela de contexto, limites de saída, modalidades e capabilities. |
+| **Precificação Estruturada** | **44 / 44** | **100%** | Input, output, prompt cache read, cache write (5m/1h) e mapeamento nos pools (Cursor/Go). |
+| **Multi-Benchmark Ledger** | **44 / 44** | **100%** | Todos os 44 modelos indexados com as colunas auditadas disponíveis ou `null` quando não testados. |
+| **Benchmarks Oficiais (Fabricante)** | **42 / 44** | **95%** | 42 modelos possuem model card oficial. 2 modelos (`ox-alpha` e `composer-2-5`) não possuem relatório formal divulgado. |
+| **CursorBench 3.2 (Baterias Reais)** | **16 / 44** | **36% (58 runs)** | 16 modelos frontier avaliados em múltiplos níveis de thinking (*Low, Med, High, XHigh, Max*). Os 28 modelos restantes permanecem como `N/D` por ausência de runs auditadas. |
+| **Radar de Capacidades 10D** | **44 / 44** | **100%** | Vetores 0–100 calibrados para projeção comparativa nas 10 dimensões. |
+| **Simulador de 5 Workloads** | **44 / 44** | **100%** | Cálculo dinâmico em tempo de execução via `AI_DATA_HELPERS.calculateRequestCost` para todos os 44 modelos. |
+| **Dossiês: Guia Operacional** | **44 / 44** | **100%** | `idealFor`, `avoidFor` e fluxos de orquestração preenchidos individualmente. |
+| **Hardware Local & Topologia VRAM** | **9 / 9** | **100%** | 100% dos modelos de pesos abertos com dimensionamento de quantização (INT4/FP8/BF16) e GPU recomendada. |
+| **Privacidade, ZDR & Governança** | **11 / 44** | **25%** | Mapeamento explícito de Zero Data Retention, políticas de retenção de dados e segurança documental. |
+| **Rastreabilidade e Fontes Primárias** | **44 / 44** | **100%** | Registro de proveniência através do registro `DATA_SOURCES` e metadados nos modelos principais. |
 
 ---
 
-## 🚀 Etapas de Execução
+## 🏆 Principais Marcos da Atualização (Setembro/2026)
 
-```mermaid
-graph TD
-    A[Etapa 1: Multi-Benchmark Ledger & CursorBench 3.2] --> B[Etapa 2: Radar de 10 Dimensões]
-    B --> C[Etapa 3: Simulador dos 5 Workloads]
-    C --> D[Etapa 4: Dossiês Canônicos & Guia Operacional]
-    D --> E[Etapa 5: Requisitos de Hardware para Modelos Abertos]
-    E --> F[Etapa 6: Auditoria, Validação e Reindexação]
+1. **Claude Fable 5.1 (Anthropic):**
+   - **Novo #1 CursorBench 3.2:** Score recorde de **73,4%** no nível Max ($9,64 / task) e 72,8% no XHigh ($6,96).
+   - **Líder Geral Artificial Analysis:** Intelligence Index **66**.
+   - **Economia de Cache:** Cache read de **$0,25/M** (redução de 75% em relação ao Fable 5).
+   - **Terminal-Bench 2.1:** **91,4%** (novo recorde do benchmark).
+2. **Gemini 3.8 Flash (Google DeepMind):**
+   - **Terminal-Bench 2.1:** Salto para **90,8%** (superando Gemini 3.7 Flash em +5,0 p.p.).
+   - **DeepSWE 1.1:** **74% ±1%** ($2,36/task, 166 steps, 143k tokens).
+   - **Throughput Extremo:** **305–310 tokens/segundo** e TTFT de 0,18 s.
+   - **CursorBench 3.2:** **69,2%** no High ($2,38/task) e **67,0%** no Medium ($1,93/task).
+   - **Google Antigravity:** Alocado no **Pool 1** (`gemini-models`).
+3. **Claude Fable 5 (Predecessor):**
+   - Preservado com status `superseded` para análise geracional.
+   - Output máximo corrigido para **128k tokens** e cache read de $1,00/M.
+
+---
+
+## 🧪 Verificação Automatizada
+
+A integridade deste catálogo é garantida pelo script de teste contínuo:
+```bash
+node scripts/audit-data.js
 ```
-
----
-
-### 🔹 ETAPA 1: Multi-Benchmark Ledger & CursorBench 3.2
-**Foco:** Garantir que todos os 42 modelos tenham métricas comparáveis nas tabelas principais.
-
-1. **Completar `MULTI_BENCHMARK_LEDGER`**:
-   - Inserir entrada completa para `composer-2-5`.
-   - Preencher métricas nos 42 modelos:
-     - `SWE-bench Verified (%)`
-     - `Terminal-Bench 2.1 (%)`
-     - `DeepSWE 1.1 (%)`
-     - `OpenAI MRCR v2 1M (%)`
-     - `Aider Polyglot Benchmark (%)`
-     - `LiveCodeBench v5 (%)`
-     - `Tau-Bench Retail / Airline (%)`
-2. **Expandir `CURSORBENCH_32_DATA`**:
-   - Adicionar runs com níveis de esforço (*Low*, *Medium*, *High*, *XHigh* ou *Standard*) para os 22 modelos sem registros:
-     - `Claude Opus 4.6`, `Claude Sonnet 4.6`, `gpt-oss-120b`, `gpt-oss-20b`, `Ox Alpha`, `Composer 2.5`
-     - `DeepSeek-V4-Vision-Exp`, `DeepSeek-V3.2`, `Qwen3.8-2.4T-A95B`, `Qwen3.7 Max`
-     - `Kimi K2.7 Code`, `Kimi K2.6`, `GLM-5.3`, `GLM-5.1`
-     - `Muse Spark 1.2`, `MiniMax M2.7`, `MiMo-V2.5-Pro`, `MiMo-V2.5`, `Tencent Hy3`, `LongCat-2.0`
-     - `Gemini 3.5 Flash`, `GPT-5.5 Preview`
-
----
-
-### 🔹 ETAPA 2: Radar de 10 Dimensões (`RADAR_10D_DATA`)
-**Foco:** Permitir que qualquer um dos 42 modelos possa ser plotado e confrontado no gráfico Spider/Radar.
-
-1. **Adicionar Datasets para os 32 Modelos Faltantes**:
-   - Cada dataset terá valores calibrados de 0 a 100 nas 10 dimensões canônicas:
-     1. `Raciocínio Lógico & Math` (AIME/GPQA)
-     2. `Coding Agêntico Monorepo` (Terminal-Bench 2.1 / SWE-bench)
-     3. `Resolução Real de Bugs` (SWE-bench Verified / DeepSWE)
-     4. `Retenção de Longo Contexto` (MRCR v2 / Needle in a Haystack 1M)
-     5. `Multimodalidade & Visão de UI` (MMMU-Pro / Vision Tasks)
-     6. `Throughput & Decode` (Velocidade tok/s)
-     7. `Eficiência de Custo por Task` (Preço / Performance)
-     8. `Aderência a Ferramentas & FIM` (Tool Calling / Strict JSON)
-     9. `Latência TTFT & Responsividade` (Tempo até o 1º token)
-     10. `Acesso Aberto & Cotas` (Open-weights / OpenCode Go)
-2. **Atualizar Seletor do Radar**:
-   - Garantir ordenação alfabética e por família no dropdown e checkboxes do Radar.
-
----
-
-### 🔹 ETAPA 3: Simulador dos 5 Workloads Padronizados (`STANDARDIZED_WORKLOADS_DATA`)
-**Foco:** Fazer com que a tabela comparativa de custos de desenvolvimento reflita os 42 modelos.
-
-1. **Cálculo de Projeções de Custo para os 28 Modelos Restantes**:
-   - **Workload 1:** *Single-File Bugfix (8k in / 1.5k out)*
-   - **Workload 2:** *Feature Dev Monorepo (45k in / 6k out)*
-   - **Workload 3:** *Agentic Refactor Suite (180k in / 24k out / 8 steps)*
-   - **Workload 4:** *Long-Context Debugging 1M (650k in / 12k out)*
-   - **Workload 5:** *Vision UI Implementation (32k text + 8 imgs in / 4k out)*
-2. **Definição de Modelos Self-Hosted / Gratuitos**:
-   - Indicar custo de `$0,00` em API e destacar custo amortizado de GPU/energia para modelos open-weights.
-
----
-
-### 🔹 ETAPA 4: Enriquecimento dos Dossiês Canônicos (`AI_MODELS_DATA`)
-**Foco:** Eliminar telas vazias ou com poucos dados ao abrir o dossiê detalhado (`#model/:id`).
-
-1. **Adicionar `operationalGuidance` para os 37 Modelos**:
-   - `idealFor`: 3 a 5 pontos fortes de aplicação prática em engenharia de software.
-   - `avoidFor`: 2 a 3 cenários onde o modelo é ineficiente ou caro.
-   - `orchestrationFlow`: Exemplo de pipeline em conjunto com outros modelos (ex: *Worker Haiku 4.5 -> Reviewer Sonnet 5*).
-2. **Adicionar `officialBenchmarks` Oficiais**:
-   - Inserir os scores oficiais publicados pelos laboratórios (OpenAI, Anthropic, Google, DeepSeek, Alibaba, Zhipu, Moonshot, Tencent, Meta, MiniMax).
-3. **Completar `strengths` e `weaknesses`**:
-   - Garantir no mínimo 3 pontos fortes e 2 limitações técnicas claras para cada entidade.
-
----
-
-### 🔹 ETAPA 5: Hardware & VRAM para Modelos Abertos / Locais
-**Foco:** Fornecer especificações precisas de infraestrutura na aba *Hardware & VRAM*.
-
-1. **Mapeamento de Topologia de Servidor para Modelos Pesados**:
-   - `LongCat-2.0` (3,55 TB MoE): Arquitetura de clusters recomendada (8x H200 / InfiniBand).
-   - `Qwen3.8-2.4T-A95B (Repo)`: Nós de inferência distribuída (vLLM / SGLang).
-   - `DeepSeek-V4-Vision-Exp` & `DeepSeek-V3.2`: Requisitos com quantização INT4 / FP8.
-   - `gpt-oss-120b` e `gpt-oss-20b`: Requisitos de VRAM em estações locais (1x RTX 4090 vs 2x RTX 3090 vs Apple Silicon M-Max).
-
----
-
-### 🔹 ETAPA 6: Auditoria, Validação e Reindexação
-**Foco:** Testar toda a integridade da aplicação e atualizar a documentação.
-
-1. **Script de Auditoria Automatizada**:
-   - Rodar script Node.js para confirmar que zero modelos possuem campos faltantes ou `undefined`.
-2. **Validação de Sintaxe**:
-   - Executar `node -c data.js app.js server.js`.
-3. **Reindexação jCodeMunch**:
-   - Reindexar todo o repositório com o MCP `index_folder`.
-4. **Atualização do Walkthrough**:
-   - Registrar as melhorias em `walkthrough.md`.
-
----
-
-## 📌 Ordem de Execução Sugerida
-Recomenda-se executar uma etapa por vez para permitir validação pontual:
-1. **Passo 1:** Executar **Etapa 1** (Ledger & CursorBench 3.2).
-2. **Passo 2:** Executar **Etapa 2** (Radar 10D).
-3. **Passo 3:** Executar **Etapa 3** (Simulador 5 Workloads).
-4. **Passo 4:** Executar **Etapa 4 e 5** (Dossiês, Guia Operacional e Hardware).
-5. **Passo 5:** Executar **Etapa 6** (Auditoria e Validação Final).
+O script executa 12 asserções automáticas de tipos, limites, unicidade de identificadores e consistência matemática de custos.
