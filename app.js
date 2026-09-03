@@ -30,7 +30,19 @@
       benchmarkMain: null,
       radar10d: null,
       paretoScatter: null
-    }
+    },
+    planCurrency: 'BRL',
+    planAudience: 'all',
+    planProfile: 'all',
+    planSearchQuery: '',
+    selectedPlanCompare: [],
+    activeBudgetStack: 110,
+    activeHistoryTab: 'lineages',
+    activeTimelineFilter: 'all',
+    activeUseCaseId: 'saas-system-architecture',
+    activeCommunityTab: 'divergences',
+    communitySearchQuery: '',
+    platformSearchQuery: ''
   };
 
   // ==========================================
@@ -146,6 +158,11 @@
     if (route === 'aa-intelligence') route = 'artificial-analysis';
     if (route === 'troubleshooter') route = 'troubleshoot';
     if (route === 'antigravity') route = 'antigravity-pools';
+    if (route === 'plans' || route === 'subscriptions') route = 'plans';
+    if (route === 'history' || route === 'lineages' || route === 'timeline') route = 'history';
+    if (route === 'use-cases' || route === 'projects' || route === 'stacks') route = 'use-cases';
+    if (route === 'community' || route === 'behavior') route = 'community';
+    if (route === 'platforms' || route === 'opencode' || route === 'availability') route = 'platforms';
 
     AppState.currentRoute = route;
 
@@ -171,7 +188,12 @@
                       (route === 'model' && linkRoute === 'dashboard') ||
                       (route === 'artificial-analysis' && (linkRoute === 'aa-intelligence' || linkRoute === 'artificial-analysis')) ||
                       (route === 'troubleshoot' && (linkRoute === 'troubleshooter' || linkRoute === 'troubleshoot')) ||
-                      (route === 'antigravity-pools' && (linkRoute === 'antigravity' || linkRoute === 'antigravity-pools'));
+                      (route === 'antigravity-pools' && (linkRoute === 'antigravity' || linkRoute === 'antigravity-pools')) ||
+                      (route === 'plans' && linkRoute === 'plans') ||
+                      (route === 'history' && linkRoute === 'history') ||
+                      (route === 'use-cases' && linkRoute === 'use-cases') ||
+                      (route === 'community' && linkRoute === 'community') ||
+                      (route === 'platforms' && linkRoute === 'platforms');
       if (isMatch) {
         link.classList.add('active');
         link.setAttribute('aria-current', 'page');
@@ -229,6 +251,21 @@
       case 'dashboard':
         renderDashboardTable();
         updateEstimatorResults();
+        break;
+      case 'plans':
+        renderPlansView();
+        break;
+      case 'history':
+        renderHistoryView();
+        break;
+      case 'use-cases':
+        renderUseCasesView();
+        break;
+      case 'community':
+        renderCommunityView();
+        break;
+      case 'platforms':
+        renderPlatformsView();
         break;
       case 'providers':
         renderProvidersGrid();
@@ -352,6 +389,177 @@
             if (modelId) openQuickInspector(modelId);
           }
         }
+      });
+    }
+
+    // ----------------------------------------------------
+    // Eventos das Novas Views (Planos, Histórico, Casos de Uso, Comunidade, Plataformas)
+    // ----------------------------------------------------
+    // 1. Alternador de Moeda dos Planos (BRL / USD / DUAL)
+    const currencyGroup = document.getElementById('currencyToggleGroup');
+    if (currencyGroup) {
+      currencyGroup.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-toggle');
+        if (btn) {
+          currencyGroup.querySelectorAll('.btn-toggle').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          AppState.planCurrency = btn.getAttribute('data-currency');
+          renderPlansView();
+        }
+      });
+    }
+
+    // 2. Filtros de Planos (Público, Perfil e Busca)
+    const planAudienceSel = document.getElementById('planAudienceFilter');
+    if (planAudienceSel) {
+      planAudienceSel.addEventListener('change', (e) => {
+        AppState.planAudience = e.target.value;
+        renderPlansView();
+      });
+    }
+    const planProfileSel = document.getElementById('planProfileFilter');
+    if (planProfileSel) {
+      planProfileSel.addEventListener('change', (e) => {
+        AppState.planProfile = e.target.value;
+        renderPlansView();
+      });
+    }
+    const planSearchInp = document.getElementById('planSearchInput');
+    if (planSearchInp) {
+      planSearchInp.addEventListener('input', (e) => {
+        AppState.planSearchQuery = e.target.value;
+        renderPlansView();
+      });
+    }
+
+    // 3. Checkbox de Comparação de Planos (Event Delegation no Grid)
+    const plansGrid = document.getElementById('plansCardsGrid');
+    if (plansGrid) {
+      plansGrid.addEventListener('change', (e) => {
+        if (e.target.classList.contains('plan-compare-checkbox')) {
+          const planId = e.target.getAttribute('data-plan-id');
+          if (e.target.checked) {
+            if (!AppState.selectedPlanCompare.includes(planId)) {
+              if (AppState.selectedPlanCompare.length >= 4) {
+                e.target.checked = false;
+                showToast('Limite de 4 planos atingido no comparador.');
+                return;
+              }
+              AppState.selectedPlanCompare.push(planId);
+            }
+          } else {
+            AppState.selectedPlanCompare = AppState.selectedPlanCompare.filter(id => id !== planId);
+          }
+          updatePlanCompareTray();
+        }
+      });
+    }
+
+    // 4. Botões do Tray e Modal de Comparação de Planos
+    const btnOpenPlanModal = document.getElementById('btnOpenPlanCompareModal');
+    if (btnOpenPlanModal) btnOpenPlanModal.addEventListener('click', openPlanCompareModal);
+
+    const btnClosePlanModal = document.getElementById('btnClosePlanCompareModal');
+    if (btnClosePlanModal) btnClosePlanModal.addEventListener('click', closePlanCompareModal);
+
+    const btnClosePlanModalX = document.getElementById('planCompareModalCloseBtn');
+    if (btnClosePlanModalX) btnClosePlanModalX.addEventListener('click', closePlanCompareModal);
+
+    const planModalOverlay = document.getElementById('planCompareModalOverlay');
+    if (planModalOverlay) {
+      planModalOverlay.addEventListener('click', (e) => {
+        if (e.target === planModalOverlay) closePlanCompareModal();
+      });
+    }
+
+    const btnClearPlanCompare = document.getElementById('btnClearPlanCompare');
+    if (btnClearPlanCompare) {
+      btnClearPlanCompare.addEventListener('click', () => {
+        AppState.selectedPlanCompare = [];
+        document.querySelectorAll('.plan-compare-checkbox').forEach(cb => cb.checked = false);
+        updatePlanCompareTray();
+      });
+    }
+
+    // 5. Seletor de Orçamento (Budget Stacks)
+    const budgetPillsContainer = document.getElementById('budgetSelectorPills');
+    if (budgetPillsContainer) {
+      budgetPillsContainer.addEventListener('click', (e) => {
+        const pill = e.target.closest('.budget-pill');
+        if (pill) {
+          budgetPillsContainer.querySelectorAll('.budget-pill').forEach(p => p.classList.remove('active'));
+          pill.classList.add('active');
+          AppState.activeBudgetStack = parseInt(pill.getAttribute('data-budget'), 10) || 0;
+          renderBudgetStacks();
+        }
+      });
+    }
+
+    // 6. Abas do Histórico (Lineages, Timeline, Benchmarks)
+    const historyTabsNav = document.querySelector('.history-tabs-nav');
+    if (historyTabsNav) {
+      historyTabsNav.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-toggle');
+        if (btn) {
+          AppState.activeHistoryTab = btn.getAttribute('data-htab');
+          renderHistoryView();
+        }
+      });
+    }
+
+    // 7. Filtros da Timeline
+    const timelineFilters = document.querySelector('.timeline-filters');
+    if (timelineFilters) {
+      timelineFilters.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-toggle');
+        if (btn) {
+          timelineFilters.querySelectorAll('.btn-toggle').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          AppState.activeTimelineFilter = btn.getAttribute('data-tfilter');
+          renderHistoryView();
+        }
+      });
+    }
+
+    // 8. Seletor de Casos de Uso
+    const useCaseChips = document.getElementById('useCaseChipsScroll');
+    if (useCaseChips) {
+      useCaseChips.addEventListener('click', (e) => {
+        const chip = e.target.closest('.use-case-chip');
+        if (chip) {
+          AppState.activeUseCaseId = chip.getAttribute('data-uc-id');
+          renderUseCasesView();
+        }
+      });
+    }
+
+    // 9. Abas da Comunidade
+    const commTabsNav = document.querySelector('.community-tabs-nav');
+    if (commTabsNav) {
+      commTabsNav.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-toggle');
+        if (btn) {
+          AppState.activeCommunityTab = btn.getAttribute('data-ctab');
+          renderCommunityView();
+        }
+      });
+    }
+
+    // 10. Busca de Relatos da Comunidade
+    const reportSearch = document.getElementById('reportSearchInput');
+    if (reportSearch) {
+      reportSearch.addEventListener('input', (e) => {
+        AppState.communitySearchQuery = e.target.value;
+        renderCommunityView();
+      });
+    }
+
+    // 11. Busca na Matriz de Plataformas
+    const platformSearch = document.getElementById('platformMatrixSearch');
+    if (platformSearch) {
+      platformSearch.addEventListener('input', (e) => {
+        AppState.platformSearchQuery = e.target.value;
+        renderPlatformsView();
       });
     }
 
@@ -1060,12 +1268,16 @@
           </div>
         </div>
 
-        <!-- 6 Sub-Abas -->
+        <!-- 10 Sub-Abas do Dossiê Expandido -->
         <div class="dossier-subtabs-nav">
           <button class="subtab-btn active" data-tab="tab-specs">📄 Ficha Canônica</button>
           <button class="subtab-btn" data-tab="tab-benchmarks">🧠 Thinking & Benchmarks</button>
+          <button class="subtab-btn" data-tab="tab-pricing">💰 Tarifas & Caching</button>
+          <button class="subtab-btn" data-tab="tab-plans">💳 Planos & Assinaturas</button>
+          <button class="subtab-btn" data-tab="tab-history">📜 Histórico & Linhagem</button>
+          <button class="subtab-btn" data-tab="tab-community">💬 Comunidade & Perfil</button>
+          <button class="subtab-btn" data-tab="tab-usecases">🎯 Casos de Uso</button>
           <button class="subtab-btn" data-tab="tab-hardware">🖥️ Hardware & VRAM</button>
-          <button class="subtab-btn" data-tab="tab-pricing">💰 Tarifas & OpenCode Go</button>
           <button class="subtab-btn" data-tab="tab-configs">🔌 Harnesses & JSON</button>
           <button class="subtab-btn" data-tab="tab-governance">🔒 Governança & ZDR</button>
         </div>
@@ -1414,7 +1626,191 @@
           </div>
         </div>
 
-        <!-- Subtab 6: Governança & ZDR -->
+        <!-- Subtab 4: Planos & Assinaturas -->
+        <div class="subtab-panel" id="tab-plans">
+          <div class="content-box">
+            <div class="box-header">
+              <h4>💳 Onde Executar Este Modelo em Assinaturas de Ferramentas</h4>
+            </div>
+            <div class="specs-grid" style="margin-bottom: 16px;">
+              <div class="spec-item-card">
+                <div class="spec-label">Cursor IDE</div>
+                <div class="spec-value">${model.cursorPool ? model.cursorPool.poolLabel : 'Other Models ($20 Pool)'}</div>
+              </div>
+              <div class="spec-item-card">
+                <div class="spec-label">OpenCode Go ($10/mês)</div>
+                <div class="spec-value highlight-green">${model.openCodeGo && model.openCodeGo.available ? `${model.openCodeGo.quotaMultiplier}x cota (~${model.openCodeGo.estReqMonth.toLocaleString()} req/mês)` : 'Não listado no plano Go'}</div>
+              </div>
+              <div class="spec-item-card">
+                <div class="spec-label">Google Antigravity</div>
+                <div class="spec-value highlight-cyan">${model.antigravity ? `${model.antigravity.poolLabel} (${model.antigravity.role})` : 'Indisponível no Antigravity'}</div>
+              </div>
+              <div class="spec-item-card">
+                <div class="spec-label">OpenRouter API</div>
+                <div class="spec-value">${model.openRouterId || model.id}</div>
+              </div>
+            </div>
+
+            <h5 style="margin-top: 14px; margin-bottom: 8px;">Planos de Assinatura que Contemplam Este Modelo:</h5>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              ${(() => {
+                if (typeof SUBSCRIPTION_PLANS_DATA === 'undefined') return '';
+                const matchedPlans = SUBSCRIPTION_PLANS_DATA.filter(p => {
+                  const mList = (p.includedModels || []).join(' ').toLowerCase();
+                  return mList.includes(model.name.toLowerCase()) || mList.includes(model.id.toLowerCase()) || (model.provider === p.provider);
+                });
+                if (matchedPlans.length === 0) return '<p style="color: var(--text-muted);">Consulte a API direta do provedor para precificação sob demanda.</p>';
+                return matchedPlans.map(p => `
+                  <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
+                    <div>
+                      <strong>${p.planName}</strong> • <span style="color: var(--text-muted); font-size: 0.8rem;">${p.provider} (${p.product})</span>
+                      <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">${p.quotaDescription}</div>
+                    </div>
+                    <div style="text-align: right;">
+                      <strong style="color: var(--text-primary);">${p.localizedPricing && p.localizedPricing.BRL && p.localizedPricing.BRL.official ? `R$ ${p.localizedPricing.BRL.price.toFixed(2).replace('.', ',')} (Oficial)` : `~ R$ ${typeof FX_HELPERS !== 'undefined' ? FX_HELPERS.convertUsdToBrl(p.monthlyPriceUsd).toFixed(2).replace('.', ',') : (p.monthlyPriceUsd * 5.1556).toFixed(2)}`}</strong>
+                      <div style="font-size: 0.72rem; color: var(--text-muted);">US$ ${p.monthlyPriceUsd.toFixed(2)} / mo</div>
+                    </div>
+                  </div>
+                `).join('');
+              })()}
+            </div>
+          </div>
+        </div>
+
+        <!-- Subtab 5: Histórico & Linhagem Geracional -->
+        <div class="subtab-panel" id="tab-history">
+          <div class="content-box">
+            <div class="box-header">
+              <h4>📜 Linhagem Arquitetural & Eventos Históricos</h4>
+            </div>
+            ${model.previewHistory ? `
+              <div style="padding: 12px 16px; background: rgba(234, 179, 8, 0.1); border: 1px solid rgba(234, 179, 8, 0.4); border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 0.85rem;">
+                <strong style="color: #facc15;">ℹ️ Revelação Stealth de Identidade:</strong>
+                <p style="color: var(--text-secondary); margin: 4px 0 0 0;">
+                  Este modelo operou sob o alias de preview <strong>${model.previewHistory.alias}</strong> de 20/08/2026 a 26/08/2026 antes de sua revelação oficial como <strong>${model.name}</strong> sob licença MIT.
+                </p>
+              </div>
+            ` : ''}
+
+            <h5 style="margin-bottom: 8px;">Eventos Históricos Registrados:</h5>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              ${(() => {
+                if (typeof MODEL_HISTORY_DATA === 'undefined') return '';
+                const events = MODEL_HISTORY_DATA.events.filter(e => e.modelId === model.id);
+                if (events.length === 0) return '<p style="color: var(--text-muted);">Sem eventos históricos específicos registrados para este modelo.</p>';
+                return events.map(e => `
+                  <div style="padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                      <span class="badge-tag badge-frontier">${e.date}</span>
+                      <span class="badge-tag badge-subdollar">${e.type}</span>
+                    </div>
+                    <strong style="color: var(--text-primary); font-size: 0.9rem;">${e.title}</strong>
+                    <p style="color: var(--text-secondary); font-size: 0.82rem; margin: 4px 0 0 0;">${e.description}</p>
+                  </div>
+                `).join('');
+              })()}
+            </div>
+          </div>
+        </div>
+
+        <!-- Subtab 6: Comunidade & Comportamento Prático de Engenharia -->
+        <div class="subtab-panel" id="tab-community">
+          <div class="content-box">
+            <div class="box-header">
+              <h4>💬 Avaliações Práticas & Relatos da Comunidade</h4>
+              <span class="badge-tag badge-warning">sourceType: community / calibrated</span>
+            </div>
+
+            ${(() => {
+              if (typeof ENGINEERING_BEHAVIOR_DATA === 'undefined') return '';
+              const bData = ENGINEERING_BEHAVIOR_DATA.models[model.id];
+              if (!bData) return '<p style="color: var(--text-muted);">Dados de comportamento calibrado em processamento para este modelo.</p>';
+              const dims = ENGINEERING_BEHAVIOR_DATA.dimensions;
+              return `
+                <div style="margin-bottom: 20px;">
+                  <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px;">${bData.profileSummary}</div>
+                  <div class="specs-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px;">
+                    ${dims.map(d => {
+                      const val = bData[d.key];
+                      if (typeof val === 'undefined') return '';
+                      return `
+                        <div class="spec-item-card" style="padding: 8px 12px;">
+                          <div class="spec-label">${d.label}</div>
+                          <div class="spec-value ${d.isInverted ? (val > 60 ? 'highlight-rose' : 'highlight-green') : (val >= 90 ? 'highlight-cyan' : 'highlight-green')}">${val} / 100</div>
+                        </div>
+                      `;
+                    }).join('')}
+                  </div>
+                </div>
+              `;
+            })()}
+
+            <h5 style="margin-top: 16px; margin-bottom: 8px;">Relatos Auditados de Fóruns & Repositórios:</h5>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              ${(() => {
+                if (typeof COMMUNITY_REPORTS_DATA === 'undefined') return '';
+                const reports = COMMUNITY_REPORTS_DATA.filter(r => (r.models || []).includes(model.id));
+                if (reports.length === 0) return '<p style="color: var(--text-muted);">Nenhum relato anedótico direto registrado no banco para este modelo.</p>';
+                return reports.map(r => `
+                  <div style="padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                      <span class="badge-tag badge-subdollar">${r.platform} • ${r.date}</span>
+                      <span class="badge-tag badge-frontier">Harness: ${r.harness}</span>
+                    </div>
+                    <strong style="color: var(--text-primary); font-size: 0.88rem;">${r.summary}</strong>
+                    <ul style="padding-left: 18px; margin: 6px 0 0 0; font-size: 0.8rem; color: var(--text-secondary);">
+                      ${(r.observations || []).map(o => `<li>${o}</li>`).join('')}
+                    </ul>
+                  </div>
+                `).join('');
+              })()}
+            </div>
+          </div>
+        </div>
+
+        <!-- Subtab 7: Casos de Uso Recomendados -->
+        <div class="subtab-panel" id="tab-usecases">
+          <div class="content-box">
+            <div class="box-header">
+              <h4>🎯 Posições em Casos de Uso Reais & Projetos</h4>
+              <span class="badge-tag badge-subdollar">E — Calibrado</span>
+            </div>
+            <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 16px;">
+              Veja em quais categorias de projetos este modelo foi classificado entre os 10 melhores do mercado:
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              ${(() => {
+                if (typeof USE_CASE_COMPARISON_DATA === 'undefined') return '';
+                const casesWithModel = [];
+                USE_CASE_COMPARISON_DATA.useCases.forEach(uc => {
+                  const found = uc.rankings.find(r => r.modelId === model.id);
+                  if (found) {
+                    casesWithModel.push({ ...uc, rankingInfo: found });
+                  }
+                });
+                if (casesWithModel.length === 0) return '<p style="color: var(--text-muted);">Este modelo não figura no Top 10 dos casos de uso calibrados.</p>';
+                return casesWithModel.map(c => `
+                  <div style="padding: 12px 16px; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.2rem;">${c.icon}</span>
+                        <strong style="color: var(--text-primary); font-size: 0.95rem;">${c.title}</strong>
+                        <span class="badge-tag badge-frontier">Rank #${c.rankingInfo.rank}</span>
+                      </div>
+                      <div style="font-size: 0.82rem; color: var(--accent-cyan); margin-top: 2px;"><strong>Papel:</strong> ${c.rankingInfo.role}</div>
+                      <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">${c.rankingInfo.rationale}</div>
+                    </div>
+                    <div>
+                      <span class="badge-tag badge-sweetspot" style="font-size: 0.85rem;">Fit Score: ${c.rankingInfo.fitScore}/100</span>
+                    </div>
+                  </div>
+                `).join('');
+              })()}
+            </div>
+          </div>
+        </div>
+
+        <!-- Subtab 8: Governança & ZDR -->
         <div class="subtab-panel" id="tab-governance">
           <div class="specs-grid">
             <div class="spec-item-card"><div class="spec-label">Zero Data Retention (ZDR)</div><div class="spec-value">${model.privacy ? (model.privacy.retentionDays === 0 ? '✅ ZDR Ativo (0 dias)' : `⚠️ Retenção de até ${model.privacy.retentionDays} dias`) : (model.openCodeGo && model.openCodeGo.trainingConsent ? '❌ Prompts usados para treino (Contributor)' : (model.id === 'ox-alpha' ? '⚠️ Conflito (ZDR no Go / Treino no EULA OpenRouter)' : '✅ ZDR Ativo / Sem Treinamento'))}</div></div>
@@ -2782,6 +3178,634 @@
   }
 
   // ==========================================
+  // 17. VIEW: PLANOS & ASSINATURAS (USD / BRL)
+  // ==========================================
+  function renderPlansView() {
+    if (typeof SUBSCRIPTION_PLANS_DATA === 'undefined') return;
+
+    const grid = document.getElementById('plansCardsGrid');
+    if (!grid) return;
+
+    const currency = AppState.planCurrency || 'BRL';
+    const audience = AppState.planAudience || 'all';
+    const profile = AppState.planProfile || 'all';
+    const query = (AppState.planSearchQuery || '').toLowerCase().trim();
+
+    const filteredPlans = SUBSCRIPTION_PLANS_DATA.filter(plan => {
+      if (!plan.current) return false;
+      if (audience !== 'all' && plan.targetAudience !== audience) return false;
+      if (profile !== 'all' && (!plan.profileTags || !plan.profileTags.includes(profile))) return false;
+      if (query) {
+        const text = `${plan.planName} ${plan.product} ${plan.provider} ${(plan.includedModels || []).join(' ')} ${plan.bestFor || ''}`.toLowerCase();
+        if (!text.includes(query)) return false;
+      }
+      return true;
+    });
+
+    if (filteredPlans.length === 0) {
+      grid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-muted); background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+          🔍 Nenhum plano encontrado para os filtros selecionados. Tente ajustar o público ou termo de busca.
+        </div>
+      `;
+    } else {
+      grid.innerHTML = filteredPlans.map(plan => {
+        const isChecked = (AppState.selectedPlanCompare || []).includes(plan.id);
+
+        let priceHtml = '';
+        const officialBrl = plan.localizedPricing && plan.localizedPricing.BRL && plan.localizedPricing.BRL.official;
+
+        if (currency === 'BRL') {
+          if (plan.monthlyPriceUsd === 0 && (!plan.monthlyPriceCny || plan.monthlyPriceCny === 0)) {
+            priceHtml = `<div class="plan-price-main">R$ 0,00</div><div class="plan-price-sub">Gratuito / Free Tier</div>`;
+          } else if (officialBrl) {
+            priceHtml = `
+              <div class="plan-price-main" style="color: #34d399;">R$ ${plan.localizedPricing.BRL.price.toFixed(2).replace('.', ',')}</div>
+              <div class="plan-price-sub">
+                <span class="badge-tag badge-subdollar">🇧🇷 Preço Oficial Brasil</span>
+                <span style="margin-left: 4px; color: var(--text-muted);">(US$ ${plan.monthlyPriceUsd.toFixed(2)})</span>
+              </div>
+            `;
+          } else if (plan.nativeCurrency === 'CNY') {
+            const brl = typeof FX_HELPERS !== 'undefined' ? FX_HELPERS.convertCnyToBrl(plan.monthlyPriceCny) : plan.monthlyPriceCny * 0.7595;
+            priceHtml = `
+              <div class="plan-price-main">~ R$ ${brl.toFixed(2).replace('.', ',')}</div>
+              <div class="plan-price-sub">¥ ${plan.monthlyPriceCny} / mês (CNY) · ~ US$ ${plan.monthlyPriceUsd.toFixed(2)}</div>
+            `;
+          } else {
+            const brl = typeof FX_HELPERS !== 'undefined' ? FX_HELPERS.convertUsdToBrl(plan.monthlyPriceUsd) : plan.monthlyPriceUsd * 5.1556;
+            priceHtml = `
+              <div class="plan-price-main">~ R$ ${brl.toFixed(2).replace('.', ',')}</div>
+              <div class="plan-price-sub">US$ ${plan.monthlyPriceUsd.toFixed(2)} / mês comercial</div>
+            `;
+          }
+        } else if (currency === 'USD') {
+          if (plan.monthlyPriceUsd === 0) {
+            priceHtml = `<div class="plan-price-main">US$ 0.00</div><div class="plan-price-sub">Free Tier</div>`;
+          } else if (plan.nativeCurrency === 'CNY') {
+            priceHtml = `
+              <div class="plan-price-main">~ US$ ${plan.monthlyPriceUsd.toFixed(2)}</div>
+              <div class="plan-price-sub">¥ ${plan.monthlyPriceCny} / mo nativo (Yuan)</div>
+            `;
+          } else {
+            priceHtml = `
+              <div class="plan-price-main">US$ ${plan.monthlyPriceUsd.toFixed(2)}</div>
+              <div class="plan-price-sub">${plan.billingPeriod === 'user/month' ? 'per user / month' : 'per month'}</div>
+            `;
+          }
+        } else {
+          const brl = officialBrl 
+            ? plan.localizedPricing.BRL.price 
+            : (plan.nativeCurrency === 'CNY' ? FX_HELPERS.convertCnyToBrl(plan.monthlyPriceCny) : FX_HELPERS.convertUsdToBrl(plan.monthlyPriceUsd));
+          priceHtml = `
+            <div class="plan-price-main">
+              ${officialBrl ? `R$ ${brl.toFixed(2).replace('.', ',')}` : `~ R$ ${brl.toFixed(2).replace('.', ',')}`}
+            </div>
+            <div class="plan-price-sub" style="font-weight: 600; color: var(--accent-cyan);">
+              US$ ${plan.monthlyPriceUsd.toFixed(2)} / mo ${plan.nativeCurrency === 'CNY' ? `(¥ ${plan.monthlyPriceCny})` : ''}
+              ${officialBrl ? '<span class="badge-tag badge-subdollar" style="margin-left: 4px;">Oficial BR</span>' : ''}
+            </div>
+          `;
+        }
+
+        return `
+          <div class="plan-card" data-plan-id="${plan.id}">
+            <div>
+              <div class="plan-card-header">
+                <div>
+                  <div class="plan-provider-badge">${plan.provider} • ${plan.product}</div>
+                  <div class="plan-card-title">${plan.planName}</div>
+                </div>
+                <span class="badge-tag ${plan.targetAudience === 'team' ? 'badge-warning' : 'badge-frontier'}">
+                  ${plan.targetAudience === 'team' ? '🏢 Equipe' : '👤 Individual'}
+                </span>
+              </div>
+
+              <div class="plan-card-price-box">
+                ${priceHtml}
+                ${plan.annualPriceUsd ? `
+                  <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
+                    Opção Anual: US$ ${(plan.annualPriceUsd / 12).toFixed(2)}/mês
+                  </div>
+                ` : ''}
+              </div>
+
+              <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 10px;">
+                <strong>Franquia:</strong> ${plan.quotaDescription}
+              </div>
+
+              <div style="margin-bottom: 12px;">
+                <div style="font-size: 0.74rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;">Modelos Inclusos:</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                  ${(plan.includedModels || []).map(m => `
+                    <span style="background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: 4px; padding: 2px 6px; font-size: 0.72rem; color: var(--text-primary);">
+                      ${m}
+                    </span>
+                  `).join('')}
+                </div>
+              </div>
+
+              <div style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.35; margin-bottom: 8px;">
+                🔒 <strong>Privacidade:</strong> ${plan.privacyNotes}
+              </div>
+
+              <div style="font-size: 0.78rem; color: var(--accent-cyan); line-height: 1.35;">
+                💡 <strong>Ideal para:</strong> ${plan.bestFor}
+              </div>
+            </div>
+
+            <div class="plan-card-footer">
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 0.82rem; cursor: pointer;">
+                <input type="checkbox" class="plan-compare-checkbox" data-plan-id="${plan.id}" ${isChecked ? 'checked' : ''}>
+                <span>Comparar</span>
+              </label>
+              <button class="btn-table-action" onclick="window.AIApp.selectBudgetStackForPlan('${plan.id}')" title="Ver stack recomendado">
+                Ver Stacks ➔
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    renderBudgetStacks();
+    updatePlanCompareTray();
+  }
+
+  function renderBudgetStacks() {
+    if (typeof BUDGET_STACK_RECOMMENDER === 'undefined') return;
+
+    const container = document.getElementById('budgetStacksContainer');
+    if (!container) return;
+
+    const budget = AppState.activeBudgetStack || 110;
+    const stacks = BUDGET_STACK_RECOMMENDER.getStacksForBudgetBrl(budget);
+
+    container.innerHTML = stacks.map(st => `
+      <div class="budget-stack-card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+          <div>
+            <h4 style="color: var(--accent-cyan); font-size: 1.05rem; margin-bottom: 2px;">${st.title}</h4>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">
+              Custo Total Estimado: <strong style="color: var(--text-primary);">R$ ${st.monthlyCostBrl.toFixed(2).replace('.', ',')} / mês</strong> (~ US$ ${st.monthlyCostUsd.toFixed(2)})
+            </div>
+          </div>
+        </div>
+
+        <div style="margin: 10px 0; font-size: 0.8rem;">
+          <span style="color: var(--text-muted);">Planos que compõem o stack:</span>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;">
+            ${(st.plans || []).map(p => p ? `
+              <span class="badge-tag badge-frontier">${p.product} ${p.planName}</span>
+            ` : '').join('')}
+          </div>
+        </div>
+
+        <div class="stack-roles-grid">
+          <div class="stack-role-item">
+            <div class="stack-role-label">🏛️ Arquiteto / Planner</div>
+            <strong style="color: #38bdf8;">${st.planner}</strong>
+          </div>
+          <div class="stack-role-item">
+            <div class="stack-role-label">⚡ Implementador / Workers</div>
+            <strong style="color: #34d399;">${st.executor}</strong>
+          </div>
+          <div class="stack-role-item">
+            <div class="stack-role-label">🔍 Revisor / Edge Cases</div>
+            <strong style="color: #f59e0b;">${st.reviewer}</strong>
+          </div>
+        </div>
+
+        <div style="font-size: 0.8rem; color: #34d399; margin-bottom: 4px;">
+          <strong>Vantagens:</strong> ${st.pros}
+        </div>
+        <div style="font-size: 0.8rem; color: #f87171;">
+          <strong>Atenção / Limites:</strong> ${st.cons}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function updatePlanCompareTray() {
+    const tray = document.getElementById('planCompareTray');
+    const countLabel = document.getElementById('planCompareCount');
+    if (!tray || !countLabel) return;
+
+    const list = AppState.selectedPlanCompare || [];
+    if (list.length > 0) {
+      tray.style.display = 'block';
+      countLabel.textContent = `${list.length} plano(s) selecionado(s) para comparação (máx 4)`;
+    } else {
+      tray.style.display = 'none';
+    }
+  }
+
+  function openPlanCompareModal() {
+    const modal = document.getElementById('planCompareModalOverlay');
+    const thead = document.getElementById('planCompareHeaderRow');
+    const tbody = document.getElementById('planCompareTableBody');
+    if (!modal || !thead || !tbody) return;
+
+    const planIds = AppState.selectedPlanCompare || [];
+    if (planIds.length < 2) {
+      showToast('Selecione ao menos 2 planos para comparar lado a lado.');
+      return;
+    }
+
+    const plans = planIds.map(id => SUBSCRIPTION_PLANS_DATA.find(p => p.id === id)).filter(Boolean);
+
+    thead.innerHTML = `<th>Atributo</th>` + plans.map(p => `
+      <th style="min-width: 200px;">
+        <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">${p.provider}</div>
+        <div style="font-size: 1rem; color: var(--text-primary);">${p.planName}</div>
+      </th>
+    `).join('');
+
+    const rows = [
+      { label: 'Custo Mensal (BRL / FX 03/09)', fn: p => p.localizedPricing && p.localizedPricing.BRL && p.localizedPricing.BRL.official ? `<strong class="highlight-green">R$ ${p.localizedPricing.BRL.price.toFixed(2).replace('.', ',')} (Oficial)</strong>` : `~ R$ ${FX_HELPERS.convertUsdToBrl(p.monthlyPriceUsd).toFixed(2).replace('.', ',')}` },
+      { label: 'Preço Original USD / CNY', fn: p => p.nativeCurrency === 'CNY' ? `¥ ${p.monthlyPriceCny} / mo (~ US$ ${p.monthlyPriceUsd.toFixed(2)})` : `US$ ${p.monthlyPriceUsd.toFixed(2)} / mo` },
+      { label: 'Público Alvo', fn: p => p.targetAudience === 'team' ? '🏢 Equipe / Corporativo' : '👤 Individual / Dev' },
+      { label: 'Franquia & Pools', fn: p => p.quotaDescription },
+      { label: 'Modelos Principais', fn: p => (p.includedModels || []).join(', ') },
+      { label: 'Overage Excedente', fn: p => p.overageAllowed ? '✅ Permitido (on-demand ou créditos)' : '❌ Não permitido (bloqueia até reset)' },
+      { label: 'Créditos de API Inclusos?', fn: p => p.apiIncluded ? '✅ Sim (endpoint direto)' : '❌ Não (apenas app / IDE)' },
+      { label: 'Privacidade & ZDR', fn: p => p.privacyNotes },
+      { label: 'Melhor Adequação', fn: p => p.bestFor }
+    ];
+
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td style="font-weight: 600; color: var(--text-secondary);">${r.label}</td>
+        ${plans.map(p => `<td>${r.fn(p)}</td>`).join('')}
+      </tr>
+    `).join('');
+
+    modal.classList.add('active');
+  }
+
+  function closePlanCompareModal() {
+    const modal = document.getElementById('planCompareModalOverlay');
+    if (modal) modal.classList.remove('active');
+  }
+
+  // ==========================================
+  // 18. VIEW: HISTÓRICO, LINHAGENS & TIMELINE
+  // ==========================================
+  function renderHistoryView() {
+    if (typeof MODEL_HISTORY_DATA === 'undefined') return;
+
+    const currentTab = AppState.activeHistoryTab || 'lineages';
+
+    document.querySelectorAll('.htab-panel').forEach(p => p.style.display = 'none');
+    document.querySelectorAll('.history-tabs-nav .btn-toggle').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('data-htab') === currentTab);
+    });
+
+    const activePanel = document.getElementById(`htab-${currentTab}`);
+    if (activePanel) activePanel.style.display = 'block';
+
+    if (currentTab === 'lineages') {
+      const container = document.getElementById('lineagesListContainer');
+      if (container) {
+        container.innerHTML = MODEL_HISTORY_DATA.lineages.map(lin => `
+          <div class="lineage-family-card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div>
+                <h3 style="color: var(--accent-cyan); margin-bottom: 4px;">${lin.familyName}</h3>
+                <p style="font-size: 0.85rem; color: var(--text-secondary);">${lin.description}</p>
+              </div>
+            </div>
+
+            <div class="lineage-flow">
+              ${lin.nodes.map((n, idx) => `
+                <div class="lineage-node" onclick="location.hash='#model/${n.modelId}'">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <strong style="color: var(--text-primary); font-size: 0.95rem;">${n.name}</strong>
+                    <span class="badge-tag ${n.status === 'active' ? 'badge-frontier' : n.status === 'superseded' ? 'badge-warning' : 'badge-subdollar'}">${n.status}</span>
+                  </div>
+                  <div style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 6px;">Lançamento: ${n.releaseDate}</div>
+                  <div style="font-size: 0.78rem; color: var(--text-secondary);">${n.notes}</div>
+                </div>
+                ${idx < lin.nodes.length - 1 ? `<span class="lineage-arrow">➔</span>` : ''}
+              `).join('')}
+            </div>
+
+            ${(lin.connections || []).length > 0 ? `
+              <div style="margin-top: 14px; font-size: 0.82rem; color: var(--text-muted);">
+                <strong>Evoluções registradas:</strong>
+                <ul style="margin-top: 4px; padding-left: 18px; color: var(--text-secondary);">
+                  ${lin.connections.map(c => `<li><strong>${c.from} ➔ ${c.to}:</strong> ${c.improvements}</li>`).join('')}
+                </ul>
+              </div>
+            ` : ''}
+          </div>
+        `).join('');
+      }
+    } else if (currentTab === 'timeline') {
+      const container = document.getElementById('timelineStreamContainer');
+      if (container) {
+        const filter = AppState.activeTimelineFilter || 'all';
+        const events = MODEL_HISTORY_DATA.events.filter(ev => filter === 'all' || ev.type === filter);
+
+        container.innerHTML = events.map(ev => `
+          <div class="timeline-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="badge-tag badge-frontier" style="font-size: 0.75rem;">${ev.date}</span>
+                <span class="badge-tag badge-subdollar" style="font-size: 0.72rem; text-transform: uppercase;">${ev.type}</span>
+              </div>
+              <strong style="color: var(--accent-cyan); cursor: pointer;" onclick="location.hash='#model/${ev.modelId}'">${ev.modelId}</strong>
+            </div>
+            <h4 style="color: var(--text-primary); margin-bottom: 6px; font-size: 1rem;">${ev.title}</h4>
+            <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.45; margin-bottom: 8px;">${ev.description}</p>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Fonte auditada: <code>${ev.sourceId}</code></div>
+          </div>
+        `).join('');
+      }
+    } else if (currentTab === 'benchmarks') {
+      const tbody = document.getElementById('benchmarkHistoryTableBody');
+      if (tbody && typeof BENCHMARK_HISTORY_DATA !== 'undefined') {
+        tbody.innerHTML = BENCHMARK_HISTORY_DATA.map(b => `
+          <tr>
+            <td><code>${b.date}</code></td>
+            <td><strong style="color: var(--text-primary); cursor: pointer;" onclick="location.hash='#model/${b.modelId}'">${b.modelId}</strong></td>
+            <td><strong>${b.benchmark} ${b.benchmarkVersion}</strong></td>
+            <td><strong class="highlight-green">${b.score.toFixed(1)}%</strong></td>
+            <td>${b.confidenceInterval ? `±${b.confidenceInterval}pp` : '—'}</td>
+            <td>${b.costPerTaskUsd ? `$${b.costPerTaskUsd.toFixed(2)}` : '—'}</td>
+            <td>${b.tokensPerTask ? b.tokensPerTask.toLocaleString() : '—'}</td>
+            <td>${b.agentSteps || '—'}</td>
+            <td><span class="badge-tag ${b.sourceType === 'official' ? 'badge-frontier' : 'badge-subdollar'}">${b.sourceType}</span></td>
+            <td><span style="font-size: 0.78rem; color: var(--text-muted);">${b.sourceId}</span></td>
+          </tr>
+        `).join('');
+      }
+    }
+  }
+
+  // ==========================================
+  // 19. VIEW: CASOS DE USO REAIS & PROJETOS
+  // ==========================================
+  function renderUseCasesView() {
+    if (typeof USE_CASE_COMPARISON_DATA === 'undefined') return;
+
+    const chipsContainer = document.getElementById('useCaseChipsScroll');
+    if (chipsContainer) {
+      chipsContainer.innerHTML = USE_CASE_COMPARISON_DATA.useCases.map(uc => `
+        <button class="use-case-chip ${uc.id === AppState.activeUseCaseId ? 'active' : ''}" data-uc-id="${uc.id}">
+          <span>${uc.icon}</span> ${uc.title}
+        </button>
+      `).join('');
+    }
+
+    const activeCase = USE_CASE_COMPARISON_DATA.useCases.find(uc => uc.id === AppState.activeUseCaseId) || USE_CASE_COMPARISON_DATA.useCases[0];
+    const contentContainer = document.getElementById('useCaseActiveContent');
+    if (contentContainer && activeCase) {
+      contentContainer.innerHTML = `
+        <div class="content-box" style="margin-bottom: 24px;">
+          <div class="box-header">
+            <div>
+              <h3>${activeCase.icon} ${activeCase.title}</h3>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px;">${activeCase.description}</p>
+            </div>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;">
+            <span style="font-size: 0.78rem; color: var(--text-muted); align-self: center;">Atributos críticos avaliados:</span>
+            ${activeCase.keyAttributes.map(a => `<span class="badge-tag badge-frontier" style="font-size: 0.74rem;">${a}</span>`).join('')}
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 50px;">Rank</th>
+                  <th>Modelo</th>
+                  <th>Fit Score (Calibrado)</th>
+                  <th>Papel Ideal no Projeto</th>
+                  <th>Justificativa Técnica & Evidências</th>
+                  <th style="width: 90px;">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${activeCase.rankings.map(r => `
+                  <tr>
+                    <td><strong>#${r.rank}</strong></td>
+                    <td>
+                      <strong style="color: var(--text-primary); cursor: pointer;" onclick="location.hash='#model/${r.modelId}'">${r.modelName}</strong>
+                    </td>
+                    <td>
+                      <span class="badge-tag ${r.fitScore >= 95 ? 'badge-frontier' : r.fitScore >= 90 ? 'badge-sweetspot' : 'badge-subdollar'}">
+                        ${r.fitScore} / 100
+                      </span>
+                    </td>
+                    <td><strong style="color: var(--accent-cyan); font-size: 0.84rem;">${r.role}</strong></td>
+                    <td style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.4;">${r.rationale}</td>
+                    <td>
+                      <button class="btn-table-action" onclick="location.hash='#model/${r.modelId}'" title="Ver Dossiê">
+                        🔍 Dossiê
+                      </button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    const recipesContainer = document.getElementById('recipesGridContainer');
+    if (recipesContainer) {
+      recipesContainer.innerHTML = USE_CASE_COMPARISON_DATA.orchestrationRecipes.map(rc => `
+        <div class="orchestration-recipe-card">
+          <h4 style="color: var(--accent-cyan); margin-bottom: 4px;">${rc.title}</h4>
+          <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px;">Foco: ${rc.target}</div>
+          <div class="recipe-steps-list">
+            ${rc.flow.map(s => `
+              <div class="recipe-flow-step">
+                <span class="recipe-step-num">${s.step}</span>
+                <div>
+                  <strong style="color: var(--text-primary); font-size: 0.82rem;">${s.role}:</strong>
+                  <span style="color: var(--accent-cyan); font-size: 0.82rem;">${s.model}</span>
+                  <div style="color: var(--text-secondary); font-size: 0.76rem; margin-top: 2px;">${s.action}</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          <div style="margin-top: 12px; padding: 8px 12px; background: rgba(16, 185, 129, 0.08); border-radius: var(--radius-sm); font-size: 0.78rem; color: #34d399;">
+            💡 <strong>Impacto Orçamentário:</strong> ${rc.estimatedCostVsSingleModel}
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+
+  // ==========================================
+  // 20. VIEW: COMUNIDADE & BEHAVIOR
+  // ==========================================
+  function renderCommunityView() {
+    if (typeof COMMUNITY_REPORTS_DATA === 'undefined') return;
+
+    const currentTab = AppState.activeCommunityTab || 'divergences';
+
+    document.querySelectorAll('.ctab-panel').forEach(p => p.style.display = 'none');
+    document.querySelectorAll('.community-tabs-nav .btn-toggle').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('data-ctab') === currentTab);
+    });
+
+    const activePanel = document.getElementById(`ctab-${currentTab}`);
+    if (activePanel) activePanel.style.display = 'block';
+
+    if (currentTab === 'divergences') {
+      const container = document.getElementById('divergencesGridContainer');
+      if (container && typeof BENCHMARK_VS_COMMUNITY_DIVERGENCES !== 'undefined') {
+        container.innerHTML = BENCHMARK_VS_COMMUNITY_DIVERGENCES.map(d => `
+          <div class="divergence-card">
+            <div class="divergence-card-header">
+              <h4 style="color: var(--text-primary); margin: 0;">${d.modelName}</h4>
+              <button class="btn-table-action" onclick="location.hash='#model/${d.modelId}'">🔍 Dossiê</button>
+            </div>
+            <div class="divergence-claim">
+              <div style="font-size: 0.72rem; text-transform: uppercase; color: #38bdf8; font-weight: bold; margin-bottom: 2px;">📈 O que o Benchmark Afirma:</div>
+              <div style="color: var(--text-primary);">${d.benchmarkClaim}</div>
+            </div>
+            <div class="divergence-reality">
+              <div style="font-size: 0.72rem; text-transform: uppercase; color: #fbbf24; font-weight: bold; margin-bottom: 2px;">⚠️ O que a Comunidade Vivencia:</div>
+              <div style="color: var(--text-primary);">${d.communityReality}</div>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">
+              🎯 <strong>Veredito Técnico:</strong> ${d.verdict}
+            </div>
+          </div>
+        `).join('');
+      }
+    } else if (currentTab === 'behavior') {
+      const container = document.getElementById('behaviorModelsGrid');
+      if (container && typeof ENGINEERING_BEHAVIOR_DATA !== 'undefined') {
+        const models = ENGINEERING_BEHAVIOR_DATA.models;
+        const dims = ENGINEERING_BEHAVIOR_DATA.dimensions;
+
+        container.innerHTML = Object.keys(models).map(mId => {
+          const m = models[mId];
+          return `
+            <div class="behavior-model-card">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <h4 style="color: var(--accent-cyan); margin: 0; cursor: pointer;" onclick="location.hash='#model/${mId}'">${m.modelName}</h4>
+                <span class="badge-tag badge-subdollar" style="font-size: 0.7rem;">E — Calibrado</span>
+              </div>
+              <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.35;">${m.profileSummary}</p>
+
+              <div>
+                ${dims.map(d => {
+                  const val = m[d.key];
+                  if (typeof val === 'undefined') return '';
+                  const barColor = d.isInverted 
+                    ? (val > 60 ? '#f87171' : val > 30 ? '#fbbf24' : '#34d399')
+                    : (val >= 90 ? '#38bdf8' : val >= 75 ? '#34d399' : '#fbbf24');
+                  return `
+                    <div class="behavior-metric-row" title="${d.description}">
+                      <div class="behavior-metric-label">${d.label}:</div>
+                      <div class="behavior-bar-track">
+                        <div class="behavior-bar-fill" style="width: ${val}%; background: ${barColor};"></div>
+                      </div>
+                      <div class="behavior-metric-val">${val}</div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    } else if (currentTab === 'reports') {
+      const container = document.getElementById('communityReportsList');
+      if (container) {
+        const query = (AppState.communitySearchQuery || '').toLowerCase().trim();
+        const reports = COMMUNITY_REPORTS_DATA.filter(r => {
+          if (!query) return true;
+          const text = `${r.summary} ${(r.models || []).join(' ')} ${r.platform} ${r.harness} ${r.taskCategory}`.toLowerCase();
+          return text.includes(query);
+        });
+
+        container.innerHTML = reports.map(r => `
+          <div class="community-report-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="badge-tag badge-frontier">${r.date}</span>
+                <span class="badge-tag badge-subdollar">${r.platform}</span>
+                <span class="badge-tag badge-warning">Harness: ${r.harness}</span>
+              </div>
+              <div>
+                ${(r.models || []).map(m => `<strong style="color: var(--accent-cyan); margin-left: 6px; cursor: pointer;" onclick="location.hash='#model/${m}'">${m}</strong>`).join(', ')}
+              </div>
+            </div>
+            <h4 style="color: var(--text-primary); margin-bottom: 8px; font-size: 0.95rem;">${r.summary}</h4>
+            <div style="margin-bottom: 8px;">
+              <div style="font-size: 0.76rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;">Observações Auditadas:</div>
+              <ul style="padding-left: 18px; margin: 6px 0 0 0; font-size: 0.8rem; color: var(--text-secondary);">
+                ${(r.observations || []).map(o => `<li>${o}</li>`).join('')}
+              </ul>
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">
+              ⚠️ <strong>Ressalvas:</strong> ${r.caveats} · Confiança: <code>${r.confidence}</code>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+  }
+
+  // ==========================================
+  // 21. VIEW: PLATAFORMAS & OPENCODE GO
+  // ==========================================
+  function renderPlatformsView() {
+    if (typeof PLATFORM_MODEL_CATALOG === 'undefined') return;
+
+    const tbodyGo = document.getElementById('opencodeDetailedTableBody');
+    if (tbodyGo && PLATFORM_MODEL_CATALOG.opencodeGo) {
+      tbodyGo.innerHTML = PLATFORM_MODEL_CATALOG.opencodeGo.catalog.map(item => `
+        <tr>
+          <td><strong>${item.displayName}</strong></td>
+          <td>
+            ${item.canonicalId ? `
+              <strong style="color: var(--accent-cyan); cursor: pointer;" onclick="location.hash='#model/${item.canonicalId}'">${item.canonicalId}</strong>
+            ` : '<span style="color: var(--text-muted);">Exclusivo OpenCode</span>'}
+          </td>
+          <td><span class="badge-tag ${item.multiplier <= 0.5 ? 'badge-subdollar' : item.multiplier <= 1.5 ? 'badge-sweetspot' : 'badge-danger'}">${item.multiplier}x</span></td>
+          <td><strong>${item.req5h.toLocaleString()}</strong> req</td>
+          <td><strong>${item.reqWeek.toLocaleString()}</strong> req</td>
+          <td><strong class="highlight-green">${item.reqMonth.toLocaleString()}</strong> req</td>
+          <td>${item.context}</td>
+          <td><span class="badge-tag ${item.status === 'active' ? 'badge-frontier' : item.status === 'preview' ? 'badge-warning' : 'badge-subdollar'}">${item.status}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    const tbodyMatrix = document.getElementById('platformMatrixTableBody');
+    if (tbodyMatrix && PLATFORM_MODEL_CATALOG.availabilityMatrix) {
+      const query = (AppState.platformSearchQuery || '').toLowerCase().trim();
+      const rows = PLATFORM_MODEL_CATALOG.availabilityMatrix.filter(r => {
+        if (!query) return true;
+        return r.name.toLowerCase().includes(query) || r.modelId.toLowerCase().includes(query);
+      });
+
+      tbodyMatrix.innerHTML = rows.map(r => `
+        <tr>
+          <td>
+            <strong style="color: var(--text-primary); cursor: pointer;" onclick="location.hash='#model/${r.modelId}'">${r.name}</strong>
+          </td>
+          <td style="font-size: 0.8rem;">${r.directApi}</td>
+          <td style="font-size: 0.8rem;">${r.cursor}</td>
+          <td style="font-size: 0.8rem;">${r.opencode}</td>
+          <td style="font-size: 0.8rem;">${r.antigravity}</td>
+          <td style="font-size: 0.8rem;">${r.openrouter}</td>
+          <td style="font-size: 0.8rem;">${r.local}</td>
+        </tr>
+      `).join('');
+    }
+  }
+
+  // ==========================================
   // 17. QUICK INSPECTOR DRAWER
   // ==========================================
   let _lastActiveElementBeforeDrawer = null;
@@ -3225,6 +4249,15 @@
     closeQuickInspector,
     closeDrawer: closeQuickInspector,
     getState: () => AppState,
+    selectBudgetStackForPlan(planId) {
+      location.hash = '#plans';
+      setTimeout(() => {
+        const box = document.querySelector('#plansCardsGrid');
+        if (box) box.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    },
+    openPlanCompareModal,
+    closePlanCompareModal,
     openComparatorWith(modelId) {
       AppState.comparatorModels[0] = modelId;
       location.hash = '#comparator';

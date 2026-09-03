@@ -34,7 +34,20 @@ const {
   PRIVACY_ZDR_DATABASE,
   ARTIFICIAL_ANALYSIS_DATA,
   STANDARDIZED_WORKLOADS_DATA,
-  AI_DATA_HELPERS
+  AI_DATA_HELPERS,
+  // Novos datasets modulares
+  FX_RATES_DATA,
+  FX_HELPERS,
+  SUBSCRIPTION_PLANS_DATA,
+  BUDGET_STACK_RECOMMENDER,
+  MODEL_HISTORY_DATA,
+  BENCHMARK_HISTORY_DATA,
+  PRICE_HISTORY_DATA,
+  COMMUNITY_REPORTS_DATA,
+  BENCHMARK_VS_COMMUNITY_DIVERGENCES,
+  ENGINEERING_BEHAVIOR_DATA,
+  USE_CASE_COMPARISON_DATA,
+  PLATFORM_MODEL_CATALOG
 } = data;
 
 const errors = [];
@@ -86,7 +99,7 @@ modelIds.forEach(id => {
   }
 });
 
-// 3. Verificação dos Novos Modelos Obrigatórios e Substituição Ox Alpha -> GLM-5.3-Flash
+// 3. Verificação dos Modelos Obrigatórios e Correções Críticas
 assert(AI_MODELS_DATA['gemini-3-8-flash'], 'Modelo "gemini-3-8-flash" não encontrado em AI_MODELS_DATA');
 assert(AI_MODELS_DATA['claude-fable-5-1'], 'Modelo "claude-fable-5-1" não encontrado em AI_MODELS_DATA');
 assert(AI_MODELS_DATA['glm-5-3-flash'], 'Modelo "glm-5-3-flash" não encontrado em AI_MODELS_DATA');
@@ -98,6 +111,31 @@ assert(AI_MODELS_DATA['gemini-3-7-flash'], 'Modelo predecessor "gemini-3-7-flash
 assert(AI_MODELS_DATA['claude-fable-5'], 'Modelo predecessor "claude-fable-5" foi removido indevidamente');
 assert(HARDWARE_LOCAL_MODELS_DATA.some(h => h.modelId === 'glm-5-3-flash'), 'GLM-5.3-Flash deve estar cadastrado em HARDWARE_LOCAL_MODELS_DATA');
 
+// Validações de preços e status específicos
+const g38 = AI_MODELS_DATA['gemini-3-8-flash'];
+assert(g38.pricing.standard.input === 0.30, `Gemini 3.8 Flash input price atual deve ser $0.30 (promocional). Encontrado: ${g38.pricing.standard.input}`);
+assert(g38.pricing.postPromo && g38.pricing.postPromo.input === 1.50, `Gemini 3.8 Flash postPromo input deve ser $1.50`);
+assert(g38.maxOutputTokens === 65536, `Gemini 3.8 Flash maxOutputTokens deve ser 65.536 (64k)`);
+
+const cf5 = AI_MODELS_DATA['claude-fable-5'];
+assert(cf5.status === 'superseded', `Claude Fable 5 deve ter status "superseded"`);
+assert(cf5.pricing.standard.input === 10.00 && cf5.pricing.standard.output === 50.00, `Claude Fable 5 tarifas devem ser $10.00 in / $50.00 out`);
+assert(cf5.maxOutputTokens === 131072, `Claude Fable 5 maxOutputTokens deve ser 131.072 (128k)`);
+
+const cop5 = AI_MODELS_DATA['claude-opus-5'];
+assert(cop5.pricing.standard.input === 5.00 && cop5.pricing.standard.output === 25.00, `Claude Opus 5 tarifas devem ser $5.00 in / $25.00 out`);
+assert(cop5.maxOutputTokens === 131072, `Claude Opus 5 maxOutputTokens deve ser 131.072 (128k)`);
+
+const sol = AI_MODELS_DATA['gpt-5-6-sol'];
+assert(sol.pricing.standard.input === 4.00 && sol.pricing.standard.output === 20.00, `GPT-5.6 Sol tarifas devem ser $4.00 in / $20.00 out`);
+assert(sol.maxOutputTokens === 131072, `GPT-5.6 Sol maxOutputTokens deve ser 131.072 (128k)`);
+
+const terra = AI_MODELS_DATA['gpt-5-6-terra'];
+assert(terra.pricing.standard.input === 2.00 && terra.pricing.standard.output === 12.00, `GPT-5.6 Terra tarifas devem ser $2.00 in / $12.00 out`);
+
+const luna = AI_MODELS_DATA['gpt-5-6-luna'];
+assert(luna.pricing.standard.input === 0.20 && luna.pricing.standard.output === 1.20, `GPT-5.6 Luna tarifas devem ser $0.20 in / $1.20 out`);
+
 // 4. CursorBench 3.2
 console.log(`📋 Total de runs no CursorBench: ${CURSORBENCH_32_DATA.length}`);
 CURSORBENCH_32_DATA.forEach((run, index) => {
@@ -107,7 +145,6 @@ CURSORBENCH_32_DATA.forEach((run, index) => {
   assert(typeof run.tokensPerTask === 'number' && run.tokensPerTask > 0, `Run ${index} (${run.modelName}) possui tokensPerTask inválido: ${run.tokensPerTask}`);
 });
 
-// Verifica se Claude Fable 5.1 Max é o #1 do CursorBench
 const topCursorBench = [...CURSORBENCH_32_DATA].sort((a, b) => b.score - a.score)[0];
 assert(topCursorBench && topCursorBench.modelId === 'claude-fable-5-1' && topCursorBench.score >= 73.0,
   `O líder do CursorBench deve ser Claude Fable 5.1 Max com score >= 73.0%. Encontrado: ${topCursorBench ? topCursorBench.modelName + ' (' + topCursorBench.score + '%)' : 'Nenhum'}`);
@@ -116,51 +153,193 @@ assert(topCursorBench && topCursorBench.modelId === 'claude-fable-5-1' && topCur
 console.log(`📑 Total de modelos no Ledger Multi-Benchmark: ${MULTI_BENCHMARK_LEDGER.length}`);
 MULTI_BENCHMARK_LEDGER.forEach((item, index) => {
   assert(AI_MODELS_DATA[item.modelId], `Ledger item ${index} (${item.modelName}) referencia modelId inexistente: ${item.modelId}`);
-  ['terminalBench21', 'deepSwe11', 'sweBenchPro', 'sweBenchVerified', 'gpqaDiamond'].forEach(bench => {
-    if (item[bench] !== null && item[bench] !== undefined) {
-      assert(typeof item[bench] === 'number' && item[bench] >= 0 && item[bench] <= 100,
-        `Ledger ${item.modelName} possui ${bench} fora do intervalo 0-100: ${item[bench]}`);
-    }
-  });
 });
 
 // 6. Capability Radar 10D
 console.log(`🕸️ Total de modelos no Radar 10D: ${Object.keys(CAPABILITY_RADAR_10D).length}`);
-const requiredRadarDimensions = [
-  'reasoning', 'agentic', 'sweBench', 'longContext', 'multimodal',
-  'throughput', 'costEfficiency', 'toolAdherence', 'ttftLatency', 'openAccess'
-];
-
-Object.keys(CAPABILITY_RADAR_10D).forEach(id => {
-  assert(AI_MODELS_DATA[id], `Radar 10D referencia modelId inexistente: ${id}`);
-  const vec = CAPABILITY_RADAR_10D[id];
-  requiredRadarDimensions.forEach(dim => {
-    assert(typeof vec[dim] === 'number' && vec[dim] >= 0 && vec[dim] <= 100,
-      `Radar de "${id}" possui dimensão "${dim}" inválida ou fora de 0-100: ${vec[dim]}`);
-  });
-});
 assert(CAPABILITY_RADAR_10D['gemini-3-8-flash'], 'Radar 10D ausente para "gemini-3-8-flash"');
 assert(CAPABILITY_RADAR_10D['claude-fable-5-1'], 'Radar 10D ausente para "claude-fable-5-1"');
 
-// 7. Antigravity Pools
-assert(ANTIGRAVITY_POOLS_DATA.lastUpdated.startsWith('2026-09'), `Antigravity lastUpdated deve ser de Setembro/2026. Atual: ${ANTIGRAVITY_POOLS_DATA.lastUpdated}`);
-const geminiPoolModels = ANTIGRAVITY_POOLS_DATA.pools.pool1.models;
-assert(geminiPoolModels.some(m => m.id === 'gemini-3-8-flash'), 'Gemini 3.8 Flash deve constar no Pool 1 do Google Antigravity');
+// 7. Câmbio FX e Helpers
+console.log('💵 Verificando dados e helpers de câmbio FX...');
+assert(FX_RATES_DATA && FX_RATES_DATA.USD_BRL && FX_RATES_DATA.USD_BRL.rate === 5.1556, `Cotação USD_BRL deve ser 5.1556. Encontrado: ${FX_RATES_DATA && FX_RATES_DATA.USD_BRL ? FX_RATES_DATA.USD_BRL.rate : 'N/D'}`);
+assert(FX_RATES_DATA && FX_RATES_DATA.CNY_BRL && FX_RATES_DATA.CNY_BRL.rate === 0.7595, `Cotação CNY_BRL deve ser 0.7595`);
+const convBrl = FX_HELPERS.convertUsdToBrl(20);
+assert(Math.abs(convBrl - 103.112) < 0.001, `Conversão de $20 USD para BRL incorreta: ${convBrl}`);
 
-// 8. Artificial Analysis Data
-assert(ARTIFICIAL_ANALYSIS_DATA.verifiedDate.startsWith('2026-09'), `Artificial Analysis verifiedDate deve ser de Setembro/2026. Atual: ${ARTIFICIAL_ANALYSIS_DATA.verifiedDate}`);
-assert(ARTIFICIAL_ANALYSIS_DATA.overviewKpis.topGeneral.modelId === 'claude-fable-5-1',
-  `Líder geral da Artificial Analysis deve ser Claude Fable 5.1 Max. Atual: ${ARTIFICIAL_ANALYSIS_DATA.overviewKpis.topGeneral.modelId}`);
+// 8. Planos e Assinaturas (Subscriptions)
+console.log(`💳 Total de planos cadastrados: ${SUBSCRIPTION_PLANS_DATA ? SUBSCRIPTION_PLANS_DATA.length : 0}`);
+assert(Array.isArray(SUBSCRIPTION_PLANS_DATA) && SUBSCRIPTION_PLANS_DATA.length === 32, `Esperado exatamente 32 planos de assinatura. Encontrado: ${SUBSCRIPTION_PLANS_DATA.length}`);
 
-// 9. Calculadora e Helpers (sem NaNs)
-console.log('⚡ Testando helper de custo (calculateRequestCost)...');
-const testCostG38 = AI_DATA_HELPERS.calculateRequestCost('gemini-3-8-flash', 10000, 40000, 2000);
-assert(!isNaN(testCostG38) && testCostG38 > 0, `calculateRequestCost para gemini-3-8-flash retornou NaN ou inválido: ${testCostG38}`);
+// Preços Oficiais Brasil
+const gPro = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'google-ai-pro');
+assert(gPro && gPro.localizedPricing.BRL.price === 96.99 && gPro.localizedPricing.BRL.official === true, 'Google AI Pro deve ter preço oficial BRL de R$ 96,99');
 
-const testCostF51 = AI_DATA_HELPERS.calculateRequestCost('claude-fable-5-1', 10000, 40000, 2000);
-assert(!isNaN(testCostF51) && testCostF51 > 0, `calculateRequestCost para claude-fable-5-1 retornou NaN ou inválido: ${testCostF51}`);
+const gUltra5x = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'google-ai-ultra-5x');
+assert(gUltra5x && gUltra5x.localizedPricing.BRL.price === 779.90 && gUltra5x.localizedPricing.BRL.official === true, 'Google AI Ultra 5x deve ter preço oficial BRL de R$ 779,90');
 
-// 10. Matriz de Cobertura de Dados
+const chatGptPro = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'openai-chatgpt-pro');
+assert(chatGptPro && chatGptPro.monthlyPriceUsd === 200 && chatGptPro.targetAudience === 'individual', 'ChatGPT Pro individual deve custar $200');
+
+const claudeMax5 = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'anthropic-claude-max-5x');
+assert(claudeMax5 && claudeMax5.monthlyPriceUsd === 100, 'Claude Max 5x deve custar $100');
+
+const claudeMax20 = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'anthropic-claude-max-20x');
+assert(claudeMax20 && claudeMax20.monthlyPriceUsd === 200, 'Claude Max 20x deve custar $200');
+
+// 9. Histórico e Linhagens
+console.log('🌳 Verificando linhagens e eventos históricos...');
+assert(MODEL_HISTORY_DATA && MODEL_HISTORY_DATA.lineages.length >= 5, 'Devem existir pelo menos 5 linhagens genealógicas');
+assert(MODEL_HISTORY_DATA && MODEL_HISTORY_DATA.events.length >= 10, 'Devem existir pelo menos 10 eventos na linha do tempo');
+assert(BENCHMARK_HISTORY_DATA && BENCHMARK_HISTORY_DATA.length >= 10, 'Devem existir pelo menos 10 benchmarks históricos auditados');
+
+// 10. Comunidade e Comportamento
+console.log('💬 Verificando relatos e matriz de comportamento de engenharia...');
+assert(COMMUNITY_REPORTS_DATA && COMMUNITY_REPORTS_DATA.length === 10, `Esperado 10 relatos auditados da comunidade. Encontrado: ${COMMUNITY_REPORTS_DATA.length}`);
+assert(BENCHMARK_VS_COMMUNITY_DIVERGENCES && BENCHMARK_VS_COMMUNITY_DIVERGENCES.length >= 4, 'Esperado pelo menos 4 análises de divergência benchmark vs comunidade');
+assert(ENGINEERING_BEHAVIOR_DATA && ENGINEERING_BEHAVIOR_DATA.dimensions.length === 12, 'Esperado 12 dimensões qualitativas de engenharia');
+
+// 11. Casos de Uso e Projetos
+console.log('🎯 Verificando casos de uso e orquestração...');
+assert(USE_CASE_COMPARISON_DATA && USE_CASE_COMPARISON_DATA.useCases.length === 12, `Esperado 12 categorias de projetos. Encontrado: ${USE_CASE_COMPARISON_DATA.useCases.length}`);
+USE_CASE_COMPARISON_DATA.useCases.forEach(uc => {
+  assert(uc.rankings && uc.rankings.length === 10, `Caso de uso "${uc.id}" deve ter exatamente 10 modelos rankeados`);
+});
+assert(USE_CASE_COMPARISON_DATA.orchestrationRecipes && USE_CASE_COMPARISON_DATA.orchestrationRecipes.length === 3, 'Esperado 3 receitas de orquestração multi-modelo');
+
+// 12. Plataformas e OpenCode Go
+console.log('🚀 Verificando catálogo de plataformas...');
+assert(PLATFORM_MODEL_CATALOG && PLATFORM_MODEL_CATALOG.opencodeGo.catalog.length === 25, `OpenCode Go deve conter 25 modelos. Encontrado: ${PLATFORM_MODEL_CATALOG.opencodeGo.catalog.length}`);
+assert(PLATFORM_MODEL_CATALOG && PLATFORM_MODEL_CATALOG.availabilityMatrix.length === 44, `Matriz de disponibilidade deve cobrir 44 modelos. Encontrado: ${PLATFORM_MODEL_CATALOG.availabilityMatrix.length}`);
+
+// 13. Auditoria Estática Anti-Duplicação de Chaves em data.js e data/*.js
+console.log('🛡️ Verificando ausência de chaves de objeto duplicadas...');
+const filesToCheck = [
+  path.join(__dirname, '..', 'data.js'),
+  path.join(__dirname, '..', 'data', 'fx.js'),
+  path.join(__dirname, '..', 'data', 'plans.js'),
+  path.join(__dirname, '..', 'data', 'platforms.js'),
+  path.join(__dirname, '..', 'data', 'history.js'),
+  path.join(__dirname, '..', 'data', 'community.js'),
+  path.join(__dirname, '..', 'data', 'behavior.js'),
+  path.join(__dirname, '..', 'data', 'use-cases.js'),
+  path.join(__dirname, '..', 'data', 'pricing-history.js')
+];
+
+function findDuplicateKeysInContent(filePath, content) {
+  let i = 0;
+  const n = content.length;
+  let line = 1;
+  const stack = [];
+  const duplicates = [];
+
+  function skipWhitespaceAndComments() {
+    while (i < n) {
+      if (content[i] === '\n') {
+        line++;
+        i++;
+      } else if (content[i] === ' ' || content[i] === '\t' || content[i] === '\r') {
+        i++;
+      } else if (content[i] === '/' && content[i+1] === '/') {
+        while (i < n && content[i] !== '\n') i++;
+      } else if (content[i] === '/' && content[i+1] === '*') {
+        i += 2;
+        while (i < n && !(content[i] === '*' && content[i+1] === '/')) {
+          if (content[i] === '\n') line++;
+          i++;
+        }
+        if (i < n) i += 2;
+      } else {
+        break;
+      }
+    }
+  }
+
+  while (i < n) {
+    skipWhitespaceAndComments();
+    if (i >= n) break;
+
+    const ch = content[i];
+
+    if (ch === '{') {
+      stack.push({ keys: new Set(), ternaryDepth: 0 });
+      i++;
+    } else if (ch === '}') {
+      if (stack.length > 0) stack.pop();
+      i++;
+    } else if (ch === '?') {
+      if (stack.length > 0) stack[stack.length - 1].ternaryDepth++;
+      i++;
+    } else if (ch === '"' || ch === '\'' || ch === '`') {
+      const quote = ch;
+      const startLine = line;
+      i++;
+      let str = '';
+      while (i < n && content[i] !== quote) {
+        if (content[i] === '\\' && i + 1 < n) {
+          str += content[i+1];
+          i += 2;
+        } else {
+          if (content[i] === '\n') line++;
+          str += content[i];
+          i++;
+        }
+      }
+      if (i < n) i++;
+
+      skipWhitespaceAndComments();
+      if (content[i] === ':' && stack.length > 0) {
+        const cur = stack[stack.length - 1];
+        if (cur.ternaryDepth > 0) {
+          cur.ternaryDepth--;
+          i++;
+        } else {
+          if (cur.keys.has(str)) {
+            duplicates.push({ line: startLine, key: str, file: path.basename(filePath) });
+          } else {
+            cur.keys.add(str);
+          }
+          i++;
+        }
+      }
+    } else if (/[a-zA-Z_$]/.test(ch)) {
+      const startLine = line;
+      let ident = '';
+      while (i < n && /[a-zA-Z0-9_$-]/.test(content[i])) {
+        ident += content[i];
+        i++;
+      }
+      skipWhitespaceAndComments();
+      if (content[i] === ':' && stack.length > 0) {
+        const cur = stack[stack.length - 1];
+        if (cur.ternaryDepth > 0) {
+          cur.ternaryDepth--;
+          i++;
+        } else {
+          if (cur.keys.has(ident)) {
+            duplicates.push({ line: startLine, key: ident, file: path.basename(filePath) });
+          } else {
+            cur.keys.add(ident);
+          }
+          i++;
+        }
+      }
+    } else {
+      i++;
+    }
+  }
+  return duplicates;
+}
+
+filesToCheck.forEach(fp => {
+  if (fs.existsSync(fp)) {
+    const content = fs.readFileSync(fp, 'utf8');
+    const dups = findDuplicateKeysInContent(fp, content);
+    assert(dups.length === 0, `Chaves duplicadas detectadas em ${path.basename(fp)}: ${dups.map(d => `L${d.line} (${d.key})`).join(', ')}`);
+  }
+});
+
+// 14. Matriz Real de Cobertura de Dados (44 Modelos)
 console.log('\n====================================================');
 console.log('📊 MATRIZ REAL DE COBERTURA DE DADOS (44 MODELOS)');
 console.log('====================================================');

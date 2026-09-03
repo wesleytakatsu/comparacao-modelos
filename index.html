@@ -113,6 +113,13 @@
               </a>
             </li>
             <li>
+              <a href="#plans" class="nav-link" data-route="plans">
+                <span class="nav-icon">💳</span>
+                <span class="nav-label">Planos & Assinaturas</span>
+                <span class="nav-badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-size: 0.65rem; padding: 2px 5px; border-radius: 4px;">USD/BRL</span>
+              </a>
+            </li>
+            <li>
               <a href="#comparator" class="nav-link" data-route="comparator">
                 <span class="nav-icon">⚔️</span>
                 <span class="nav-label">Comparador Lado a Lado</span>
@@ -134,12 +141,38 @@
         </div>
 
         <!-- ZONA 1: DESCOBERTA & CATÁLOGO -->
-        <details class="nav-zone" id="navZoneDiscovery">
+        <details class="nav-zone" id="navZoneDiscovery" open>
           <summary class="zone-summary">
-            <span class="zone-title">🎯 Descoberta</span>
+            <span class="zone-title">🎯 Descoberta & Linhagens</span>
             <span class="zone-arrow">▾</span>
           </summary>
           <ul class="nav-list">
+            <li>
+              <a href="#history" class="nav-link" data-route="history">
+                <span class="nav-icon">📜</span>
+                <span class="nav-label">Linhagens & Linha do Tempo</span>
+                <span class="nav-badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; font-size: 0.65rem; padding: 2px 5px; border-radius: 4px;">ÁRVORES</span>
+              </a>
+            </li>
+            <li>
+              <a href="#use-cases" class="nav-link" data-route="use-cases">
+                <span class="nav-icon">🎯</span>
+                <span class="nav-label">Casos de Uso & Projetos</span>
+                <span class="nav-badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; font-size: 0.65rem; padding: 2px 5px; border-radius: 4px;">12 CASOS</span>
+              </a>
+            </li>
+            <li>
+              <a href="#community" class="nav-link" data-route="community">
+                <span class="nav-icon">💬</span>
+                <span class="nav-label">Comunidade & Comportamento</span>
+              </a>
+            </li>
+            <li>
+              <a href="#platforms" class="nav-link" data-route="platforms">
+                <span class="nav-icon">🚀</span>
+                <span class="nav-label">Plataformas & OpenCode Go</span>
+              </a>
+            </li>
             <li>
               <a href="#providers" class="nav-link" data-route="providers">
                 <span class="nav-icon">🏢</span>
@@ -1363,6 +1396,353 @@
         </div>
       </section>
 
+      <!-- ========================================== -->
+      <!-- VIEW 16: PLANOS & ASSINATURAS (USD / BRL) -->
+      <!-- ========================================== -->
+      <section class="spa-view" id="view-plans">
+        <div class="view-header">
+          <div class="view-title">
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <h2>💳 Planos & Assinaturas de IA (Subscriptions)</h2>
+              <span class="badge-tag badge-frontier">Snapshot 03/09/2026</span>
+            </div>
+            <p>Guia canônico de assinaturas mensais (OpenAI, Anthropic, Google AI, Cursor, OpenCode, Z.ai, Kimi, xAI) com cotação FX comercial e preços oficiais localizados no Brasil.</p>
+          </div>
+        </div>
+
+        <!-- Banner de Conversão Cambial & Aviso Legal -->
+        <div class="fx-banner-container" id="fxRatesBanner">
+          <div class="fx-banner-content">
+            <div class="fx-rates-pills">
+              <span class="fx-pill">💵 US$ 1,00 = <strong>R$ 5,1556</strong> (Ptax)</span>
+              <span class="fx-pill">💴 ¥ 1,00 = <strong>R$ 0,7595</strong> (CNY/BRL)</span>
+              <span class="fx-pill fx-pill-official">🇧🇷 Preços Oficiais Brasil: Google AI Pro <strong>R$ 96,99/mês</strong> · Ultra 5x <strong>R$ 779,90/mês</strong></span>
+            </div>
+            <div class="fx-disclaimer">
+              * Valores em reais sem selo "Oficial Brasil" são conversões comerciais aproximadas de 03/09/2026 (sujeitas a IOF, impostos locais e taxas de cartão). Assinaturas de ferramentas NÃO são créditos de API.
+            </div>
+          </div>
+        </div>
+
+        <!-- Barra de Filtros & Seletor de Moeda -->
+        <div class="plans-filter-bar">
+          <div class="filter-group">
+            <label class="filter-label">Exibição de Moeda:</label>
+            <div class="currency-toggle-group" id="currencyToggleGroup">
+              <button type="button" class="btn-toggle active" data-currency="BRL">R$ (BRL)</button>
+              <button type="button" class="btn-toggle" data-currency="USD">US$ (USD)</button>
+              <button type="button" class="btn-toggle" data-currency="DUAL">Ambas (Dual)</button>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label" for="planAudienceFilter">Público:</label>
+            <select id="planAudienceFilter" class="form-select">
+              <option value="all">Todos os Públicos</option>
+              <option value="individual">Uso Individual / Desenvolvedor</option>
+              <option value="team">Equipes & Empresas (Teams)</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label" for="planProfileFilter">Perfil / Caso:</label>
+            <select id="planProfileFilter" class="form-select">
+              <option value="all">Todos os Perfis</option>
+              <option value="student">Estudante / Orçamento Mínimo</option>
+              <option value="indie-dev">Indie Hacker / Dev Autônomo</option>
+              <option value="professional-dev">Desenvolvedor Profissional</option>
+              <option value="heavy-agentic">Heavy-Agentic / Hardcore</option>
+            </select>
+          </div>
+
+          <div class="filter-group" style="flex: 1; min-width: 200px;">
+            <label class="filter-label" for="planSearchInput">Buscar Plano:</label>
+            <input type="text" id="planSearchInput" class="form-input" placeholder="Buscar por plano, provedor ou modelo...">
+          </div>
+        </div>
+
+        <!-- Seletor de Comparação Flutuante de Planos -->
+        <div class="plan-compare-tray" id="planCompareTray" style="display: none;">
+          <div class="tray-content">
+            <span id="planCompareCount">0 planos selecionados (máx 4)</span>
+            <div class="tray-actions">
+              <button class="btn-secondary btn-sm" id="btnClearPlanCompare">Limpar</button>
+              <button class="btn-primary btn-sm" id="btnOpenPlanCompareModal">⚔️ Comparar Planos Lado a Lado</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grid de Cards de Planos -->
+        <div class="plans-grid" id="plansCardsGrid">
+          <!-- Injetado dinamicamente via JS -->
+        </div>
+
+        <!-- Ferramenta: Planejador de Stacks por Faixa de Orçamento -->
+        <div class="content-box" style="margin-top: 32px;">
+          <div class="box-header">
+            <div>
+              <h3>🧩 Stacks Recomendados por Orçamento Mensal</h3>
+              <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 2px;">
+                Combinações balanceadas calculadas a partir de preços reais para cobrir planejamento, execução paralela e revisão.
+              </p>
+            </div>
+          </div>
+
+          <div class="budget-selector-pills" id="budgetSelectorPills">
+            <button class="budget-pill" data-budget="0">R$ 0 (100% Gratuito)</button>
+            <button class="budget-pill" data-budget="60">Até R$ 60/mês</button>
+            <button class="budget-pill active" data-budget="110">Até R$ 110/mês</button>
+            <button class="budget-pill" data-budget="200">~R$ 150 – R$ 200/mês</button>
+            <button class="budget-pill" data-budget="370">~R$ 360/mês</button>
+            <button class="budget-pill" data-budget="600">R$ 500+ (Heavy-Agentic)</button>
+          </div>
+
+          <div class="budget-stacks-container" id="budgetStacksContainer">
+            <!-- Injetado via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW 17: HISTÓRICO, LINHAGENS & TIMELINE -->
+      <!-- ========================================== -->
+      <section class="spa-view" id="view-history">
+        <div class="view-header">
+          <div class="view-title">
+            <h2>📜 Linhagens de Modelos & Linha do Tempo da Indústria</h2>
+            <p>Evolução arquitetural dos modelos de IA, árvores geracionais de predecessores para sucessores e histórico auditado de eventos de mercado.</p>
+          </div>
+        </div>
+
+        <!-- Sub-navegação do Histórico -->
+        <div class="history-tabs-nav">
+          <button class="btn-toggle active" data-htab="lineages">🌳 Árvores Genealógicas & Linhagens</button>
+          <button class="btn-toggle" data-htab="timeline">⏱️ Linha do Tempo Cronológica</button>
+          <button class="btn-toggle" data-htab="benchmarks">📊 Histórico Auditado de Benchmarks</button>
+        </div>
+
+        <!-- Painel 1: Linhagens Genealógicas -->
+        <div class="htab-panel active" id="htab-lineages">
+          <div class="lineages-container" id="lineagesListContainer">
+            <!-- Injetado dinamicamente via JS -->
+          </div>
+        </div>
+
+        <!-- Painel 2: Timeline de Eventos -->
+        <div class="htab-panel" id="htab-timeline" style="display: none;">
+          <div class="timeline-filters">
+            <button class="btn-toggle active" data-tfilter="all">Todos os Eventos</button>
+            <button class="btn-toggle" data-tfilter="release">Lançamentos Oficiais</button>
+            <button class="btn-toggle" data-tfilter="identity-reveal">Revelação / Stealth</button>
+            <button class="btn-toggle" data-tfilter="weights-released">Pesos Abertos (Open Weights)</button>
+            <button class="btn-toggle" data-tfilter="pricing-change">Alteração de Tarifas</button>
+          </div>
+          <div class="timeline-stream" id="timelineStreamContainer">
+            <!-- Injetado dinamicamente via JS -->
+          </div>
+        </div>
+
+        <!-- Painel 3: Histórico de Benchmarks -->
+        <div class="htab-panel" id="htab-benchmarks" style="display: none;">
+          <div class="content-box">
+            <div class="box-header">
+              <h3>Histórico de Execuções e Corroboração Metrológica</h3>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table" id="benchmarkHistoryTable">
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Modelo</th>
+                    <th>Benchmark</th>
+                    <th>Score</th>
+                    <th>IC</th>
+                    <th>Custo/Task</th>
+                    <th>Tokens/Task</th>
+                    <th>Passos</th>
+                    <th>Tipo</th>
+                    <th>Fonte</th>
+                  </tr>
+                </thead>
+                <tbody id="benchmarkHistoryTableBody">
+                  <!-- Injetado via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW 18: CASOS DE USO REAIS & PROJETOS -->
+      <!-- ========================================== -->
+      <section class="spa-view" id="view-use-cases">
+        <div class="view-header">
+          <div class="view-title">
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <h2>🎯 Matriz de Casos de Uso & Seleção por Tipo de Projeto</h2>
+              <span class="badge-tag badge-subdollar">E — Calibrado</span>
+            </div>
+            <p>Classificação técnica balanceada por tipo de desenvolvimento de software, papéis recomendados e pipelines de orquestração multi-agente.</p>
+          </div>
+        </div>
+
+        <!-- Seletor de Categorias de Projetos (12 Casos) -->
+        <div class="use-case-chips-scroll" id="useCaseChipsScroll">
+          <!-- Injetado via JS -->
+        </div>
+
+        <!-- Conteúdo do Caso de Uso Ativo -->
+        <div class="use-case-active-content" id="useCaseActiveContent">
+          <!-- Injetado dinamicamente via JS -->
+        </div>
+
+        <!-- Pipelines & Receitas de Orquestração -->
+        <div class="content-box" style="margin-top: 32px;">
+          <div class="box-header">
+            <h3>🔀 Receitas Recomendadas de Orquestração Multi-Modelo</h3>
+            <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 2px;">
+              Padrões de trabalho consagrados na comunidade técnica para maximizar inteligência reduzindo custos em até 80%.
+            </p>
+          </div>
+          <div class="recipes-grid" id="recipesGridContainer">
+            <!-- Injetado dinamicamente via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW 19: COMUNIDADE & ENGENHARIA -->
+      <!-- ========================================== -->
+      <section class="spa-view" id="view-community">
+        <div class="view-header">
+          <div class="view-title">
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <h2>💬 Relatos da Comunidade & Comportamento de Engenharia</h2>
+              <span class="badge-tag badge-warning">sourceType: community / calibrated</span>
+            </div>
+            <p>Síntese de vivências de engenharia em produção (Reddit, GitHub, Twitter, Fóruns) e confronto metrológico entre o que os benchmarks dizem e o que os desenvolvedores sentem no dia a dia.</p>
+          </div>
+        </div>
+
+        <!-- Abas da Comunidade -->
+        <div class="community-tabs-nav">
+          <button class="btn-toggle active" data-ctab="divergences">⚡ Benchmarks vs Realidade Prática</button>
+          <button class="btn-toggle" data-ctab="behavior">📊 Engineering Behavior Matrix</button>
+          <button class="btn-toggle" data-ctab="reports">📝 Base de Relatos Auditados</button>
+        </div>
+
+        <!-- Aba 1: Divergências -->
+        <div class="ctab-panel active" id="ctab-divergences">
+          <div class="divergences-grid" id="divergencesGridContainer">
+            <!-- Injetado dinamicamente via JS -->
+          </div>
+        </div>
+
+        <!-- Aba 2: Engineering Behavior -->
+        <div class="ctab-panel" id="ctab-behavior" style="display: none;">
+          <div class="content-box">
+            <div class="box-header">
+              <div>
+                <h3>Comportamento Prático de Engenharia (Calibração 0 a 100)</h3>
+                <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 2px;">
+                  12 dimensões qualitativas de desenvolvimento de software (maior score = melhor, exceto Risco de Overengineering).
+                </p>
+              </div>
+            </div>
+            <div class="behavior-models-grid" id="behaviorModelsGrid">
+              <!-- Injetado dinamicamente via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Aba 3: Relatos Auditados -->
+        <div class="ctab-panel" id="ctab-reports" style="display: none;">
+          <div class="reports-filter-bar">
+            <input type="text" id="reportSearchInput" class="form-input" placeholder="Buscar relato por modelo, stack ou palavra-chave...">
+          </div>
+          <div class="reports-list" id="communityReportsList">
+            <!-- Injetado dinamicamente via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW 20: PLATAFORMAS & OPENCODE GO -->
+      <!-- ========================================== -->
+      <section class="spa-view" id="view-platforms">
+        <div class="view-header">
+          <div class="view-title">
+            <h2>🚀 Disponibilidade por Plataforma & Catálogo OpenCode Go</h2>
+            <p>Onde executar cada modelo de IA: API Direta, Cursor IDE, OpenCode Go, Google Antigravity, OpenRouter e clusters locais com limites de requisições calculados.</p>
+          </div>
+        </div>
+
+        <!-- Seção 1: Catálogo OpenCode Go -->
+        <div class="content-box" style="margin-bottom: 30px;">
+          <div class="box-header">
+            <div>
+              <h3>Catálogo OpenCode Go ($10/mês) — Cotas & Requisições Estimadas</h3>
+              <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 2px;">
+                Baseado em limites monetários de $12 por 5 horas, $30 semanal e $60 mensal. Zero Data Retention (ZDR) garantido em contrato.
+              </p>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table" id="opencodeDetailedTable">
+              <thead>
+                <tr>
+                  <th>Modelo OpenCode</th>
+                  <th>Modelo Canônico</th>
+                  <th>Multiplicador</th>
+                  <th>Cota 5 Horas</th>
+                  <th>Cota Semanal</th>
+                  <th>Cota Mensal</th>
+                  <th>Contexto</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="opencodeDetailedTableBody">
+                <!-- Injetado dinamicamente via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Seção 2: Matriz Geral de Disponibilidade dos 44 Modelos -->
+        <div class="content-box">
+          <div class="box-header">
+            <div>
+              <h3>Matriz Geral de Disponibilidade dos 44 Modelos</h3>
+              <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 2px;">
+                Mapeamento completo de canais de acesso para cada modelo do catálogo.
+              </p>
+            </div>
+            <div style="min-width: 240px;">
+              <input type="text" id="platformMatrixSearch" class="form-input" placeholder="Filtrar modelos...">
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table" id="platformMatrixTable">
+              <thead>
+                <tr>
+                  <th>Modelo</th>
+                  <th>API Direta</th>
+                  <th>Cursor IDE</th>
+                  <th>OpenCode Go</th>
+                  <th>Antigravity</th>
+                  <th>OpenRouter</th>
+                  <th>Execução Local</th>
+                </tr>
+              </thead>
+              <tbody id="platformMatrixTableBody">
+                <!-- Injetado dinamicamente via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -1428,6 +1808,34 @@
         <button class="btn-secondary" id="btnDownloadExportMarkdown">Baixar .md</button>
         <button class="btn-primary" id="btnCopyExportMarkdown">Copiar</button>
       </div>
+  <!-- 6. MODAL DE COMPARAÇÃO DE PLANOS LADO A LADO -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="planCompareModalOverlay" role="dialog" aria-modal="true" aria-label="Comparador de Assinaturas de IA">
+    <div class="modal-card modal-card-wide" style="max-width: 1100px; width: 95%;">
+      <div class="modal-header">
+        <div>
+          <h3>⚔️ Comparador de Assinaturas & Planos Lado a Lado</h3>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">Análise comparativa de franquias, custos (USD/BRL) e modelos incluídos.</p>
+        </div>
+        <button class="modal-close-btn" id="planCompareModalCloseBtn" aria-label="Fechar Modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="data-table" id="planCompareTable">
+            <thead>
+              <tr id="planCompareHeaderRow">
+                <th>Atributo</th>
+              </tr>
+            </thead>
+            <tbody id="planCompareTableBody">
+              <!-- Injetado via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button class="btn-secondary" id="btnClosePlanCompareModal">Fechar</button>
+      </div>
     </div>
   </div>
 
@@ -1437,7 +1845,15 @@
   <!-- Botão Flutuante Voltar ao Topo -->
   <button class="back-to-top-btn" id="backToTopBtn" title="Voltar ao Topo" aria-label="Voltar ao topo da página">↑</button>
 
-  <!-- Scripts da Aplicação -->
+  <!-- Scripts de Dados Modulares (Arquitetura sem Framework / GitHub Pages Nativo) -->
+  <script src="data/fx.js"></script>
+  <script src="data/plans.js"></script>
+  <script src="data/platforms.js"></script>
+  <script src="data/history.js"></script>
+  <script src="data/community.js"></script>
+  <script src="data/behavior.js"></script>
+  <script src="data/use-cases.js"></script>
+  <script src="data/pricing-history.js"></script>
   <script src="data.js"></script>
   <script src="app.js"></script>
 </body>

@@ -542,7 +542,7 @@ const AI_MODELS_DATA = {
     "architectureType": "MoE Proprietário Frontier",
     "attentionType": "Multi-Head Latent Sparse Attention",
     "contextWindow": 1048576,
-    "maxOutputTokens": 65536,
+    "maxOutputTokens": 131072,
     "modalities": {
       "input": [
         "text",
@@ -572,10 +572,10 @@ const AI_MODELS_DATA = {
     },
     "pricing": {
       "standard": {
-        "input": 5,
-        "cacheRead": 0.5,
-        "cacheWrite": 6.25,
-        "output": 30
+        "input": 4.00,
+        "cacheRead": 0.40,
+        "cacheWrite": 5.00,
+        "output": 20.00
       },
       "longContextThreshold": 272000,
       "longContextMultiplier": 2,
@@ -648,7 +648,7 @@ const AI_MODELS_DATA = {
     "architectureType": "MoE Proprietário Balanced Tier",
     "attentionType": "Multi-Head Attention",
     "contextWindow": 1048576,
-    "maxOutputTokens": 65536,
+    "maxOutputTokens": 131072,
     "modalities": {
       "input": [
         "text",
@@ -678,10 +678,10 @@ const AI_MODELS_DATA = {
     },
     "pricing": {
       "standard": {
-        "input": 0.8,
-        "cacheRead": 0.08,
-        "cacheWrite": 1,
-        "output": 4
+        "input": 2.00,
+        "cacheRead": 0.20,
+        "cacheWrite": 2.50,
+        "output": 12.00
       },
       "longContextThreshold": 272000,
       "longContextMultiplier": 2,
@@ -751,7 +751,7 @@ const AI_MODELS_DATA = {
     "architectureType": "Dense Leve Otimizado",
     "attentionType": "Multi-Head Attention Flash",
     "contextWindow": 1048576,
-    "maxOutputTokens": 65536,
+    "maxOutputTokens": 131072,
     "modalities": {
       "input": [
         "text",
@@ -781,10 +781,10 @@ const AI_MODELS_DATA = {
     },
     "pricing": {
       "standard": {
-        "input": 0.15,
-        "cacheRead": 0.015,
-        "cacheWrite": 0.1875,
-        "output": 0.6
+        "input": 0.20,
+        "cacheRead": 0.02,
+        "cacheWrite": 0.25,
+        "output": 1.20
       },
       "longContextThreshold": 272000,
       "longContextMultiplier": 2,
@@ -889,27 +889,9 @@ const AI_MODELS_DATA = {
     },
     "sourceConfidence": "official",
     "sources": [
-          "openai-gpt56",
-          "cursorbench-32",
-          "artificial-analysis-v41"
-    ],
-    "sourceConfidence": "official",
-    "sources": [
-          "openai-gpt56",
-          "cursorbench-32",
-          "artificial-analysis-v41"
-    ],
-    "sourceConfidence": "official",
-    "sources": [
-          "openai-gpt56",
-          "cursorbench-32",
-          "artificial-analysis-v41"
-    ],
-    "sourceConfidence": "official",
-    "sources": [
-          "xai-grok46",
-          "cursorbench-32",
-          "artificial-analysis-v41"
+      "openai-gpt56",
+      "cursorbench-32",
+      "artificial-analysis-v41"
     ],
     "cursorPool": {
       "pool": "other-models",
@@ -1362,11 +1344,15 @@ const AI_MODELS_DATA = {
         "max": { "score": 73.4, "costUsd": 9.64, "tokensPerTask": 72060, "steps": 70 }
       },
       "artificialAnalysis": {
-        "low": 58,
-        "medium": 60,
-        "high": 62,
-        "xhigh": 65,
-        "max": 66
+        "low": { "aaIndex": 58, "costPerTask": 0.77 },
+        "medium": { "aaIndex": 60, "costPerTask": 1.00 },
+        "high": { "aaIndex": 62, "costPerTask": 1.43 },
+        "xhigh": { "aaIndex": 65, "costPerTask": 2.65 },
+        "max": { "aaIndex": 66, "costPerTask": 3.69 },
+        "terminalBench21": 91.4,
+        "sciCode": 62.0,
+        "hle": 59.1,
+        "notes": "Líder geral AA Index v4.1.1 (66). ~4% dos output tokens foram atendidos por fallback server-side para modelos Opus em safeguards."
       }
     },
     "operationalGuidance": {
@@ -1432,10 +1418,11 @@ const AI_MODELS_DATA = {
     },
     "pricing": {
       "standard": {
-        "input": 12,
-        "cacheRead": 1.2,
-        "cacheWrite": null,
-        "output": 60
+        "input": 10.00,
+        "cacheRead": 1.00,
+        "cacheWrite5Min": 12.50,
+        "cacheWrite1Hour": 20.00,
+        "output": 50.00
       }
     },
     "cursorPool": {
@@ -1528,10 +1515,11 @@ const AI_MODELS_DATA = {
     },
     "pricing": {
       "standard": {
-        "input": 6,
-        "cacheRead": 0.6,
-        "cacheWrite": null,
-        "output": 30
+        "input": 5.00,
+        "cacheRead": 0.50,
+        "cacheWrite5Min": 6.25,
+        "cacheWrite1Hour": 10.00,
+        "output": 25.00
       }
     },
     "cursorPool": {
@@ -1690,7 +1678,7 @@ const AI_MODELS_DATA = {
     "architectureType": "Dense Otimizado de Alta Velocidade",
     "attentionType": "Multi-Head Attention 200k",
     "contextWindow": 200000,
-    "maxOutputTokens": 32768,
+    "maxOutputTokens": 65536,
     "modalities": {
       "input": [
         "text",
@@ -1777,14 +1765,14 @@ const AI_MODELS_DATA = {
     "provider": "anthropic",
     "providerName": "Anthropic",
     "color": "#c2410c",
-    "status": "stable",
+    "status": "legacy",
     "openWeights": false,
     "paramsTotal": "N/D",
     "paramsActive": "N/D",
     "architectureType": "Frontier Long-Context Anthropic",
     "attentionType": "Multi-Head Attention 1M c/ Adaptive Thinking",
     "contextWindow": 1048576,
-    "maxOutputTokens": 65536,
+    "maxOutputTokens": 131072,
     "modalities": {
       "input": [
         "text",
@@ -1883,14 +1871,14 @@ const AI_MODELS_DATA = {
     "provider": "anthropic",
     "providerName": "Anthropic",
     "color": "#ea580c",
-    "status": "stable",
+    "status": "legacy",
     "openWeights": false,
     "paramsTotal": "N/D",
     "paramsActive": "N/D",
     "architectureType": "Frontier Balanced Anthropic",
     "attentionType": "Multi-Head Attention 1M c/ Adaptive Thinking",
     "contextWindow": 1048576,
-    "maxOutputTokens": 65536,
+    "maxOutputTokens": 131072,
     "modalities": {
       "input": [
         "text",
@@ -2259,29 +2247,37 @@ const AI_MODELS_DATA = {
     },
     "pricing": {
       "standard": {
-        "input": 0.75,
-        "cacheRead": 0.075,
+        "input": 0.30,
+        "cacheRead": 0.03,
         "cacheWrite": null,
-        "output": 3.75
+        "output": 2.50
+      },
+      "postPromo": {
+        "effectiveFrom": "2027-01-01",
+        "input": 1.50,
+        "output": 7.50,
+        "cacheRead": 0.15,
+        "cacheStorage": 1.00
       },
       "googleApi": {
-        "input": 0.75,
-        "cacheRead": 0.075,
+        "input": 0.30,
+        "cacheRead": 0.03,
         "cacheWrite": null,
-        "output": 3.75
+        "output": 2.50
       },
       "promotionalPeriod": {
         "effectiveFrom": "2026-09-02",
         "effectiveUntil": "2027-01-01",
-        "input": 0.75,
-        "output": 3.75,
-        "cacheRead": 0.075
+        "input": 0.30,
+        "output": 2.50,
+        "cacheRead": 0.03
       },
       "afterPromotion": {
         "effectiveFrom": "2027-01-01",
-        "input": 1.00,
-        "output": 4.50,
-        "cacheRead": 0.10
+        "input": 1.50,
+        "output": 7.50,
+        "cacheRead": 0.15,
+        "cacheStorage": 1.00
       },
       "cursor": {
         "input": 0.75,
@@ -2370,17 +2366,11 @@ const AI_MODELS_DATA = {
         "source": "CursorBench 3.2"
       },
       "artificialAnalysis": {
-        "low": { "aaIndex": 52, "throughputTps": 310, "ttftSec": 0.25 },
-        "medium": { "aaIndex": 57, "throughputTps": 308, "ttftSec": 0.55 },
-        "high": { "aaIndex": 59, "throughputTps": 305, "ttftSec": 1.20, "costPerTask": 2.38 }
+        "low": { "aaIndex": 52, "throughputTps": 313.5, "ttftSec": 0.70, "costPerTask": 0.24, "outputVolume": "19M tokens" },
+        "medium": { "aaIndex": 57, "throughputTps": 312.3, "ttftSec": 6.44, "costPerTask": 0.41, "outputVolume": "53M tokens" },
+        "high": { "aaIndex": 59, "throughputTps": 304.6, "ttftSec": 13.39, "costPerTask": 0.58, "outputVolume": "120M tokens (~30% mais output que 3.7 Flash High)" }
       }
     },
-    "sourceConfidence": "official",
-    "sources": [
-          "google-deepmind-gemini37",
-          "cursorbench-32",
-          "deepswe-datacurve"
-    ],
     "operationalGuidance": {
       "idealFor": [
         "Workers agênticos de desenvolvimento em escala e resolução massiva de bugs",
@@ -2849,15 +2839,9 @@ const AI_MODELS_DATA = {
     },
     "sourceConfidence": "official",
     "sources": [
-          "deepseek-v4-org",
-          "deepswe-datacurve",
-          "artificial-analysis-v41"
-    ],
-    "sourceConfidence": "official",
-    "sources": [
-          "deepseek-v4-org",
-          "deepswe-datacurve",
-          "artificial-analysis-v41"
+      "deepseek-v4-org",
+      "deepswe-datacurve",
+      "artificial-analysis-v41"
     ],
     "cursorPool": {
       "pool": "other-models",
@@ -5645,8 +5629,7 @@ const AI_DATA_HELPERS = {
       return {
         primaryModelId: 'gemini-3-8-flash',
         primaryModelName: 'Gemini 3.8 Flash (High) / Gemini 3.7',
-        rationale: 'Líder em multimodalidade nativa total (Vídeo, Áudio, Imagem e PDF) em 1M de tokens com throughput de ~305 tok/s e 90,8% no TB 2.1.',
-        rationale: 'Líder em ferramentas visuais (75,9% Toolathlon) com custo por imagem de ~$0,000084.',
+        rationale: 'Líder em multimodalidade nativa total (Vídeo, Áudio, Imagem e PDF) em 1M de tokens com throughput de ~305 tok/s e 90,8% no TB 2.1. Líder em ferramentas visuais (75,9% Toolathlon) com custo por imagem de ~$0,000084.',
         fallbackCascade: ['gemini-3-7-flash', 'mimo-v2-5-pro', 'glm-5-3-flash'],
         planner: 'gemini-3-7-flash',
         executor: 'deepseek-v4-vision-exp',
@@ -6139,6 +6122,34 @@ const AA_METHODOLOGY_NOTES = {
   }
 };
 
+// Carregamento dos módulos data/* em ambiente Node.js
+if (typeof require !== 'undefined') {
+  try {
+    const fxMod = require('./data/fx.js');
+    global.FX_RATES_DATA = fxMod.FX_RATES_DATA;
+    global.FX_HELPERS = fxMod.FX_HELPERS;
+    const plansMod = require('./data/plans.js');
+    global.SUBSCRIPTION_PLANS_DATA = plansMod.SUBSCRIPTION_PLANS_DATA;
+    global.BUDGET_STACK_RECOMMENDER = plansMod.BUDGET_STACK_RECOMMENDER;
+    const platformsMod = require('./data/platforms.js');
+    global.PLATFORM_MODEL_CATALOG = platformsMod.PLATFORM_MODEL_CATALOG;
+    const historyMod = require('./data/history.js');
+    global.MODEL_HISTORY_DATA = historyMod.MODEL_HISTORY_DATA;
+    global.BENCHMARK_HISTORY_DATA = historyMod.BENCHMARK_HISTORY_DATA;
+    const commMod = require('./data/community.js');
+    global.COMMUNITY_REPORTS_DATA = commMod.COMMUNITY_REPORTS_DATA;
+    global.BENCHMARK_VS_COMMUNITY_DIVERGENCES = commMod.BENCHMARK_VS_COMMUNITY_DIVERGENCES;
+    const behMod = require('./data/behavior.js');
+    global.ENGINEERING_BEHAVIOR_DATA = behMod.ENGINEERING_BEHAVIOR_DATA;
+    const ucMod = require('./data/use-cases.js');
+    global.USE_CASE_COMPARISON_DATA = ucMod.USE_CASE_COMPARISON_DATA;
+    const prHistMod = require('./data/pricing-history.js');
+    global.PRICE_HISTORY_DATA = prHistMod.PRICE_HISTORY_DATA;
+  } catch (e) {
+    // Silencioso se executado em ambiente sem filesystem local
+  }
+}
+
 // Exportação global
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
@@ -6163,7 +6174,19 @@ if (typeof module !== 'undefined' && module.exports) {
     HARDWARE_WORKSTATIONS_BR,
     HARDWARE_LOCAL_MODELS_DATA,
     AA_METHODOLOGY_NOTES,
-    AI_DATA_HELPERS
+    AI_DATA_HELPERS,
+    FX_RATES_DATA: typeof FX_RATES_DATA !== 'undefined' ? FX_RATES_DATA : null,
+    FX_HELPERS: typeof FX_HELPERS !== 'undefined' ? FX_HELPERS : null,
+    SUBSCRIPTION_PLANS_DATA: typeof SUBSCRIPTION_PLANS_DATA !== 'undefined' ? SUBSCRIPTION_PLANS_DATA : [],
+    BUDGET_STACK_RECOMMENDER: typeof BUDGET_STACK_RECOMMENDER !== 'undefined' ? BUDGET_STACK_RECOMMENDER : null,
+    PLATFORM_MODEL_CATALOG: typeof PLATFORM_MODEL_CATALOG !== 'undefined' ? PLATFORM_MODEL_CATALOG : null,
+    MODEL_HISTORY_DATA: typeof MODEL_HISTORY_DATA !== 'undefined' ? MODEL_HISTORY_DATA : null,
+    BENCHMARK_HISTORY_DATA: typeof BENCHMARK_HISTORY_DATA !== 'undefined' ? BENCHMARK_HISTORY_DATA : [],
+    COMMUNITY_REPORTS_DATA: typeof COMMUNITY_REPORTS_DATA !== 'undefined' ? COMMUNITY_REPORTS_DATA : [],
+    BENCHMARK_VS_COMMUNITY_DIVERGENCES: typeof BENCHMARK_VS_COMMUNITY_DIVERGENCES !== 'undefined' ? BENCHMARK_VS_COMMUNITY_DIVERGENCES : [],
+    ENGINEERING_BEHAVIOR_DATA: typeof ENGINEERING_BEHAVIOR_DATA !== 'undefined' ? ENGINEERING_BEHAVIOR_DATA : null,
+    USE_CASE_COMPARISON_DATA: typeof USE_CASE_COMPARISON_DATA !== 'undefined' ? USE_CASE_COMPARISON_DATA : null,
+    PRICE_HISTORY_DATA: typeof PRICE_HISTORY_DATA !== 'undefined' ? PRICE_HISTORY_DATA : null
   };
 }
 
