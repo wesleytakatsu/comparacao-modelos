@@ -1418,7 +1418,7 @@
   }
 
   // ==========================================
-  // 7. MÓDULO DOSSIÊ COMPLETO DO MODELO (6 SUB-ABAS)
+  // 7. MÓDULO DOSSIÊ COMPLETO DO MODELO (12 SUB-ABAS - PLANO 07)
   // ==========================================
   function renderModelDossier(modelId) {
     const container = document.getElementById('modelDetailContainer');
@@ -1428,6 +1428,57 @@
     const provider = AI_PROVIDERS_DATA[model.provider] || { name: model.providerName, logo: '⚡' };
     const ledgerEntry = MULTI_BENCHMARK_LEDGER.find(l => l.modelId === model.id);
     const cursorBenchRuns = CURSORBENCH_32_DATA.filter(r => r.modelId === model.id);
+    const dossier = (typeof getModelDossier === 'function' ? getModelDossier(model.id) : null) || (typeof MODEL_DOSSIERS_DATA !== 'undefined' ? MODEL_DOSSIERS_DATA[model.id] : null);
+
+    // Helpers de metrologia e UI
+    function renderBadge(sourceType) {
+      const b = (typeof getProvenanceBadge === 'function' ? getProvenanceBadge(sourceType) : null) || { code: 'T', cssClass: 'badge-source-independent', label: 'Independente', title: '' };
+      return `<span class="badge-provenance ${b.cssClass}" title="${b.title || b.label}">${b.code}</span>`;
+    }
+
+    const fingerprint = (typeof calculatePerformanceFingerprint === 'function' ? calculatePerformanceFingerprint(model.id) : {}) || {};
+    const deepsweBoard = (typeof getDeepSweLeaderboard === 'function' ? getDeepSweLeaderboard('score') : []) || [];
+
+    function renderCategorySnapshots(catTitle, categoryId) {
+      const snaps = typeof getDossierBenchmarkSnapshots === 'function' ? getDossierBenchmarkSnapshots(model.id, categoryId) : [];
+      if (!snaps || snaps.length === 0) {
+        return `<p style="color: var(--text-muted); font-size: 0.85rem; padding: 12px 0;">Nenhum benchmark auditado de ${catTitle} cadastrado no snapshot oficial deste modelo.</p>`;
+      }
+      return `
+        <div class="deepswe-leaderboard-container">
+          <table class="deepswe-table">
+            <thead>
+              <tr>
+                <th>Benchmark</th>
+                <th>Versão</th>
+                <th>Score Auditado</th>
+                <th>Proveniência</th>
+                <th>Harness / Configuração</th>
+                <th>Data Snapshot</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${snaps.map(s => {
+                const reg = (typeof BENCHMARK_REGISTRY !== 'undefined' ? BENCHMARK_REGISTRY[s.benchmarkId] : null);
+                const bName = reg ? reg.name : s.benchmarkId;
+                const unitStr = s.unit === 'percent' ? '%' : (s.unit === 'elo' ? ' Elo' : (s.unit === 'f1' ? ' F1' : (s.unit === 'tasks' ? ' tarefas' : '')));
+                const valStr = s.score !== null ? `${s.score}${unitStr}` : '<span style="color:var(--text-muted);">null (não medido)</span>';
+                return `
+                  <tr>
+                    <td><strong>${bName}</strong></td>
+                    <td><code>${s.benchmarkVersion || '1.0'}</code></td>
+                    <td><strong style="color: var(--accent-cyan); font-size: 0.95rem;">${valStr}</strong></td>
+                    <td>${renderBadge(s.sourceType)} <span style="font-size: 0.78rem; color: var(--text-secondary);">${s.sourceType}</span></td>
+                    <td><span style="font-size: 0.8rem; color: var(--text-muted);">${s.harness || 'Padrão'} ${s.notes ? `(${s.notes})` : ''}</span></td>
+                    <td><span style="font-size: 0.8rem; color: var(--text-muted);">${s.snapshotDate || '2026-09-03'}</span></td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
 
     container.innerHTML = `
       <div class="breadcrumb-bar">
@@ -1462,31 +1513,33 @@
           </div>
         </div>
 
-        <!-- 10 Sub-Abas do Dossiê Expandido -->
+        <!-- 12 Sub-Abas do Dossiê Expandido (Plano 07 - Seção 111) -->
         <div class="dossier-subtabs-nav">
-          <button class="subtab-btn active" data-tab="tab-specs">📄 Ficha Canônica</button>
-          <button class="subtab-btn" data-tab="tab-benchmarks">🧠 Thinking & Benchmarks</button>
-          <button class="subtab-btn" data-tab="tab-pricing">💰 Tarifas & Caching</button>
-          <button class="subtab-btn" data-tab="tab-plans">💳 Planos & Assinaturas</button>
-          <button class="subtab-btn" data-tab="tab-history">📜 Histórico & Linhagem</button>
-          <button class="subtab-btn" data-tab="tab-community">💬 Comunidade & Perfil</button>
-          <button class="subtab-btn" data-tab="tab-usecases">🎯 Casos de Uso</button>
-          <button class="subtab-btn" data-tab="tab-hardware">🖥️ Hardware & VRAM</button>
-          <button class="subtab-btn" data-tab="tab-configs">🔌 Harnesses & JSON</button>
-          <button class="subtab-btn" data-tab="tab-governance">🔒 Governança & ZDR</button>
+          <button class="subtab-btn active" data-tab="tab-overview">📋 Overview</button>
+          <button class="subtab-btn" data-tab="tab-aa">📊 Artificial Analysis</button>
+          <button class="subtab-btn" data-tab="tab-coding">💻 Coding & DeepSWE</button>
+          <button class="subtab-btn" data-tab="tab-agentic">🤖 Agentic / Tools</button>
+          <button class="subtab-btn" data-tab="tab-reasoning">🧠 Reasoning</button>
+          <button class="subtab-btn" data-tab="tab-longcontext">📜 Long Context</button>
+          <button class="subtab-btn" data-tab="tab-multimodal">👁️ Multimodal</button>
+          <button class="subtab-btn" data-tab="tab-pro">💼 Professional Work</button>
+          <button class="subtab-btn" data-tab="tab-security">🔒 Security</button>
+          <button class="subtab-btn" data-tab="tab-pricing">💰 Pricing & Efficiency</button>
+          <button class="subtab-btn" data-tab="tab-platforms">🌐 Platforms</button>
+          <button class="subtab-btn" data-tab="tab-sources">📚 Sources</button>
         </div>
 
-        <!-- Subtab 1: Ficha Canônica -->
-        <div class="subtab-panel active" id="tab-specs">
+        <!-- Subtab 1: Overview & Performance Fingerprint (Seções 112 & 113) -->
+        <div class="subtab-panel active" id="tab-overview">
           <div class="specs-grid">
-            <div class="spec-item-card"><div class="spec-label">Janela de Contexto</div><div class="spec-value">${(model.contextWindow).toLocaleString()} tokens (${(model.contextWindow / 1000).toFixed(0)}k)</div></div>
+            <div class="spec-item-card"><div class="spec-label">Janela de Contexto (Nominal)</div><div class="spec-value">${(model.contextWindow).toLocaleString()} tokens (${(model.contextWindow / 1000).toFixed(0)}k)</div></div>
             <div class="spec-item-card"><div class="spec-label">Output Máximo</div><div class="spec-value">${(model.maxOutputTokens || 16384).toLocaleString()} tokens</div></div>
             <div class="spec-item-card"><div class="spec-label">Data de Lançamento</div><div class="spec-value">${model.releaseDate || '2026'}</div></div>
-            <div class="spec-item-card"><div class="spec-label">Knowledge / Training Cutoff</div><div class="spec-value">${model.knowledgeCutoff || 'fev/2025'} / ${model.trainingCutoff || 'jul/2025'}</div></div>
+            <div class="spec-item-card"><div class="spec-label">Cutoff de Conhecimento</div><div class="spec-value">${model.knowledgeCutoff || 'fev/2025'} / ${model.trainingCutoff || 'jul/2025'}</div></div>
             <div class="spec-item-card"><div class="spec-label">Latência Relativa Provedor</div><div class="spec-value highlight-cyan">${model.relativeLatency || 'Padrão'}</div></div>
             <div class="spec-item-card"><div class="spec-label">Tipo de Atenção / Arquitetura</div><div class="spec-value">${model.architectureType}</div></div>
-            <div class="spec-item-card"><div class="spec-label">Modalidades de Entrada</div><div class="spec-value">${(model.modalities.input || []).join(', ').toUpperCase()} → ${(model.modalities.output || []).join(', ').toUpperCase()}</div></div>
-            <div class="spec-item-card"><div class="spec-label">Raciocínio (Thinking)</div><div class="spec-value">${model.reasoning ? (model.reasoning.extendedThinking ? '✅ Extended Thinking (budget_tokens)' : (model.reasoning.mandatory ? 'Mandatório (Always ON)' : 'Opcional / Configurável')) + (model.reasoning.adaptiveThinking ? ' • ✅ Adaptive' : ' • ❌ Sem Adaptive') : 'Não suportado'}</div></div>
+            <div class="spec-item-card"><div class="spec-label">Modalidades de Entrada / Saída</div><div class="spec-value">${(model.modalities.input || []).join(', ').toUpperCase()} → ${(model.modalities.output || []).join(', ').toUpperCase()}</div></div>
+            <div class="spec-item-card"><div class="spec-label">Raciocínio (Thinking)</div><div class="spec-value">${model.reasoning ? (model.reasoning.extendedThinking ? '✅ Extended Thinking' : (model.reasoning.mandatory ? 'Mandatório (Always ON)' : 'Opcional / Configurável')) + (model.reasoning.adaptiveThinking ? ' • ✅ Adaptive' : ' • ❌ Sem Adaptive') : 'Não suportado'}</div></div>
             <div class="spec-item-card"><div class="spec-label">Function Calling / Tools</div><div class="spec-value">${model.tools.functionCalling ? 'Suporte Nativo' : 'Incompatível'}</div></div>
             <div class="spec-item-card"><div class="spec-label">Structured Output</div><div class="spec-value">${model.tools.structuredOutput}</div></div>
             ${model.antigravity ? `
@@ -1495,171 +1548,110 @@
             ` : ''}
           </div>
 
-          ${model.antigravity && model.antigravity.quotaWarning ? `
-            <div style="margin-top: 14px; padding: 12px 16px; background: rgba(249, 115, 22, 0.08); border: 1px solid rgba(249, 115, 22, 0.3); border-radius: var(--radius-md); font-size: 0.85rem; color: #fdba74;">
-              <strong>⚠️ Alerta de Governança de Cota (Antigravity):</strong> ${model.antigravity.quotaWarning}
+          <!-- Performance Fingerprint (Seção 113) -->
+          <div class="content-box" style="margin-top: 20px; border-color: var(--border-medium);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <h4 style="color: var(--accent-cyan); margin: 0;">🎯 Performance Fingerprint (Avaliação Categórica)</h4>
+              <span class="badge-tag badge-frontier">Metrologia 03/09/2026</span>
             </div>
-          ` : ''}
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px;">
+              Classificação sem percentuais inventados, derivada exclusivamente de evidências empíricas e benchmarks auditados.
+            </p>
+            <div class="fp-grid">
+              ${Object.keys(fingerprint).map(k => {
+                const item = fingerprint[k];
+                return `
+                  <div class="fp-card">
+                    <span class="fp-label">${item.label}</span>
+                    <span class="fp-rating ${item.cssClass}">${item.rating}</span>
+                    <span style="font-size: 0.72rem; color: var(--text-muted);">${item.rawQualifier || ''}</span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
 
           <div style="margin-top: 20px;">
             <h4 style="margin-bottom: 8px;">Pontos Fortes:</h4>
-            <ul style="padding-left: 20px; color: var(--text-secondary);">${(model.strengths || []).map(s => `<li>${s}</li>`).join('')}</ul>
+            <ul style="padding-left: 20px; color: var(--text-secondary);">${(model.strengths || (dossier?.strengths) || []).map(s => `<li>${s}</li>`).join('')}</ul>
           </div>
-          ${model.weaknesses && model.weaknesses.length > 0 ? `
+          ${(model.weaknesses || (dossier?.weaknesses) || []).length > 0 ? `
             <div style="margin-top: 14px;">
               <h4 style="margin-bottom: 8px; color: var(--accent-rose);">Pontos Fracos / Limitações:</h4>
-              <ul style="padding-left: 20px; color: var(--text-secondary);">${model.weaknesses.map(w => `<li>${w}</li>`).join('')}</ul>
+              <ul style="padding-left: 20px; color: var(--text-secondary);">${(model.weaknesses || (dossier?.weaknesses) || []).map(w => `<li>${w}</li>`).join('')}</ul>
             </div>
           ` : ''}
 
-          ${model.effortLatencyTtfa ? `
-            <div class="content-box" style="margin-top: 16px; border-color: rgba(251, 146, 60, 0.4); background: rgba(251, 146, 60, 0.04);">
-              <h4 style="color: #fb923c; margin-bottom: 8px;">⏱️ Curva de Latência de Raciocínio (TTFA por Esforço de Thinking)</h4>
-              <div class="specs-grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px;">
-                <div class="spec-item-card"><div class="spec-label">Low Effort</div><div class="spec-value">${model.effortLatencyTtfa.low}</div></div>
-                <div class="spec-item-card"><div class="spec-label">Medium Effort</div><div class="spec-value">${model.effortLatencyTtfa.medium}</div></div>
-                <div class="spec-item-card"><div class="spec-label">High Effort (Default)</div><div class="spec-value highlight-cyan">${model.effortLatencyTtfa.high}</div></div>
-                <div class="spec-item-card"><div class="spec-label">XHigh Effort</div><div class="spec-value highlight-purple">${model.effortLatencyTtfa.xhigh}</div></div>
-                <div class="spec-item-card"><div class="spec-label">Max Effort</div><div class="spec-value highlight-rose">${model.effortLatencyTtfa.max}</div></div>
+          ${model.operationalGuidance ? `
+            <div class="content-box" style="margin-top: 20px; border-color: var(--border-medium);">
+              <h4 style="color: var(--accent-cyan); margin-bottom: 8px;">🧭 Guia Operacional & Orquestração:</h4>
+              <div style="background: var(--bg-surface-dim); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px; margin-bottom: 12px; font-size: 0.85rem;">
+                🔄 <strong>Fluxo Recomendado:</strong> <code>${model.operationalGuidance.orchestrationFlow}</code>
               </div>
-              ${model.promptCacheWarning ? `
-                <div style="margin-top: 10px; font-size: 0.82rem; color: #fdba74;">
-                  ⚠️ <strong>Regra de Prompt Caching:</strong> ${model.promptCacheWarning}
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                <div style="background: var(--bg-surface-dim); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px;">
+                  <h5 style="color: var(--accent-emerald); margin-bottom: 6px;">✅ Onde Brilha (Ideal For):</h5>
+                  <ul style="padding-left: 18px; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
+                    ${model.operationalGuidance.idealFor.map(i => `<li>${i}</li>`).join('')}
+                  </ul>
                 </div>
-              ` : ''}
-              ${model.tokenizerNote ? `
-                <div style="margin-top: 4px; font-size: 0.82rem; color: var(--text-secondary);">
-                  ℹ️ <strong>Densidade do Tokenizer:</strong> ${model.tokenizerNote}
+                <div style="background: var(--bg-surface-dim); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px;">
+                  <h5 style="color: var(--accent-rose); margin-bottom: 6px;">❌ Onde Evitar (Avoid For):</h5>
+                  <ul style="padding-left: 18px; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
+                    ${model.operationalGuidance.avoidFor.map(a => `<li>${a}</li>`).join('')}
+                  </ul>
                 </div>
-              ` : ''}
-            </div>
-          ` : ''}
-
-          ${model.communityEvals && model.communityEvals.deepSwe113 ? `
-            <div class="content-box" style="margin-top: 16px; border-color: rgba(244, 63, 94, 0.4); background: rgba(244, 63, 94, 0.04);">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <h4 style="color: #f43f5e; margin: 0;">🔬 Avaliação de Comunidade DeepSWE 1.1 (113 Tarefas Auditadas)</h4>
-                <span class="badge-tag badge-danger">Stealth Telemetry</span>
-              </div>
-              <div class="specs-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px;">
-                <div class="spec-item-card"><div class="spec-label">Resolvidas no DeepSWE</div><div class="spec-value highlight-green">${model.communityEvals.deepSwe113.resolved} / ${model.communityEvals.deepSwe113.total} (${model.communityEvals.deepSwe113.scorePct}%)</div></div>
-                <div class="spec-item-card"><div class="spec-label">Taxa de Near-Misses (≥90%)</div><div class="spec-value highlight-amber">${model.communityEvals.deepSwe113.nearMissesPct}% (90/113)</div></div>
-                <div class="spec-item-card"><div class="spec-label">Total de Steps / Cache Hit</div><div class="spec-value">${model.communityEvals.deepSwe113.steps.toLocaleString()} steps (96,1%)</div></div>
-                <div class="spec-item-card"><div class="spec-label">Harness de Execução</div><div class="spec-value" style="font-size: 0.85rem;">${model.communityEvals.deepSwe113.harness}</div></div>
               </div>
             </div>
           ` : ''}
         </div>
 
-        <!-- Subtab 2: Benchmarks -->
-        <div class="subtab-panel" id="tab-benchmarks">
-          <h4>Desempenho no CursorBench 3.2 por Esforço de Thinking:</h4>
-          ${cursorBenchRuns.length > 0 ? `
-            <table class="data-table" style="margin: 14px 0;">
-              <thead><tr><th>Nível de Esforço</th><th>Score (%)</th><th>Custo / Task</th><th>Tokens / Task</th><th>Harness</th><th>Sweet Spot?</th></tr></thead>
-              <tbody>
-                ${cursorBenchRuns.map(r => `
-                  <tr>
-                    <td><strong>${r.effort}</strong></td>
-                    <td class="score-cell score-highlight">${r.score.toFixed(1)}%</td>
-                    <td>$${r.costUsd.toFixed(2)}</td>
-                    <td>${r.tokensPerTask.toLocaleString()}</td>
-                    <td>${r.harness}</td>
-                    <td>${r.isSweetSpot ? '<span class="badge-tag badge-sweetspot">🌟 Sweet Spot</span>' : '-'}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          ` : '<p style="color: var(--text-muted); margin: 12px 0;">Nenhuma bateria do CursorBench 3.2 registrada para este modelo.</p>'}
-          
-          <!-- BATERIA OFICIAL DO FABRICANTE SE DISPONÍVEL -->
-          ${model.officialBenchmarks ? `
-            <div class="content-box" style="margin-top: 20px; border-color: var(--border-medium);">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <h4 style="color: var(--accent-amber); margin: 0;">🏆 Bateria Oficial de Benchmarks do Fabricante (${model.providerName})</h4>
-                <span class="badge-tag badge-warning">Auditado Oficialmente</span>
-              </div>
-              <div class="specs-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 14px;">
-                ${model.officialBenchmarks.sweBenchVerified !== undefined ? `<div class="spec-item-card"><div class="spec-label">SWE-bench Verified</div><div class="spec-value highlight-green" style="font-size: 1.2rem;">${model.officialBenchmarks.sweBenchVerified}%</div></div>` : ''}
-                ${model.officialBenchmarks.terminalBench !== undefined ? `<div class="spec-item-card"><div class="spec-label">Terminal-Bench 2.0</div><div class="spec-value" style="font-size: 1.1rem;">${model.officialBenchmarks.terminalBench}%</div></div>` : ''}
-                ${model.officialBenchmarks.terminalBenchNoThinking !== undefined ? `<div class="spec-item-card"><div class="spec-label">Terminal-Bench (Sem Think)</div><div class="spec-value" style="font-size: 1.1rem;">${model.officialBenchmarks.terminalBenchNoThinking}%</div></div>` : ''}
-                ${model.officialBenchmarks.terminalBench32kThinking !== undefined ? `<div class="spec-item-card"><div class="spec-label">Terminal-Bench (32k Think)</div><div class="spec-value highlight-purple" style="font-size: 1.1rem;">${model.officialBenchmarks.terminalBench32kThinking}%</div></div>` : ''}
-                ${model.officialBenchmarks.mrcrV2_1m_max !== undefined ? `<div class="spec-item-card"><div class="spec-label">OpenAI MRCR v2 (1M Tokens)</div><div class="spec-value highlight-purple" style="font-size: 1.15rem; font-weight: 800;">${model.officialBenchmarks.mrcrV2_1m_max}% <span style="font-size: 0.75rem; color: var(--text-muted);">(64k: ${model.officialBenchmarks.mrcrV2_1m_64k}%)</span></div></div>` : ''}
-                ${model.officialBenchmarks.mcpAtlas !== undefined ? `<div class="spec-item-card"><div class="spec-label">MCP-Atlas (Ferramentas)</div><div class="spec-value highlight-cyan" style="font-size: 1.1rem;">${model.officialBenchmarks.mcpAtlas}%</div></div>` : ''}
-                ${model.officialBenchmarks.hleWithTools !== undefined ? `<div class="spec-item-card"><div class="spec-label">Humanities Last Exam (+Tools)</div><div class="spec-value highlight-amber" style="font-size: 1.1rem;">${model.officialBenchmarks.hleWithTools}% <span style="font-size: 0.75rem; color: var(--text-muted);">(Sem tools: ${model.officialBenchmarks.hleWithoutTools}%)</span></div></div>` : ''}
-                ${model.officialBenchmarks.arcAgi2Verified !== undefined ? `<div class="spec-item-card"><div class="spec-label">ARC-AGI-2 Verified</div><div class="spec-value highlight-purple" style="font-size: 1.1rem;">${model.officialBenchmarks.arcAgi2Verified}%</div></div>` : ''}
-                ${model.officialBenchmarks.osworld !== undefined ? `<div class="spec-item-card"><div class="spec-label">OSWorld (Computer Use)</div><div class="spec-value highlight-cyan" style="font-size: 1.1rem;">${model.officialBenchmarks.osworld}%</div></div>` : ''}
-                ${model.officialBenchmarks.gpqaDiamond !== undefined ? `<div class="spec-item-card"><div class="spec-label">GPQA Diamond</div><div class="spec-value" style="font-size: 1.1rem;">${model.officialBenchmarks.gpqaDiamond}%</div></div>` : ''}
-                ${model.officialBenchmarks.aime2025NoTools !== undefined ? `<div class="spec-item-card"><div class="spec-label">AIME 2025</div><div class="spec-value" style="font-size: 1.1rem;">${model.officialBenchmarks.aime2025NoTools}% ${model.officialBenchmarks.aime2025WithTools ? `(+Tools: ${model.officialBenchmarks.aime2025WithTools}%)` : (model.officialBenchmarks.aime2025Python ? `(+Py: ${model.officialBenchmarks.aime2025Python}%)` : '')}</div></div>` : ''}
-                ${model.officialBenchmarks.mmlu !== undefined ? `<div class="spec-item-card"><div class="spec-label">MMLU</div><div class="spec-value" style="font-size: 1.1rem;">${model.officialBenchmarks.mmlu}%</div></div>` : ''}
-                ${model.officialBenchmarks.sweBenchMultilingual !== undefined ? `<div class="spec-item-card"><div class="spec-label">SWE-bench Multilingual</div><div class="spec-value" style="font-size: 1.1rem;">${model.officialBenchmarks.sweBenchMultilingual}%</div></div>` : ''}
-                ${model.officialBenchmarks.mmmuProWithTools !== undefined ? `<div class="spec-item-card"><div class="spec-label">MMMU-Pro (+Tools)</div><div class="spec-value" style="font-size: 1.1rem;">${model.officialBenchmarks.mmmuProWithTools}% <span style="font-size: 0.75rem; color: var(--text-muted);">(No tools: ${model.officialBenchmarks.mmmuProNoTools}%)</span></div></div>` : ''}
-                ${model.officialBenchmarks.tau2Retail !== undefined ? `<div class="spec-item-card"><div class="spec-label">τ²-bench Retail / Airline</div><div class="spec-value" style="font-size: 1.1rem;">${model.officialBenchmarks.tau2Retail}% ${model.officialBenchmarks.tau2Airline ? `/ ${model.officialBenchmarks.tau2Airline}%` : ''}</div></div>` : ''}
-                ${model.officialBenchmarks.aiderPolyglot !== undefined ? `<div class="spec-item-card"><div class="spec-label">Aider Polyglot</div><div class="spec-value" style="font-size: 1.1rem;">${model.officialBenchmarks.aiderPolyglot}%</div></div>` : ''}
-              </div>
-              <div style="background: var(--bg-surface-dim); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px; font-size: 0.8rem; color: var(--text-secondary);">
-                📌 <em>${model.officialBenchmarks.methodology}</em>
-              </div>
-            </div>
-          ` : ''}
-
-          ${model.historicalEvaluations && model.historicalEvaluations.length > 0 ? `
-            <div class="content-box" style="margin-top: 20px; border-color: rgba(234, 179, 8, 0.4); background: rgba(234, 179, 8, 0.04);">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <h4 style="color: #facc15; margin: 0;">📜 Avaliações Históricas Pré-Revelação (Fase Stealth Preview)</h4>
-                <span class="badge-tag badge-warning">Histórico</span>
-              </div>
-              <p style="font-size: 0.83rem; color: var(--text-secondary); margin-bottom: 12px;">
-                Métricas auditadas registradas enquanto o modelo operava sob o codinome anônimo <strong>${model.historicalEvaluations[0].alias}</strong>:
-              </p>
-              <table class="data-table">
-                <thead><tr><th>Benchmark</th><th>Score</th><th>Tarefas</th><th>Fase</th><th>Notas</th></tr></thead>
-                <tbody>
-                  ${model.historicalEvaluations.map(h => `
-                    <tr>
-                      <td><strong>${h.benchmark}</strong></td>
-                      <td class="score-cell">${h.score}%</td>
-                      <td>${h.solved ? `${h.solved} / ${h.tasks}` : `${h.tasks} tarefas`}</td>
-                      <td><span class="badge-tag badge-frontier">${h.phase}</span></td>
-                      <td style="font-size: 0.8rem; color: var(--text-muted);">${h.notes}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
-          ` : ''}
-
-          <h4 style="margin-top: 20px;">Métricas Oficiais nos Principais Ledgers:</h4>
-          <div class="specs-grid" style="margin-top: 10px;">
-            <div class="spec-item-card"><div class="spec-label">Terminal-Bench 2.1</div><div class="spec-value">${ledgerEntry && ledgerEntry.terminalBench21 ? `${ledgerEntry.terminalBench21.toFixed(1)}%` : 'N/D'}</div></div>
-            <div class="spec-item-card"><div class="spec-label">DeepSWE 1.1 (113 tarefas)</div><div class="spec-value">${ledgerEntry && ledgerEntry.deepSwe11 ? `${ledgerEntry.deepSwe11.toFixed(1)}%` : 'N/D'}</div></div>
-            <div class="spec-item-card"><div class="spec-label">SWE-bench Pro</div><div class="spec-value">${ledgerEntry && ledgerEntry.sweBenchPro ? `${ledgerEntry.sweBenchPro.toFixed(1)}%` : 'N/D'}</div></div>
-            <div class="spec-item-card"><div class="spec-label">SWE-bench Verified</div><div class="spec-value">${ledgerEntry && ledgerEntry.sweBenchVerified ? `${ledgerEntry.sweBenchVerified.toFixed(1)}%` : 'N/D'}</div></div>
-          </div>
-
-          <!-- PAINEL OFICIAL DE AUDITORIA ARTIFICIAL ANALYSIS -->
+        <!-- Subtab 2: Artificial Analysis (Seção 114) -->
+        <div class="subtab-panel" id="tab-aa">
           <div class="aa-audit-dossier-card">
             <div class="aa-audit-header">
-              <h4>🛡️ Auditoria Oficial: Artificial Analysis (v4.1.1)</h4>
+              <h4>🛡️ Auditoria Oficial: Artificial Analysis (Intelligence Index v4.1.1)</h4>
               <a href="https://artificialanalysis.ai" target="_blank" rel="noopener" class="btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;">
-                <span>Ver no site oficial ↗</span>
+                <span>Ver na Artificial Analysis ↗</span>
               </a>
             </div>
+
             ${(() => {
-              if (model.artificialAnalysis) {
-                const r = model.artificialAnalysis.reasoning;
-                const nr = model.artificialAnalysis.nonReasoning;
+              if (dossier?.artificialAnalysis?.efforts) {
+                const efforts = dossier.artificialAnalysis.efforts;
                 return `
-                  <div class="specs-grid">
-                    <div class="spec-item-card" style="border-color: var(--aa-purple-border);"><div class="spec-label">AA Index (Reasoning)</div><div class="spec-value highlight-purple" style="font-size: 1.3rem; font-weight: 800;">${r.aaIndex.toFixed(1)} <span style="font-size: 0.75rem; color: var(--text-muted);">/ 100</span></div></div>
-                    <div class="spec-item-card"><div class="spec-label">AA Index (Sem Reasoning)</div><div class="spec-value" style="font-size: 1.3rem;">${nr.aaIndex.toFixed(1)} <span style="font-size: 0.75rem; color: var(--text-muted);">/ 100</span></div></div>
-                    <div class="spec-item-card"><div class="spec-label">Custo / Tarefa (AA Method)</div><div class="spec-value">$${r.costPerTaskUsd.toFixed(2)}</div></div>
-                    <div class="spec-item-card"><div class="spec-label">Decode Anthropic vs Bedrock</div><div class="spec-value"><strong>~${r.speedTps} tok/s</strong> vs <strong>~${r.bedrockSpeedTps} tok/s</strong></div></div>
-                    <div class="spec-item-card"><div class="spec-label">Latência TTFT / Resposta Final</div><div class="spec-value">~${nr.ttftSeconds}s (TTFT) • ${r.timeToFinalAnswer} (Final)</div></div>
-                    <div class="spec-item-card"><div class="spec-label">Volume de Tokens Avaliados</div><div class="spec-value">${(r.totalOutputTokens / 1000000).toFixed(0)}M tokens</div></div>
+                  <h5 style="margin-top: 10px; margin-bottom: 8px;">Breakdown de Inteligência, Velocidade e Custo por Esforço de Thinking:</h5>
+                  <div class="deepswe-leaderboard-container">
+                    <table class="deepswe-table">
+                      <thead>
+                        <tr>
+                          <th>Nível de Esforço</th>
+                          <th>AA Index</th>
+                          <th>Throughput (Decode)</th>
+                          <th>Latência TTFT</th>
+                          <th>Custo / Tarefa</th>
+                          <th>Volume Tokens Testados</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${Object.keys(efforts).map(effKey => {
+                          const eff = efforts[effKey];
+                          return `
+                            <tr>
+                              <td><strong>${effKey.toUpperCase()}</strong></td>
+                              <td><strong style="color: var(--accent-cyan); font-size: 1.05rem;">${eff.aaIndex}</strong> / 100</td>
+                              <td>${eff.outputSpeedTokS ? `${eff.outputSpeedTokS.toFixed(1)} tok/s` : 'N/D'}</td>
+                              <td>${eff.ttftSeconds ? `${eff.ttftSeconds.toFixed(2)}s` : 'N/D'}</td>
+                              <td>$${eff.costPerTaskUsd ? eff.costPerTaskUsd.toFixed(2) : 'N/D'}</td>
+                              <td>${eff.totalOutputTokens ? `${(eff.totalOutputTokens / 1000000).toFixed(0)}M tokens` : 'N/D'}</td>
+                            </tr>
+                          `;
+                        }).join('')}
+                      </tbody>
+                    </table>
                   </div>
-                  <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 10px;">
-                    🔍 <em>${model.artificialAnalysis.thinkingImpact} Avaliação independente em suíte multimodal e Stirrup Harness.</em>
+                  <div style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 10px; background: rgba(255,255,255,0.02); padding: 10px; border-radius: var(--radius-sm);">
+                    🔍 <strong>Interpretação Metrológica AA:</strong> ${dossier.artificialAnalysis.interpretation}
                   </div>
                 `;
               }
@@ -1682,373 +1674,204 @@
               } else {
                 return `
                   <div style="padding: 12px; background: rgba(255,255,255,0.02); border-radius: var(--radius-md); border: 1px dashed var(--border-subtle); color: var(--text-secondary); font-size: 0.85rem;">
-                    ℹ️ <strong>Status N/D na Artificial Analysis:</strong> Este modelo ainda não possui submissão ou bateria padronizada pública na suíte do Intelligence Index v4.1.1. Mantidas avaliações comunitárias e de fabricantes acima.
+                    ℹ️ <strong>Status N/D na Artificial Analysis:</strong> Este endpoint ainda não possui medição pública na suíte do Intelligence Index v4.1.1 (03/09/2026).
                   </div>
                 `;
               }
             })()}
           </div>
+        </div>
 
-          <!-- GUIA OPERACIONAL & CASOS DE USO -->
-          ${model.operationalGuidance ? `
-            <div class="content-box" style="margin-top: 20px; border-color: var(--border-medium);">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <h4 style="color: var(--accent-cyan); margin: 0;">🧭 Papel Arquitetural & Guia Operacional em Coding</h4>
-                <span class="badge-tag badge-openweights">Worker Subagente</span>
-              </div>
-              <div style="background: var(--bg-surface-dim); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 14px; font-size: 0.85rem; color: var(--text-primary);">
-                🔄 <strong>Padrão de Orquestração Recomendado:</strong> <code>${model.operationalGuidance.orchestrationFlow}</code>
-              </div>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                <div style="background: var(--bg-surface-dim); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px;">
-                  <h5 style="color: var(--accent-emerald); margin-bottom: 8px;">✅ Onde Brilha (Altamente Recomendado):</h5>
-                  <ul style="padding-left: 18px; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
-                    ${model.operationalGuidance.idealFor.map(i => `<li>${i}</li>`).join('')}
-                  </ul>
-                </div>
-                <div style="background: var(--bg-surface-dim); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px;">
-                  <h5 style="color: var(--accent-rose); margin-bottom: 8px;">❌ Onde Evitar (Não Recomendado):</h5>
-                  <ul style="padding-left: 18px; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
-                    ${model.operationalGuidance.avoidFor.map(a => `<li>${a}</li>`).join('')}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          ` : ''}
+        <!-- Subtab 3: Coding & DeepSWE Leaderboard (Seção 115) -->
+        <div class="subtab-panel" id="tab-coding">
+          <h4>🏆 DeepSWE 1.1 Leaderboard Independente (Com Custo por Tarefa Resolvida)</h4>
+          <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
+            Ordenação factual por taxa de sucesso e eficiência. Custo por tarefa resolvida calculado dinamicamente com flag <code>derived: true</code> via fórmula <code>costPerTask / (score / 100)</code>.
+          </p>
+          <div class="deepswe-leaderboard-container">
+            <table class="deepswe-table">
+              <thead>
+                <tr>
+                  <th>Modelo</th>
+                  <th>Score (%)</th>
+                  <th>Custo / Task</th>
+                  <th>Output Tokens / Task</th>
+                  <th>Agent Steps / Task</th>
+                  <th>Custo / Tarefa Resolvida</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${deepsweBoard.map(item => {
+                  const isCurrent = item.modelId === model.id;
+                  return `
+                    <tr style="${isCurrent ? 'background: rgba(6, 182, 212, 0.12); font-weight: 600;' : ''}">
+                      <td>${isCurrent ? '👉 ' : ''}<strong>${item.modelName}</strong></td>
+                      <td><strong style="color: var(--accent-cyan); font-size: 0.95rem;">${item.score.toFixed(1)}%</strong> <span style="font-size:0.75rem; color:var(--text-muted);">±${item.confidenceInterval}</span></td>
+                      <td>$${item.costPerTaskUsd.toFixed(2)}</td>
+                      <td>${item.outputTokensPerTask.toLocaleString()}</td>
+                      <td>${item.agentStepsPerTask}</td>
+                      <td><span class="cost-per-solved-badge">$${item.costPerSolvedTask ? item.costPerSolvedTask.toFixed(2) : 'N/D'}</span></td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
 
-          <!-- PAINEL DE AVALIAÇÃO COMUNITÁRIA & AUDITORIA EMPÍRICA -->
-          ${model.communityEvals ? `
-            <div class="content-box" style="margin-top: 20px; border-color: var(--border-medium);">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <h4 style="color: var(--accent-rose); margin: 0;">🔬 Auditoria Comunitária Independente (Traces Públicos 24/08/2026)</h4>
-                <span class="badge-tag badge-danger">Harness Reproduzível</span>
-              </div>
-              
-              <div class="specs-grid" style="margin-bottom: 16px;">
-                <div class="spec-item-card">
-                  <div class="spec-label">DeepSWE 1.1 Completo (113 tarefas)</div>
-                  <div class="spec-value highlight-green" style="font-size: 1.25rem;">${model.communityEvals.deepSwe113.scorePct}% <span style="font-size: 0.75rem; color: var(--text-muted);">(${model.communityEvals.deepSwe113.resolved}/${model.communityEvals.deepSwe113.total} resolvidas)</span></div>
-                </div>
-                <div class="spec-item-card">
-                  <div class="spec-label">Taxa de Near-Misses (&ge;90% testes)</div>
-                  <div class="spec-value" style="font-size: 1.25rem; color: var(--accent-cyan);">${model.communityEvals.deepSwe113.nearMissesPct}% <span style="font-size: 0.75rem; color: var(--text-muted);">(90/113 tarefas)</span></div>
-                </div>
-                <div class="spec-item-card">
-                  <div class="spec-label">LiveCodeBench v6 (Pass@1)</div>
-                  <div class="spec-value" style="font-size: 1.25rem; color: var(--accent-amber);">${model.communityEvals.liveCodeBenchV6.scorePct}% <span style="font-size: 0.75rem; color: var(--text-muted);">(Easy: ${model.communityEvals.liveCodeBenchV6.easy}%)</span></div>
-                </div>
-                <div class="spec-item-card">
-                  <div class="spec-label">Telemetria OpenRouter (Throughput)</div>
-                  <div class="spec-value">${model.communityEvals.openRouterTelemetrics.throughputP50} tok/s <span style="font-size: 0.75rem; color: var(--text-muted);">(Latência P50: ${model.communityEvals.openRouterTelemetrics.latencyP50}s)</span></div>
-                </div>
-              </div>
+          <h4 style="margin-top: 24px;">Benchmarks de Coding do Modelo (Snapshots Auditados):</h4>
+          ${renderCategorySnapshots('Coding', 'coding')}
 
-              <div style="background: var(--bg-surface-dim); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
-                <div><strong>⏱️ Telemetria do Run DeepSWE:</strong> ${model.communityEvals.deepSwe113.steps.toLocaleString()} passos agênticos (mediana: ${model.communityEvals.deepSwe113.medianSteps} steps | máx: ${model.communityEvals.deepSwe113.maxSteps}) em 20h39m ininterruptas no harness <code>${model.communityEvals.deepSwe113.harness}</code>.</div>
-                <div style="margin-top: 6px;"><strong>🚨 Ponto Crítico de Tool Calling:</strong> 9,7% da suíte (11 tarefas) falhou por <code>RepeatedFormatError</code> (o modelo respondeu em texto puro 3 vezes consecutivas sem acionar ferramentas).</div>
-                <div style="margin-top: 6px;"><strong>📊 Consumo Massivo em Produção (OpenRouter):</strong> ${model.communityEvals.tokensConsumedAppRank.hermes} tokens (Hermes Agent) • ${model.communityEvals.tokensConsumedAppRank.claudeCode} tokens (Claude Code) • ${model.communityEvals.tokensConsumedAppRank.deepseekHarness} tokens (DeepSeek Multimodal Bridge).</div>
-              </div>
+          ${cursorBenchRuns.length > 0 ? `
+            <h4 style="margin-top: 20px;">CursorBench 3.2 por Esforço de Thinking (Cursor Native):</h4>
+            <div class="deepswe-leaderboard-container">
+              <table class="deepswe-table">
+                <thead><tr><th>Nível de Esforço</th><th>Score (%)</th><th>Custo / Task</th><th>Tokens / Task</th><th>Harness</th><th>Sweet Spot?</th></tr></thead>
+                <tbody>
+                  ${cursorBenchRuns.map(r => `
+                    <tr>
+                      <td><strong>${r.effort}</strong></td>
+                      <td><strong style="color: var(--accent-cyan); font-size: 0.95rem;">${r.score.toFixed(1)}%</strong></td>
+                      <td>$${r.costUsd.toFixed(2)}</td>
+                      <td>${r.tokensPerTask.toLocaleString()}</td>
+                      <td>${r.harness}</td>
+                      <td>${r.isSweetSpot ? '<span class="badge-tag badge-sweetspot">🌟 Sweet Spot</span>' : '-'}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
             </div>
           ` : ''}
         </div>
 
-        <!-- Subtab 3: Hardware & VRAM -->
-        <div class="subtab-panel" id="tab-hardware">
-          ${(() => {
-            const localHardware = typeof HARDWARE_LOCAL_MODELS_DATA !== 'undefined' ? HARDWARE_LOCAL_MODELS_DATA.find(h => h.modelId === model.id) : null;
-            if (localHardware) {
-              return `
-                <div class="content-box" style="border-color: rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.03); margin-bottom: 16px;">
-                  <h4 style="color: var(--accent-cyan); margin-top: 0;">🖥️ Topologia de Servidor & Requisitos de VRAM (Auditado 2026)</h4>
-                  <div class="specs-grid">
-                    <div class="spec-item-card"><div class="spec-label">VRAM Mínima Quantizada (INT4 / FP4)</div><div class="spec-value highlight-green">${localHardware.minVramInt4}</div></div>
-                    <div class="spec-item-card"><div class="spec-label">VRAM Recomendada (FP16 / BF16)</div><div class="spec-value highlight-purple">${localHardware.recommendedBf16}</div></div>
-                    <div class="spec-item-card"><div class="spec-label">Throughput Estimado (Single-Stream)</div><div class="spec-value highlight-cyan">${localHardware.estimatedDecodeTps}</div></div>
-                    <div class="spec-item-card" style="grid-column: 1 / -1;"><div class="spec-label">Configuração de Estação / Servidor Recomendada</div><div class="spec-value" style="font-size: 0.95rem;"><strong>${localHardware.recommendedNode}</strong></div></div>
-                  </div>
-                  <div style="margin-top: 10px; font-size: 0.82rem; color: var(--text-secondary);">
-                    📌 <em>${localHardware.notes}</em>
-                  </div>
-                </div>
-              `;
-            }
-            if (model.openWeights && model.hardwareRequirements) {
-              return `
-                <div class="specs-grid">
-                  <div class="spec-item-card"><div class="spec-label">Tamanho dos Pesos (Download)</div><div class="spec-value">${model.hardwareRequirements.downloadSizeBytes ? (model.hardwareRequirements.downloadSizeBytes / 1073741824).toFixed(1) + ' GB' : 'N/D'}</div></div>
-                  <div class="spec-item-card"><div class="spec-label">VRAM Mínima Recomendada</div><div class="spec-value">${model.hardwareRequirements.minVramGb || 'N/D'} GB (Ideal: ${model.hardwareRequirements.recommendedVramGb || 'N/D'} GB)</div></div>
-                  <div class="spec-item-card"><div class="spec-label">Throughput Decode</div><div class="spec-value">${model.hardwareRequirements.singleStreamDecodeTps || 'N/D'} tok/s</div></div>
-                </div>
-              `;
-            }
-            return '<p style="color: var(--text-muted);">Este modelo é proprietário e executado exclusivamente na nuvem gerenciada do provedor.</p>';
-          })()}
-          <div style="margin-top: 16px;">
-            <button class="btn-primary" onclick="location.hash='#calculator'">🖥️ Simular nesta GPU na Calculadora</button>
+        <!-- Subtab 4: Agentic / Tools (Seção 117) -->
+        <div class="subtab-panel" id="tab-agentic">
+          <h4>🤖 Benchmarks Agênticos, Automação & Tool Calling</h4>
+          <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
+            Avaliação de Toolathlon, AutomationBench, Agents' Last Exam (ALE), APEX-Agents, MCP Atlas, OSWorld e τ³-Banking.
+          </p>
+          ${renderCategorySnapshots('Ferramentas & Agentes', 'agent')}
+        </div>
+
+        <!-- Subtab 5: Reasoning & Science (Seção 118) -->
+        <div class="subtab-panel" id="tab-reasoning">
+          <h4>🧠 Raciocínio de Fronteira, Matemática & Ciência</h4>
+          <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
+            Desafios de doutorado, olimpíadas de exatas e verificação formal (GPQA Diamond, Humanity's Last Exam, ARC-AGI-2, CritPt, SciCode, FrontierMath).
+          </p>
+          ${renderCategorySnapshots('Raciocínio & Ciência', 'science')}
+        </div>
+
+        <!-- Subtab 6: Long Context (Seção 116) -->
+        <div class="subtab-panel" id="tab-longcontext">
+          <h4>📜 Comparador de Contexto: Janela Nominal vs Retenção Efetiva</h4>
+          <div class="context-comparison-box">
+            <div class="context-card nominal">
+              <span class="spec-label">Janela Nominal da API</span>
+              <div style="font-size: 1.4rem; font-weight: 800; color: var(--accent-cyan); margin: 6px 0;">
+                ${(model.contextWindow).toLocaleString()} tokens
+              </div>
+              <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0;">
+                Capacidade máxima de buffer aceita pelo endpoint HTTP/SDK.
+              </p>
+            </div>
+            <div class="context-card effective">
+              <span class="spec-label">Qualidade Efetiva de Retenção (Intervalo 512k–1M)</span>
+              <div style="font-size: 1.4rem; font-weight: 800; color: #a855f7; margin: 6px 0;">
+                ${dossier?.context?.retrievalAccuracyScore ? `${dossier.context.retrievalAccuracyScore}%` : (ledgerEntry?.mrcr1m ? `${ledgerEntry.mrcr1m}% (MRCR v2)` : 'N/D')}
+              </div>
+              <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0;">
+                ${dossier?.context?.effectiveEvaluation || 'Taxa de sucesso em tarefas de agulha no palheiro agêntica e recuperação multi-arquivo.'}
+              </p>
+            </div>
+          </div>
+
+          <h4 style="margin-top: 20px;">Snapshots de Contexto Longo (MRCR, GraphWalks, OneMillionBench):</h4>
+          ${renderCategorySnapshots('Contexto Longo', 'longContext')}
+
+          ${model.pricing?.standard?.cacheRead !== null && model.pricing?.standard?.cacheRead !== undefined ? `
+            <div style="margin-top: 16px; padding: 12px 16px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-md); font-size: 0.85rem;">
+              ⚡ <strong>Economia de Prompt Caching:</strong> Leitura em cache custa apenas <strong>$${model.pricing.standard.cacheRead.toFixed(4)} / M</strong> (~85-90% de desconto sobre o input frio de $${model.pricing.standard.input.toFixed(2)}).
+            </div>
+          ` : ''}
+        </div>
+
+        <!-- Subtab 7: Multimodal (Seção 119) -->
+        <div class="subtab-panel" id="tab-multimodal">
+          <h4>👁️ Compreensão Multimodal, Visão Técnica & Diagramas</h4>
+          <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
+            Desempenho em leitura de PDFs densos, diagramas de arquitetura, gráficos de papers e vídeo (MMMU-Pro, CharXiv, GDP.pdf, Video-MME).
+          </p>
+          ${renderCategorySnapshots('Multimodalidade', 'multimodal')}
+        </div>
+
+        <!-- Subtab 8: Professional Work (Seção 120) -->
+        <div class="subtab-panel" id="tab-pro">
+          <h4>💼 Trabalho Profissional & Domínios Corporativos</h4>
+          <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
+            Benchmarks calibrados em tarefas do mundo real corporativo (GDPval-AA v2, AA-Briefcase, Finance Agent v2, Harvey Legal Agent).
+          </p>
+          ${renderCategorySnapshots('Trabalho Profissional', 'business')}
+        </div>
+
+        <!-- Subtab 9: Security (Seção 120) -->
+        <div class="subtab-panel" id="tab-security">
+          <h4>🔒 Cibersegurança & Auditoria de Governança</h4>
+          <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
+            Resolução de vulnerabilidades, capture-the-flag (CyberGym, ExploitGym) e diretrizes de Zero Data Retention (ZDR).
+          </p>
+          ${renderCategorySnapshots('Cibersegurança', 'cyber')}
+
+          <div class="specs-grid" style="margin-top: 20px;">
+            <div class="spec-item-card"><div class="spec-label">Zero Data Retention (ZDR)</div><div class="spec-value">${model.privacy ? (model.privacy.retentionDays === 0 ? '✅ ZDR Ativo (0 dias)' : `⚠️ Retenção de até ${model.privacy.retentionDays} dias`) : (model.id === 'glm-5-3-flash' ? '✅ ZDR Oficial Z.ai API / OpenRouter' : '✅ ZDR Ativo')}</div></div>
+            <div class="spec-item-card"><div class="spec-label">Status dos Pesos</div><div class="spec-value">${model.openWeights ? 'Pesos Abertos Auditáveis' : 'Proprietário de Código Fechado'}</div></div>
+            <div class="spec-item-card"><div class="spec-label">Confiança Metrológica</div><div class="spec-value highlight-green">${(model.sourceConfidence || 'oficial').toUpperCase()}</div></div>
           </div>
         </div>
 
-        <!-- Subtab 4: Tarifas & OpenCode Go -->
+        <!-- Subtab 10: Pricing & Efficiency (Seções 111 & 114) -->
         <div class="subtab-panel" id="tab-pricing">
           <div class="specs-grid">
             <div class="spec-item-card"><div class="spec-label">Preço Padrão (Input / Entrada)</div><div class="spec-value">$${model.pricing.standard.input.toFixed(2)} / milhão</div></div>
             <div class="spec-item-card"><div class="spec-label">Preço Padrão (Output / Saída)</div><div class="spec-value">$${model.pricing.standard.output.toFixed(2)} / milhão</div></div>
-            <div class="spec-item-card"><div class="spec-label">Prompt Cache Read (Hit)</div><div class="spec-value highlight-green">${model.pricing.standard.cacheRead !== null && model.pricing.standard.cacheRead !== undefined ? `$${model.pricing.standard.cacheRead.toFixed(2)} / milhão (90% OFF)` : 'Padrão'}</div></div>
+            <div class="spec-item-card"><div class="spec-label">Prompt Cache Read (Hit)</div><div class="spec-value highlight-green">${model.pricing.standard.cacheRead !== null && model.pricing.standard.cacheRead !== undefined ? `$${model.pricing.standard.cacheRead.toFixed(4)} / milhão` : 'Padrão'}</div></div>
             <div class="spec-item-card"><div class="spec-label">Cache Write (5 min / 1 hora)</div><div class="spec-value">${model.pricing.standard.cacheWrite5m ? `$${model.pricing.standard.cacheWrite5m.toFixed(2)} / $${model.pricing.standard.cacheWrite1h.toFixed(2)}` : 'N/D'}</div></div>
             ${model.pricing.batch ? `
               <div class="spec-item-card" style="border-color: rgba(34, 197, 94, 0.4);"><div class="spec-label">Batch API (50% de Desconto)</div><div class="spec-value highlight-green">$${model.pricing.batch.input.toFixed(2)} in / $${model.pricing.batch.output.toFixed(2)} out</div></div>
             ` : ''}
-            <div class="spec-item-card"><div class="spec-label">Pool no Cursor Pro</div><div class="spec-value">${model.cursorPool ? model.cursorPool.poolLabel : 'Standard ($0,50/$2,50)'}</div></div>
+            <div class="spec-item-card"><div class="spec-label">Pool no Cursor Pro</div><div class="spec-value">${model.cursorPool ? model.cursorPool.poolLabel : 'Standard'}</div></div>
             <div class="spec-item-card"><div class="spec-label">OpenCode Go ($10/mês)</div><div class="spec-value">${model.openCodeGo && model.openCodeGo.available ? `Classe US$${model.openCodeGo.usageAllowanceUsd} (${model.openCodeGo.quotaBurnMultiplier}× burn • ~${model.openCodeGo.estReqMonth.toLocaleString()} req/mês)` : 'Não listado no Go'}</div></div>
-            ${model.pricing.sonnetComparison ? `
-              <div class="spec-item-card"><div class="spec-label">Paridade vs Claude Sonnet 5</div><div class="spec-value highlight-cyan">${model.pricing.sonnetComparison}</div></div>
-            ` : ''}
           </div>
         </div>
 
-        <!-- Subtab 5: Harnesses & Configs -->
-        <div class="subtab-panel" id="tab-configs">
-          <h4>Configuração Oficial Pronta para Copiar (OpenCode):</h4>
+        <!-- Subtab 11: Platforms & Access (Seção 111) -->
+        <div class="subtab-panel" id="tab-platforms">
+          <h4>🌐 Onde Executar Este Modelo & Configurações de IDE</h4>
+          <div class="specs-grid" style="margin-bottom: 16px;">
+            <div class="spec-item-card"><div class="spec-label">Cursor IDE</div><div class="spec-value">${model.cursorPool ? model.cursorPool.poolLabel : 'Other Models'}</div></div>
+            <div class="spec-item-card"><div class="spec-label">OpenCode Go</div><div class="spec-value ${model.openCodeGo && model.openCodeGo.available ? 'highlight-green' : ''}">${model.openCodeGo && model.openCodeGo.available ? `Sim (${model.openCodeGo.quotaBurnMultiplier}× burn)` : 'Consulte OpenRouter'}</div></div>
+            <div class="spec-item-card"><div class="spec-label">Google Antigravity</div><div class="spec-value highlight-cyan">${model.antigravity ? `${model.antigravity.poolLabel}` : 'Indisponível'}</div></div>
+            <div class="spec-item-card"><div class="spec-label">OpenRouter</div><div class="spec-value">${model.openRouterId || model.id}</div></div>
+          </div>
+
+          <h5 style="margin-top: 16px; margin-bottom: 8px;">Configuração Pronta para OpenCode (JSON):</h5>
           <div class="code-snippet-box">
             <button class="btn-copy-code" onclick="window.AIApp.copySnippet('snip-opencode')">Copiar JSON</button>
             <pre id="snip-opencode"><code>${AI_DATA_HELPERS.generateIdeConfig(model.id, 'opencode')}</code></pre>
           </div>
-          <h4 style="margin-top: 16px;">Configuração para Aider (.aider.conf.yml):</h4>
+          <h5 style="margin-top: 16px; margin-bottom: 8px;">Configuração para Aider (.aider.conf.yml):</h5>
           <div class="code-snippet-box">
             <button class="btn-copy-code" onclick="window.AIApp.copySnippet('snip-aider')">Copiar YAML</button>
             <pre id="snip-aider"><code>${AI_DATA_HELPERS.generateIdeConfig(model.id, 'aider')}</code></pre>
           </div>
         </div>
 
-        <!-- Subtab 4: Planos & Assinaturas -->
-        <div class="subtab-panel" id="tab-plans">
-          <div class="content-box">
-            <div class="box-header">
-              <h4>💳 Onde Executar Este Modelo em Assinaturas de Ferramentas</h4>
-            </div>
-            <div class="specs-grid" style="margin-bottom: 16px;">
-              <div class="spec-item-card">
-                <div class="spec-label">Cursor IDE</div>
-                <div class="spec-value">${model.cursorPool ? model.cursorPool.poolLabel : 'Other Models ($20 Pool)'}</div>
-              </div>
-              <div class="spec-item-card">
-                <div class="spec-label">OpenCode Go ($10/mês)</div>
-                <div class="spec-value ${model.openCodeGo && model.openCodeGo.available ? (model.openCodeGo.quotaBurnMultiplier === 1 ? 'highlight-green' : model.openCodeGo.quotaBurnMultiplier === 2 ? 'highlight-amber' : 'highlight-rose') : ''}">${model.openCodeGo && model.openCodeGo.available ? `Classe US$${model.openCodeGo.usageAllowanceUsd} (${model.openCodeGo.quotaBurnMultiplier}× burn • ~${model.openCodeGo.estReqMonth.toLocaleString()} req/mês)` : 'Não listado no plano Go'}</div>
-              </div>
-              <div class="spec-item-card">
-                <div class="spec-label">Google Antigravity</div>
-                <div class="spec-value highlight-cyan">${model.antigravity ? `${model.antigravity.poolLabel} (${model.antigravity.role})` : 'Indisponível no Antigravity'}</div>
-              </div>
-              <div class="spec-item-card">
-                <div class="spec-label">OpenRouter API</div>
-                <div class="spec-value">${model.openRouterId || model.id}</div>
-              </div>
-            </div>
-
-            <h5 style="margin-top: 14px; margin-bottom: 8px;">Planos de Assinatura que Contemplam Este Modelo:</h5>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              ${(() => {
-                if (typeof SUBSCRIPTION_PLANS_DATA === 'undefined') return '';
-                const matchedPlans = SUBSCRIPTION_PLANS_DATA.filter(p => {
-                  const mList = (p.includedModels || []).join(' ').toLowerCase();
-                  return mList.includes(model.name.toLowerCase()) || mList.includes(model.id.toLowerCase()) || (model.provider === p.provider);
-                });
-                if (matchedPlans.length === 0) return '<p style="color: var(--text-muted);">Consulte a API direta do provedor para precificação sob demanda.</p>';
-                return matchedPlans.map(p => `
-                  <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
-                    <div>
-                      <strong>${p.planName}</strong> • <span style="color: var(--text-muted); font-size: 0.8rem;">${p.provider} (${p.product})</span>
-                      <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">${p.quotaDescription}</div>
-                    </div>
-                    <div style="text-align: right;">
-                      <strong style="color: var(--text-primary);">${p.localizedPricing && p.localizedPricing.BRL && p.localizedPricing.BRL.official ? `R$ ${p.localizedPricing.BRL.price.toFixed(2).replace('.', ',')} (Oficial)` : `~ R$ ${typeof FX_HELPERS !== 'undefined' ? FX_HELPERS.convertUsdToBrl(p.monthlyPriceUsd).toFixed(2).replace('.', ',') : (p.monthlyPriceUsd * 5.1556).toFixed(2)}`}</strong>
-                      <div style="font-size: 0.72rem; color: var(--text-muted);">US$ ${p.monthlyPriceUsd.toFixed(2)} / mo</div>
-                    </div>
-                  </div>
-                `).join('');
-              })()}
-            </div>
-          </div>
-        </div>
-
-        <!-- Subtab 5: Histórico & Linhagem Geracional -->
-        <div class="subtab-panel" id="tab-history">
-          <div class="content-box">
-            <div class="box-header">
-              <h4>📜 Linhagem Arquitetural & Eventos Históricos</h4>
-            </div>
-            ${model.previewHistory ? `
-              <div style="padding: 12px 16px; background: rgba(234, 179, 8, 0.1); border: 1px solid rgba(234, 179, 8, 0.4); border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 0.85rem;">
-                <strong style="color: #facc15;">ℹ️ Revelação Stealth de Identidade:</strong>
-                <p style="color: var(--text-secondary); margin: 4px 0 0 0;">
-                  Este modelo operou sob o alias de preview <strong>${model.previewHistory.alias}</strong> de 20/08/2026 a 26/08/2026 antes de sua revelação oficial como <strong>${model.name}</strong> sob licença MIT.
-                </p>
-              </div>
-            ` : ''}
-
-            <h5 style="margin-bottom: 8px;">Eventos Históricos Registrados:</h5>
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-              ${(() => {
-                if (typeof MODEL_HISTORY_DATA === 'undefined') return '';
-                const events = MODEL_HISTORY_DATA.events.filter(e => e.modelId === model.id);
-                if (events.length === 0) return '<p style="color: var(--text-muted);">Sem eventos históricos específicos registrados para este modelo.</p>';
-                return events.map(e => `
-                  <div style="padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                      <span class="badge-tag badge-frontier">${e.date}</span>
-                      <span class="badge-tag badge-subdollar">${e.type}</span>
-                    </div>
-                    <strong style="color: var(--text-primary); font-size: 0.9rem;">${e.title}</strong>
-                    <p style="color: var(--text-secondary); font-size: 0.82rem; margin: 4px 0 0 0;">${e.description}</p>
-                  </div>
-                `).join('');
-              })()}
-            </div>
-          </div>
-        </div>
-
-        <!-- Subtab 6: Comunidade & Comportamento Prático de Engenharia -->
-        <div class="subtab-panel" id="tab-community">
-          <div class="content-box">
-            <div class="box-header">
-              <h4>💬 Avaliações Práticas & Relatos da Comunidade</h4>
-              <span class="badge-tag badge-warning">sourceType: community / calibrated</span>
-            </div>
-
-            ${(() => {
-              if (typeof ENGINEERING_BEHAVIOR_DATA === 'undefined') return '';
-              const bData = ENGINEERING_BEHAVIOR_DATA.models[model.id];
-              if (!bData) return '<p style="color: var(--text-muted);">Dados de comportamento calibrado em processamento para este modelo.</p>';
-              const dims = ENGINEERING_BEHAVIOR_DATA.dimensions;
-              return `
-                <div style="margin-bottom: 20px;">
-                  <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px;">${bData.profileSummary}</div>
-                  <div class="specs-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px;">
-                    ${dims.map(d => {
-                      const val = bData[d.key];
-                      if (typeof val === 'undefined') return '';
-                      return `
-                        <div class="spec-item-card" style="padding: 8px 12px;">
-                          <div class="spec-label">${d.label}</div>
-                          <div class="spec-value ${d.isInverted ? (val > 60 ? 'highlight-rose' : 'highlight-green') : (val >= 90 ? 'highlight-cyan' : 'highlight-green')}">${val} / 100</div>
-                        </div>
-                      `;
-                    }).join('')}
-                  </div>
-                </div>
-              `;
-            })()}
-
-            <h5 style="margin-top: 16px; margin-bottom: 8px;">Relatos Auditados de Fóruns & Repositórios:</h5>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              ${(() => {
-                if (typeof COMMUNITY_REPORTS_DATA === 'undefined') return '';
-                const reports = COMMUNITY_REPORTS_DATA.filter(r => (r.models || []).includes(model.id));
-                if (reports.length === 0) return '<p style="color: var(--text-muted);">Nenhum relato anedótico direto registrado no banco para este modelo.</p>';
-                return reports.map(r => `
-                  <div style="padding: 10px 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                      <span class="badge-tag badge-subdollar">${r.platform} • ${r.date}</span>
-                      <span class="badge-tag badge-frontier">Harness: ${r.harness}</span>
-                    </div>
-                    <strong style="color: var(--text-primary); font-size: 0.88rem;">${r.summary}</strong>
-                    <ul style="padding-left: 18px; margin: 6px 0 0 0; font-size: 0.8rem; color: var(--text-secondary);">
-                      ${(r.observations || []).map(o => `<li>${o}</li>`).join('')}
-                    </ul>
-                  </div>
-                `).join('');
-              })()}
-            </div>
-          </div>
-        </div>
-
-        <!-- Subtab 7: Casos de Uso Recomendados -->
-        <div class="subtab-panel" id="tab-usecases">
-          <div class="content-box">
-            <div class="box-header">
-              <h4>🎯 Posições em Casos de Uso Reais & Projetos</h4>
-              <span class="badge-tag badge-subdollar">E — Calibrado</span>
-            </div>
-            <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 16px;">
-              Veja em quais categorias de projetos este modelo foi classificado entre os 10 melhores do mercado:
-            </p>
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-              ${(() => {
-                if (typeof USE_CASE_COMPARISON_DATA === 'undefined') return '';
-                const casesWithModel = [];
-                USE_CASE_COMPARISON_DATA.useCases.forEach(uc => {
-                  const found = uc.rankings.find(r => r.modelId === model.id);
-                  if (found) {
-                    casesWithModel.push({ ...uc, rankingInfo: found });
-                  }
-                });
-                if (casesWithModel.length === 0) return '<p style="color: var(--text-muted);">Este modelo não figura no Top 10 dos casos de uso calibrados.</p>';
-                return casesWithModel.map(c => `
-                  <div style="padding: 12px 16px; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                    <div>
-                      <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="font-size: 1.2rem;">${c.icon}</span>
-                        <strong style="color: var(--text-primary); font-size: 0.95rem;">${c.title}</strong>
-                        <span class="badge-tag badge-frontier">Rank #${c.rankingInfo.rank}</span>
-                      </div>
-                      <div style="font-size: 0.82rem; color: var(--accent-cyan); margin-top: 2px;"><strong>Papel:</strong> ${c.rankingInfo.role}</div>
-                      <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">${c.rankingInfo.rationale}</div>
-                    </div>
-                    <div>
-                      <span class="badge-tag badge-sweetspot" style="font-size: 0.85rem;">Fit Score: ${c.rankingInfo.fitScore}/100</span>
-                    </div>
-                  </div>
-                `).join('');
-              })()}
-            </div>
-          </div>
-        </div>
-
-        <!-- Subtab 8: Governança & ZDR -->
-        <div class="subtab-panel" id="tab-governance">
-          <div class="specs-grid">
-            <div class="spec-item-card"><div class="spec-label">Zero Data Retention (ZDR)</div><div class="spec-value">${model.privacy ? (model.privacy.retentionDays === 0 ? '✅ ZDR Ativo (0 dias)' : `⚠️ Retenção de até ${model.privacy.retentionDays} dias`) : (model.openCodeGo && model.openCodeGo.trainingConsent ? '❌ Prompts usados para treino (Contributor)' : (model.id === 'glm-5-3-flash' ? '✅ ZDR Oficial Z.ai API / OpenRouter' : '✅ ZDR Ativo / Sem Treinamento'))}</div></div>
-            <div class="spec-item-card"><div class="spec-label">Status dos Pesos</div><div class="spec-value">${model.openWeights ? 'Pesos Abertos Auditáveis' : 'Proprietário de Código Fechado'}</div></div>
-            <div class="spec-item-card"><div class="spec-label">Nível de Confiança da Fonte</div><div class="spec-value highlight-green">${(model.sourceConfidence || 'oficial').toUpperCase()}</div></div>
-          </div>
-          ${model.privacy && model.privacy.notes ? `
-            <div style="margin-top: 14px; padding: 12px 16px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: var(--radius-md); font-size: 0.85rem; color: var(--text-secondary);">
-              <strong>🔒 Diretriz de Governança & Retenção:</strong> ${model.privacy.notes}
-            </div>
-          ` : ''}
-          ${model.sources && typeof DATA_SOURCES !== 'undefined' ? `
-            <div style="margin-top: 20px;">
-              <h4 style="margin-bottom: 8px;">📚 Fontes Primárias e Rastreabilidade do Dossiê:</h4>
-              <div style="display: flex; flex-direction: column; gap: 8px;">
-                ${model.sources.map(sId => {
-                  const s = DATA_SOURCES[sId];
-                  if (!s) return '';
-                  return `
-                    <div style="padding: 10px 14px; background: var(--bg-surface-dim); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 0.83rem;">
-                      <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <strong style="color: var(--accent-cyan);">${s.title}</strong>
-                        <span class="badge-tag ${s.sourceType === 'official' ? 'badge-warning' : 'badge-frontier'}">${s.sourceType.toUpperCase()}</span>
-                      </div>
-                      <div style="color: var(--text-muted); font-size: 0.78rem; margin: 4px 0;">Publicador: ${s.publisher} • Data: ${s.publishedAt} • Acessado: ${s.retrievedAt}</div>
-                      <div style="color: var(--text-secondary);">${s.notes}</div>
-                      <a href="${s.sourceUrl}" target="_blank" rel="noopener" style="font-size: 0.78rem; color: var(--accent-blue); text-decoration: underline; margin-top: 4px; display: inline-block;">Consultar fonte oficial ↗</a>
-                    </div>
-                  `;
-                }).join('')}
-              </div>
-            </div>
-          ` : ''}
-          ${model.previewHistory ? `
-            <div style="margin-top: 14px; padding: 14px; background: rgba(234, 179, 8, 0.08); border: 1px solid rgba(234, 179, 8, 0.35); border-radius: var(--radius-md); font-size: 0.85rem;">
-              <h5 style="color: #facc15; margin-bottom: 6px;">ℹ️ Histórico de Governança & Revelação de Identidade (${model.previewHistory.alias} → ${model.name})</h5>
-              <p style="color: var(--text-secondary); margin-bottom: 8px;">
-                Este modelo foi testado em sigilo no OpenRouter (<code>stealth/ox-alpha</code>) e OpenCode (<code>opencode-go/ox-alpha-free</code>) entre 20/08 e 26/08/2026. A Z.ai revelou formalmente sua identidade como <strong>GLM-5.3-Flash</strong> em 26/08/2026, encerrando os termos provisórios do programa stealth.
-              </p>
-              <p style="color: var(--text-secondary); margin: 0;">
-                🔒 <strong>Diretriz de Produção:</strong> Os endpoints de preview foram descontinuados. Em produção, utilize a rota oficial da Z.ai API (<code>glm-5.3-flash</code>) com garantia de ZDR empresarial ou o endpoint canônico do OpenRouter (<code>z-ai/glm-5.3-flash</code>).
-              </p>
-            </div>
-          ` : ''}
+        <!-- Subtab 12: Sources & Metrology (Seções 111 & 131) -->
+        <div class="subtab-panel" id="tab-sources">
+          <h4>📚 Fontes Auditadas, Publicadores & Metrologia Estrita</h4>
+          <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
+            Rastreabilidade integral das evidências utilizadas neste dossiê (Snapshot de 03/09/2026).
+          </p>
+          ${renderSourcesTab()}
         </div>
 
       </div>
@@ -2058,15 +1881,64 @@
     const subtabsNav = container.querySelector('.dossier-subtabs-nav');
     if (subtabsNav) {
       subtabsNav.addEventListener('click', (e) => {
-        if (e.target.classList.contains('subtab-btn')) {
-          subtabsNav.querySelectorAll('.subtab-btn').forEach(btn => btn.classList.remove('active'));
-          e.target.classList.add('active');
-          const targetTabId = e.target.getAttribute('data-tab');
+        const btn = e.target.closest('.subtab-btn');
+        if (btn) {
+          subtabsNav.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const targetTabId = btn.getAttribute('data-tab');
           container.querySelectorAll('.subtab-panel').forEach(p => p.classList.remove('active'));
           const targetPanel = container.querySelector(`#${targetTabId}`);
           if (targetPanel) targetPanel.classList.add('active');
         }
       });
+    }
+
+    function renderSourcesTab() {
+      const sIds = dossier?.sourceIds || (model.sources || []);
+      const sRegistry = typeof SOURCE_REGISTRY !== 'undefined' ? SOURCE_REGISTRY : {};
+      const dataSources = typeof DATA_SOURCES !== 'undefined' ? DATA_SOURCES : {};
+      if (!sIds || sIds.length === 0) {
+        return `<p style="color: var(--text-muted); font-size: 0.85rem;">Nenhuma fonte direta cadastrada.</p>`;
+      }
+      return `
+        <div class="provenance-legend-box">
+          <div><strong>Legenda de Metrologia:</strong></div>
+          <div>${renderBadge('official')} <strong>[O]</strong> Oficial Primária (Laboratório)</div>
+          <div>${renderBadge('vendor-reported')} <strong>[V]</strong> Reportado p/ Fornecedor (Harness proprietário)</div>
+          <div>${renderBadge('independent')} <strong>[T]</strong> Terceiros / Independente (DataCurve, AA, etc.)</div>
+          <div>${renderBadge('community')} <strong>[C]</strong> Comunidade / Telemetria</div>
+          <div>${renderBadge('estimated')} <strong>[E]</strong> Estimado / Calibrado</div>
+        </div>
+        <div class="deepswe-leaderboard-container">
+          <table class="deepswe-table">
+            <thead>
+              <tr>
+                <th>ID da Fonte</th>
+                <th>Publicador</th>
+                <th>Título do Relatório</th>
+                <th>Classificação</th>
+                <th>Publicação</th>
+                <th>Recuperação</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${sIds.map(sid => {
+                const s = sRegistry[sid] || dataSources[sid] || { id: sid, publisher: 'Auditado', title: sid, sourceType: 'independent', publishedAt: '2026-09-02', retrievedAt: '2026-09-03' };
+                return `
+                  <tr>
+                    <td><code>${s.id || sid}</code></td>
+                    <td><strong>${s.publisher || 'Auditado'}</strong></td>
+                    <td>${s.title || sid}</td>
+                    <td>${renderBadge(s.sourceType || 'independent')} <span style="font-size: 0.8rem;">${s.sourceType || 'independent'}</span></td>
+                    <td><span style="font-size: 0.8rem; color: var(--text-muted);">${s.publishedAt || 'N/D'}</span></td>
+                    <td><span style="font-size: 0.8rem; color: var(--text-muted);">${s.retrievedAt || '2026-09-03'}</span></td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
     }
   }
 

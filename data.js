@@ -4722,6 +4722,230 @@ const AI_MODELS_DATA = {
       ],
       "orchestrationFlow": "GLM-5.3-Flash (Leitura Multimodal & Implementação) → GLM-5.3 (Revisão Arquitetural)"
     }
+  },
+  "hy4-preview": {
+    "id": "hy4-preview",
+    "name": "Hy4 Preview",
+    "family": "tencent",
+    "provider": "tencent",
+    "providerName": "Tencent",
+    "color": "#12b7f5",
+    "status": "preview",
+    "openWeights": true,
+    "paramsTotal": "770B MoE",
+    "paramsActive": "49B",
+    "architectureType": "MoE Gated DeepSeek Sparse c/ IndexCache",
+    "attentionType": "Gated DeepSeek Sparse Attention + iHC Residual",
+    "contextWindow": 1048576,
+    "maxOutputTokens": 65536,
+    "modalities": {
+      "input": ["text", "code"],
+      "output": ["text"]
+    },
+    "reasoning": {
+      "mandatory": false,
+      "canDisable": true,
+      "supportedEfforts": ["none", "high"],
+      "defaultEffort": "high"
+    },
+    "tools": {
+      "functionCalling": true,
+      "structuredOutput": "schema_guaranteed",
+      "fim": true
+    },
+    "pricing": {
+      "standard": {
+        "input": 0.30,
+        "cacheRead": 0.075,
+        "cacheWrite": null,
+        "output": 1.00
+      }
+    },
+    "cursorPool": {
+      "pool": "other-models",
+      "poolLabel": "Other Models",
+      "fastDefault": false,
+      "fastMultiplier": 1
+    },
+    "sweetSpot": "High (85,4% Terminal-Bench 2.1 / 64,3% DeepSWE)",
+    "strengths": [
+      "MoE aberto de 770B com apenas 49B ativos por token para alta escalabilidade",
+      "85,4% no Terminal-Bench 2.1 e 64,3% no DeepSWE 1.1 (reportado)",
+      "OneMillionBench de 65,4% em contexto longo nativo de 1M"
+    ],
+    "weaknesses": [
+      "Status preview com testes independentes de terceiros ainda escassos",
+      "Tendência a over-reasoning em certas tarefas"
+    ],
+    "badges": [
+      "🐧 OPEN WEIGHTS",
+      "85.4% TERMINAL 2.1",
+      "1M CONTEXTO"
+    ],
+    "officialBenchmarks": {
+      "terminalBench21": 85.4,
+      "deepSwe11": 64.3,
+      "sweBenchPro": 65.7,
+      "toolathlonVerified": 74.1,
+      "methodology": "Tencent Hunyuan Hy4 Technical Report."
+    },
+    "operationalGuidance": {
+      "idealFor": [
+        "Desenvolvimento de software de backend, games e análise de grandes repositórios"
+      ],
+      "avoidFor": [
+        "Ambientes de produção estritos sensíveis a mudanças de preview"
+      ],
+      "orchestrationFlow": "Hy4 Preview (Planejamento & Backend) → Workers Leves → Hy4 Preview (Validação)"
+    }
+  },
+  "qwen3-8-flash": {
+    "id": "qwen3-8-flash",
+    "name": "Qwen3.8 Flash",
+    "family": "qwen",
+    "provider": "alibaba",
+    "providerName": "Alibaba Qwen",
+    "color": "#ff6a00",
+    "status": "stable",
+    "openWeights": false,
+    "paramsTotal": "N/D (Frontier Flash API)",
+    "paramsActive": "N/D",
+    "architectureType": "MoE Flash Multimodal API Service",
+    "attentionType": "Flash Sparse Multimodal Attention",
+    "contextWindow": 1048576,
+    "maxOutputTokens": 131072,
+    "modalities": {
+      "input": ["text", "image", "video"],
+      "output": ["text"]
+    },
+    "reasoning": {
+      "mandatory": false,
+      "canDisable": true,
+      "supportedEfforts": ["none", "high"],
+      "defaultEffort": "high"
+    },
+    "tools": {
+      "functionCalling": true,
+      "structuredOutput": "schema_guaranteed",
+      "fim": true
+    },
+    "pricing": {
+      "standard": {
+        "input": 0.16,
+        "cacheRead": 0.04,
+        "cacheWrite": null,
+        "output": 0.47
+      }
+    },
+    "cursorPool": {
+      "pool": "other-models",
+      "poolLabel": "Other Models",
+      "fastDefault": false,
+      "fastMultiplier": 1
+    },
+    "sweetSpot": "High (81,0% SWE-Multilingual / 73,9% CoWorkBench)",
+    "strengths": [
+      "Preço extremamente competitivo ($0.16 / $0.47 por milhão)",
+      "Liderança em código multilíngue (81,0% no SWE-bench Multilingual)",
+      "Suporte multimodal completo (texto, imagem, vídeo) com 131K output"
+    ],
+    "weaknesses": [
+      "Raciocínio puro de fronteira inferior ao Qwen3.8 Max"
+    ],
+    "badges": [
+      "⚡ ULTRA-BARATO",
+      "81.0% MULTILINGUAL",
+      "131K SAÍDA"
+    ],
+    "officialBenchmarks": {
+      "deepSwe11": 58.7,
+      "sweBenchPro": 62.5,
+      "sweBenchMultilingual": 81.0,
+      "methodology": "Alibaba Cloud Qwen3.8 Flash Technical Report."
+    },
+    "operationalGuidance": {
+      "idealFor": [
+        "Tarefas de programação multilíngue e automações de alto volume"
+      ],
+      "avoidFor": [
+        "Desafios teóricos de matemática frontier Tier 4"
+      ],
+      "orchestrationFlow": "Qwen3.8 Flash (Varredura Multilíngue & Execução de Tarefas) → Qwen3.8 Max (Validação)"
+    }
+  },
+  "muse-spark-1-3": {
+    "id": "muse-spark-1-3",
+    "name": "Muse Spark 1.3",
+    "family": "meta",
+    "provider": "meta",
+    "providerName": "Meta",
+    "color": "#0081fb",
+    "status": "stable",
+    "openWeights": true,
+    "paramsTotal": "N/D (Multimodal Frontier)",
+    "paramsActive": "N/D",
+    "architectureType": "Dense/MoE Multimodal Nativo c/ Thinking",
+    "attentionType": "Full Attention Nativa 1M",
+    "contextWindow": 1048576,
+    "maxOutputTokens": 65536,
+    "modalities": {
+      "input": ["text", "image", "video"],
+      "output": ["text"]
+    },
+    "reasoning": {
+      "mandatory": false,
+      "canDisable": true,
+      "supportedEfforts": ["none", "medium", "high", "xhigh", "max"],
+      "defaultEffort": "xhigh"
+    },
+    "tools": {
+      "functionCalling": true,
+      "structuredOutput": "schema_guaranteed",
+      "fim": true
+    },
+    "pricing": {
+      "standard": {
+        "input": 1.25,
+        "cacheRead": 0.15,
+        "cacheWrite": null,
+        "output": 4.25
+      }
+    },
+    "cursorPool": {
+      "pool": "other-models",
+      "poolLabel": "Other Models",
+      "fastDefault": false,
+      "fastMultiplier": 1
+    },
+    "sweetSpot": "XHigh (AA 61 / 181.7 tok/s / 47% τ³ Banking)",
+    "strengths": [
+      "Excepcional relação inteligência/velocidade: AA 61 com 181.7 tok/s no XHigh",
+      "Líder de mercado em operações bancárias (52% no τ³ Banking Max)",
+      "Janela nativa de 1M com 88% de desconto em cache read"
+    ],
+    "weaknesses": [
+      "TTFT longo no XHigh (27.51 segundos de latência inicial)"
+    ],
+    "badges": [
+      "⚡ 182 TOK/S",
+      "AA INDEX 61",
+      "52% TAU3 BANKING"
+    ],
+    "officialBenchmarks": {
+      "terminalBench21": 85.0,
+      "tau3Banking": 47.0,
+      "aaIndex": 61.0,
+      "methodology": "Meta Muse Spark 1.3 Technical Report & AA Audit."
+    },
+    "operationalGuidance": {
+      "idealFor": [
+        "Operações bancárias, análises financeiras e processamento multimodal veloz"
+      ],
+      "avoidFor": [
+        "Aplicações com tolerância zero a latência de primeiro token (TTFT)"
+      ],
+      "orchestrationFlow": "Muse Spark 1.3 (Raciocínio Financeiro & Multimodal) → Workers de Código → Muse Spark 1.3 (Validação)"
+    }
   }
 };
 
@@ -4857,7 +5081,7 @@ const MARGINAL_GAINS_DATA = [
 
 const MULTI_BENCHMARK_LEDGER = [
   { modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1 (Max)', terminalBench20: null, terminalBench21: 91.4, terminalBench30: null, terminalBench40: 55.8, terminalBenchScience01: 52.6, sweBenchVerified: null, sweBenchPro: 81.2, sweAtlas: null, deepSwe11: 71.5, cursorBench32: 73.4, hle: 59.1, hleVerified: null, hleWithTools: 65.0, hleWithoutTools: 60.9, osworldOriginal: null, osworldVerified: null, osworld2Partial: 77.9, osworld2Strict: 41.7, gpqaDiamond: 95.2, aime2025: null, aime2025Tools: null, arcAgi2Verified: 82.0, tau2Retail: null, tau2Airline: null, tau3Banking: null, financeAgentV2: null, harveyLegalAgent: null, sciCode: 62.0, mcpAtlas: null, browseComp: null, mmmuPro: null, charXiv: null, gdpPdf: null, gdpvalElo: 1853, automationBench: 31.4, aaIndex: 66.0, costPerTask: 9.64, outputTokensPerTask: 72060, agentStepsPerTask: 70, confidenceInterval: null, benchmarkSnapshotDate: '2026-09-02' },
-  { modelId: 'gemini-3-8-flash', modelName: 'Gemini 3.8 Flash (High)', terminalBench20: null, terminalBench21: 90.8, terminalBench30: null, terminalBench40: null, terminalBenchScience01: null, sweBenchVerified: null, sweBenchPro: 61.6, sweAtlas: 51.9, deepSwe11: 74.0, cursorBench32: 69.2, hle: 45.4, hleVerified: 54.9, hleWithTools: null, hleWithoutTools: null, osworldOriginal: null, osworldVerified: null, osworld2Partial: null, osworld2Strict: null, gpqaDiamond: 94.8, aime2025: null, aime2025Tools: null, arcAgi2Verified: 78.5, tau2Retail: null, tau2Airline: null, tau3Banking: 38.1, financeAgentV2: 61.4, harveyLegalAgent: 10.0, sciCode: null, mcpAtlas: null, browseComp: null, mmmuPro: null, charXiv: 86.2, gdpPdf: 35.0, aaIndex: 59.0, costPerTask: 2.36, outputTokensPerTask: 143000, agentStepsPerTask: 166, confidenceInterval: 1.0, benchmarkSnapshotDate: '2026-09-02' },
+  { modelId: 'gemini-3-8-flash', modelName: 'Gemini 3.8 Flash (High)', terminalBench20: null, terminalBench21: 90.8, terminalBench30: null, terminalBench40: null, terminalBenchScience01: null, sweBenchVerified: null, sweBenchPro: 61.6, sweAtlas: 51.9, deepSwe11: 74.0, cursorBench32: 69.2, hle: 45.4, hleVerified: 54.9, hleWithTools: null, hleWithoutTools: null, osworldOriginal: null, osworldVerified: null, osworld2Partial: null, osworld2Strict: null, gpqaDiamond: null, aime2025: null, aime2025Tools: null, arcAgi2Verified: null, tau2Retail: null, tau2Airline: null, tau3Banking: 38.1, financeAgentV2: 61.4, harveyLegalAgent: 10.0, sciCode: null, mcpAtlas: null, browseComp: null, mmmuPro: null, charXiv: 86.2, gdpPdf: 35.0, aaIndex: 59.0, costPerTask: 2.36, outputTokensPerTask: 143000, agentStepsPerTask: 166, confidenceInterval: 1.0, benchmarkSnapshotDate: '2026-09-02' },
 
   { modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol (Max)', terminalBench21: 88.8, terminalBench30: 34.6, deepSwe11: 72.7, sweBenchPro: 64.6, sweBenchVerified: null, mrcr1m: 73.8, gpqaDiamond: 94.6, osworld: 62.6, aaIndex: 61.0 },
   { modelId: 'claude-opus-5', modelName: 'Claude Opus 5 (Max)', terminalBench21: null, terminalBench30: null, deepSwe11: 73.6, sweBenchPro: null, sweBenchVerified: null, mrcr1m: null, gpqaDiamond: null, osworld: null, aaIndex: 63.0 },
@@ -4889,7 +5113,7 @@ const MULTI_BENCHMARK_LEDGER = [
   { modelId: 'deepseek-v3-2', modelName: 'DeepSeek-V3.2', terminalBench21: 46.0, terminalBench30: null, deepSwe11: null, sweBenchPro: null, sweBenchVerified: 73.1, mrcr1m: null, gpqaDiamond: null, osworld: null, aaIndex: 40.0 },
   { modelId: 'longcat-2-0', modelName: 'LongCat-2.0 (1.6T MoE)', terminalBench21: 70.8, terminalBench30: null, deepSwe11: null, sweBenchPro: 59.5, sweBenchVerified: null, mrcr1m: null, gpqaDiamond: 88.9, osworld: null, aaIndex: 34.0 },
   { modelId: 'mimo-v2-5', modelName: 'MiMo-V2.5', terminalBench21: 65.8, terminalBench30: null, deepSwe11: null, sweBenchPro: 56.1, sweBenchVerified: null, mrcr1m: null, gpqaDiamond: null, osworld: null, aaIndex: 38.0 },
-  { modelId: 'minimax-m3', modelName: 'MiniMax M3', terminalBench21: 65.5, terminalBench30: null, deepSwe11: 13.3, sweBenchPro: 59.0, sweBenchVerified: 80.5, mrcr1m: null, gpqaDiamond: 93.0, osworld: 70.1, hleWithTools: 37.0, aaIndex: 45.0 },
+  { modelId: 'minimax-m3', modelName: 'MiniMax M3', terminalBench21: 66.0, terminalBench30: null, deepSwe11: 13.3, sweBenchPro: 59.0, sweBenchVerified: 80.5, mrcr1m: null, gpqaDiamond: 93.0, osworld: 70.1, hleWithTools: 37.0, aaIndex: 45.0 },
   { modelId: 'glm-5-1', modelName: 'GLM-5.1', terminalBench21: 63.5, terminalBench30: null, deepSwe11: 18.0, sweBenchPro: 58.4, sweBenchVerified: null, mrcr1m: null, gpqaDiamond: 86.2, osworld: null, hleWithTools: 52.3, aaIndex: 40.0 },
   { modelId: 'gpt-oss-120b', modelName: 'gpt-oss-120b (High)', terminalBench21: null, terminalBench30: null, deepSwe11: null, sweBenchPro: null, sweBenchVerified: 62.4, mrcr1m: null, aiderPolyglot: 44.4, tauRetail: 67.8, tauAirline: 49.2, gpqaDiamond: 80.1, hleWithTools: 19.0, aaIndex: 24.0 },
   { modelId: 'gpt-oss-20b', modelName: 'gpt-oss-20b (High)', terminalBench21: null, terminalBench30: null, deepSwe11: null, sweBenchPro: null, sweBenchVerified: 60.7, mrcr1m: null, aiderPolyglot: 34.2, tauRetail: 54.8, tauAirline: 38.0, gpqaDiamond: 66.0, hleWithTools: 8.8, aaIndex: 15.0 },
@@ -4899,8 +5123,11 @@ const MULTI_BENCHMARK_LEDGER = [
   { modelId: 'minimax-m2-7', modelName: 'MiniMax M2.7', terminalBench21: 57.0, terminalBench30: null, deepSwe11: null, sweBenchPro: 56.22, sweBenchVerified: 76.5, mrcr1m: null, gpqaDiamond: null, osworld: null, aaIndex: 39.0 },
   { modelId: 'composer-2-5', modelName: 'Composer 2.5', terminalBench21: null, terminalBench30: null, deepSwe11: null, sweBenchPro: null, sweBenchVerified: null, mrcr1m: null, gpqaDiamond: null, osworld: null, aaIndex: 45.0 },
   { modelId: 'gpt-5-6-pro', modelName: 'GPT-5.6 Sol Pro', terminalBench21: null, terminalBench30: null, deepSwe11: null, sweBenchPro: null, sweBenchVerified: null, mrcr1m: null, gpqaDiamond: null, osworld: null, aaIndex: null, notes: 'Factual ledger benchmarks null: Sol Pro não possui benchmark row oficial pública segregada na OpenAI API.' },
-  { modelId: 'deepseek-v4-vision-exp', modelName: 'DeepSeek-V4-Flash-Vision-Exp (Preview)', terminalBench21: 83.9, terminalBench30: null, deepSwe11: 59.3, sweBenchPro: null, sweBenchVerified: null, mrcr1m: null, gpqaDiamond: null, osworld: null, aaIndex: 52.0 },
-  { modelId: 'glm-5-3-flash', modelName: 'GLM-5.3-Flash (Max)', terminalBench21: 84.3, terminalBench30: null, deepSwe11: 63.4, sweBenchPro: null, sweBenchVerified: null, mrcr1m: 89.2, gpqaDiamond: null, osworld: null, hleWithTools: 55.3, aaIndex: 57.0, historicalAlias: 'Ox Alpha' }
+  { modelId: 'deepseek-v4-vision-exp', modelName: 'DeepSeek-V4-Flash-Vision-Exp (Preview)', terminalBench21: 83.9, terminalBench30: null, deepSwe11: 59.3, sweBenchPro: null, sweBenchVerified: null, mrcr1m: null, gpqaDiamond: null, osworld: null, aaIndex: 51.0 },
+  { modelId: 'glm-5-3-flash', modelName: 'GLM-5.3-Flash (Max)', terminalBench21: 84.3, terminalBench30: null, deepSwe11: 63.4, sweBenchPro: null, sweBenchVerified: null, mrcr1m: 89.2, gpqaDiamond: null, osworld: null, hleWithTools: 55.3, aaIndex: 57.0, historicalAlias: 'Ox Alpha' },
+  { modelId: 'hy4-preview', modelName: 'Hy4 Preview', terminalBench21: 85.4, terminalBench30: null, deepSwe11: 64.3, sweBenchPro: 65.7, sweBenchVerified: null, mrcr1m: 65.4, gpqaDiamond: null, osworld: null, aaIndex: null, notes: 'Vendor-reported benchmarks; AA Index is null.' },
+  { modelId: 'qwen3-8-flash', modelName: 'Qwen3.8 Flash', terminalBench21: null, terminalBench30: null, deepSwe11: 58.7, sweBenchPro: 62.5, sweBenchVerified: null, mrcr1m: null, gpqaDiamond: null, osworld: null, aaIndex: null, notes: 'Base open-weight Qwen3.8-Flash-Next tem AA ~56; endpoint de produção sem AA isolado.' },
+  { modelId: 'muse-spark-1-3', modelName: 'Muse Spark 1.3 (XHigh)', terminalBench21: 85.0, terminalBench30: null, deepSwe11: null, sweBenchPro: null, sweBenchVerified: null, mrcr1m: null, gpqaDiamond: 94.0, tau3Banking: 47.0, osworld: null, aaIndex: 61.0, notes: 'Independent AA evaluation: AA 61, 181.7 tok/s.' }
 ];
 
 // Enriquecimento com proveniência metrológica estrita para cada célula factual (Seções 80 & 81)
@@ -4964,6 +5191,15 @@ MULTI_BENCHMARK_LEDGER.forEach(row => {
           if (row.modelId === 'grok-4-6') {
             sourceId = 'aa-grok46-tb21';
             sourceType = 'independent';
+          } else if (row.modelId === 'minimax-m3') {
+            sourceId = 'minimax-m3-modelcard';
+            sourceType = 'official';
+          } else if (row.modelId === 'hy4-preview') {
+            sourceId = 'tencent-hy4-modelcard';
+            sourceType = 'vendor-reported';
+          } else if (row.modelId === 'muse-spark-1-3') {
+            sourceId = 'aa-muse-spark13';
+            sourceType = 'independent';
           } else if (row.modelId === 'claude-fable-5-1' || row.modelId === 'claude-fable-5') {
             sourceId = 'anthropic-claude-fable-51';
             sourceType = 'official';
@@ -4997,6 +5233,15 @@ MULTI_BENCHMARK_LEDGER.forEach(row => {
             sourceType = 'official';
           } else if (row.modelId.startsWith('gpt-5-6')) {
             sourceId = 'openai-gpt56-launch';
+            sourceType = 'official';
+          } else if (row.modelId === 'minimax-m3') {
+            sourceId = 'minimax-m3-modelcard';
+            sourceType = 'official';
+          } else if (row.modelId === 'hy4-preview') {
+            sourceId = 'tencent-hy4-modelcard';
+            sourceType = 'vendor-reported';
+          } else if (row.modelId === 'qwen3-8-flash') {
+            sourceId = 'qwen-qwen38-flashnext-eval';
             sourceType = 'official';
           } else {
             sourceId = 'swe-bench-verified';
@@ -5095,7 +5340,10 @@ const CAPABILITY_RADAR_10D = {
   'longcat-2-0': { reasoning: 91, agentic: 82, sweBench: 80, longContext: 97, multimodal: 8, throughput: 38, costEfficiency: 86, toolAdherence: 90, ttftLatency: 39, openAccess: 100 },
   'muse-spark-1-2': { reasoning: 95, agentic: 93, sweBench: 85, longContext: 94, multimodal: 100, throughput: 87, costEfficiency: 92, toolAdherence: 95, ttftLatency: 84, openAccess: 82 },
   'composer-2-5': { reasoning: 83, agentic: 82, sweBench: 78, longContext: 58, multimodal: 30, throughput: 97, costEfficiency: 100, toolAdherence: 93, ttftLatency: 97, openAccess: 25 },
-  'glm-5-3-flash': { reasoning: 86, agentic: 84, sweBench: 82, longContext: 96, multimodal: 88, throughput: 55, costEfficiency: 98, toolAdherence: 88, ttftLatency: 72, openAccess: 100 }
+  'glm-5-3-flash': { reasoning: 86, agentic: 84, sweBench: 82, longContext: 96, multimodal: 88, throughput: 55, costEfficiency: 98, toolAdherence: 88, ttftLatency: 72, openAccess: 100 },
+  'hy4-preview': { reasoning: 92, agentic: 88, sweBench: 88, longContext: 94, multimodal: 8, throughput: 88, costEfficiency: 98, toolAdherence: 91, ttftLatency: 84, openAccess: 100 },
+  'qwen3-8-flash': { reasoning: 90, agentic: 87, sweBench: 85, longContext: 95, multimodal: 92, throughput: 90, costEfficiency: 100, toolAdherence: 92, ttftLatency: 89, openAccess: 65 },
+  'muse-spark-1-3': { reasoning: 97, agentic: 94, sweBench: 90, longContext: 96, multimodal: 98, throughput: 96, costEfficiency: 94, toolAdherence: 95, ttftLatency: 40, openAccess: 85 }
 };
 
 
@@ -6254,6 +6502,15 @@ var ENGINEERING_BEHAVIOR_DATA = null;
 var USE_CASE_COMPARISON_DATA = null;
 var PRICE_HISTORY_DATA = null;
 var PlanExplorer = null;
+var BENCHMARK_REGISTRY = {};
+var SOURCE_REGISTRY = {};
+var MODEL_DOSSIERS_DATA = {};
+var DEEPSWE_INDEPENDENT_LEADERBOARD = [];
+var getModelDossier = null;
+var getDossierBenchmarkSnapshots = null;
+var calculatePerformanceFingerprint = null;
+var getDeepSweLeaderboard = null;
+var getProvenanceBadge = null;
 
 // Carregamento dos módulos data/* em ambiente Node.js
 if (typeof require !== 'undefined') {
@@ -6285,6 +6542,16 @@ if (typeof require !== 'undefined') {
     PRICE_HISTORY_DATA = global.PRICE_HISTORY_DATA = prHistMod.PRICE_HISTORY_DATA;
     const planExpMod = require('./data/plan-explorer.js');
     PlanExplorer = global.PlanExplorer = planExpMod;
+    const dossiersMod = require('./data/dossiers.js');
+    BENCHMARK_REGISTRY = global.BENCHMARK_REGISTRY = dossiersMod.BENCHMARK_REGISTRY;
+    SOURCE_REGISTRY = global.SOURCE_REGISTRY = dossiersMod.SOURCE_REGISTRY;
+    MODEL_DOSSIERS_DATA = global.MODEL_DOSSIERS_DATA = dossiersMod.MODEL_DOSSIERS_DATA;
+    DEEPSWE_INDEPENDENT_LEADERBOARD = global.DEEPSWE_INDEPENDENT_LEADERBOARD = dossiersMod.DEEPSWE_INDEPENDENT_LEADERBOARD;
+    getModelDossier = global.getModelDossier = dossiersMod.getModelDossier;
+    getDossierBenchmarkSnapshots = global.getDossierBenchmarkSnapshots = dossiersMod.getDossierBenchmarkSnapshots;
+    calculatePerformanceFingerprint = global.calculatePerformanceFingerprint = dossiersMod.calculatePerformanceFingerprint;
+    getDeepSweLeaderboard = global.getDeepSweLeaderboard = dossiersMod.getDeepSweLeaderboard;
+    getProvenanceBadge = global.getProvenanceBadge = dossiersMod.getProvenanceBadge;
   } catch (e) {
     // Silencioso se executado em ambiente sem filesystem local
   }
@@ -6332,7 +6599,16 @@ if (typeof module !== 'undefined' && module.exports) {
     ENGINEERING_BEHAVIOR_DATA: typeof ENGINEERING_BEHAVIOR_DATA !== 'undefined' ? ENGINEERING_BEHAVIOR_DATA : null,
     USE_CASE_COMPARISON_DATA: typeof USE_CASE_COMPARISON_DATA !== 'undefined' ? USE_CASE_COMPARISON_DATA : null,
     PRICE_HISTORY_DATA: typeof PRICE_HISTORY_DATA !== 'undefined' ? PRICE_HISTORY_DATA : null,
-    PlanExplorer: typeof PlanExplorer !== 'undefined' ? PlanExplorer : null
+    PlanExplorer: typeof PlanExplorer !== 'undefined' ? PlanExplorer : null,
+    BENCHMARK_REGISTRY: typeof BENCHMARK_REGISTRY !== 'undefined' ? BENCHMARK_REGISTRY : {},
+    SOURCE_REGISTRY: typeof SOURCE_REGISTRY !== 'undefined' ? SOURCE_REGISTRY : {},
+    MODEL_DOSSIERS_DATA: typeof MODEL_DOSSIERS_DATA !== 'undefined' ? MODEL_DOSSIERS_DATA : {},
+    DEEPSWE_INDEPENDENT_LEADERBOARD: typeof DEEPSWE_INDEPENDENT_LEADERBOARD !== 'undefined' ? DEEPSWE_INDEPENDENT_LEADERBOARD : [],
+    getModelDossier: typeof getModelDossier !== 'undefined' ? getModelDossier : null,
+    getDossierBenchmarkSnapshots: typeof getDossierBenchmarkSnapshots !== 'undefined' ? getDossierBenchmarkSnapshots : null,
+    calculatePerformanceFingerprint: typeof calculatePerformanceFingerprint !== 'undefined' ? calculatePerformanceFingerprint : null,
+    getDeepSweLeaderboard: typeof getDeepSweLeaderboard !== 'undefined' ? getDeepSweLeaderboard : null,
+    getProvenanceBadge: typeof getProvenanceBadge !== 'undefined' ? getProvenanceBadge : null
   };
 }
 
@@ -6349,5 +6625,14 @@ if (typeof window !== 'undefined') {
   if (typeof OPENCODE_GO_DATA !== "undefined") window.OPENCODE_GO_DATA = OPENCODE_GO_DATA;
   if (typeof PLATFORM_AVAILABILITY_MATRIX !== "undefined") window.PLATFORM_AVAILABILITY_MATRIX = PLATFORM_AVAILABILITY_MATRIX;
   if (typeof PlanExplorer !== "undefined") window.PlanExplorer = PlanExplorer;
+  if (typeof BENCHMARK_REGISTRY !== "undefined") window.BENCHMARK_REGISTRY = BENCHMARK_REGISTRY;
+  if (typeof SOURCE_REGISTRY !== "undefined") window.SOURCE_REGISTRY = SOURCE_REGISTRY;
+  if (typeof MODEL_DOSSIERS_DATA !== "undefined") window.MODEL_DOSSIERS_DATA = MODEL_DOSSIERS_DATA;
+  if (typeof DEEPSWE_INDEPENDENT_LEADERBOARD !== "undefined") window.DEEPSWE_INDEPENDENT_LEADERBOARD = DEEPSWE_INDEPENDENT_LEADERBOARD;
+  if (typeof getModelDossier !== "undefined") window.getModelDossier = getModelDossier;
+  if (typeof getDossierBenchmarkSnapshots !== "undefined") window.getDossierBenchmarkSnapshots = getDossierBenchmarkSnapshots;
+  if (typeof calculatePerformanceFingerprint !== "undefined") window.calculatePerformanceFingerprint = calculatePerformanceFingerprint;
+  if (typeof getDeepSweLeaderboard !== "undefined") window.getDeepSweLeaderboard = getDeepSweLeaderboard;
+  if (typeof getProvenanceBadge !== "undefined") window.getProvenanceBadge = getProvenanceBadge;
 }
 

@@ -1725,6 +1725,39 @@ const PLATFORM_MODEL_CATALOG = {
         openrouter: { available: true, status: 'superseded', notes: 'Superseded' },
         local: { supported: false, requirements: 'N/A', type: 'proprietary' }
       }
+    },
+    {
+      modelId: 'hy4-preview', name: 'Hy4 Preview',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'preview', priceDesc: '$0.30/$1.00' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'Preview' },
+        opencode: { available: true, tier: 'Go', burnRate: 1, reqEstimate: 20000, notes: '1x burn' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'preview', notes: 'Preview' },
+        local: { supported: true, requirements: '770B MoE (49B active)', type: 'open-weights' }
+      }
+    },
+    {
+      modelId: 'qwen3-8-flash', name: 'Qwen3.8 Flash',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: '$0.16/$0.47' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'Direct API' },
+        opencode: { available: true, tier: 'Go', burnRate: 0.5, reqEstimate: 40000, notes: '0.5x burn' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: false, requirements: 'N/A (Ver Qwen3.8-Flash-Next)', type: 'proprietary' }
+      }
+    },
+    {
+      modelId: 'muse-spark-1-3', name: 'Muse Spark 1.3',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: '$1.25/$4.25' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'Usage-based' },
+        opencode: { available: true, tier: 'Go', burnRate: 1, reqEstimate: 113000, notes: '1x burn' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: true, requirements: 'Cluster multi-GPU', type: 'open-weights' }
+      }
     }
   ]
 };

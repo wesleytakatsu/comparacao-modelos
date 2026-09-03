@@ -4441,5 +4441,183 @@ input[type="range"]::-webkit-slider-thumb:hover {
   margin-bottom: 14px;
 }
 
+/* ==========================================
+ * ESTILOS DO DOSSIÊ TÉCNICO & METROLOGIA (PLANO 07)
+ * ========================================== */
 
+/* Badges de Proveniência Metrológica */
+.badge-provenance {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.72rem;
+  margin-left: 6px;
+  vertical-align: middle;
+  cursor: help;
+}
 
+.badge-source-official {
+  background: rgba(16, 185, 129, 0.18);
+  border: 1px solid rgba(16, 185, 129, 0.5);
+  color: #34d399;
+}
+
+.badge-source-vendor {
+  background: rgba(168, 85, 247, 0.18);
+  border: 1px solid rgba(168, 85, 247, 0.5);
+  color: #c084fc;
+}
+
+.badge-source-independent {
+  background: rgba(6, 182, 212, 0.18);
+  border: 1px solid rgba(6, 182, 212, 0.5);
+  color: #22d3ee;
+}
+
+.badge-source-community {
+  background: rgba(234, 179, 8, 0.18);
+  border: 1px solid rgba(234, 179, 8, 0.5);
+  color: #facc15;
+}
+
+.badge-source-estimated {
+  background: rgba(249, 115, 22, 0.18);
+  border: 1px solid rgba(249, 115, 22, 0.5);
+  color: #fb923c;
+}
+
+/* Performance Fingerprint Grid (Seção 113) */
+.fp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.fp-card {
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-secondary, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fp-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.fp-rating {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.fp-excellent {
+  color: #34d399;
+  text-shadow: 0 0 12px rgba(52, 211, 153, 0.25);
+}
+
+.fp-strong {
+  color: #38bdf8;
+}
+
+.fp-average {
+  color: #facc15;
+}
+
+.fp-weak {
+  color: #f87171;
+}
+
+.fp-unknown {
+  color: var(--text-muted);
+}
+
+/* Tabela DeepSWE Leaderboard & Custo por Tarefa Resolvida */
+.deepswe-leaderboard-container {
+  margin: 20px 0;
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+
+.deepswe-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.deepswe-table th {
+  background: rgba(255, 255, 255, 0.04);
+  padding: 10px 14px;
+  text-align: left;
+  color: var(--text-muted);
+  font-weight: 600;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.deepswe-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+}
+
+.deepswe-table tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.cost-per-solved-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #34d399;
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+
+/* Comparador de Contexto Nominal vs Efetivo (Seção 116) */
+.context-comparison-box {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.context-card {
+  padding: 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+
+.context-card.nominal {
+  border-left: 4px solid var(--accent-cyan);
+}
+
+.context-card.effective {
+  border-left: 4px solid var(--accent-purple, #a855f7);
+}
+
+.provenance-legend-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}

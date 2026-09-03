@@ -53,7 +53,16 @@ const {
   CAMELAI_PLATFORM_DATA,
   GROK_BOT_METADATA,
   ZAI_CREDIT_ACCOUNTING,
-  PlanExplorer
+  PlanExplorer,
+  BENCHMARK_REGISTRY,
+  SOURCE_REGISTRY,
+  MODEL_DOSSIERS_DATA,
+  DEEPSWE_INDEPENDENT_LEADERBOARD,
+  getModelDossier,
+  getDossierBenchmarkSnapshots,
+  calculatePerformanceFingerprint,
+  getDeepSweLeaderboard,
+  getProvenanceBadge
 } = data;
 
 const errors = [];
@@ -75,7 +84,8 @@ console.log('====================================================\n');
 const modelIds = Object.keys(AI_MODELS_DATA);
 const modelCount = modelIds.length;
 console.log(`📊 Total de modelos catalogados: ${modelCount}`);
-assert(modelCount === 44, `Catálogo de modelos canônicos deve ter 44 modelos. Encontrado: ${modelCount}`);
+assert(modelCount >= 44, `Catálogo de modelos canônicos deve ter pelo menos 44 modelos. Encontrado: ${modelCount}`);
+assert(modelCount === MULTI_BENCHMARK_LEDGER.length, `Catálogo de modelos (${modelCount}) deve coincidir exatamente com o Ledger (${MULTI_BENCHMARK_LEDGER.length}) conforme Seção 129`);
 
 // Validação dos estados/status permitidos no catálogo
 const validStatuses = ['active', 'stable', 'preview', 'superseded', 'legacy', 'retired', 'stealth-revealed'];
@@ -151,7 +161,7 @@ assert(topCursorBench && topCursorBench.score >= 70.0, `Líder do CursorBench de
 
 // 5. Multi-Benchmark Ledger e Proveniência Estruturada (Seções 80, 81, 102)
 console.log(`📑 Total de modelos no Ledger Multi-Benchmark: ${MULTI_BENCHMARK_LEDGER.length}`);
-assert(MULTI_BENCHMARK_LEDGER.length === 44, 'Ledger deve conter exatamente 44 modelos');
+assert(MULTI_BENCHMARK_LEDGER.length === modelCount, `Ledger deve conter exatamente ${modelCount} modelos. Encontrado: ${MULTI_BENCHMARK_LEDGER.length}`);
 
 const solProRow = MULTI_BENCHMARK_LEDGER.find(r => r.modelId === 'gpt-5-6-pro');
 assert(solProRow, 'Linha gpt-5-6-pro no Ledger não encontrada');
@@ -354,8 +364,8 @@ SUBSCRIPTION_PLANS_DATA.forEach(p => {
 
 // 10. Matriz Canônica de Disponibilidade por Plataforma (Seção 40)
 console.log('🌐 Verificando matriz canônica de disponibilidade por plataforma...');
-assert(Array.isArray(PLATFORM_AVAILABILITY_MATRIX) && PLATFORM_AVAILABILITY_MATRIX.length === 44,
-  `PLATFORM_AVAILABILITY_MATRIX deve conter exatamente 44 modelos. Encontrado: ${PLATFORM_AVAILABILITY_MATRIX?.length}`);
+assert(Array.isArray(PLATFORM_AVAILABILITY_MATRIX) && PLATFORM_AVAILABILITY_MATRIX.length === modelCount,
+  `PLATFORM_AVAILABILITY_MATRIX deve conter exatamente ${modelCount} modelos. Encontrado: ${PLATFORM_AVAILABILITY_MATRIX?.length}`);
 PLATFORM_AVAILABILITY_MATRIX.forEach(entry => {
   assert(entry.modelId && entry.platforms, `Entrada da matriz de plataforma inválida para ${entry.modelId}`);
   assert(typeof entry.platforms.directApi?.available === 'boolean', `directApi.available deve ser booleano para ${entry.modelId}`);
@@ -506,6 +516,114 @@ SUBSCRIPTION_PLANS_DATA.forEach(p => {
   assert(scores.costBenefitScore >= 0 && scores.costBenefitScore <= 100, `costBenefitScore fora do range [0, 100] para ${p.id}`);
 });
 console.log('   ✅ Todos os requisitos e testes das Seções 94 a 101, 113 e 114 foram validados com sucesso.');
+
+// ==========================================
+// TESTES DO PLANO 07 (DOSSIÊ & METROLOGIA - SEÇÕES 121 A 131)
+// ==========================================
+console.log('\n🔬 VALIDANDO TESTES DO PLANO 07 (DOSSIÊ TÉCNICO & METROLOGIA)...');
+
+// Seção 121: Teste Gemini 3.8 Flash (GPQA e ARC-AGI-2 nulos)
+console.log('   - [Seção 121] Verificando integridade factual do Gemini 3.8 Flash (GPQA e ARC nulos)...');
+const g38Row = MULTI_BENCHMARK_LEDGER.find(r => r.modelId === 'gemini-3-8-flash');
+assert(g38Row, 'Linha gemini-3-8-flash no ledger não encontrada');
+assert(g38Row.gpqaDiamond === null, `Seção 121: Gemini 3.8 Flash gpqaDiamond deve ser null. Encontrado: ${g38Row.gpqaDiamond}`);
+assert(g38Row.arcAgi2Verified === null, `Seção 121: Gemini 3.8 Flash arcAgi2Verified deve ser null. Encontrado: ${g38Row.arcAgi2Verified}`);
+
+// Seção 122: Teste DeepSeek V4 Vision Exp (AA Index = 51.0)
+console.log('   - [Seção 122] Verificando AA Index de DeepSeek V4 Vision Exp (51.0)...');
+const dsv4Row = MULTI_BENCHMARK_LEDGER.find(r => r.modelId === 'deepseek-v4-vision-exp');
+assert(dsv4Row, 'Linha deepseek-v4-vision-exp no ledger não encontrada');
+assert(dsv4Row.aaIndex === 51.0, `Seção 122: DeepSeek V4 Vision Exp aaIndex deve ser 51.0 (não 52.0). Encontrado: ${dsv4Row.aaIndex}`);
+
+// Seção 123: Teste MiniMax M3 (Terminal-Bench 2.1 = 66.0)
+console.log('   - [Seção 123] Verificando Terminal-Bench 2.1 do MiniMax M3 (66.0)...');
+const m3Row = MULTI_BENCHMARK_LEDGER.find(r => r.modelId === 'minimax-m3');
+assert(m3Row, 'Linha minimax-m3 no ledger não encontrada');
+assert(m3Row.terminalBench21 === 66.0, `Seção 123: MiniMax M3 terminalBench21 deve ser 66.0 (não 65.5). Encontrado: ${m3Row.terminalBench21}`);
+
+// Seção 124: Teste Grok 4.6 Terminal-Bench 2.1 (Independente - AA)
+console.log('   - [Seção 124] Verificando classificação independente de Grok 4.6 TB 2.1 (AA)...');
+const grokRow = MULTI_BENCHMARK_LEDGER.find(r => r.modelId === 'grok-4-6');
+assert(grokRow, 'Linha grok-4-6 no ledger não encontrada');
+assert(grokRow.benchmarkEvidence?.terminalBench21?.sourceType === 'independent',
+  `Seção 124: Grok 4.6 TB 2.1 deve ter sourceType="independent". Encontrado: ${grokRow.benchmarkEvidence?.terminalBench21?.sourceType}`);
+
+// Seção 125: Teste Muse Spark Contributor (não herda benchmarks do base)
+console.log('   - [Seção 125] Verificando segregação do Muse Spark Contributor (sem benchmarks herdados)...');
+assert(!MULTI_BENCHMARK_LEDGER.some(r => r.modelId === 'muse-spark-1-3-contributor'),
+  'Seção 125: muse-spark-1-3-contributor NÃO deve possuir linha no MULTI_BENCHMARK_LEDGER');
+const contribDossier = MODEL_DOSSIERS_DATA ? MODEL_DOSSIERS_DATA['muse-spark-1-3-contributor'] : null;
+assert(contribDossier, 'Dossiê do muse-spark-1-3-contributor deve existir');
+assert(contribDossier.exactCheckpointVerified === false, 'muse-spark-1-3-contributor deve ter exactCheckpointVerified=false');
+
+// Seção 126: Teste Qwen3.8 Flash vs Qwen3.8-Flash-Next (AA Index nulo)
+console.log('   - [Seção 126] Verificando Qwen3.8 Flash API vs Qwen3.8-Flash-Next...');
+const qfRow = MULTI_BENCHMARK_LEDGER.find(r => r.modelId === 'qwen3-8-flash');
+assert(qfRow, 'Linha qwen3-8-flash no ledger não encontrada');
+assert(qfRow.aaIndex === null, `Seção 126: Qwen3.8 Flash API não deve reportar AA Index isolado. Encontrado: ${qfRow.aaIndex}`);
+
+// Seção 127: Teste Custo por Tarefa Resolvida (DeepSWE Leaderboard com derived: true)
+console.log('   - [Seção 127] Verificando cálculo derivado de custo por tarefa resolvida no DeepSWE...');
+const deepsweBoard = typeof getDeepSweLeaderboard === 'function' ? getDeepSweLeaderboard('score') : [];
+assert(deepsweBoard.length >= 6, `Leaderboard DeepSWE deve conter pelo menos 6 modelos. Encontrados: ${deepsweBoard.length}`);
+deepsweBoard.forEach(entry => {
+  assert(entry.derived === true, `Seção 127: Modelo ${entry.modelId} no DeepSWE deve ter flag derived=true`);
+  assert(typeof entry.costPerSolvedTask === 'number' && entry.costPerSolvedTask > 0,
+    `Seção 127: Modelo ${entry.modelId} deve ter costPerSolvedTask > 0. Encontrado: ${entry.costPerSolvedTask}`);
+  const expectedCost = entry.costPerTaskUsd / (entry.score / 100);
+  assert(Math.abs(entry.costPerSolvedTask - expectedCost) < 0.001,
+    `Seção 127: Cálculo de costPerSolvedTask divergente para ${entry.modelId}. Calculado: ${entry.costPerSolvedTask}, Esperado: ${expectedCost}`);
+});
+
+// Seção 128: Teste Performance Fingerprint (sem percentuais inventados, apenas ratings categóricos)
+console.log('   - [Seção 128] Verificando Performance Fingerprint categórico...');
+const fpSample = typeof calculatePerformanceFingerprint === 'function' ? calculatePerformanceFingerprint('gemini-3-8-flash') : {};
+const expectedDomains = [
+  'softwareEngineering', 'terminal', 'toolUse', 'scientificReasoning',
+  'longContext', 'multimodal', 'cyber', 'throughput', 'costEfficiency'
+];
+const validRatings = ['Excellent', 'Strong', 'Average', 'Weak', 'Unknown'];
+assert(Object.keys(fpSample).length === 9, `Seção 128: Fingerprint deve cobrir 9 domínios. Encontrados: ${Object.keys(fpSample).length}`);
+expectedDomains.forEach(dom => {
+  assert(fpSample[dom], `Domínio ${dom} ausente no fingerprint`);
+  assert(validRatings.includes(fpSample[dom].rating), `Rating inválido em ${dom}: ${fpSample[dom].rating}`);
+});
+
+// Seção 129: Teste Contagem Dinâmica (Nenhum hardcode)
+console.log('   - [Seção 129] Verificando paridade dinâmica de catálogo...');
+assert(Object.keys(AI_MODELS_DATA).length === MULTI_BENCHMARK_LEDGER.length,
+  `Seção 129: Divergência entre AI_MODELS_DATA (${Object.keys(AI_MODELS_DATA).length}) e MULTI_BENCHMARK_LEDGER (${MULTI_BENCHMARK_LEDGER.length})`);
+assert(Object.keys(AI_MODELS_DATA).length === PLATFORM_AVAILABILITY_MATRIX.length,
+  `Seção 129: Divergência entre AI_MODELS_DATA (${Object.keys(AI_MODELS_DATA).length}) e PLATFORM_AVAILABILITY_MATRIX (${PLATFORM_AVAILABILITY_MATRIX.length})`);
+
+// Seção 130: Teste 18 Dossiês Prioritários
+console.log('   - [Seção 130] Verificando integridade dos 18 dossiês técnicos prioritários...');
+const priorityIds = [
+  'gemini-3-8-flash', 'gpt-5-6-sol', 'gpt-5-6-terra', 'gpt-5-6-luna',
+  'deepseek-v4-flash-0731', 'deepseek-v4-flash-vision-exp', 'grok-4-6',
+  'glm-5-3', 'glm-5-3-flash', 'kimi-k3', 'hy4-preview', 'hy3-tencent',
+  'qwen3-8-max', 'qwen3-8-flash', 'minimax-m3', 'muse-spark-1-3',
+  'muse-spark-1-3-contributor', 'claude-fable-5-1'
+];
+assert(MODEL_DOSSIERS_DATA, 'Objeto MODEL_DOSSIERS_DATA não definido');
+priorityIds.forEach(pId => {
+  assert(MODEL_DOSSIERS_DATA[pId], `Seção 130: Dossiê ausente para modelo prioritário "${pId}"`);
+  const d = MODEL_DOSSIERS_DATA[pId];
+  assert(d.identity && (d.identity.name || d.identity.canonicalName), `Dossiê "${pId}" ausente de identidade`);
+  assert(Array.isArray(d.sourceIds) && d.sourceIds.length > 0, `Dossiê "${pId}" deve listar sourceIds`);
+});
+
+// Seção 131: Teste Badges de Proveniência Metrológica
+console.log('   - [Seção 131] Verificando badges de proveniência [O], [V], [T], [C], [E]...');
+const requiredSourceTypes = ['official', 'vendor-reported', 'independent', 'community', 'estimated'];
+requiredSourceTypes.forEach(st => {
+  const badge = typeof getProvenanceBadge === 'function' ? getProvenanceBadge(st) : null;
+  assert(badge, `Badge ausente para sourceType: ${st}`);
+  assert(['O', 'V', 'T', 'C', 'E'].includes(badge.code), `Código de badge inválido para ${st}: ${badge.code}`);
+  assert(badge.cssClass && badge.cssClass.startsWith('badge-source-'), `Classe CSS inválida para ${st}: ${badge.cssClass}`);
+});
+
+console.log('   ✅ Todas as 11 suítes de auditoria das Seções 121 a 131 foram validadas com sucesso!');
 
 console.log('====================================================\n');
 
