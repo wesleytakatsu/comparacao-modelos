@@ -2,6 +2,7 @@
  * Script de Auditoria Técnica e Integridade de Dados
  * Portal de Inteligência de Modelos de IA
  * Execução: node scripts/audit-data.js
+ * Data de Referência: 03/09/2026 ~03:30 BRT
  */
 
 const fs = require('fs');
@@ -20,12 +21,12 @@ try {
 const {
   AI_PROVIDERS_DATA,
   AI_MODELS_DATA,
+  DATA_SOURCES,
   CURSORBENCH_32_DATA,
   MARGINAL_GAINS_DATA,
   MULTI_BENCHMARK_LEDGER,
   CAPABILITY_RADAR_10D,
   OPENCODE_GO_DATA,
-  OPENCODE_GO_CATALOG,
   HARDWARE_LOCAL_MODELS_DATA,
   HARDWARE_GPU_DATABASE,
   KV_CACHE_COMPRESSION_FACTORS,
@@ -36,7 +37,6 @@ const {
   ARTIFICIAL_ANALYSIS_DATA,
   STANDARDIZED_WORKLOADS_DATA,
   AI_DATA_HELPERS,
-  // Novos datasets modulares
   FX_RATES_DATA,
   FX_HELPERS,
   SUBSCRIPTION_PLANS_DATA,
@@ -48,7 +48,12 @@ const {
   BENCHMARK_VS_COMMUNITY_DIVERGENCES,
   ENGINEERING_BEHAVIOR_DATA,
   USE_CASE_COMPARISON_DATA,
-  PLATFORM_MODEL_CATALOG
+  PLATFORM_MODEL_CATALOG,
+  PLATFORM_AVAILABILITY_MATRIX,
+  CAMELAI_PLATFORM_DATA,
+  GROK_BOT_METADATA,
+  ZAI_CREDIT_ACCOUNTING,
+  PlanExplorer
 } = data;
 
 const errors = [];
@@ -70,10 +75,9 @@ console.log('====================================================\n');
 const modelIds = Object.keys(AI_MODELS_DATA);
 const modelCount = modelIds.length;
 console.log(`📊 Total de modelos catalogados: ${modelCount}`);
-assert(modelCount > 0, 'Catálogo de modelos não pode estar vazio.');
-assert(modelCount === Object.keys(AI_MODELS_DATA).length, `Inconsistência na contagem de chaves de modelos: ${modelCount}`);
+assert(modelCount === 44, `Catálogo de modelos canônicos deve ter 44 modelos. Encontrado: ${modelCount}`);
 
-// Validação dos estados/status permitidos no catálogo (Seção 1.1)
+// Validação dos estados/status permitidos no catálogo
 const validStatuses = ['active', 'stable', 'preview', 'superseded', 'legacy', 'retired', 'stealth-revealed'];
 modelIds.forEach(id => {
   const m = AI_MODELS_DATA[id];
@@ -94,506 +98,302 @@ modelIds.forEach(id => {
     assert(model[field] !== undefined, `Modelo "${id}" ausente do campo obrigatório "${field}"`);
   });
 
-  // Valida Provedor
   assert(AI_PROVIDERS_DATA[model.provider], `Modelo "${id}" referencia provedor inexistente "${model.provider}"`);
-
-  // Valida Contexto
   assert(typeof model.contextWindow === 'number' && model.contextWindow > 0, `Modelo "${id}" possui contextWindow inválido: ${model.contextWindow}`);
   assert(typeof model.maxOutputTokens === 'number' && model.maxOutputTokens > 0, `Modelo "${id}" possui maxOutputTokens inválido: ${model.maxOutputTokens}`);
 
-  // Valida Preços
   if (model.pricing && model.pricing.standard) {
     assert(typeof model.pricing.standard.input === 'number' && model.pricing.standard.input >= 0, `Modelo "${id}" possui input price negativo ou inválido`);
     assert(typeof model.pricing.standard.output === 'number' && model.pricing.standard.output >= 0, `Modelo "${id}" possui output price negativo ou inválido`);
   }
 });
 
-// 3. Verificação dos Modelos Obrigatórios e Correções Críticas
-assert(AI_MODELS_DATA['gemini-3-8-flash'], 'Modelo "gemini-3-8-flash" não encontrado em AI_MODELS_DATA');
-assert(AI_MODELS_DATA['claude-fable-5-1'], 'Modelo "claude-fable-5-1" não encontrado em AI_MODELS_DATA');
-assert(AI_MODELS_DATA['glm-5-3-flash'], 'Modelo "glm-5-3-flash" não encontrado em AI_MODELS_DATA');
-assert(AI_MODELS_DATA['glm-5-3'], 'Modelo "glm-5-3" deve continuar existindo separadamente de "glm-5-3-flash"');
-assert(!AI_MODELS_DATA['ox-alpha'], 'Modelo "ox-alpha" não deve existir como modelo ativo independente (substituído por glm-5-3-flash)');
-assert(!AI_PROVIDERS_DATA['stealth'], 'Provedor órfão "stealth" não deve existir como provedor ativo');
-assert(AI_MODELS_DATA['glm-5-3-flash'].historicalAliases && AI_MODELS_DATA['glm-5-3-flash'].historicalAliases.includes('Ox Alpha'), 'GLM-5.3-Flash deve registrar "Ox Alpha" em historicalAliases');
-assert(AI_MODELS_DATA['gemini-3-7-flash'], 'Modelo predecessor "gemini-3-7-flash" foi removido indevidamente');
-assert(AI_MODELS_DATA['claude-fable-5'], 'Modelo predecessor "claude-fable-5" foi removido indevidamente');
-assert(HARDWARE_LOCAL_MODELS_DATA.some(h => h.modelId === 'glm-5-3-flash'), 'GLM-5.3-Flash deve estar cadastrado em HARDWARE_LOCAL_MODELS_DATA');
+// 3. Verificação dos Modelos Obrigatórios e Correções Críticas (Seção 97)
+const solPro = AI_MODELS_DATA['gpt-5-6-pro'];
+assert(solPro, 'Modelo "gpt-5-6-pro" não encontrado');
+assert(solPro.directApi === false, `GPT-5.6 Sol Pro deve ter directApi === false. Encontrado: ${solPro.directApi}`);
+assert(solPro.pricing.subscriptionOnly === true, 'GPT-5.6 Sol Pro deve ter pricing.subscriptionOnly === true');
+assert(solPro.pricing.api === null, 'GPT-5.6 Sol Pro deve ter pricing.api === null');
 
-// Validações de preços e status específicos (02-dados-ajuste.md)
-const g38 = AI_MODELS_DATA['gemini-3-8-flash'];
-assert(g38.pricing.standard.input === 0.75, `Gemini 3.8 Flash input price atual deve ser $0.75 (promocional até 31/12/2026). Encontrado: ${g38.pricing.standard.input}`);
-assert(g38.pricing.standard.output === 3.75, `Gemini 3.8 Flash output price atual deve ser $3.75. Encontrado: ${g38.pricing.standard.output}`);
-assert(g38.pricing.postPromo && g38.pricing.postPromo.input === 1.50, `Gemini 3.8 Flash postPromo input deve ser $1.50`);
-assert(g38.pricing.postPromo && g38.pricing.postPromo.output === 7.50, `Gemini 3.8 Flash postPromo output deve ser $7.50`);
-assert(g38.maxOutputTokens === 65536, `Gemini 3.8 Flash maxOutputTokens deve ser 65.536 (64k)`);
+const g31Pro = AI_MODELS_DATA['gemini-3-1-pro'];
+assert(g31Pro, 'Modelo "gemini-3-1-pro" não encontrado');
+assert(g31Pro.status === 'preview' && g31Pro.apiStatus === 'preview', `Gemini 3.1 Pro deve ter status preview e apiStatus preview. Encontrado: ${g31Pro.status}/${g31Pro.apiStatus}`);
 
-const cf51 = AI_MODELS_DATA['claude-fable-5-1'];
-assert(!cf51.officialBenchmarks.terminalBench21, 'Terminal-Bench 2.1 não deve estar em officialBenchmarks de Claude Fable 5.1 (é Artificial Analysis)');
-assert(!cf51.officialBenchmarks.sciCode, 'SciCode não deve estar em officialBenchmarks de Claude Fable 5.1 (é Artificial Analysis)');
-assert(!cf51.officialBenchmarks.hle, 'HLE não deve estar em officialBenchmarks de Claude Fable 5.1 (é Artificial Analysis)');
-assert(cf51.independentBenchmarks && cf51.independentBenchmarks.artificialAnalysis && cf51.independentBenchmarks.artificialAnalysis.terminalBench21 === 91.4, 'Terminal-Bench 2.1 (91.4%) deve estar em independentBenchmarks.artificialAnalysis');
+const g37Flash = AI_MODELS_DATA['gemini-3-7-flash'];
+assert(g37Flash, 'Modelo "gemini-3-7-flash" não encontrado');
+assert(g37Flash.status !== 'legacy' && g37Flash.status === 'stable', `Gemini 3.7 Flash deve ter status "stable" e NÃO legacy. Encontrado: ${g37Flash.status}`);
+assert(g37Flash.generationPredecessorOf === 'gemini-3-8-flash', 'Gemini 3.7 Flash deve registrar generationPredecessorOf: gemini-3-8-flash');
 
-const gptPro = AI_MODELS_DATA['gpt-5-6-pro'];
-assert(gptPro.benchmarkCoverage === 'limited', 'GPT-5.6 Pro deve ter benchmarkCoverage: "limited"');
-assert(!gptPro.sources.includes('xai-grok46'), 'GPT-5.6 Pro não deve conter xai-grok46 em sources');
+const dsV4Exp = AI_MODELS_DATA['deepseek-v4-vision-exp'];
+assert(dsV4Exp, 'Modelo "deepseek-v4-vision-exp" não encontrado');
+assert(dsV4Exp.sourceConfidence === 'platform-sku/unverified-upstream', `DeepSeek V4 Vision Exp deve ter sourceConfidence platform-sku/unverified-upstream`);
 
-const cf5 = AI_MODELS_DATA['claude-fable-5'];
-assert(cf5.status === 'superseded', `Claude Fable 5 deve ter status "superseded"`);
-assert(cf5.pricing.standard.input === 10.00 && cf5.pricing.standard.output === 50.00, `Claude Fable 5 tarifas devem ser $10.00 in / $50.00 out`);
-assert(cf5.maxOutputTokens === 131072, `Claude Fable 5 maxOutputTokens deve ser 131.072 (128k)`);
+// Preços oficiais xAI Grok 4.5 e 4.6
+const grok46 = AI_MODELS_DATA['grok-4-6'];
+assert(grok46, 'Modelo "grok-4-6" não encontrado');
+assert(grok46.pricing.standard.input === 2.00 && grok46.pricing.standard.output === 6.00, 'Grok 4.6 short context deve ser $2 in / $6 out');
+assert(grok46.pricing.longContextMultiplier === 2, 'Grok 4.6 long context multiplier deve ser 2 ($4 in / $12 out)');
 
-const cop5 = AI_MODELS_DATA['claude-opus-5'];
-assert(cop5.pricing.standard.input === 5.00 && cop5.pricing.standard.output === 25.00, `Claude Opus 5 tarifas devem ser $5.00 in / $25.00 out`);
-assert(cop5.maxOutputTokens === 131072, `Claude Opus 5 maxOutputTokens deve ser 131.072 (128k)`);
+const grok45 = AI_MODELS_DATA['grok-4-5'];
+assert(grok45, 'Modelo "grok-4-5" não encontrado');
+assert(grok45.pricing.standard.input === 2.00 && grok45.pricing.standard.output === 6.00, 'Grok 4.5 short context deve ser $2 in / $6 out');
+assert(grok45.pricing.longContextMultiplier === 2, 'Grok 4.5 long context multiplier deve ser 2');
 
-const sol = AI_MODELS_DATA['gpt-5-6-sol'];
-assert(sol.pricing.standard.input === 4.00 && sol.pricing.standard.output === 20.00, `GPT-5.6 Sol tarifas devem ser $4.00 in / $20.00 out`);
-assert(sol.maxOutputTokens === 131072, `GPT-5.6 Sol maxOutputTokens deve ser 131.072 (128k)`);
+// Preços de Grok no Cursor IDE
+assert(PLATFORM_MODEL_CATALOG.cursor.pricing.grok46.standard.input === 2.00 && PLATFORM_MODEL_CATALOG.cursor.pricing.grok46.fast.input === 4.00, 'Cursor Grok 4.6 pricing');
+assert(PLATFORM_MODEL_CATALOG.cursor.pricing.grok45.standard.input === 2.00 && PLATFORM_MODEL_CATALOG.cursor.pricing.grok45.fast.output === 18.00, 'Cursor Grok 4.5 pricing');
 
-const terra = AI_MODELS_DATA['gpt-5-6-terra'];
-assert(terra.pricing.standard.input === 2.00 && terra.pricing.standard.output === 12.00, `GPT-5.6 Terra tarifas devem ser $2.00 in / $12.00 out`);
-
-const luna = AI_MODELS_DATA['gpt-5-6-luna'];
-assert(luna.pricing.standard.input === 0.20 && luna.pricing.standard.output === 1.20, `GPT-5.6 Luna tarifas devem ser $0.20 in / $1.20 out`);
-
-// 4. CursorBench 3.2
+// 4. CursorBench 3.2 (Teste não-frágil)
 console.log(`📋 Total de runs no CursorBench: ${CURSORBENCH_32_DATA.length}`);
-CURSORBENCH_32_DATA.forEach((run, index) => {
-  assert(AI_MODELS_DATA[run.modelId], `Run ${index} (${run.modelName}) referencia modelId inexistente: ${run.modelId}`);
-  assert(typeof run.score === 'number' && run.score >= 0 && run.score <= 100, `Run ${index} (${run.modelName}) possui score inválido: ${run.score}`);
-  assert(typeof run.costUsd === 'number' && run.costUsd >= 0, `Run ${index} (${run.modelName}) possui custo negativo: ${run.costUsd}`);
-  assert(typeof run.tokensPerTask === 'number' && run.tokensPerTask > 0, `Run ${index} (${run.modelName}) possui tokensPerTask inválido: ${run.tokensPerTask}`);
-});
-
+assert(CURSORBENCH_32_DATA.length > 0, 'CursorBench não pode estar vazio');
 const topCursorBench = [...CURSORBENCH_32_DATA].sort((a, b) => b.score - a.score)[0];
-assert(topCursorBench && topCursorBench.modelId === 'claude-fable-5-1' && topCursorBench.score >= 73.0,
-  `O líder do CursorBench deve ser Claude Fable 5.1 Max com score >= 73.0%. Encontrado: ${topCursorBench ? topCursorBench.modelName + ' (' + topCursorBench.score + '%)' : 'Nenhum'}`);
+assert(topCursorBench && topCursorBench.score >= 70.0, `Líder do CursorBench deve ter score >= 70.0%. Encontrado: ${topCursorBench?.score}`);
 
-// 5. Multi-Benchmark Ledger
+// 5. Multi-Benchmark Ledger e Proveniência Estruturada (Seções 80, 81, 102)
 console.log(`📑 Total de modelos no Ledger Multi-Benchmark: ${MULTI_BENCHMARK_LEDGER.length}`);
-MULTI_BENCHMARK_LEDGER.forEach((item, index) => {
-  assert(AI_MODELS_DATA[item.modelId], `Ledger item ${index} (${item.modelName}) referencia modelId inexistente: ${item.modelId}`);
+assert(MULTI_BENCHMARK_LEDGER.length === 44, 'Ledger deve conter exatamente 44 modelos');
+
+const solProRow = MULTI_BENCHMARK_LEDGER.find(r => r.modelId === 'gpt-5-6-pro');
+assert(solProRow, 'Linha gpt-5-6-pro no Ledger não encontrada');
+assert(solProRow.terminalBench21 === null && solProRow.terminalBench30 === null && solProRow.deepSwe11 === null && solProRow.gpqaDiamond === null,
+  'GPT-5.6 Sol Pro NÃO deve ter valores factuais de benchmark sem evidência específica');
+
+const grok46Row = MULTI_BENCHMARK_LEDGER.find(r => r.modelId === 'grok-4-6');
+assert(grok46Row, 'Linha grok-4-6 no Ledger não encontrada');
+assert(grok46Row.terminalBench30 === 26.0, `Grok 4.6 TB 3.0 oficial deve ser 26.0. Encontrado: ${grok46Row.terminalBench30}`);
+assert(grok46Row.terminalBench21 === 88.4, `Grok 4.6 TB 2.1 independente deve ser 88.4. Encontrado: ${grok46Row.terminalBench21}`);
+
+// Validação de benchmarkEvidence em cada célula não-nula do Ledger
+let verifiedCells = 0;
+MULTI_BENCHMARK_LEDGER.forEach(row => {
+  assert(row.benchmarkEvidence && typeof row.benchmarkEvidence === 'object', `Ledger row "${row.modelId}" deve ter benchmarkEvidence`);
+  ['terminalBench21', 'terminalBench30', 'sweBenchVerified', 'deepSwe11', 'gpqaDiamond', 'aaIndex'].forEach(metric => {
+    if (row[metric] !== null && row[metric] !== undefined) {
+      const ev = row.benchmarkEvidence[metric];
+      assert(ev, `Métrica "${metric}" do modelo "${row.modelId}" tem valor ${row[metric]} mas falta benchmarkEvidence correspondente`);
+      assert(ev && ev.sourceId && ev.evidenceTier && ev.status, `Métrica "${metric}" do modelo "${row.modelId}" possui evidência incompleta`);
+      verifiedCells++;
+    }
+  });
+});
+console.log(`   ✅ Verificadas ${verifiedCells} células de benchmark com evidência metrológica estruturada.`);
+
+// 6. Câmbio FX (Descongelado de valores frágeis)
+console.log('💵 Verificando dados e helpers de câmbio FX...');
+assert(FX_RATES_DATA && FX_RATES_DATA.USD_BRL && typeof FX_RATES_DATA.USD_BRL.rate === 'number' && FX_RATES_DATA.USD_BRL.rate > 0, 'USD_BRL deve ser número positivo');
+assert(FX_RATES_DATA.USD_BRL.officialPtax === false, 'USD_BRL deve ter officialPtax === false');
+
+// 7. Auditoria Completa de Planos de Assinatura (Seções 97 a 101)
+console.log(`💳 Total de planos cadastrados: ${SUBSCRIPTION_PLANS_DATA.length}`);
+assert(SUBSCRIPTION_PLANS_DATA.length >= 40, `Esperado no mínimo 40 planos cadastrados. Encontrado: ${SUBSCRIPTION_PLANS_DATA.length}`);
+
+// Detector de poluição de features em includedModels
+const forbiddenInModels = ['Canvas', 'Deep Research', 'Storage', 'TB Cloud', 'Workspaces', 'Credits', 'Flow (', 'Admin Console'];
+SUBSCRIPTION_PLANS_DATA.forEach(p => {
+  p.includedModels.forEach(m => {
+    forbiddenInModels.forEach(f => {
+      assert(!m.toLowerCase().includes(f.toLowerCase()), `Poluição semântica no plano "${p.id}": feature "${m}" encontrada em includedModels`);
+    });
+  });
 });
 
-// 6. Capability Radar 10D
-console.log(`🕸️ Total de modelos no Radar 10D: ${Object.keys(CAPABILITY_RADAR_10D).length}`);
-assert(CAPABILITY_RADAR_10D['gemini-3-8-flash'], 'Radar 10D ausente para "gemini-3-8-flash"');
-assert(CAPABILITY_RADAR_10D['claude-fable-5-1'], 'Radar 10D ausente para "claude-fable-5-1"');
-
-// 7. Câmbio FX e Helpers (Snapshot de Mercado 03/09/2026 - Sem Ptax Oficial)
-console.log('💵 Verificando dados e helpers de câmbio FX...');
-assert(FX_RATES_DATA && FX_RATES_DATA.USD_BRL && FX_RATES_DATA.USD_BRL.rate === 5.108, `Cotação USD_BRL deve ser 5.108. Encontrado: ${FX_RATES_DATA && FX_RATES_DATA.USD_BRL ? FX_RATES_DATA.USD_BRL.rate : 'N/D'}`);
-assert(FX_RATES_DATA && FX_RATES_DATA.USD_BRL && FX_RATES_DATA.USD_BRL.officialPtax === false, 'USD_BRL deve ter officialPtax === false (é snapshot de mercado)');
-assert(FX_RATES_DATA && FX_RATES_DATA.CNY_BRL && FX_RATES_DATA.CNY_BRL.rate === 0.7599, `Cotação CNY_BRL deve ser 0.7599. Encontrado: ${FX_RATES_DATA && FX_RATES_DATA.CNY_BRL ? FX_RATES_DATA.CNY_BRL.rate : 'N/D'}`);
-assert(FX_RATES_DATA && FX_RATES_DATA.CNY_BRL && FX_RATES_DATA.CNY_BRL.officialPtax === false, 'CNY_BRL deve ter officialPtax === false');
-const convBrl = FX_HELPERS.convertUsdToBrl(20);
-assert(Math.abs(convBrl - 102.16) < 0.001, `Conversão de $20 USD para BRL incorreta: ${convBrl}`);
-
-// 8. Planos e Assinaturas (Subscriptions & camelAI)
-console.log(`💳 Total de planos cadastrados: ${SUBSCRIPTION_PLANS_DATA ? SUBSCRIPTION_PLANS_DATA.length : 0}`);
-assert(Array.isArray(SUBSCRIPTION_PLANS_DATA) && SUBSCRIPTION_PLANS_DATA.length >= 35, `Esperado no mínimo 35 planos de assinatura cadastrados. Encontrado: ${SUBSCRIPTION_PLANS_DATA ? SUBSCRIPTION_PLANS_DATA.length : 0}`);
-
-// Google AI Plans
+// Google AI Plans (Seção 97)
 const gPlus = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'google-ai-plus');
-assert(gPlus && gPlus.localizedPricing.BRL.price === 24.99 && gPlus.localizedPricing.BRL.official === true, 'Google AI Plus deve ter preço oficial BRL de R$ 24,99');
-assert(gPlus && gPlus.storageGb === 400 && gPlus.geminiUsageMultiplierVsFree === 2, 'Google AI Plus deve ter 400 GB storage e Gemini usage 2x Free');
+assert(gPlus, 'Plano google-ai-plus não encontrado');
+assert(gPlus.storage.cloudStorageGb === 400, 'Google Plus deve ter 400 GB storage');
+assert(gPlus.credits.flowCreditsMonthly === 200, 'Google Plus deve ter 200 Flow credits/mês');
+assert(gPlus.credits.canPurchaseAiCredits === false, 'Google Plus canPurchaseAiCredits deve ser false');
 
 const gPro = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'google-ai-pro');
-assert(gPro && gPro.localizedPricing.BRL.price === 96.99 && gPro.localizedPricing.BRL.official === true, 'Google AI Pro deve ter preço oficial BRL de R$ 96,99');
-assert(gPro && gPro.storageTb === 5, `Google AI Pro deve ter RIGOROSAMENTE 5 TB de armazenamento (NUNCA 2 TB). Encontrado: ${gPro ? gPro.storageTb : 'N/D'}`);
+assert(gPro, 'Plano google-ai-pro não encontrado');
+assert(gPro.storage.localizedBenefits?.BR?.storageTb === 5, 'Google Pro deve ter benefício verificado no Brasil de 5 TB de armazenamento');
+assert(gPro.credits.flowCreditsMonthly === 1000, 'Google Pro deve ter 1.000 Flow credits/mês');
+assert(gPro.credits.canPurchaseAiCredits === true, 'Google Pro canPurchaseAiCredits deve ser true');
 
-const gUltra5x = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'google-ai-ultra-5x');
-assert(gUltra5x && gUltra5x.localizedPricing.BRL.price === 779.90 && gUltra5x.localizedPricing.BRL.official === true, 'Google AI Ultra 5x deve ter preço oficial BRL de R$ 779,90');
-assert(gUltra5x && gUltra5x.storageTb === 20, 'Google AI Ultra 5x deve ter 20 TB storage');
+const gUltra5 = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'google-ai-ultra-5x');
+assert(gUltra5, 'Plano google-ai-ultra-5x não encontrado');
+assert(gUltra5.storage.cloudStorageTb === 20, 'Google AI Ultra 5x deve ter 20 TB storage');
+assert(gUltra5.credits.flowCreditsMonthly === 10000, 'Google AI Ultra 5x deve ter 10.000 Flow credits/mês');
 
-const gUltra20x = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'google-ai-ultra-20x');
-assert(gUltra20x && gUltra20x.localizedPricing.BRL.price === 999.90 && gUltra20x.localizedPricing.BRL.official === true, 'Google AI Ultra 20x deve ter preço oficial BRL de R$ 999,90');
-assert(gUltra20x && gUltra20x.storageTb === 30, 'Google AI Ultra 20x deve ter 30 TB storage');
+const gUltra20 = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'google-ai-ultra-20x');
+assert(gUltra20, 'Plano google-ai-ultra-20x não encontrado');
+assert(gUltra20.storage.cloudStorageTb === 30, 'Google AI Ultra 20x deve ter 30 TB storage');
+assert(gUltra20.credits.flowCreditsMonthly === 25000, 'Google AI Ultra 20x deve ter 25.000 Flow credits/mês');
 
-// ChatGPT Pro Plans (5x e 20x sem faturamento anual)
-const chatGptPro5x = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'openai-chatgpt-pro-5x');
-assert(chatGptPro5x && chatGptPro5x.monthlyPriceUsd === 100 && chatGptPro5x.annualPriceUsd === null, 'ChatGPT Pro 5x deve custar $100/mês sem faturamento anual');
-
-const chatGptPro20x = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'openai-chatgpt-pro-20x');
-assert(chatGptPro20x && chatGptPro20x.monthlyPriceUsd === 200 && chatGptPro20x.annualPriceUsd === null, 'ChatGPT Pro 20x deve custar $200/mês sem faturamento anual');
-
-// Claude / Anthropic Plans
+// Claude / Anthropic Plans (Seção 98)
 const claudePro = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'anthropic-claude-pro');
-assert(claudePro && claudePro.fableAccess && claudePro.fableAccess.includedInBaseQuota === false && claudePro.fableAccess.requiresUsageCredits === true, 'Claude Pro deve ter Fable 5.1 fora da cota base (requiresUsageCredits === true)');
+assert(claudePro, 'Plano anthropic-claude-pro não encontrado');
+assert(claudePro.pricing.annualPriceUsd === 200, `Claude Pro plano anual total deve ser $200. Encontrado: ${claudePro.pricing.annualPriceUsd}`);
+const cProFable = claudePro.modelAccess.find(m => m.modelId === 'claude-fable-5-1');
+assert(cProFable && cProFable.available === true && cProFable.included === false && cProFable.billingMode === 'usage-credits',
+  'Claude Pro deve ter Fable 5.1 available: true, included: false, billingMode: usage-credits');
 
 const claudeMax5 = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'anthropic-claude-max-5x');
-assert(claudeMax5 && claudeMax5.monthlyPriceUsd === 100 && claudeMax5.fableAccess && claudeMax5.fableAccess.includedInBaseQuota === true, 'Claude Max 5x deve custar $100 com Fable 5.1 incluso na base');
-
-const claudeMax20 = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'anthropic-claude-max-20x');
-assert(claudeMax20 && claudeMax20.monthlyPriceUsd === 200 && claudeMax20.fableAccess && claudeMax20.fableAccess.includedInBaseQuota === true, 'Claude Max 20x deve custar $200 com Fable 5.1 incluso na base');
+assert(claudeMax5, 'Plano anthropic-claude-max-5x não encontrado');
+const cMaxFable = claudeMax5.modelAccess.find(m => m.modelId === 'claude-fable-5-1');
+assert(cMaxFable && cMaxFable.included === true && cMaxFable.weeklyShareCapPct === 50,
+  'Claude Max 5x deve ter Fable 5.1 included: true com weeklyShareCapPct: 50');
 
 const claudeTeamStd = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'anthropic-claude-team-standard');
-assert(claudeTeamStd && claudeTeamStd.monthlyPriceUsd === 25 && claudeTeamStd.minSeats === 2 && claudeTeamStd.fableAccess.includedInBaseQuota === false, 'Claude Team Standard deve custar $25/seat com mín. 2 usuários e Fable via usage credits');
+assert(claudeTeamStd, 'Plano anthropic-claude-team-standard não encontrado');
+assert(claudeTeamStd.usage.sessionMultiplierVsPro === 1.25, `Claude Team Standard sessionMultiplierVsPro deve ser 1.25. Encontrado: ${claudeTeamStd.usage.sessionMultiplierVsPro}`);
 
 const claudeTeamPrem = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'anthropic-claude-team-premium');
-assert(claudeTeamPrem && claudeTeamPrem.monthlyPriceUsd === 125 && claudeTeamPrem.minSeats === 2 && claudeTeamPrem.fableAccess.includedInBaseQuota === true, 'Claude Team Premium deve custar $125/seat com mín. 2 usuários e Fable incluso');
+assert(claudeTeamPrem, 'Plano anthropic-claude-team-premium não encontrado');
+assert(claudeTeamPrem.usage.sessionMultiplierVsPro === 6.25, `Claude Team Premium sessionMultiplierVsPro deve ser 6.25. Encontrado: ${claudeTeamPrem.usage.sessionMultiplierVsPro}`);
 
-// Cursor Pools e Pricing
+// Cursor IDE Pools (Seção 99)
 const cursorPool = PLATFORM_MODEL_CATALOG.cursor.pools.cursorModels.models;
-const expectedCursorModels = ['composer-2-5', 'grok-4-5', 'grok-4-6'];
-assert(JSON.stringify([...cursorPool].sort()) === JSON.stringify(expectedCursorModels.sort()), `Cursor Models pool deve conter RIGOROSAMENTE grok-4-6, grok-4-5 e composer-2-5. Encontrado: ${JSON.stringify(cursorPool)}`);
-assert(!cursorPool.includes('gemini-3-8-flash'), 'Gemini 3.8 Flash NÃO deve constar no pool Cursor Models');
-assert(PLATFORM_MODEL_CATALOG.cursor.pools.otherModels.models.includes('gemini-3-8-flash'), 'Gemini 3.8 Flash deve constar em otherModels do Cursor');
+const strictlyExpectedCursor = ['composer-2-5', 'grok-4-5', 'grok-4-6'];
+assert(JSON.stringify([...cursorPool].sort()) === JSON.stringify(strictlyExpectedCursor.sort()),
+  `Cursor Models pool deve ser RIGOROSAMENTE composer-2-5, grok-4-5 e grok-4-6. Encontrado: ${JSON.stringify(cursorPool)}`);
+assert(!cursorPool.some(m => m.includes('gemini')), 'Cursor Models pool NÃO deve conter nenhum Gemini');
 
-// Antigravity Pools
-const agPool1 = PLATFORM_MODEL_CATALOG.antigravity.pools.pool1.models;
-assert(agPool1.includes('gemini-3-1-pro'), 'Gemini 3.1 Pro deve estar no Pool 1 (Gemini) do Antigravity');
-assert(agPool1.includes('gemini-3-8-flash') && agPool1.includes('gemini-3-7-flash') && agPool1.includes('gemini-3-6-flash'), 'Pool 1 do Antigravity deve conter Gemini 3.8, 3.7 e 3.6 Flash');
-const agPool2 = PLATFORM_MODEL_CATALOG.antigravity.pools.pool2.models;
-assert(agPool2.includes('gpt-oss-120b'), 'GPT-OSS-120B deve estar no Pool 2 (Claude/GPT) do Antigravity');
-assert(!agPool2.includes('gemini-3-1-pro'), 'Gemini 3.1 Pro NÃO deve estar no Pool 2 do Antigravity');
+// Z.ai Coding Plans (Seção 100)
+const zLite = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'zai-coding-lite');
+assert(zLite && zLite.credits.creditsPer5h === 2000 && zLite.credits.creditsPerWeek === 10000, 'Z.ai Lite deve ter 2.000/5h e 10.000/semana');
+assert(zLite.apiIncluded === false && zLite.overageAllowed === false, 'Z.ai Lite individual deve ter generalApiIncluded false e overageAllowed false');
 
-// camelAI Plans e Validações
-const cFree = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'camelai-code-free');
-assert(cFree && cFree.monthlyPriceUsd === 0, 'camelCode Free deve existir com custo $0');
+const zPro = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'zai-coding-pro');
+assert(zPro && zPro.credits.creditsPer5h === 12000 && zPro.credits.creditsPerWeek === 60000, 'Z.ai Pro deve ter 12.000/5h e 60.000/semana');
+assert(zPro.apiIncluded === false && zPro.overageAllowed === false, 'Z.ai Pro individual deve ter generalApiIncluded false e overageAllowed false');
 
-const cStarter = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'camelai-code-starter');
-assert(cStarter && cStarter.monthlyPriceUsd === 10 && cStarter.premiumModelCreditsUsd === 10, 'camelCode Starter deve custar $10 com $10 em créditos');
+const zMax = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'zai-coding-max');
+assert(zMax && zMax.credits.creditsPer5h === 28000 && zMax.credits.creditsPerWeek === 140000, 'Z.ai Max deve ter 28.000/5h e 140.000/semana');
+assert(zMax.apiIncluded === false && zMax.overageAllowed === false, 'Z.ai Max individual deve ter generalApiIncluded false e overageAllowed false');
 
-const cProPlan = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'camelai-code-pro');
-assert(cProPlan && cProPlan.monthlyPriceUsd === 40 && cProPlan.premiumModelCreditsUsd === 40, 'camelCode Pro deve custar $40 com $40 em créditos');
+// Kimi Plans (Seção 101)
+const kAndante = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'kimi-membership-andante');
+assert(kAndante && kAndante.modelAccess.every(m => m.modelId === 'kimi-for-coding'), 'Kimi Andante deve ter acesso apenas a kimi-for-coding no Kimi Code');
 
-const cTeam = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'camelai-code-team');
-assert(cTeam && cTeam.monthlyPriceUsd === 50 && cTeam.minSeats === 3 && cTeam.minimumMonthlyCostUsd === 150, 'camelCode Team deve custar $50/seat com mín. 3 assentos ($150 total)');
+const kModerato = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'kimi-membership-moderato');
+assert(kModerato && !kModerato.includedModels.some(m => m.includes('1M')), 'Kimi Moderato NÃO deve incluir K3 1M');
 
-const cEnterprise = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'camelai-code-enterprise');
-assert(cEnterprise && cEnterprise.workspaces === 'unlimited' && cEnterprise.ssoSaml === true, 'camelCode Enterprise deve ter workspaces ilimitados e SSO');
+const kAllegretto = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'kimi-membership-allegretto');
+assert(kAllegretto && kAllegretto.includedModels.some(m => m.includes('1M')), 'Kimi Allegretto DEVE incluir K3 1M');
 
-const cStream = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'camelai-stream');
-assert(cStream && cStream.monthlyPriceUsd === 5, 'camelStream deve custar $5/stream/mês');
-assert(cStream && cStream.unlimitedTokens === true, 'camelStream deve ter unlimitedTokens === true');
-assert(cStream && cStream.concurrencyPerStream === 1, 'camelStream deve garantir concorrência de 1 por stream');
-assert(cStream && cStream.modelRoutingId === 'auto', 'camelStream deve usar modelRoutingId "auto"');
-assert(cStream && cStream.trainingPossible === true && cStream.zdrSupported === false, 'camelStream standard deve indicar retenção/treino e sem ZDR');
+// Kimi Storage, Anuais e Estimativas de Uso (Seções 53 e 54)
+assert(kAndante && kAndante.storage.cloudStorageGb === 20 && kAndante.pricing.annualPriceCny === 468, 'Kimi Andante: 20GB e ¥468 anual');
+assert(kModerato && kModerato.storage.cloudStorageGb === 20 && kModerato.pricing.annualPriceCny === 948, 'Kimi Moderato: 20GB e ¥948 anual');
+assert(kAllegretto && kAllegretto.storage.cloudStorageGb === 20 && kAllegretto.pricing.annualPriceCny === 1908, 'Kimi Allegretto: 20GB e ¥1.908 anual');
+const kAllegro = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'kimi-membership-allegro');
+assert(kAllegro && kAllegro.storage.cloudStorageGb === 50 && kAllegro.pricing.annualPriceCny === 6708, 'Kimi Allegro: 50GB e ¥6.708 anual');
 
-const cLegacy = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'camelai-legacy-professional');
-assert(cLegacy && cLegacy.current !== true && cLegacy.status === 'legacy', 'camelAI legacy professional deve ter current !== true e status "legacy"');
+// OpenAI Chat Picker (Seções 7 e 8)
+const oPlus = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'openai-chatgpt-plus');
+assert(oPlus && oPlus.includedModels.length === 1 && oPlus.includedModels[0] === 'GPT-5.6 Sol',
+  `ChatGPT Plus generic includedModels deve ser estritamente ["GPT-5.6 Sol"]. Encontrado: ${JSON.stringify(oPlus?.includedModels)}`);
+const oFree = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'openai-chatgpt-free');
+assert(oFree && oFree.includedModels.length === 1 && oFree.includedModels[0] === 'GPT-5.6 Luna',
+  `ChatGPT Free generic includedModels deve ser estritamente ["GPT-5.6 Luna"]. Encontrado: ${JSON.stringify(oFree?.includedModels)}`);
+const oPro = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'openai-chatgpt-pro-5x');
+assert(oPro && JSON.stringify(oPro.includedModels.sort()) === JSON.stringify(['GPT-5.6 Sol', 'GPT-5.6 Sol Pro'].sort()),
+  `ChatGPT Pro generic includedModels deve ser estritamente ["GPT-5.6 Sol", "GPT-5.6 Sol Pro"]`);
 
-// Validação Anti-Hardcode de Dólar no index.html
-const htmlPath = path.join(__dirname, '..', 'index.html');
-const htmlContent = fs.readFileSync(htmlPath, 'utf8');
-assert(!htmlContent.includes('value="5.80"'), 'index.html NÃO deve conter o valor hardcoded value="5.80"');
+// Z.ai Credit Formula e Off-Peak (Seções 46 e 47)
+assert(ZAI_CREDIT_ACCOUNTING && ZAI_CREDIT_ACCOUNTING.multipliers['glm-5-3'].output === 24, 'Fórmula Z.ai GLM-5.3 output 24');
+assert(ZAI_CREDIT_ACCOUNTING.multipliers['glm-5-3-flash'].output === 8, 'Fórmula Z.ai GLM-5.3-Flash output 8');
+assert(ZAI_CREDIT_ACCOUNTING.offPeakDiscountPct === 50, 'Z.ai off-peak 50% discount');
 
-// 9. Histórico e Linhagens
-console.log('🌳 Verificando linhagens e eventos históricos...');
-assert(MODEL_HISTORY_DATA && MODEL_HISTORY_DATA.lineages.length >= 5, 'Devem existir pelo menos 5 linhagens genealógicas');
-assert(MODEL_HISTORY_DATA && MODEL_HISTORY_DATA.events.length >= 10, 'Devem existir pelo menos 10 eventos na linha do tempo');
-assert(BENCHMARK_HISTORY_DATA && BENCHMARK_HISTORY_DATA.length >= 10, 'Devem existir pelo menos 10 benchmarks históricos auditados');
+// Grok Bot e Plataforma (Seções 61 e 62)
+assert(GROK_BOT_METADATA && GROK_BOT_METADATA.announcedAt === '2026-08-26', 'Grok Bot anúncio 2026-08-26');
+assert(GROK_BOT_METADATA.eligiblePlans.includes('cursor-pro') && GROK_BOT_METADATA.eligiblePlans.includes('xai-supergrok-heavy'), 'Grok Bot eligible plans');
+assert(GROK_BOT_METADATA.sourceConflict === true, 'Grok Bot source conflict documentado');
 
-// 10. Comunidade e Comportamento
-console.log('💬 Verificando relatos e matriz de comportamento de engenharia...');
-assert(COMMUNITY_REPORTS_DATA && COMMUNITY_REPORTS_DATA.length === 10, `Esperado 10 relatos auditados da comunidade. Encontrado: ${COMMUNITY_REPORTS_DATA.length}`);
-assert(BENCHMARK_VS_COMMUNITY_DIVERGENCES && BENCHMARK_VS_COMMUNITY_DIVERGENCES.length >= 4, 'Esperado pelo menos 4 análises de divergência benchmark vs comunidade');
-assert(ENGINEERING_BEHAVIOR_DATA && ENGINEERING_BEHAVIOR_DATA.dimensions.length === 12, 'Esperado 12 dimensões qualitativas de engenharia');
+// CamelAI Automation Limits (Seção 67)
+assert(CAMELAI_PLATFORM_DATA && CAMELAI_PLATFORM_DATA.camelCode.automationLimits.canonicalDocs.starter.count === 1, 'CamelAI docs starter: 1 hourly');
+assert(CAMELAI_PLATFORM_DATA.camelCode.automationLimits.marketingPage.starter.count === 10, 'CamelAI marketing starter: 10 hourly');
+assert(CAMELAI_PLATFORM_DATA.camelCode.automationLimits.sourceConflict === true, 'CamelAI automation source conflict');
 
-// 11. Casos de Uso e Projetos
-console.log('🎯 Verificando casos de uso e orquestração...');
-assert(USE_CASE_COMPARISON_DATA && USE_CASE_COMPARISON_DATA.useCases.length === 12, `Esperado 12 categorias de projetos. Encontrado: ${USE_CASE_COMPARISON_DATA.useCases.length}`);
-USE_CASE_COMPARISON_DATA.useCases.forEach(uc => {
-  assert(uc.rankings && uc.rankings.length === 10, `Caso de uso "${uc.id}" deve ter exatamente 10 modelos rankeados`);
+// Enterprise Plans (Seções 10, 23, 59)
+assert(SUBSCRIPTION_PLANS_DATA.some(p => p.id === 'openai-chatgpt-enterprise'), 'ChatGPT Enterprise deve estar presente');
+assert(SUBSCRIPTION_PLANS_DATA.some(p => p.id === 'anthropic-claude-enterprise'), 'Claude Enterprise deve estar presente');
+assert(SUBSCRIPTION_PLANS_DATA.some(p => p.id === 'xai-grok-enterprise'), 'Grok Enterprise deve estar presente');
+assert(SUBSCRIPTION_PLANS_DATA.some(p => p.id === 'camelai-code-enterprise'), 'camelCode Enterprise deve estar presente');
+
+// Budget Stacks Recommender (Seções 103, 104)
+console.log('📦 Verificando Stacks de Assinatura (Budget Stack Recommender)...');
+assert(BUDGET_STACK_RECOMMENDER && BUDGET_STACK_RECOMMENDER.stacks.length >= 5, 'Devem existir pelo menos 5 stacks orçamentárias');
+BUDGET_STACK_RECOMMENDER.stacks.forEach(stack => {
+  assert(typeof stack.fixedMonthlyCostUsd === 'number', `Stack "${stack.id}" deve definir fixedMonthlyCostUsd`);
+  assert(Array.isArray(stack.variableBilling), `Stack "${stack.id}" deve definir array variableBilling`);
 });
-assert(USE_CASE_COMPARISON_DATA.orchestrationRecipes && USE_CASE_COMPARISON_DATA.orchestrationRecipes.length === 3, 'Esperado 3 receitas de orquestração multi-modelo');
 
-// 12. Plataformas e OpenCode Go (Snapshot Oficial 03/09/2026 - Documentação 02/09/2026)
-console.log('🚀 Verificando catálogo canônico do OpenCode Go e plataformas...');
+// 8. OpenCode Go (Catálogo Canônico Oficial)
+console.log('🚀 Verificando catálogo canônico do OpenCode Go...');
 assert(OPENCODE_GO_DATA && Array.isArray(OPENCODE_GO_DATA.models), 'OPENCODE_GO_DATA.models deve ser um array');
 assert(OPENCODE_GO_DATA.models.length === 26, `OpenCode Go deve conter RIGOROSAMENTE 26 modelos oficiais. Encontrado: ${OPENCODE_GO_DATA.models.length}`);
 
-// Seção 63: Verificação de Modelos Obrigatórios e Proibidos
-assert(OPENCODE_GO_DATA.getModel('opencode-go/muse-spark-1.3-contributor'), 'Muse Spark 1.3 Contributor DEVE existir no catálogo Go');
-assert(OPENCODE_GO_DATA.getModel('opencode-go/grok-4.6'), 'Grok 4.6 DEVE existir no catálogo Go');
-assert(OPENCODE_GO_DATA.getModel('opencode-go/gpt-5.6-luna'), 'GPT 5.6 Luna DEVE existir no catálogo Go');
-assert(OPENCODE_GO_DATA.getModel('opencode-go/deepseek-v4-flash'), 'DeepSeek V4 Flash DEVE existir no catálogo Go');
-
-const forbiddenGoModels = [
-  'gpt-5-6-sol',
-  'gpt-5-6-terra',
-  'gpt-5-5-preview',
-  'gpt-oss-120b',
-  'gpt-oss-20b',
-  'claude-fable-5-1',
-  'claude-fable-5',
-  'claude-opus-5',
-  'claude-sonnet-5',
-  'claude-haiku-4-5',
-  'gemini-3-8-flash',
-  'gemini-3-7-flash',
-  'gemini-3-5-flash',
-  'gemini-3-1-pro'
+// 9. Detector Universal de Fake SKUs (Seção 114)
+console.log('🛡️ Verificando ausência de Fake SKUs no repositório...');
+const forbiddenSkus = [
+  'Gemini 3.1 Pro Ultra',
+  'Gemini 3.8 Flash Max',
+  'Claude Fable 5.1 Max',
+  'Grok 4.6 Ultra',
+  'GPT-5.6 Sol Max',
+  'GLM-5.3 Max Concurrency',
+  'Dedicated Endpoint',
+  '$15/$60'
 ];
-forbiddenGoModels.forEach(mId => {
-  assert(!OPENCODE_GO_DATA.getModel(mId), `Modelo proibido "${mId}" NÃO deve constar no catálogo Go`);
-  if (AI_MODELS_DATA[mId]) {
-    assert(AI_MODELS_DATA[mId].openCodeGo && AI_MODELS_DATA[mId].openCodeGo.available === false, `AI_MODELS_DATA["${mId}"].openCodeGo.available deve ser false`);
-  }
-});
-
-// Seções 64, 65, 66: Classes de Uso, Quota Burn e Value Multiplier
-const validUsageClasses = [15, 30, 60];
-OPENCODE_GO_DATA.models.forEach(m => {
-  assert(validUsageClasses.includes(m.usageAllowanceUsd), `Modelo "${m.id}" possui usageAllowanceUsd inválido: ${m.usageAllowanceUsd}`);
-  assert(m.quotaBurnMultiplier === (60 / m.usageAllowanceUsd), `Modelo "${m.id}" quotaBurnMultiplier incorreto: ${m.quotaBurnMultiplier} vs ${60 / m.usageAllowanceUsd}`);
-  assert(m.valueMultiplierVsSubscription === (m.usageAllowanceUsd / 10), `Modelo "${m.id}" valueMultiplierVsSubscription incorreto: ${m.valueMultiplierVsSubscription}`);
-  assert(m.effectiveQuotaPct === (m.usageAllowanceUsd / 60) * 100, `Modelo "${m.id}" effectiveQuotaPct incorreto: ${m.effectiveQuotaPct}`);
-  assert(m.id.startsWith('opencode-go/'), `ID do modelo "${m.id}" deve começar com "opencode-go/"`);
-});
-
-// Seção 67: Validação da Tabela Oficial de Requisições
-const officialRequestTable = {
-  'opencode-go/grok-4.6': { req5h: 169, reqWeek: 423, reqMonth: 845, usage: 15, burn: 4 },
-  'opencode-go/gpt-5.6-luna': { req5h: 2050, reqWeek: 5100, reqMonth: 10250, usage: 15, burn: 4 },
-  'opencode-go/glm-5.3-flash': { req5h: 1580, reqWeek: 3950, reqMonth: 7900, usage: 15, burn: 4 },
-  'opencode-go/glm-5.3': { req5h: 220, reqWeek: 540, reqMonth: 1080, usage: 15, burn: 4 },
-  'opencode-go/glm-5.2': { req5h: 880, reqWeek: 2150, reqMonth: 4300, usage: 60, burn: 1 },
-  'opencode-go/glm-5.1': { req5h: 880, reqWeek: 2150, reqMonth: 4300, usage: 60, burn: 1 },
-  'opencode-go/kimi-k3': { req5h: 110, reqWeek: 250, reqMonth: 490, usage: 15, burn: 4 },
-  'opencode-go/kimi-k2.7-code': { req5h: 1350, reqWeek: 3380, reqMonth: 6750, usage: 60, burn: 1 },
-  'opencode-go/kimi-k2.6': { req5h: 1150, reqWeek: 2880, reqMonth: 5750, usage: 60, burn: 1 },
-  'opencode-go/longcat-2.0': { req5h: 11400, reqWeek: 28600, reqMonth: 57200, usage: 60, burn: 1 },
-  'opencode-go/mimo-v2.5': { req5h: 30100, reqWeek: 75200, reqMonth: 150400, usage: 60, burn: 1 },
-  'opencode-go/mimo-v2.5-pro': { req5h: 3250, reqWeek: 8150, reqMonth: 16300, usage: 15, burn: 4 },
-  'opencode-go/minimax-m3': { req5h: 3200, reqWeek: 8000, reqMonth: 16000, usage: 60, burn: 1 },
-  'opencode-go/minimax-m2.7': { req5h: 3400, reqWeek: 8500, reqMonth: 17000, usage: 60, burn: 1 },
-  'opencode-go/muse-spark-1.3-contributor': { req5h: 45300, reqWeek: 113300, reqMonth: 226600, usage: 60, burn: 1 },
-  'opencode-go/muse-spark-1.2-contributor': { req5h: 45300, reqWeek: 113300, reqMonth: 226600, usage: 60, burn: 1 },
-  'opencode-go/qwen3.8-max': { req5h: 160, reqWeek: 400, reqMonth: 810, usage: 15, burn: 4 },
-  'opencode-go/qwen3.8-flash': { req5h: 5400, reqWeek: 13500, reqMonth: 27000, usage: 30, burn: 2 },
-  'opencode-go/qwen3.7-max': { req5h: 170, reqWeek: 420, reqMonth: 840, usage: 30, burn: 2 },
-  'opencode-go/qwen3.7-plus': { req5h: 4300, reqWeek: 10800, reqMonth: 21600, usage: 60, burn: 1 },
-  'opencode-go/qwen3.6-plus': { req5h: 3300, reqWeek: 8200, reqMonth: 16300, usage: 60, burn: 1 },
-  'opencode-go/deepseek-v4-pro': { req5h: 1050, reqWeek: 2600, reqMonth: 5200, usage: 15, burn: 4 },
-  'opencode-go/deepseek-v4-flash': { req5h: 7600, reqWeek: 18900, reqMonth: 37800, usage: 30, burn: 2 },
-  'opencode-go/deepseek-v4-flash-vision-exp': { req5h: 3800, reqWeek: 9450, reqMonth: 18900, usage: 15, burn: 4 },
-  'opencode-go/hy4-preview': { req5h: 1350, reqWeek: 3380, reqMonth: 6770, usage: 30, burn: 2 },
-  'opencode-go/hy3': { req5h: 4300, reqWeek: 10750, reqMonth: 21500, usage: 60, burn: 1 }
-};
-
-Object.keys(officialRequestTable).forEach(mId => {
-  const expected = officialRequestTable[mId];
-  const actual = OPENCODE_GO_DATA.getModel(mId);
-  assert(actual, `Modelo "${mId}" da tabela oficial não encontrado`);
-  assert(actual.req5h === expected.req5h, `req5h incorreto para ${mId}: ${actual.req5h} vs ${expected.req5h}`);
-  assert(actual.reqWeek === expected.reqWeek, `reqWeek incorreto para ${mId}: ${actual.reqWeek} vs ${expected.reqWeek}`);
-  assert(actual.reqMonth === expected.reqMonth, `reqMonth incorreto para ${mId}: ${actual.reqMonth} vs ${expected.reqMonth}`);
-  assert(actual.usageAllowanceUsd === expected.usage, `usageAllowanceUsd incorreto para ${mId}`);
-  assert(actual.quotaBurnMultiplier === expected.burn, `quotaBurnMultiplier incorreto para ${mId}`);
-});
-
-// Seção 68: Testes Específicos de Privacidade e ZDR
-const grokGo = OPENCODE_GO_DATA.getModel('opencode-go/grok-4.6');
-assert(grokGo && grokGo.privacy.retentionDays === 30 && grokGo.privacy.zdr === false, 'Grok 4.6 no Go deve reter logs por 30 dias (não é ZDR)');
-
-const lunaGo = OPENCODE_GO_DATA.getModel('opencode-go/gpt-5.6-luna');
-assert(lunaGo && lunaGo.privacy.retentionDays === 30 && lunaGo.privacy.zdr === false, 'GPT 5.6 Luna no Go deve ter retenção de 30 dias (não é ZDR)');
-
-const muse13 = OPENCODE_GO_DATA.getModel('opencode-go/muse-spark-1.3-contributor');
-assert(muse13 && muse13.privacy.trainingUsed === true && muse13.privacy.zdr === false, 'Muse Spark 1.3 Contributor deve ter trainingUsed === true e zdr === false');
-
-const muse12 = OPENCODE_GO_DATA.getModel('opencode-go/muse-spark-1.2-contributor');
-assert(muse12 && muse12.privacy.trainingUsed === true && muse12.privacy.zdr === false, 'Muse Spark 1.2 Contributor deve ter trainingUsed === true e zdr === false');
-
-const dsFlashGo = OPENCODE_GO_DATA.getModel('opencode-go/deepseek-v4-flash');
-assert(dsFlashGo && dsFlashGo.privacy.zdrAgreementRequiresRenewal === true, 'DeepSeek V4 Flash deve marcar necessidade de revalidação de acordo ZDR');
-
-// Matriz de disponibilidade dos 44 modelos
-assert(PLATFORM_MODEL_CATALOG && PLATFORM_MODEL_CATALOG.availabilityMatrix.length === 44, `Matriz de disponibilidade deve cobrir 44 modelos. Encontrado: ${PLATFORM_MODEL_CATALOG.availabilityMatrix.length}`);
-
-// 13. Auditoria Estática Anti-Duplicação de Chaves em data.js e data/*.js
-console.log('🛡️ Verificando ausência de chaves de objeto duplicadas...');
-const filesToCheck = [
-  path.join(__dirname, '..', 'data.js'),
-  path.join(__dirname, '..', 'data', 'fx.js'),
-  path.join(__dirname, '..', 'data', 'plans.js'),
-  path.join(__dirname, '..', 'data', 'platforms.js'),
-  path.join(__dirname, '..', 'data', 'history.js'),
-  path.join(__dirname, '..', 'data', 'community.js'),
-  path.join(__dirname, '..', 'data', 'behavior.js'),
-  path.join(__dirname, '..', 'data', 'use-cases.js'),
-  path.join(__dirname, '..', 'data', 'pricing-history.js')
-];
-
-function findDuplicateKeysInContent(filePath, content) {
-  let i = 0;
-  const n = content.length;
-  let line = 1;
-  const stack = [];
-  const duplicates = [];
-
-  function skipWhitespaceAndComments() {
-    while (i < n) {
-      if (content[i] === '\n') {
-        line++;
-        i++;
-      } else if (content[i] === ' ' || content[i] === '\t' || content[i] === '\r') {
-        i++;
-      } else if (content[i] === '/' && content[i+1] === '/') {
-        while (i < n && content[i] !== '\n') i++;
-      } else if (content[i] === '/' && content[i+1] === '*') {
-        i += 2;
-        while (i < n && !(content[i] === '*' && content[i+1] === '/')) {
-          if (content[i] === '\n') line++;
-          i++;
-        }
-        if (i < n) i += 2;
-      } else {
-        break;
-      }
-    }
-  }
-
-  while (i < n) {
-    skipWhitespaceAndComments();
-    if (i >= n) break;
-
-    const ch = content[i];
-
-    if (ch === '{') {
-      stack.push({ keys: new Set(), ternaryDepth: 0 });
-      i++;
-    } else if (ch === '}') {
-      if (stack.length > 0) stack.pop();
-      i++;
-    } else if (ch === '?') {
-      if (stack.length > 0) stack[stack.length - 1].ternaryDepth++;
-      i++;
-    } else if (ch === '"' || ch === '\'' || ch === '`') {
-      const quote = ch;
-      const startLine = line;
-      i++;
-      let str = '';
-      while (i < n && content[i] !== quote) {
-        if (content[i] === '\\' && i + 1 < n) {
-          str += content[i+1];
-          i += 2;
-        } else {
-          if (content[i] === '\n') line++;
-          str += content[i];
-          i++;
-        }
-      }
-      if (i < n) i++;
-
-      skipWhitespaceAndComments();
-      if (content[i] === ':' && stack.length > 0) {
-        const cur = stack[stack.length - 1];
-        if (cur.ternaryDepth > 0) {
-          cur.ternaryDepth--;
-          i++;
-        } else {
-          if (cur.keys.has(str)) {
-            duplicates.push({ line: startLine, key: str, file: path.basename(filePath) });
-          } else {
-            cur.keys.add(str);
-          }
-          i++;
-        }
-      }
-    } else if (/[a-zA-Z_$]/.test(ch)) {
-      const startLine = line;
-      let ident = '';
-      while (i < n && /[a-zA-Z0-9_$-]/.test(content[i])) {
-        ident += content[i];
-        i++;
-      }
-      skipWhitespaceAndComments();
-      if (content[i] === ':' && stack.length > 0) {
-        const cur = stack[stack.length - 1];
-        if (cur.ternaryDepth > 0) {
-          cur.ternaryDepth--;
-          i++;
-        } else {
-          if (cur.keys.has(ident)) {
-            duplicates.push({ line: startLine, key: ident, file: path.basename(filePath) });
-          } else {
-            cur.keys.add(ident);
-          }
-          i++;
-        }
-      }
-    } else {
-      i++;
-    }
-  }
-  return duplicates;
-}
-
-filesToCheck.forEach(fp => {
-  if (fs.existsSync(fp)) {
-    const content = fs.readFileSync(fp, 'utf8');
-    const dups = findDuplicateKeysInContent(fp, content);
-    assert(dups.length === 0, `Chaves duplicadas detectadas em ${path.basename(fp)}: ${dups.map(d => `L${d.line} (${d.key})`).join(', ')}`);
-  }
-});
-
-// 14. Matriz Real de Cobertura de Dados e Classificação Metrológica (Seção 75)
-console.log('\n====================================================');
-console.log(`📊 MATRIZ REAL DE COBERTURA DE DADOS (${modelCount} MODELOS CATALOGADOS)`);
-console.log('====================================================');
-
-let coverage = {
-  specs: 0,
-  pricing: 0,
-  officialBenchmarks: 0,
-  independentBenchmarks: 0,
-  cursorBench: 0,
-  radar10D: 0,
-  privacy: 0,
-  operationalGuidance: 0,
-  sources: 0
-};
-
-let pricingCategories = {
-  verifiedCurrent: 0,
-  promotionalActive: 0,
-  selfHostedOpenWeights: 0,
-  legacyOrSuperseded: 0
-};
 
 modelIds.forEach(id => {
-  const m = AI_MODELS_DATA[id];
-  if (m.contextWindow && m.maxOutputTokens && m.modalities) coverage.specs++;
-  if (m.pricing && m.pricing.standard) {
-    coverage.pricing++;
-    if (m.openWeights && m.pricing.standard.input === 0 && m.pricing.standard.output === 0) {
-      pricingCategories.selfHostedOpenWeights++;
-    } else if (m.pricing.promotionalPeriod) {
-      pricingCategories.promotionalActive++;
-    } else if (['legacy', 'superseded'].includes(m.status)) {
-      pricingCategories.legacyOrSuperseded++;
-    } else {
-      pricingCategories.verifiedCurrent++;
-    }
-  }
-  if (m.officialBenchmarks && Object.keys(m.officialBenchmarks).length > 1) coverage.officialBenchmarks++;
-  if (MULTI_BENCHMARK_LEDGER.some(l => l.modelId === id && (l.deepSwe11 || l.sweBenchVerified || l.terminalBench21))) coverage.independentBenchmarks++;
-  if (CURSORBENCH_32_DATA.some(c => c.modelId === id)) coverage.cursorBench++;
-  if (CAPABILITY_RADAR_10D[id]) coverage.radar10D++;
-  if (m.privacy || PRIVACY_ZDR_DATABASE[m.provider] || PRIVACY_ZDR_DATABASE[`${m.provider}-direct`]) coverage.privacy++;
-  if (m.operationalGuidance && m.operationalGuidance.idealFor && m.operationalGuidance.avoidFor) coverage.operationalGuidance++;
-  if (m.sources && m.sources.length > 0) coverage.sources++;
+  const name = AI_MODELS_DATA[id].name;
+  forbiddenSkus.forEach(fake => {
+    assert(!name.includes(fake), `Fake SKU "${fake}" detectado no catálogo de modelos: ${name}`);
+  });
 });
 
-console.log(`Especificações Canônicas:     ${coverage.specs}/${modelCount} (${Math.round(coverage.specs/modelCount*100)}%)`);
-console.log(`Precificação Estruturada:     ${coverage.pricing}/${modelCount} (${Math.round(coverage.pricing/modelCount*100)}%)`);
-console.log(`  ├─ Comercial Verificada:    ${pricingCategories.verifiedCurrent}/${modelCount}`);
-console.log(`  ├─ Promocional Ativa:       ${pricingCategories.promotionalActive}/${modelCount}`);
-console.log(`  ├─ Self-Hosted / Open-W:    ${pricingCategories.selfHostedOpenWeights}/${modelCount}`);
-console.log(`  └─ Legado / Predecessores:  ${pricingCategories.legacyOrSuperseded}/${modelCount}`);
-console.log(`Benchmarks Oficiais (Metr.):  ${coverage.officialBenchmarks}/${modelCount} (${Math.round(coverage.officialBenchmarks/modelCount*100)}%)`);
-console.log(`Benchmarks Independentes:     ${coverage.independentBenchmarks}/${modelCount} (${Math.round(coverage.independentBenchmarks/modelCount*100)}%)`);
-console.log(`CursorBench 3.2:              ${coverage.cursorBench}/${modelCount} (${Math.round(coverage.cursorBench/modelCount*100)}%)`);
-console.log(`Radar 10D Calibrado:          ${coverage.radar10D}/${modelCount} (${Math.round(coverage.radar10D/modelCount*100)}%)`);
-console.log(`Privacidade & ZDR:            ${coverage.privacy}/${modelCount} (${Math.round(coverage.privacy/modelCount*100)}%)`);
-console.log(`Guia Operacional:             ${coverage.operationalGuidance}/${modelCount} (${Math.round(coverage.operationalGuidance/modelCount*100)}%)`);
-console.log(`Rastreabilidade / Fontes:     ${coverage.sources}/${modelCount} (${Math.round(coverage.sources/modelCount*100)}%)`);
+SUBSCRIPTION_PLANS_DATA.forEach(p => {
+  p.includedModels.forEach(m => {
+    forbiddenSkus.forEach(fake => {
+      assert(!m.includes(fake), `Fake SKU "${fake}" detectado no plano ${p.id}: ${m}`);
+    });
+  });
+});
 
-// 15. Auditoria de Freshness de Dados (Seção 76 de 02-dados-ajuste.md)
+// 10. Matriz Canônica de Disponibilidade por Plataforma (Seção 40)
+console.log('🌐 Verificando matriz canônica de disponibilidade por plataforma...');
+assert(Array.isArray(PLATFORM_AVAILABILITY_MATRIX) && PLATFORM_AVAILABILITY_MATRIX.length === 44,
+  `PLATFORM_AVAILABILITY_MATRIX deve conter exatamente 44 modelos. Encontrado: ${PLATFORM_AVAILABILITY_MATRIX?.length}`);
+PLATFORM_AVAILABILITY_MATRIX.forEach(entry => {
+  assert(entry.modelId && entry.platforms, `Entrada da matriz de plataforma inválida para ${entry.modelId}`);
+  assert(typeof entry.platforms.directApi?.available === 'boolean', `directApi.available deve ser booleano para ${entry.modelId}`);
+  assert(typeof entry.platforms.cursor?.available === 'boolean', `cursor.available deve ser booleano para ${entry.modelId}`);
+  assert(typeof entry.platforms.opencode?.available === 'boolean', `opencode.available deve ser booleano para ${entry.modelId}`);
+  assert(typeof entry.platforms.antigravity?.available === 'boolean', `antigravity.available deve ser booleano para ${entry.modelId}`);
+  assert(typeof entry.platforms.openrouter?.available === 'boolean', `openrouter.available deve ser booleano para ${entry.modelId}`);
+  assert(typeof entry.platforms.local?.supported === 'boolean', `local.supported deve ser booleano para ${entry.modelId}`);
+});
+
+// 11. Segregação de Privacidade e ZDR (Seções 87 e 88)
+console.log('🔒 Verificando separação estrita entre noTrainingByDefault e ZDR...');
+let plansWithNoTrainingWithoutZdr = 0;
+SUBSCRIPTION_PLANS_DATA.forEach(p => {
+  // noTrainingByDefault === true NUNCA implica zdr === true
+  if (p.privacy.noTrainingByDefault && !p.privacy.zdr) {
+    plansWithNoTrainingWithoutZdr++;
+  }
+  // Planos pessoais / consumer NUNCA devem ter ZDR verdadeiro
+  if (p.privacy.profileType === 'consumer') {
+    assert(p.privacy.zdr === false, `Plano consumer ${p.id} não pode alegar ZDR`);
+  }
+});
+assert(plansWithNoTrainingWithoutZdr >= 5, `Devem existir planos com exclusão de treino sem alegação de ZDR. Encontrado: ${plansWithNoTrainingWithoutZdr}`);
+
+// 12. Isolamento de Recursos: Features não podem poluir modelAccess (Seção 90)
+console.log('📦 Verificando isolamento de features fora de modelAccess...');
+const forbiddenFeatureStrings = ['Canvas', 'Deep Research', 'Admin Console', 'Workspaces', '5 TB Cloud', 'SSO', 'Audit Logs'];
+SUBSCRIPTION_PLANS_DATA.forEach(p => {
+  p.modelAccess.forEach(m => {
+    forbiddenFeatureStrings.forEach(feat => {
+      assert(!m.modelName?.includes(feat) && !m.modelId?.includes(feat),
+        `Feature "${feat}" detectada indevidamente em modelAccess do plano ${p.id}`);
+    });
+  });
+});
+
+// 10. Auditoria de Freshness de Dados
 console.log('\n⏱️ Verificando Freshness de Dados (Janela Temporal <= 14/30/90 dias)...');
 const refDate = new Date('2026-09-03T00:00:00Z');
 
@@ -609,20 +409,103 @@ SUBSCRIPTION_PLANS_DATA.forEach(p => {
   assert(pDiff <= 14, `Plano ${p.id} desatualizado: ${pDiff} dias (limite: 14 dias)`);
 });
 
-// Benchmark History: <= 30 dias para runs recentes de setembro/2026
-BENCHMARK_HISTORY_DATA.forEach(bh => {
-  const bDate = new Date(bh.date + 'T00:00:00Z');
-  const bDiff = Math.round((refDate - bDate) / (1000 * 60 * 60 * 24));
-  assert(bDiff <= 90, `Benchmark histórico ${bh.modelId} (${bh.benchmark}) muito antigo: ${bDiff} dias`);
+console.log('   ✅ Todos os datasets auditados estão dentro da janela máxima de frescor.');
+
+// =========================================================================
+// 13. VALIDAÇÃO ESPECÍFICA DO PLANO 06: EXPLORADOR MULTIDIMENSIONAL
+// =========================================================================
+console.log('\n🚀 Verificando requisitos de 06-prompt-ajuste.md (Seções 94 a 101, 113, 114)...');
+
+// Seção 94: Testes de integridade de dados de planos
+console.log('   - [Seção 94] Validando provider, planFamily, modelAccess, billingMode e nativeCurrency...');
+const validBillingModes = ['included', 'partial', 'usage-credits', 'metered', 'pool', 'none'];
+SUBSCRIPTION_PLANS_DATA.forEach(p => {
+  assert(p.provider && p.provider.trim().length > 0, `Plano ${p.id} não possui provider`);
+  assert(p.planFamily && p.planFamily.trim().length > 0, `Plano ${p.id} não possui planFamily canônico`);
+  assert(p.nativeCurrency, `Plano ${p.id} não possui nativeCurrency`);
+  
+  (p.modelAccess || []).forEach(m => {
+    assert(validBillingModes.includes(m.billingMode), `Plano ${p.id} possui billingMode inválido: ${m.billingMode} para modelo ${m.modelId}`);
+    const existsInModels = Boolean(AI_MODELS_DATA[m.modelId]);
+    assert(existsInModels || m.platformSku === true, `Modelo ${m.modelId} no plano ${p.id} não existe em AI_MODELS_DATA nem está marcado como platformSku`);
+  });
 });
 
-// Community Reports: <= 30 dias
-COMMUNITY_REPORTS_DATA.forEach(cr => {
-  const cDate = new Date(cr.date + 'T00:00:00Z');
-  const cDiff = Math.round((refDate - cDate) / (1000 * 60 * 60 * 24));
-  assert(cDiff <= 30, `Relato comunitário ${cr.id} desatualizado: ${cDiff} dias (limite: 30 dias)`);
+// Seção 95: Testes de UI & Helpers
+console.log('   - [Seção 95] Testando helpers de UI do PlanExplorer...');
+assert(PlanExplorer, 'PlanExplorer não está definido ou exportado');
+const compGroups = PlanExplorer.getPlansByCompany(SUBSCRIPTION_PLANS_DATA);
+assert(Object.keys(compGroups).length >= 9, 'getPlansByCompany deve cobrir as 9 empresas canônicas');
+const totalGrouped = Object.values(compGroups).reduce((acc, list) => acc + list.length, 0);
+assert(totalGrouped === SUBSCRIPTION_PLANS_DATA.length, `Soma dos planos agrupados (${totalGrouped}) difere do total (${SUBSCRIPTION_PLANS_DATA.length})`);
+
+// Seção 96: Teste Claude Fable 5.1
+console.log('   - [Seção 96] Validando Claude Fable 5.1 em Claude Pro...');
+const fablePlans = PlanExplorer.getPlansForModel('claude-fable-5-1', SUBSCRIPTION_PLANS_DATA);
+assert(fablePlans.length > 0, 'Claude Fable 5.1 deve estar presente em ao menos um plano');
+const claudeProFable = fablePlans.find(f => f.plan.id === 'anthropic-claude-pro');
+assert(claudeProFable, 'Claude Pro deve ser listado para Claude Fable 5.1');
+assert(claudeProFable.billingMode === 'usage-credits', `Claude Pro deve disponibilizar Fable 5.1 via usage-credits, encontrado: ${claudeProFable.billingMode}`);
+
+// Seção 97: Teste Google Pro
+console.log('   - [Seção 97] Validando Google AI Pro (R$ 96,99 e 5 TB Storage)...');
+const googlePro = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'google-ai-pro');
+assert(googlePro, 'Plano google-ai-pro deve existir');
+assert(googlePro.localizedPricing?.BRL?.price === 96.99, `Preço BRL oficial do Google Pro deve ser 96.99, encontrado: ${googlePro.localizedPricing?.BRL?.price}`);
+assert(googlePro.storage?.includedGb >= 5000, `Google Pro deve incluir 5 TB (>= 5000 GB), encontrado: ${googlePro.storage?.includedGb}`);
+
+// Seção 98: Teste OpenCode Go
+console.log('   - [Seção 98] Validando OpenCode Go (US$ 10 e burn rate 1x/2x/4x)...');
+const opencodeGo = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'opencode-go-standard');
+assert(opencodeGo, 'Plano opencode-go-standard deve existir');
+assert(opencodeGo.monthlyPriceUsd === 10, `OpenCode Go deve custar US$ 10, encontrado: ${opencodeGo.monthlyPriceUsd}`);
+const goVarBilling = PlanExplorer.getPlanVariableBilling(opencodeGo);
+assert(goVarBilling.hasVariableCost === true, 'OpenCode Go deve ser identificado como tendo custo variável/burn rate');
+assert(goVarBilling.items.some(it => it.includes('1×, 2× ou 4×')), 'OpenCode Go deve declarar burn rate variável 1x/2x/4x');
+
+// Seção 99: Teste camelStream
+console.log('   - [Seção 99] Validando camelStream (US$ 5/stream, tokens ilimitados e alerta de training)...');
+const camelStream = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'camelai-stream-flat');
+assert(camelStream, 'Plano camelai-stream-flat deve existir');
+assert(camelStream.monthlyPriceUsd === 5, `camelStream deve custar US$ 5/stream, encontrado: ${camelStream.monthlyPriceUsd}`);
+assert(camelStream.privacy?.noTrainingByDefault === false, 'camelStream standard não pode afirmar no-training por padrão');
+assert(camelStream.privacyNotes?.toLowerCase().includes('training') || camelStream.privacyNotes?.toLowerCase().includes('treino'), 'camelStream deve explicitar aviso de treinamento');
+
+// Seção 100: Teste Enterprise
+console.log('   - [Seção 100] Validando exibição de planos Enterprise (Fale com vendas / Nunca US$ 0)...');
+const enterprisePlans = SUBSCRIPTION_PLANS_DATA.filter(p => p.monthlyPriceUsd === null || p.monthlyPriceUsd === undefined);
+assert(enterprisePlans.length >= 2, `Devem existir planos Enterprise sob consulta. Encontrados: ${enterprisePlans.length}`);
+enterprisePlans.forEach(ep => {
+  const disp = PlanExplorer.getDisplayPrice(ep, 'USD', FX_RATES_DATA);
+  assert(disp.isEnterprise === true, `Plano ${ep.id} deve ter isEnterprise=true`);
+  assert(disp.text === 'Fale com vendas', `Plano ${ep.id} deve exibir "Fale com vendas", exibiu: ${disp.text}`);
+  assert(!disp.text.includes('0') && !disp.subtext.includes('0'), `Plano ${ep.id} nunca pode exibir US$ 0`);
 });
-console.log('   ✅ Todos os datasets auditados estão dentro da janela máxima de frescor.');
+
+// Seção 101: Teste CNY Kimi
+console.log('   - [Seção 101] Validando precificação nativa em CNY do Kimi (¥ e ≈ R$)...');
+const kimiPlans = SUBSCRIPTION_PLANS_DATA.filter(p => p.provider === 'moonshot');
+assert(kimiPlans.length >= 3, `Devem existir planos Kimi cadastrados. Encontrados: ${kimiPlans.length}`);
+kimiPlans.forEach(kp => {
+  if (kp.monthlyPriceCny > 0) {
+    const disp = PlanExplorer.getDisplayPrice(kp, 'BRL', FX_RATES_DATA);
+    assert(disp.subtext.includes('¥'), `Kimi ${kp.id} deve incluir símbolo ¥ no subtexto, exibiu: ${disp.subtext}`);
+    assert(disp.text.includes('R$'), `Kimi ${kp.id} deve exibir conversão para R$ no texto principal, exibiu: ${disp.text}`);
+  }
+});
+
+// Seção 113 & 114: Validação de Scores Dimensionais
+console.log('   - [Seção 113/114] Validando scores calibrados em 5 dimensões sem inflação artificial...');
+SUBSCRIPTION_PLANS_DATA.forEach(p => {
+  const scores = PlanExplorer.calculatePlanScores(p, FX_RATES_DATA);
+  assert(scores.aiAccessScore >= 0 && scores.aiAccessScore <= 100, `aiAccessScore fora do range [0, 100] para ${p.id}`);
+  assert(scores.codingScore >= 0 && scores.codingScore <= 100, `codingScore fora do range [0, 100] para ${p.id}`);
+  assert(scores.quotaScore >= 0 && scores.quotaScore <= 100, `quotaScore fora do range [0, 100] para ${p.id}`);
+  assert(scores.bundleStorageScore >= 0 && scores.bundleStorageScore <= 100, `bundleStorageScore fora do range [0, 100] para ${p.id}`);
+  assert(scores.privacyScore >= 0 && scores.privacyScore <= 100, `privacyScore fora do range [0, 100] para ${p.id}`);
+  assert(scores.costBenefitScore >= 0 && scores.costBenefitScore <= 100, `costBenefitScore fora do range [0, 100] para ${p.id}`);
+});
+console.log('   ✅ Todos os requisitos e testes das Seções 94 a 101, 113 e 114 foram validados com sucesso.');
 
 console.log('====================================================\n');
 

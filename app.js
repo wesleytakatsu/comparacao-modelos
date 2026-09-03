@@ -31,11 +31,32 @@
       radar10d: null,
       paretoScatter: null
     },
+    planActiveTab: 'plans',
     planCurrency: 'BRL',
+    planBillingCycle: 'monthly',
+    planSelectedCompanies: [],
+    planMaxPrice: 250,
     planAudience: 'all',
     planProfile: 'all',
+    planGrouping: 'company',
+    planSort: 'default',
     planSearchQuery: '',
+    filterPredictableOnly: false,
+    filterByokOnly: false,
+    filterCloudStorageOnly: false,
+    planPrivacyFilter: 'all',
+    planSelectedModel: 'claude-fable-5-1',
+    planBudgetValue: 200,
+    planBudgetProfile: 'coding',
     selectedPlanCompare: [],
+    planFavoritesList: (function() {
+      try { return JSON.parse(localStorage.getItem('model_intel_favorite_plans') || '[]'); }
+      catch(e) { return []; }
+    })(),
+    compareOnlyDifferences: false,
+    expandedCompanies: { openai: true, anthropic: true, google: true, cursor: true, opencode: true, zai: true, xai: true, kimi: true, camelai: true },
+    wizardStep: 1,
+    wizardAnswers: { maxBudgetBrl: 250, audience: 'individual', primaryFocus: 'coding', priorityModel: 'any', requirePredictableCost: true },
     activeBudgetStack: 110,
     activeHistoryTab: 'lineages',
     activeTimelineFilter: 'all',
@@ -166,18 +187,30 @@
 
     AppState.currentRoute = route;
 
-    // Suporte a Query Params na Rota de Comparador
-    if (route === 'comparator' && queryPart) {
-      const urlParams = new URLSearchParams(queryPart);
-      const modelsParam = urlParams.get('models');
-      if (modelsParam) {
-        const loadedModels = modelsParam.split(',').filter(Boolean);
-        AppState.comparatorModels = [
-          loadedModels[0] || 'grok-4-6',
-          loadedModels[1] || (loadedModels.length > 1 ? loadedModels[1] : 'gpt-5-6-sol'),
-          loadedModels[2] || '',
-          loadedModels[3] || ''
-        ];
+    // Suporte a Deep Links na Rota de Planos & Assinaturas (Seções 61, 62, 63)
+    if (route === 'plans') {
+      if (parts[1] === 'company' && parts[2]) {
+        AppState.planActiveTab = 'plans';
+        AppState.planSelectedCompanies = [parts[2].toLowerCase()];
+      } else if (parts[1] === 'model' && parts[2]) {
+        AppState.planActiveTab = 'models';
+        AppState.planSelectedModel = parts[2].toLowerCase();
+      } else if (parts[1] === 'compare') {
+        AppState.planActiveTab = 'compare';
+      } else if (queryPart) {
+        const urlParams = new URLSearchParams(queryPart);
+        if (urlParams.get('tab')) AppState.planActiveTab = urlParams.get('tab');
+        if (urlParams.get('company')) AppState.planSelectedCompanies = [urlParams.get('company').toLowerCase()];
+        if (urlParams.get('model')) {
+          AppState.planActiveTab = 'models';
+          AppState.planSelectedModel = urlParams.get('model');
+        }
+        if (urlParams.get('compare') || urlParams.get('ids')) {
+          AppState.planActiveTab = 'compare';
+          const compareStr = urlParams.get('compare') || urlParams.get('ids');
+          const ids = compareStr.split(',').filter(Boolean);
+          if (ids.length) AppState.selectedPlanCompare = ids;
+        }
       }
     }
 
@@ -395,7 +428,24 @@
     // ----------------------------------------------------
     // Eventos das Novas Views (Planos, Histórico, Casos de Uso, Comunidade, Plataformas)
     // ----------------------------------------------------
-    // 1. Alternador de Moeda dos Planos (BRL / USD / DUAL)
+    // Eventos do Explorador de Planos, Modelos & Orçamento (06)
+    // ----------------------------------------------------
+    // 1. Abas Principais do Explorador
+    const planExplorerTabs = document.getElementById('planExplorerTabs');
+    if (planExplorerTabs) {
+      planExplorerTabs.addEventListener('click', (e) => {
+        const btn = e.target.closest('.tab-btn');
+        if (btn) {
+          const tab = btn.getAttribute('data-tab');
+          if (tab) {
+            AppState.planActiveTab = tab;
+            renderPlansView();
+          }
+        }
+      });
+    }
+
+    // 2. Alternador de Moeda dos Planos (BRL / USD / DUAL)
     const currencyGroup = document.getElementById('currencyToggleGroup');
     if (currencyGroup) {
       currencyGroup.addEventListener('click', (e) => {
@@ -409,7 +459,21 @@
       });
     }
 
-    // 2. Filtros de Planos (Público, Perfil e Busca)
+    // 3. Toggle de Ciclo de Cobrança (Mensal / Anual)
+    const billingCycleGroup = document.getElementById('billingCycleToggleGroup');
+    if (billingCycleGroup) {
+      billingCycleGroup.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-toggle');
+        if (btn) {
+          billingCycleGroup.querySelectorAll('.btn-toggle').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          AppState.planBillingCycle = btn.getAttribute('data-cycle');
+          renderPlansView();
+        }
+      });
+    }
+
+    // 4. Filtros de Planos (Público, Perfil, Busca, Agrupamento e Ordenação)
     const planAudienceSel = document.getElementById('planAudienceFilter');
     if (planAudienceSel) {
       planAudienceSel.addEventListener('change', (e) => {
@@ -424,6 +488,27 @@
         renderPlansView();
       });
     }
+    const planPrivacySel = document.getElementById('planPrivacyFilter');
+    if (planPrivacySel) {
+      planPrivacySel.addEventListener('change', (e) => {
+        AppState.planPrivacyFilter = e.target.value;
+        renderPlansView();
+      });
+    }
+    const planGroupingSel = document.getElementById('planGroupingSelect');
+    if (planGroupingSel) {
+      planGroupingSel.addEventListener('change', (e) => {
+        AppState.planGrouping = e.target.value;
+        renderPlansView();
+      });
+    }
+    const planSortSel = document.getElementById('planSortSelect');
+    if (planSortSel) {
+      planSortSel.addEventListener('change', (e) => {
+        AppState.planSort = e.target.value;
+        renderPlansView();
+      });
+    }
     const planSearchInp = document.getElementById('planSearchInput');
     if (planSearchInp) {
       planSearchInp.addEventListener('input', (e) => {
@@ -432,52 +517,145 @@
       });
     }
 
-    // 3. Checkbox de Comparação de Planos (Event Delegation no Grid)
-    const plansGrid = document.getElementById('plansCardsGrid');
-    if (plansGrid) {
-      plansGrid.addEventListener('change', (e) => {
-        if (e.target.classList.contains('plan-compare-checkbox')) {
-          const planId = e.target.getAttribute('data-plan-id');
-          if (e.target.checked) {
-            if (!AppState.selectedPlanCompare.includes(planId)) {
-              if (AppState.selectedPlanCompare.length >= 4) {
-                e.target.checked = false;
-                showToast('Limite de 4 planos atingido no comparador.');
-                return;
-              }
-              AppState.selectedPlanCompare.push(planId);
-            }
+    // Slider de Preço & Presets
+    const planPriceSlider = document.getElementById('planPriceSlider');
+    const priceSliderValLabel = document.getElementById('priceSliderCurrentVal');
+    if (planPriceSlider) {
+      planPriceSlider.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        AppState.planMaxPrice = val;
+        if (priceSliderValLabel) {
+          priceSliderValLabel.textContent = val >= 250 ? 'Sem limite' : `Até US$ ${val}`;
+        }
+        renderPlansView();
+      });
+    }
+    const pricePresetsContainer = document.getElementById('pricePresetsPills');
+    if (pricePresetsContainer) {
+      pricePresetsContainer.addEventListener('click', (e) => {
+        const pill = e.target.closest('.filter-pill');
+        if (pill) {
+          pricePresetsContainer.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+          pill.classList.add('active');
+          const pVal = pill.getAttribute('data-price');
+          if (pVal === 'all') {
+            AppState.planMaxPrice = 250;
+            if (planPriceSlider) planPriceSlider.value = 250;
+            if (priceSliderValLabel) priceSliderValLabel.textContent = 'Sem limite';
           } else {
-            AppState.selectedPlanCompare = AppState.selectedPlanCompare.filter(id => id !== planId);
+            const num = parseInt(pVal, 10);
+            AppState.planMaxPrice = num;
+            if (planPriceSlider) planPriceSlider.value = num;
+            if (priceSliderValLabel) priceSliderValLabel.textContent = num === 0 ? 'Grátis' : `Até US$ ${num}`;
           }
-          updatePlanCompareTray();
+          renderPlansView();
         }
       });
     }
 
-    // 4. Botões do Tray e Modal de Comparação de Planos
-    const btnOpenPlanModal = document.getElementById('btnOpenPlanCompareModal');
-    if (btnOpenPlanModal) btnOpenPlanModal.addEventListener('click', openPlanCompareModal);
-
-    const btnClosePlanModal = document.getElementById('btnClosePlanCompareModal');
-    if (btnClosePlanModal) btnClosePlanModal.addEventListener('click', closePlanCompareModal);
-
-    const btnClosePlanModalX = document.getElementById('planCompareModalCloseBtn');
-    if (btnClosePlanModalX) btnClosePlanModalX.addEventListener('click', closePlanCompareModal);
-
-    const planModalOverlay = document.getElementById('planCompareModalOverlay');
-    if (planModalOverlay) {
-      planModalOverlay.addEventListener('click', (e) => {
-        if (e.target === planModalOverlay) closePlanCompareModal();
+    // Toggles de Recursos
+    const filterPredictable = document.getElementById('filterPredictableOnly');
+    if (filterPredictable) {
+      filterPredictable.addEventListener('change', (e) => {
+        AppState.filterPredictableOnly = e.target.checked;
+        renderPlansView();
+      });
+    }
+    const filterByok = document.getElementById('filterByokOnly');
+    if (filterByok) {
+      filterByok.addEventListener('change', (e) => {
+        AppState.filterByokOnly = e.target.checked;
+        renderPlansView();
+      });
+    }
+    const filterCloud = document.getElementById('filterCloudStorageOnly');
+    if (filterCloud) {
+      filterCloud.addEventListener('change', (e) => {
+        AppState.filterCloudStorageOnly = e.target.checked;
+        renderPlansView();
       });
     }
 
-    const btnClearPlanCompare = document.getElementById('btnClearPlanCompare');
-    if (btnClearPlanCompare) {
-      btnClearPlanCompare.addEventListener('click', () => {
+    // Botão Limpar Filtros
+    const btnResetFilters = document.getElementById('btnResetAllFilters');
+    if (btnResetFilters) {
+      btnResetFilters.addEventListener('click', () => {
+        resetAllPlanFilters();
+      });
+    }
+
+    // Expandir / Recolher Todas as Empresas
+    const btnExpandAll = document.getElementById('btnExpandAllCompanies');
+    if (btnExpandAll) {
+      btnExpandAll.addEventListener('click', () => {
+        if (typeof PlanExplorer !== 'undefined') {
+          PlanExplorer.PLAN_UI_CONFIG.companiesOrder.forEach(c => AppState.expandedCompanies[c] = true);
+        }
+        renderPlansView();
+      });
+    }
+    const btnCollapseAll = document.getElementById('btnCollapseAllCompanies');
+    if (btnCollapseAll) {
+      btnCollapseAll.addEventListener('click', () => {
+        if (typeof PlanExplorer !== 'undefined') {
+          PlanExplorer.PLAN_UI_CONFIG.companiesOrder.forEach(c => AppState.expandedCompanies[c] = false);
+        }
+        renderPlansView();
+      });
+    }
+
+    // Botão e Modais do Assistente / Wizard
+    const btnOpenWizard = document.getElementById('btnOpenPlanWizard');
+    if (btnOpenWizard) btnOpenWizard.addEventListener('click', openPlanWizardModal);
+    const btnCloseWizard = document.getElementById('planWizardModalCloseBtn');
+    if (btnCloseWizard) btnCloseWizard.addEventListener('click', closePlanWizardModal);
+    const btnNextWizard = document.getElementById('btnWizardNextStep');
+    if (btnNextWizard) {
+      btnNextWizard.addEventListener('click', () => {
+        if (AppState.wizardStep < 6) {
+          AppState.wizardStep++;
+          renderWizardStep();
+        } else {
+          closePlanWizardModal();
+        }
+      });
+    }
+    const btnPrevWizard = document.getElementById('btnWizardPrevStep');
+    if (btnPrevWizard) {
+      btnPrevWizard.addEventListener('click', () => {
+        if (AppState.wizardStep > 1) {
+          AppState.wizardStep--;
+          renderWizardStep();
+        }
+      });
+    }
+
+    // Modal de Detalhes do Plano
+    const btnCloseDetails = document.getElementById('btnClosePlanDetailsModal');
+    if (btnCloseDetails) btnCloseDetails.addEventListener('click', closePlanDetailsModal);
+    const btnCloseDetailsX = document.getElementById('planDetailsModalCloseBtn');
+    if (btnCloseDetailsX) btnCloseDetailsX.addEventListener('click', closePlanDetailsModal);
+    const planDetailsOverlay = document.getElementById('planDetailsModalOverlay');
+    if (planDetailsOverlay) {
+      planDetailsOverlay.addEventListener('click', (e) => {
+        if (e.target === planDetailsOverlay) closePlanDetailsModal();
+      });
+    }
+
+    // Tray de Comparação
+    const btnOpenCompareTab = document.getElementById('btnOpenPlanCompareTab');
+    if (btnOpenCompareTab) {
+      btnOpenCompareTab.addEventListener('click', () => {
+        AppState.planActiveTab = 'compare';
+        renderPlansView();
+      });
+    }
+    const btnClearCompare = document.getElementById('btnClearPlanCompare');
+    if (btnClearCompare) {
+      btnClearCompare.addEventListener('click', () => {
         AppState.selectedPlanCompare = [];
-        document.querySelectorAll('.plan-compare-checkbox').forEach(cb => cb.checked = false);
         updatePlanCompareTray();
+        renderPlansView();
       });
     }
 
@@ -3200,217 +3378,1378 @@
   }
 
   // ==========================================
-  // 17. VIEW: PLANOS & ASSINATURAS (USD / BRL)
+  // 17. VIEW: EXPLORADOR DE PLANOS, MODELOS & ORÇAMENTO (06)
   // ==========================================
+
   function renderPlansView() {
     if (typeof SUBSCRIPTION_PLANS_DATA === 'undefined') return;
 
-    const grid = document.getElementById('plansCardsGrid');
-    if (!grid) return;
-
-    const currency = AppState.planCurrency || 'BRL';
-    const audience = AppState.planAudience || 'all';
-    const profile = AppState.planProfile || 'all';
-    const query = (AppState.planSearchQuery || '').toLowerCase().trim();
-
-    const filteredPlans = SUBSCRIPTION_PLANS_DATA.filter(plan => {
-      if (!plan.current) return false;
-      if (audience !== 'all' && plan.targetAudience !== audience) return false;
-      if (profile !== 'all' && (!plan.profileTags || !plan.profileTags.includes(profile))) return false;
-      if (query) {
-        const text = `${plan.planName} ${plan.product} ${plan.provider} ${(plan.includedModels || []).join(' ')} ${plan.bestFor || ''}`.toLowerCase();
-        if (!text.includes(query)) return false;
-      }
-      return true;
+    // 1. Atualiza Navegação de Abas do Explorador
+    const currentTab = AppState.planActiveTab || 'plans';
+    const tabs = document.querySelectorAll('#planExplorerTabs .tab-btn');
+    tabs.forEach(btn => {
+      const isAct = btn.getAttribute('data-tab') === currentTab;
+      btn.classList.toggle('active', isAct);
+      btn.setAttribute('aria-selected', isAct ? 'true' : 'false');
     });
 
-    if (filteredPlans.length === 0) {
-      grid.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-muted); background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
-          🔍 Nenhum plano encontrado para os filtros selecionados. Tente ajustar o público ou termo de busca.
-        </div>
-      `;
-    } else {
-      grid.innerHTML = filteredPlans.map(plan => {
-        const isChecked = (AppState.selectedPlanCompare || []).includes(plan.id);
+    // 2. Atualiza Alternadores de Moeda e Ciclo
+    const currBtns = document.querySelectorAll('#currencyToggleGroup .btn-toggle');
+    currBtns.forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-currency') === (AppState.planCurrency || 'BRL'));
+    });
+    const cycleBtns = document.querySelectorAll('#billingCycleToggleGroup .btn-toggle');
+    cycleBtns.forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-cycle') === (AppState.planBillingCycle || 'monthly'));
+    });
 
-        let priceHtml = '';
-        const officialBrl = plan.localizedPricing && plan.localizedPricing.BRL && plan.localizedPricing.BRL.official;
+    // 3. Atualiza Badges de Contagem (Header, Comparador e Favoritos)
+    const totalPlans = SUBSCRIPTION_PLANS_DATA.length;
+    const totalModels = typeof AI_MODELS_DATA !== 'undefined' ? (Array.isArray(AI_MODELS_DATA) ? AI_MODELS_DATA.length : Object.keys(AI_MODELS_DATA).length) : 44;
+    const countersBadge = document.getElementById('planCountersBadge');
+    if (countersBadge) {
+      countersBadge.textContent = `9 empresas · ${totalPlans} planos · ${totalModels} modelos`;
+    }
 
-        if (plan.monthlyPriceUsd === null || plan.monthlyPriceUsd === undefined) {
-          priceHtml = `
-            <div class="plan-price-main">Sob Consulta</div>
-            <div class="plan-price-sub">Custom Enterprise / Contato Comercial</div>
-          `;
-        } else if (currency === 'BRL') {
-          if (plan.monthlyPriceUsd === 0 && (!plan.monthlyPriceCny || plan.monthlyPriceCny === 0)) {
-            priceHtml = `<div class="plan-price-main">R$ 0,00</div><div class="plan-price-sub">Gratuito / Free Tier</div>`;
-          } else if (officialBrl) {
-            priceHtml = `
-              <div class="plan-price-main" style="color: #34d399;">R$ ${plan.localizedPricing.BRL.price.toFixed(2).replace('.', ',')}</div>
-              <div class="plan-price-sub">
-                <span class="badge-tag badge-subdollar">🇧🇷 Preço Oficial Brasil</span>
-                <span style="margin-left: 4px; color: var(--text-muted);">(US$ ${plan.monthlyPriceUsd.toFixed(2)})</span>
-              </div>
-            `;
-          } else if (plan.nativeCurrency === 'CNY') {
-            const brl = typeof FX_HELPERS !== 'undefined' ? FX_HELPERS.convertCnyToBrl(plan.monthlyPriceCny) : plan.monthlyPriceCny * 0.7599;
-            priceHtml = `
-              <div class="plan-price-main">~ R$ ${brl.toFixed(2).replace('.', ',')}</div>
-              <div class="plan-price-sub">¥ ${plan.monthlyPriceCny} / mês (CNY) · ~ US$ ${plan.monthlyPriceUsd.toFixed(2)}</div>
-            `;
-          } else {
-            const brl = typeof FX_HELPERS !== 'undefined' ? FX_HELPERS.convertUsdToBrl(plan.monthlyPriceUsd) : plan.monthlyPriceUsd * 5.108;
-            priceHtml = `
-              <div class="plan-price-main">~ R$ ${brl.toFixed(2).replace('.', ',')}</div>
-              <div class="plan-price-sub">US$ ${plan.monthlyPriceUsd.toFixed(2)} / mês comercial</div>
-            `;
-          }
-        } else if (currency === 'USD') {
-          if (plan.monthlyPriceUsd === 0) {
-            priceHtml = `<div class="plan-price-main">US$ 0.00</div><div class="plan-price-sub">Free Tier</div>`;
-          } else if (plan.nativeCurrency === 'CNY') {
-            priceHtml = `
-              <div class="plan-price-main">~ US$ ${plan.monthlyPriceUsd.toFixed(2)}</div>
-              <div class="plan-price-sub">¥ ${plan.monthlyPriceCny} / mo nativo (Yuan)</div>
-            `;
-          } else {
-            priceHtml = `
-              <div class="plan-price-main">US$ ${plan.monthlyPriceUsd.toFixed(2)}</div>
-              <div class="plan-price-sub">${plan.billingPeriod === 'user/month' ? 'per user / month' : plan.billingPeriod === 'stream/month' ? 'per stream / month' : 'per month'}</div>
-            `;
-          }
-        } else {
-          const brl = officialBrl 
-            ? plan.localizedPricing.BRL.price 
-            : (plan.nativeCurrency === 'CNY' ? FX_HELPERS.convertCnyToBrl(plan.monthlyPriceCny) : FX_HELPERS.convertUsdToBrl(plan.monthlyPriceUsd));
-          priceHtml = `
-            <div class="plan-price-main">
-              ${officialBrl ? `R$ ${brl.toFixed(2).replace('.', ',')}` : `~ R$ ${brl.toFixed(2).replace('.', ',')}`}
-            </div>
-            <div class="plan-price-sub" style="font-weight: 600; color: var(--accent-cyan);">
-              US$ ${plan.monthlyPriceUsd.toFixed(2)} / mo ${plan.nativeCurrency === 'CNY' ? `(¥ ${plan.monthlyPriceCny})` : ''}
-              ${officialBrl ? '<span class="badge-tag badge-subdollar" style="margin-left: 4px;">Oficial BR</span>' : ''}
-            </div>
-          `;
-        }
+    const compareBadge = document.getElementById('compareBadgeCount');
+    if (compareBadge) {
+      const cmpLen = (AppState.selectedPlanCompare || []).length;
+      compareBadge.textContent = cmpLen;
+      compareBadge.style.display = cmpLen > 0 ? 'inline-block' : 'none';
+    }
+
+    const favBadge = document.getElementById('favoritesBadgeCount');
+    if (favBadge) {
+      const favLen = (AppState.planFavoritesList || []).length;
+      favBadge.textContent = favLen;
+      favBadge.style.display = favLen > 0 ? 'inline-block' : 'none';
+    }
+
+    // 4. Alterna Visibilidade dos Painéis de Sub-views
+    const tabPanels = [
+      { id: 'tabContentPlans', tab: 'plans', fn: renderTabPlans },
+      { id: 'tabContentModels', tab: 'models', fn: renderTabModels },
+      { id: 'tabContentBudget', tab: 'budget', fn: renderTabBudget },
+      { id: 'tabContentCompare', tab: 'compare', fn: renderTabCompare },
+      { id: 'tabContentFavorites', tab: 'favorites', fn: renderTabFavorites }
+    ];
+
+    tabPanels.forEach(tp => {
+      const el = document.getElementById(tp.id);
+      if (el) {
+        const isActive = tp.tab === currentTab;
+        el.style.display = isActive ? 'block' : 'none';
+        el.classList.toggle('active', isActive);
+        if (isActive) tp.fn();
+      }
+    });
+
+    updatePlanCompareTray();
+  }
+
+  // ----------------------------------------------------
+  // SUB-VIEW 1: ABA PLANOS (Catálogo, Sidebar & Acordeão)
+  // ----------------------------------------------------
+  function renderTabPlans() {
+    renderSidebarFilters();
+    renderFilteredPlansList();
+  }
+
+  function renderSidebarFilters() {
+    if (typeof PlanExplorer === 'undefined') return;
+
+    // Renderiza pílulas de empresas na sidebar
+    const compContainer = document.getElementById('companyFilterPills');
+    if (compContainer) {
+      const byComp = PlanExplorer.getPlansByCompany(SUBSCRIPTION_PLANS_DATA);
+      const selected = AppState.planSelectedCompanies || [];
+
+      compContainer.innerHTML = PlanExplorer.PLAN_UI_CONFIG.companiesOrder.map(cId => {
+        const conf = PlanExplorer.PLAN_UI_CONFIG.companies[cId] || { name: cId, icon: '🏢' };
+        const count = (byComp[cId] || []).length;
+        const isActive = selected.includes(cId);
 
         return `
-          <div class="plan-card" data-plan-id="${plan.id}">
-            <div>
-              <div class="plan-card-header">
-                <div>
-                  <div class="plan-provider-badge">${plan.provider} • ${plan.product}</div>
-                  <div class="plan-card-title">${plan.planName}</div>
-                </div>
-                <span class="badge-tag ${plan.targetAudience === 'team' ? 'badge-warning' : 'badge-frontier'}">
-                  ${plan.targetAudience === 'team' ? '🏢 Equipe' : '👤 Individual'}
-                </span>
-              </div>
-
-              <div class="plan-card-price-box">
-                ${priceHtml}
-                ${plan.annualPriceUsd ? `
-                  <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
-                    Opção Anual: US$ ${(plan.annualPriceUsd / 12).toFixed(2)}/mês
-                  </div>
-                ` : ''}
-              </div>
-
-              <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 10px;">
-                <strong>Franquia:</strong> ${plan.quotaDescription}
-              </div>
-
-              <div style="margin-bottom: 12px;">
-                <div style="font-size: 0.74rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;">Modelos Inclusos:</div>
-                <div style="display: flex; flex-wrap: wrap; gap: 4px;">
-                  ${(plan.includedModels || []).map(m => `
-                    <span style="background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: 4px; padding: 2px 6px; font-size: 0.72rem; color: var(--text-primary);">
-                      ${m}
-                    </span>
-                  `).join('')}
-                </div>
-              </div>
-
-              <div style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.35; margin-bottom: 8px;">
-                🔒 <strong>Privacidade:</strong> ${plan.privacyNotes}
-              </div>
-
-              <div style="font-size: 0.78rem; color: var(--accent-cyan); line-height: 1.35;">
-                💡 <strong>Ideal para:</strong> ${plan.bestFor}
-              </div>
-            </div>
-
-            <div class="plan-card-footer">
-              <label style="display: flex; align-items: center; gap: 8px; font-size: 0.82rem; cursor: pointer;">
-                <input type="checkbox" class="plan-compare-checkbox" data-plan-id="${plan.id}" ${isChecked ? 'checked' : ''}>
-                <span>Comparar</span>
-              </label>
-              <button class="btn-table-action" onclick="window.AIApp.selectBudgetStackForPlan('${plan.id}')" title="Ver stack recomendado">
-                Ver Stacks ➔
-              </button>
-            </div>
-          </div>
+          <button type="button" class="filter-pill ${isActive ? 'active' : ''}" onclick="window.AIApp.toggleCompanyFilter('${cId}')">
+            ${conf.icon} ${conf.name} <span style="opacity: 0.7; font-size: 0.7rem;">(${count})</span>
+          </button>
         `;
       }).join('');
     }
 
-    renderBudgetStacks();
-    updatePlanCompareTray();
+    // Atualiza valores dos inputs da sidebar com base no AppState
+    const slider = document.getElementById('planPriceSlider');
+    if (slider) slider.value = AppState.planMaxPrice !== undefined ? AppState.planMaxPrice : 250;
+
+    const valLabel = document.getElementById('priceSliderCurrentVal');
+    if (valLabel) {
+      valLabel.textContent = AppState.planMaxPrice >= 250 ? 'Sem limite' : `Até US$ ${AppState.planMaxPrice}`;
+    }
+
+    const audSel = document.getElementById('planAudienceFilter');
+    if (audSel) audSel.value = AppState.planAudience || 'all';
+
+    const profSel = document.getElementById('planProfileFilter');
+    if (profSel) profSel.value = AppState.planProfile || 'all';
+
+    const privSel = document.getElementById('planPrivacyFilter');
+    if (privSel) privSel.value = AppState.planPrivacyFilter || 'all';
+
+    const predCheck = document.getElementById('filterPredictableOnly');
+    if (predCheck) predCheck.checked = !!AppState.filterPredictableOnly;
+
+    const byokCheck = document.getElementById('filterByokOnly');
+    if (byokCheck) byokCheck.checked = !!AppState.filterByokOnly;
+
+    const storageCheck = document.getElementById('filterCloudStorageOnly');
+    if (storageCheck) storageCheck.checked = !!AppState.filterCloudStorageOnly;
+
+    const groupSel = document.getElementById('planGroupingSelect');
+    if (groupSel) groupSel.value = AppState.planGrouping || 'company';
+
+    const sortSel = document.getElementById('planSortSelect');
+    if (sortSel) sortSel.value = AppState.planSort || 'default';
+
+    const searchInp = document.getElementById('planSearchInput');
+    if (searchInp && searchInp.value !== AppState.planSearchQuery) {
+      searchInp.value = AppState.planSearchQuery || '';
+    }
   }
 
-  function renderBudgetStacks() {
-    if (typeof BUDGET_STACK_RECOMMENDER === 'undefined') return;
+  function renderFilteredPlansList() {
+    if (typeof PlanExplorer === 'undefined') return;
 
-    const container = document.getElementById('budgetStacksContainer');
+    let plans = SUBSCRIPTION_PLANS_DATA.filter(p => p.current);
+
+    // 1. Filtro por Empresa
+    const selComps = AppState.planSelectedCompanies || [];
+    if (selComps.length > 0) {
+      plans = plans.filter(p => {
+        const pComp = (p.provider === 'anysphere' ? 'cursor' : p.provider === 'moonshot' ? 'kimi' : p.provider?.toLowerCase());
+        return selComps.includes(pComp);
+      });
+    }
+
+    // 2. Filtro por Preço Máximo
+    if (AppState.planMaxPrice !== undefined && AppState.planMaxPrice < 250) {
+      plans = plans.filter(p => {
+        if (p.monthlyPriceUsd === null || p.monthlyPriceUsd === undefined) return false;
+        return p.monthlyPriceUsd <= AppState.planMaxPrice;
+      });
+    }
+
+    // 3. Filtro por Público
+    if (AppState.planAudience && AppState.planAudience !== 'all') {
+      plans = plans.filter(p => p.targetAudience === AppState.planAudience);
+    }
+
+    // 4. Filtro por Perfil
+    if (AppState.planProfile && AppState.planProfile !== 'all') {
+      plans = plans.filter(p => p.profileTags && p.profileTags.includes(AppState.planProfile));
+    }
+
+    // 5. Filtro por Custo Previsível
+    if (AppState.filterPredictableOnly) {
+      plans = plans.filter(p => {
+        const vb = PlanExplorer.getPlanVariableBilling(p);
+        return vb.predictable;
+      });
+    }
+
+    // 6. Filtro por BYOK
+    if (AppState.filterByokOnly) {
+      plans = plans.filter(p => {
+        const feats = (p.features || []).join(' ').toLowerCase();
+        return feats.includes('byok') || (p.notes || '').toLowerCase().includes('byok');
+      });
+    }
+
+    // 7. Filtro por Cloud Storage (>= 1 TB)
+    if (AppState.filterCloudStorageOnly) {
+      plans = plans.filter(p => p.storage && p.storage.includedGb >= 1000);
+    }
+
+    // 8. Filtro por Privacidade
+    if (AppState.planPrivacyFilter && AppState.planPrivacyFilter !== 'all') {
+      plans = plans.filter(p => {
+        if (!p.privacy) return false;
+        if (AppState.planPrivacyFilter === 'no-training') {
+          return p.privacy.noTrainingByDefault === true || p.privacy.modelTrainingControl === 'never';
+        }
+        if (AppState.planPrivacyFilter === 'zdr') {
+          return p.privacy.zeroDataRetentionContract === true || p.privacy.modelTrainingControl === 'zdr-contract';
+        }
+        if (AppState.planPrivacyFilter === 'consumer') {
+          return p.privacy.modelTrainingControl === 'opt-out' || p.privacy.modelTrainingControl === 'opt-in';
+        }
+        return true;
+      });
+    }
+
+    // 9. Busca Textual
+    if (AppState.planSearchQuery && AppState.planSearchQuery.trim()) {
+      plans = PlanExplorer.searchPlans(plans, AppState.planSearchQuery);
+    }
+
+    // 10. Ordenação
+    plans = sortPlansList(plans, AppState.planSort);
+
+    // 11. Renderiza Chips de Filtros Ativos (Seção 107)
+    renderActiveFilterChips();
+
+    // 12. Atualiza Texto do Contador (Seção 108)
+    const countText = document.getElementById('planResultsCountText');
+    if (countText) {
+      countText.textContent = `Exibindo ${plans.length} de ${SUBSCRIPTION_PLANS_DATA.length} planos`;
+    }
+
+    // 13. Renderiza Container Principal com base no Agrupamento
+    const container = document.getElementById('companiesContainer');
     if (!container) return;
 
-    const budget = AppState.activeBudgetStack || 110;
-    const stacks = BUDGET_STACK_RECOMMENDER.getStacksForBudgetBrl(budget);
+    if (plans.length === 0) {
+      container.innerHTML = `
+        <div style="text-align: center; padding: 48px 20px; background: var(--bg-card); border-radius: var(--radius-md); border: 1px dashed var(--border-subtle); color: var(--text-muted);">
+          <div style="font-size: 2rem; margin-bottom: 8px;">🔍</div>
+          <h4 style="color: var(--text-primary); margin-bottom: 6px;">Nenhum plano corresponde aos filtros selecionados</h4>
+          <p style="font-size: 0.85rem; max-width: 450px; margin: 0 auto 16px auto;">Tente aumentar o teto de preço, desmarcar filtros específicos ou limpar a busca.</p>
+          <button class="btn-secondary btn-sm" onclick="window.AIApp.resetAllPlanFilters()">Limpar Todos os Filtros</button>
+        </div>
+      `;
+      return;
+    }
 
-    container.innerHTML = stacks.map(st => `
-      <div class="budget-stack-card">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-          <div>
-            <h4 style="color: var(--accent-cyan); font-size: 1.05rem; margin-bottom: 2px;">${st.title}</h4>
-            <div style="font-size: 0.8rem; color: var(--text-muted);">
-              Custo Total Estimado: <strong style="color: var(--text-primary);">R$ ${st.monthlyCostBrl.toFixed(2).replace('.', ',')} / mês</strong> (~ US$ ${st.monthlyCostUsd.toFixed(2)})
+    const grouping = AppState.planGrouping || 'company';
+
+    if (grouping === 'company') {
+      renderCompanyAccordion(container, plans);
+    } else if (grouping === 'price') {
+      renderPriceGrouped(container, plans);
+    } else if (grouping === 'type') {
+      renderTypeGrouped(container, plans);
+    } else {
+      // Sem agrupamento: grid direto
+      container.innerHTML = `
+        <div class="plans-grid">
+          ${plans.map(p => renderPlanCard(p)).join('')}
+        </div>
+      `;
+    }
+  }
+
+  function sortPlansList(plans, sortKey) {
+    const list = [...plans];
+    if (sortKey === 'price-asc') {
+      return list.sort((a, b) => (a.monthlyPriceUsd ?? 9999) - (b.monthlyPriceUsd ?? 9999));
+    }
+    if (sortKey === 'price-desc') {
+      return list.sort((a, b) => (b.monthlyPriceUsd ?? -1) - (a.monthlyPriceUsd ?? -1));
+    }
+    if (sortKey === 'coding') {
+      return list.sort((a, b) => {
+        const scA = PlanExplorer.calculatePlanScores(a, FX_RATES_DATA).codingScore;
+        const scB = PlanExplorer.calculatePlanScores(b, FX_RATES_DATA).codingScore;
+        return scB - scA;
+      });
+    }
+    if (sortKey === 'quota') {
+      return list.sort((a, b) => {
+        const scA = PlanExplorer.calculatePlanScores(a, FX_RATES_DATA).quotaScore;
+        const scB = PlanExplorer.calculatePlanScores(b, FX_RATES_DATA).quotaScore;
+        return scB - scA;
+      });
+    }
+    if (sortKey === 'cost-benefit') {
+      return list.sort((a, b) => {
+        const scA = PlanExplorer.calculatePlanScores(a, FX_RATES_DATA).costBenefitScore;
+        const scB = PlanExplorer.calculatePlanScores(b, FX_RATES_DATA).costBenefitScore;
+        return scB - scA;
+      });
+    }
+    if (sortKey === 'models') {
+      return list.sort((a, b) => (b.includedModels?.length || 0) - (a.includedModels?.length || 0));
+    }
+    return list;
+  }
+
+  function renderActiveFilterChips() {
+    const container = document.getElementById('activeFilterChips');
+    if (!container) return;
+
+    const chips = [];
+
+    (AppState.planSelectedCompanies || []).forEach(cId => {
+      const conf = PlanExplorer.PLAN_UI_CONFIG.companies[cId] || { name: cId };
+      chips.push({
+        label: `Empresa: ${conf.name}`,
+        removeFn: `window.AIApp.toggleCompanyFilter('${cId}')`
+      });
+    });
+
+    if (AppState.planMaxPrice !== undefined && AppState.planMaxPrice < 250) {
+      chips.push({
+        label: `Teto: US$ ${AppState.planMaxPrice}`,
+        removeFn: `window.AIApp.resetPriceFilter()`
+      });
+    }
+
+    if (AppState.planAudience && AppState.planAudience !== 'all') {
+      chips.push({
+        label: `Público: ${AppState.planAudience === 'individual' ? 'Individual' : AppState.planAudience === 'team' ? 'Equipes' : 'Enterprise'}`,
+        removeFn: `window.AIApp.setPlanAudience('all')`
+      });
+    }
+
+    if (AppState.planProfile && AppState.planProfile !== 'all') {
+      chips.push({
+        label: `Perfil: ${AppState.planProfile}`,
+        removeFn: `window.AIApp.setPlanProfile('all')`
+      });
+    }
+
+    if (AppState.filterPredictableOnly) {
+      chips.push({
+        label: 'Apenas Custo Previsível',
+        removeFn: `window.AIApp.togglePredictableOnly()`
+      });
+    }
+
+    if (AppState.filterByokOnly) {
+      chips.push({
+        label: 'Aceita BYOK',
+        removeFn: `window.AIApp.toggleByokOnly()`
+      });
+    }
+
+    if (AppState.filterCloudStorageOnly) {
+      chips.push({
+        label: 'Cloud Storage (>=1TB)',
+        removeFn: `window.AIApp.toggleStorageOnly()`
+      });
+    }
+
+    if (AppState.planPrivacyFilter && AppState.planPrivacyFilter !== 'all') {
+      chips.push({
+        label: `Privacidade: ${AppState.planPrivacyFilter}`,
+        removeFn: `window.AIApp.setPrivacyFilter('all')`
+      });
+    }
+
+    if (AppState.planSearchQuery && AppState.planSearchQuery.trim()) {
+      chips.push({
+        label: `Busca: "${AppState.planSearchQuery}"`,
+        removeFn: `window.AIApp.clearPlanSearch()`
+      });
+    }
+
+    container.innerHTML = chips.map(c => `
+      <span class="filter-chip">
+        ${c.label}
+        <span class="filter-chip-remove" onclick="${c.removeFn}" title="Remover filtro">&times;</span>
+      </span>
+    `).join('');
+  }
+
+  // Agrupamento por Empresa (Acordeão Expansível — Seção 5)
+  function renderCompanyAccordion(container, plans) {
+    const byComp = PlanExplorer.getPlansByCompany(plans);
+    const order = PlanExplorer.PLAN_UI_CONFIG.companiesOrder;
+
+    let html = '';
+
+    order.forEach(cId => {
+      const compPlans = byComp[cId] || [];
+      if (compPlans.length === 0) return;
+
+      const conf = PlanExplorer.PLAN_UI_CONFIG.companies[cId] || { name: cId, icon: '🏢', description: '' };
+      const isExpanded = AppState.expandedCompanies[cId] !== false; // Padrão aberto
+
+      // Calcula faixa de preço da empresa
+      const prices = compPlans.map(p => p.monthlyPriceUsd).filter(p => p !== null && p !== undefined);
+      const minP = prices.length ? Math.min(...prices) : 0;
+      const maxP = prices.length ? Math.max(...prices) : 0;
+      const priceRangeStr = minP === 0 && maxP === 0 ? 'Planos Gratuitos' :
+        minP === 0 ? `Grátis → US$ ${maxP}/mês` : `US$ ${minP} → US$ ${maxP}/mês`;
+
+      html += `
+        <div class="company-group ${isExpanded ? 'expanded' : ''}" id="companyGroup_${cId}">
+          <div class="company-group-header" onclick="window.AIApp.toggleCompanyGroup('${cId}')">
+            <div class="company-header-main">
+              <span class="company-header-icon">${conf.icon}</span>
+              <div>
+                <div class="company-header-title">${conf.name}</div>
+                <div class="company-header-meta">${conf.description || ''}</div>
+              </div>
+            </div>
+            <div class="company-header-stats">
+              <span class="badge-tag badge-subdollar">${compPlans.length} plano(s)</span>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">${priceRangeStr}</span>
+              <span class="company-toggle-arrow">▼</span>
             </div>
           </div>
+          <div class="company-group-content">
+            ${compPlans.map(p => renderPlanCard(p)).join('')}
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  function renderPriceGrouped(container, plans) {
+    const tiers = [
+      { name: 'Gratuitos (R$ 0 / US$ 0)', filter: p => p.monthlyPriceUsd === 0 },
+      { name: 'Entrada (Até US$ 15 / ~R$ 77)', filter: p => p.monthlyPriceUsd > 0 && p.monthlyPriceUsd <= 15 },
+      { name: 'Pro / Comercial (US$ 16 a US$ 30)', filter: p => p.monthlyPriceUsd > 15 && p.monthlyPriceUsd <= 30 },
+      { name: 'Avançado / Heavy (US$ 31 a US$ 100)', filter: p => p.monthlyPriceUsd > 30 && p.monthlyPriceUsd <= 100 },
+      { name: 'Ultra / Max Power (US$ 101+)', filter: p => p.monthlyPriceUsd > 100 },
+      { name: 'Custom Enterprise / Fale com Vendas', filter: p => p.monthlyPriceUsd === null || p.monthlyPriceUsd === undefined }
+    ];
+
+    container.innerHTML = tiers.map(t => {
+      const tPlans = plans.filter(t.filter);
+      if (tPlans.length === 0) return '';
+
+      return `
+        <div class="content-box" style="margin-bottom: 20px;">
+          <div class="box-header">
+            <h4>${t.name} <span class="badge-tag badge-frontier">${tPlans.length}</span></h4>
+          </div>
+          <div class="plans-grid">
+            ${tPlans.map(p => renderPlanCard(p)).join('')}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderTypeGrouped(container, plans) {
+    const types = [
+      { name: '👤 Planos Individuais & Desenvolvedores', filter: p => p.targetAudience === 'individual' && p.provider !== 'camelai' },
+      { name: '👥 Equipes & Times (Team / Business)', filter: p => p.targetAudience === 'team' },
+      { name: '🏢 Grandes Empresas (Enterprise)', filter: p => p.targetAudience === 'enterprise' },
+      { name: '⚡ Inference APIs & Concorrência Paralela', filter: p => p.provider === 'camelai' }
+    ];
+
+    container.innerHTML = types.map(t => {
+      const tPlans = plans.filter(t.filter);
+      if (tPlans.length === 0) return '';
+
+      return `
+        <div class="content-box" style="margin-bottom: 20px;">
+          <div class="box-header">
+            <h4>${t.name} <span class="badge-tag badge-frontier">${tPlans.length}</span></h4>
+          </div>
+          <div class="plans-grid">
+            ${tPlans.map(p => renderPlanCard(p)).join('')}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Card do Plano (Seções 7, 44-49, 105)
+  function renderPlanCard(plan) {
+    const currency = AppState.planCurrency || 'BRL';
+    const dispPrice = PlanExplorer.getDisplayPrice(plan, currency, FX_RATES_DATA);
+    const varBilling = PlanExplorer.getPlanVariableBilling(plan);
+    const isChecked = (AppState.selectedPlanCompare || []).includes(plan.id);
+    const isFav = (AppState.planFavoritesList || []).includes(plan.id);
+
+    // Destaque para Recursos Especiais (Seções 44 a 49)
+    let specialBadge = '';
+    if (plan.id === 'google-ai-pro') {
+      specialBadge = `<div style="font-size: 0.72rem; color: #34d399; font-weight: 700; margin-top: 4px;">☁️ Inclui 5 TB Google Drive + Gemini no Gmail/Docs</div>`;
+    } else if (plan.id === 'google-ai-ultra-5x') {
+      specialBadge = `<div style="font-size: 0.72rem; color: #38bdf8; font-weight: 700; margin-top: 4px;">⚡ 5× Mais Quota + 5 TB Storage + Gemini no Workspace</div>`;
+    } else if (plan.id === 'opencode-go' || plan.id === 'opencode-go-standard') {
+      specialBadge = `<div style="font-size: 0.72rem; color: #fbbf24; font-weight: 700; margin-top: 4px;">🔥 Burn rate variável: 1× (Haiku), 2× (Sonnet), 4× (Opus) na franquia de $60</div>`;
+    } else if (plan.id === 'camelai-stream-flat') {
+      specialBadge = `<div style="font-size: 0.72rem; color: #f87171; font-weight: 700; margin-top: 4px;">⚠ Standard camelStream: 1 stream simultâneo · Dados sujeitos a training</div>`;
+    } else if (plan.id === 'claude-pro' || plan.id === 'anthropic-claude-pro') {
+      specialBadge = `<div style="font-size: 0.72rem; color: #a78bfa; font-weight: 700; margin-top: 4px;">💳 Fable 5.1 disponível via créditos pré-pagos extras</div>`;
+    }
+
+    // Badges de Modelos Inclusos
+    const modelsBadges = (plan.modelAccess || []).slice(0, 4).map(m => {
+      const accessBadge = PlanExplorer.PLAN_UI_CONFIG.accessBadges[m.billingMode] || { label: m.billingMode, class: 'badge-frontier' };
+      return `
+        <span class="badge-tag ${accessBadge.class}" style="font-size: 0.68rem;" title="${m.surface} • ${m.notes || ''}">
+          ${m.modelId} (${accessBadge.label})
+        </span>
+      `;
+    }).join('');
+
+    const moreModelsCount = (plan.modelAccess || []).length - 4;
+
+    return `
+      <div class="plan-card" data-plan-id="${plan.id}">
+        <div>
+          <div class="plan-card-header">
+            <div>
+              <div class="plan-provider-badge">${plan.provider} • ${plan.product}</div>
+              <div class="plan-card-title">${plan.planName}</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span class="badge-tag ${plan.targetAudience === 'team' ? 'badge-warning' : plan.targetAudience === 'enterprise' ? 'badge-danger' : 'badge-frontier'}">
+                ${plan.targetAudience === 'team' ? '👥 Equipe' : plan.targetAudience === 'enterprise' ? '🏢 Enterprise' : '👤 Individual'}
+              </span>
+              <button type="button" class="badge-btn-favorite ${isFav ? 'active' : ''}" onclick="window.AIApp.togglePlanFavorite('${plan.id}')" title="${isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}">
+                ${isFav ? '★' : '☆'}
+              </button>
+            </div>
+          </div>
+
+          <div class="plan-card-price-box">
+            <div class="plan-price-main">${dispPrice.text}</div>
+            <div class="plan-price-sub">${dispPrice.subtext}</div>
+            ${dispPrice.minSeatsText ? `<div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">${dispPrice.minSeatsText}</div>` : ''}
+            ${dispPrice.annualOption && AppState.planBillingCycle === 'annual' ? `<div style="font-size: 0.72rem; color: #34d399; margin-top: 2px;">🏷️ ${dispPrice.annualOption}</div>` : ''}
+            ${specialBadge}
+          </div>
+
+          <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px;">
+            <strong>Franquia:</strong> ${plan.quotaDescription}
+          </div>
+
+          <div style="margin-bottom: 10px;">
+            <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;">Modelos & Acesso:</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+              ${modelsBadges}
+              ${moreModelsCount > 0 ? `<span class="badge-tag badge-frontier" style="font-size: 0.68rem;">+${moreModelsCount} modelos</span>` : ''}
+            </div>
+          </div>
+
+          <div style="font-size: 0.76rem; margin-bottom: 8px;">
+            <span class="badge-tag ${varBilling.predictable ? 'badge-subdollar' : 'badge-warning'}">
+              ${varBilling.predictable ? '💵 Custo 100% Previsível' : '📈 Custo com Variáveis'}
+            </span>
+          </div>
+
+          <div style="font-size: 0.78rem; color: var(--accent-cyan); line-height: 1.35; margin-bottom: 4px;">
+            💡 <strong>Melhor para:</strong> ${plan.bestFor}
+          </div>
         </div>
 
-        <div style="margin: 10px 0; font-size: 0.8rem;">
-          <span style="color: var(--text-muted);">Planos que compõem o stack:</span>
-          <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;">
-            ${(st.plans || []).map(p => p ? `
-              <span class="badge-tag badge-frontier">${p.product} ${p.planName}</span>
-            ` : '').join('')}
-          </div>
-        </div>
-
-        <div class="stack-roles-grid">
-          <div class="stack-role-item">
-            <div class="stack-role-label">🏛️ Arquiteto / Planner</div>
-            <strong style="color: #38bdf8;">${st.planner}</strong>
-          </div>
-          <div class="stack-role-item">
-            <div class="stack-role-label">⚡ Implementador / Workers</div>
-            <strong style="color: #34d399;">${st.executor}</strong>
-          </div>
-          <div class="stack-role-item">
-            <div class="stack-role-label">🔍 Revisor / Edge Cases</div>
-            <strong style="color: #f59e0b;">${st.reviewer}</strong>
-          </div>
-        </div>
-
-        <div style="font-size: 0.8rem; color: #34d399; margin-bottom: 4px;">
-          <strong>Vantagens:</strong> ${st.pros}
-        </div>
-        <div style="font-size: 0.8rem; color: #f87171;">
-          <strong>Atenção / Limites:</strong> ${st.cons}
+        <div class="plan-card-footer">
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; cursor: pointer;">
+            <input type="checkbox" class="plan-compare-checkbox" data-plan-id="${plan.id}" ${isChecked ? 'checked' : ''} onchange="window.AIApp.togglePlanCompare('${plan.id}')">
+            <span>+ Comparar</span>
+          </label>
+          <button class="btn-table-action" onclick="window.AIApp.openPlanDetails('${plan.id}')" title="Ver detalhes completos da assinatura">
+            Detalhes ➔
+          </button>
         </div>
       </div>
-    `).join('');
+    `;
+  }
+
+  // ----------------------------------------------------
+  // SUB-VIEW 2: ABA MODELOS (Onde Usar Cada Modelo — Seções 18-22, 109-110)
+  // ----------------------------------------------------
+  function renderTabModels() {
+    const container = document.getElementById('modelExplorerContainer');
+    if (!container || typeof PlanExplorer === 'undefined') return;
+
+    const models = typeof AI_MODELS_DATA !== 'undefined' ? (Array.isArray(AI_MODELS_DATA) ? AI_MODELS_DATA : Object.values(AI_MODELS_DATA)) : [];
+    const activeModelId = AppState.planSelectedModel || (models[0]?.id || 'claude-fable-5-1');
+    const selectedModel = models.find(m => m.id === activeModelId) || models[0];
+
+    // Busca todos os planos que oferecem o modelo selecionado
+    const plansForModel = PlanExplorer.getPlansForModel(activeModelId, SUBSCRIPTION_PLANS_DATA);
+
+    // Identifica destaques
+    const cheapest = plansForModel.find(p => p.plan.monthlyPriceUsd > 0);
+    const bestIncluded = plansForModel.find(p => p.billingMode === 'included');
+
+    let rowsHtml = '';
+    if (plansForModel.length === 0) {
+      rowsHtml = `<tr><td colspan="6" style="text-align: center; padding: 24px; color: var(--text-muted);">Nenhum plano catalogado com acesso direto a este modelo. Verifique se o acesso é exclusivo via API direta.</td></tr>`;
+    } else {
+      rowsHtml = plansForModel.map(item => {
+        const p = item.plan;
+        const dispPrice = PlanExplorer.getDisplayPrice(p, AppState.planCurrency || 'BRL', FX_RATES_DATA);
+        const accessBadge = PlanExplorer.PLAN_UI_CONFIG.accessBadges[item.billingMode] || { label: item.billingMode, class: 'badge-frontier' };
+
+        return `
+          <tr>
+            <td>
+              <div style="font-weight: 700; color: var(--text-primary);">${p.provider.toUpperCase()} • ${p.product}</div>
+              <div style="font-size: 0.74rem; color: var(--text-muted);">${p.targetAudience === 'team' ? 'Equipe' : 'Individual'}</div>
+            </td>
+            <td>
+              <strong style="color: var(--accent-cyan); cursor: pointer;" onclick="window.AIApp.openPlanDetails('${p.id}')">${p.planName}</strong>
+            </td>
+            <td>
+              <span class="badge-tag ${accessBadge.class}">${accessBadge.label}</span>
+            </td>
+            <td>
+              <span class="badge-tag badge-frontier">${item.surface || 'Geral'}</span>
+            </td>
+            <td>
+              <div>${dispPrice.text}</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">${dispPrice.subtext}</div>
+            </td>
+            <td>
+              <button class="btn-table-action" onclick="window.AIApp.openPlanDetails('${p.id}')">Ver Plano</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    container.innerHTML = `
+      <div class="model-explorer-header">
+        <div style="flex: 1; min-width: 260px;">
+          <label class="filter-label" for="modelSelectorDropdown">Selecione o Modelo Canônico para Descobrir Onde Usar:</label>
+          <select id="modelSelectorDropdown" class="form-select" onchange="window.AIApp.selectModelInExplorer(this.value)">
+            ${models.map(m => `
+              <option value="${m.id}" ${m.id === activeModelId ? 'selected' : ''}>
+                ${m.name} (${m.provider}) • ${m.tier || ''}
+              </option>
+            `).join('')}
+          </select>
+        </div>
+        <div>
+          <span class="badge-tag badge-frontier">${plansForModel.length} opção(ões) de assinatura encontradas</span>
+        </div>
+      </div>
+
+      <!-- Destaques Rápidos -->
+      <div class="model-highlights-grid">
+        <div class="model-highlight-card">
+          <div class="model-highlight-title">Modelo Selecionado</div>
+          <div class="model-highlight-val">${selectedModel ? selectedModel.name : activeModelId}</div>
+          <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">Contexto: ${selectedModel?.contextWindow || 'N/A'} • Provedor: ${selectedModel?.provider || 'N/A'}</div>
+        </div>
+
+        <div class="model-highlight-card">
+          <div class="model-highlight-title">Acesso Mais Barato</div>
+          <div class="model-highlight-val" style="color: #34d399;">
+            ${cheapest ? `${cheapest.plan.planName} (${PlanExplorer.getDisplayPrice(cheapest.plan, AppState.planCurrency || 'BRL', FX_RATES_DATA).text})` : 'N/D'}
+          </div>
+          <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">${cheapest ? `Cobrança: ${cheapest.billingMode}` : 'Apenas Free ou Enterprise'}</div>
+        </div>
+
+        <div class="model-highlight-card">
+          <div class="model-highlight-title">Melhor Acesso Totalmente Incluído</div>
+          <div class="model-highlight-val" style="color: #38bdf8;">
+            ${bestIncluded ? `${bestIncluded.plan.planName}` : 'Requer Créditos Extras'}
+          </div>
+          <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">${bestIncluded ? `Franquia ilimitada/nominal sem medidor` : 'Consumo sob demanda'}</div>
+        </div>
+      </div>
+
+      <!-- Tabela Detalhada de Superfícies & Planos -->
+      <div class="content-box">
+        <div class="box-header">
+          <h4>Plataformas & Assinaturas Onde Este Modelo Está Disponível</h4>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Plataforma / Provedor</th>
+                <th>Plano de Assinatura</th>
+                <th>Modalidade de Acesso</th>
+                <th>Superfície</th>
+                <th>Custo Estimado</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  // ----------------------------------------------------
+  // SUB-VIEW 3: ABA ORÇAMENTO (Budget Planner & Stacks — Seções 23-31, 72-78)
+  // ----------------------------------------------------
+  function renderTabBudget() {
+    const container = document.getElementById('budgetExplorerContainer');
+    if (!container || typeof PlanExplorer === 'undefined') return;
+
+    const budget = AppState.planBudgetValue !== undefined ? AppState.planBudgetValue : 200;
+    const currency = AppState.planCurrency || 'BRL';
+    const profile = AppState.planBudgetProfile || 'coding';
+
+    const stacks = PlanExplorer.generateBudgetStacks(budget, currency, profile, SUBSCRIPTION_PLANS_DATA, FX_RATES_DATA);
+
+    const presets = currency === 'BRL' ? [0, 50, 100, 150, 200, 350, 500, 1000] : [0, 10, 20, 30, 40, 70, 100, 200];
+
+    container.innerHTML = `
+      <div class="budget-slider-box">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+          <div>
+            <h3 style="margin-bottom: 4px;">💰 Planejador Inteligente de Orçamento & Stacks</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">
+              Encontre a combinação ideal de ferramentas de IA respeitando seu teto financeiro e separando rigorosamente custo fixo de variáveis.
+            </p>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 1.8rem; font-weight: 800; color: var(--accent-cyan);">
+              ${currency === 'BRL' ? `R$ ${budget}` : `US$ ${budget}`} / mês
+            </div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">Teto máximo configurado</div>
+          </div>
+        </div>
+
+        <input type="range" id="budgetRangeSlider" min="0" max="${currency === 'BRL' ? 1000 : 200}" step="${currency === 'BRL' ? 25 : 5}" value="${budget}" style="width: 100%; margin: 20px 0 10px 0;" oninput="window.AIApp.setBudgetValue(this.value)">
+
+        <div class="budget-presets-row">
+          <span style="font-size: 0.8rem; color: var(--text-muted); align-self: center; margin-right: 4px;">Presets rápidos:</span>
+          ${presets.map(p => `
+            <button class="budget-pill ${budget === p ? 'active' : ''}" onclick="window.AIApp.setBudgetValue(${p})">
+              ${currency === 'BRL' ? `R$ ${p}` : `US$ ${p}`}
+            </button>
+          `).join('')}
+        </div>
+
+        <div style="display: flex; gap: 16px; margin-top: 20px; flex-wrap: wrap; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <label class="filter-label" style="margin: 0; font-size: 0.82rem;">Perfil de Uso:</label>
+            <select class="form-select" style="padding: 4px 10px; font-size: 0.82rem;" onchange="window.AIApp.setBudgetProfile(this.value)">
+              <option value="coding" ${profile === 'coding' ? 'selected' : ''}>💻 Coding & IDE (Dev)</option>
+              <option value="general" ${profile === 'general' ? 'selected' : ''}>💬 Chat & Pesquisa Geral</option>
+              <option value="agent" ${profile === 'agent' ? 'selected' : ''}>🤖 Heavy-Agentic & Autônomo</option>
+              <option value="multimodal" ${profile === 'multimodal' ? 'selected' : ''}>🎨 Multimodal & Visão</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resultados: Stacks Recomendados -->
+      <div style="margin-bottom: 24px;">
+        <h4 style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+          <span>🧩 Stacks de Ferramentas Recomendados Dentro do Orçamento</span>
+          <span class="badge-tag badge-frontier">${stacks.length} encontrado(s)</span>
+        </h4>
+
+        ${stacks.length === 0 ? `
+          <div style="padding: 32px; text-align: center; background: var(--bg-card); border-radius: var(--radius-md); border: 1px dashed var(--border-subtle); color: var(--text-muted);">
+            Nenhum stack compatível encontrado para o valor selecionado. Tente aumentar o orçamento acima de R$ 50 para liberar opções de assinatura paga.
+          </div>
+        ` : stacks.slice(0, 10).map((st, idx) => `
+          <div class="budget-stack-card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
+              <div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                  <span class="badge-tag ${idx === 0 ? 'badge-subdollar' : 'badge-frontier'}">${idx === 0 ? '🏆 Top Recomendação' : `Opção ${idx + 1}`}</span>
+                  <h4 style="color: var(--text-primary); margin: 0;">${st.name}</h4>
+                </div>
+                <div style="font-size: 0.82rem; color: var(--text-muted);">${st.reason}</div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 1.3rem; font-weight: 800; color: var(--accent-cyan);">
+                  ${currency === 'BRL' ? `R$ ${st.fixedMonthlyCost.toFixed(2).replace('.', ',')}` : `US$ ${st.fixedMonthlyCost.toFixed(2)}`} / mês
+                </div>
+                <div style="font-size: 0.72rem; color: #34d399;">Custo Fixo Mensal Previsível</div>
+              </div>
+            </div>
+
+            <!-- Radar de Scores Dimensionais (Seção 38) -->
+            <div class="stack-scores-radar-bar">
+              <span class="score-mini-pill">🤖 Acesso a Modelos: <strong>${st.scores.aiAccessScore}/10</strong></span>
+              <span class="score-mini-pill">💻 Coding & IDE: <strong>${st.scores.codingScore}/10</strong></span>
+              <span class="score-mini-pill">⚡ Quota & Franquia: <strong>${st.scores.quotaScore}/10</strong></span>
+              <span class="score-mini-pill">☁️ Storage: <strong>${st.scores.bundleStorageScore}/10</strong></span>
+              <span class="score-mini-pill">🔒 Privacidade: <strong>${st.scores.privacyScore}/10</strong></span>
+              <span class="score-mini-pill" style="color: #34d399;">⭐ Custo-Benefício: <strong>${st.costBenefitScore}/10</strong></span>
+            </div>
+
+            <!-- Detalhe dos Planos que compõem o Stack -->
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0;">
+              ${st.plans.map(p => `
+                <span class="badge-tag badge-frontier" style="cursor: pointer;" onclick="window.AIApp.openPlanDetails('${p.id}')">
+                  ${p.provider.toUpperCase()} • ${p.planName}
+                </span>
+              `).join('')}
+            </div>
+
+            <!-- Alerta de Custos Variáveis se existirem -->
+            ${st.hasVariableCost ? `
+              <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-sm); padding: 8px 12px; font-size: 0.78rem; color: #fbbf24; margin-top: 8px;">
+                📈 <strong>Atenção a Custos Variáveis:</strong> ${st.variableNotes.join(' · ')}
+              </div>
+            ` : `
+              <div style="font-size: 0.76rem; color: #34d399; margin-top: 4px;">
+                ✓ 100% de custo fixo previsível sem surpresas na fatura do cartão
+              </div>
+            `}
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  // ----------------------------------------------------
+  // SUB-VIEW 4: ABA COMPARAR (Comparador de 2 a 5 Planos — Seções 32-35)
+  // ----------------------------------------------------
+  function renderTabCompare() {
+    const container = document.getElementById('compareExplorerContainer');
+    if (!container || typeof PlanExplorer === 'undefined') return;
+
+    const planIds = AppState.selectedPlanCompare || [];
+
+    if (planIds.length < 2) {
+      container.innerHTML = `
+        <div style="padding: 48px 20px; text-align: center; background: var(--bg-card); border-radius: var(--radius-md); border: 1px dashed var(--border-subtle); color: var(--text-muted);">
+          <div style="font-size: 2.2rem; margin-bottom: 8px;">⚔️</div>
+          <h4 style="color: var(--text-primary); margin-bottom: 6px;">Nenhum plano selecionado para comparação</h4>
+          <p style="font-size: 0.85rem; max-width: 450px; margin: 0 auto 16px auto;">
+            Selecione de 2 a 5 planos na aba <strong>Planos</strong> marcando a opção <strong>"+ Comparar"</strong> nos cards para comparar lado a lado preços, franquias, políticas de treinamento e superfícies.
+          </p>
+          <button class="btn-primary btn-sm" onclick="window.AIApp.switchPlanTab('plans')">Ir para Catálogo de Planos</button>
+        </div>
+      `;
+      return;
+    }
+
+    const plans = planIds.map(id => SUBSCRIPTION_PLANS_DATA.find(p => p.id === id)).filter(Boolean);
+
+    // Identifica Principal Diferença (Seção 35)
+    let smartDiffHtml = '';
+    if (plans.length >= 2) {
+      const diffText = PlanExplorer.getPlanSmartDifference(plans[0], plans[1]);
+      smartDiffHtml = `
+        <div style="background: rgba(6, 182, 212, 0.1); border: 1px solid var(--accent-cyan); border-radius: var(--radius-md); padding: 12px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
+          <span style="font-size: 1.4rem;">💡</span>
+          <div>
+            <strong style="color: var(--accent-cyan); font-size: 0.88rem;">Distinção Principal Entre os Planos:</strong>
+            <div style="font-size: 0.82rem; color: var(--text-primary); margin-top: 2px;">${diffText}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    const rows = [
+      {
+        label: 'Preço Mensal (BRL / USD)',
+        getValue: p => {
+          const d = PlanExplorer.getDisplayPrice(p, 'DUAL', FX_RATES_DATA);
+          return `<strong>${d.text}</strong><div style="font-size: 0.72rem; color: var(--text-muted);">${d.subtext}</div>`;
+        }
+      },
+      {
+        label: 'Opção Anual',
+        getValue: p => p.annualPriceUsd ? `US$ ${p.annualPriceUsd}/ano (~$${(p.annualPriceUsd/12).toFixed(2)}/mês)` : 'Apenas cobrança mensal'
+      },
+      {
+        label: 'Público & Mínimo de Assentos',
+        getValue: p => `${p.targetAudience === 'team' ? '👥 Equipe' : p.targetAudience === 'enterprise' ? '🏢 Enterprise' : '👤 Individual'} ${p.minSeats ? `(mínimo ${p.minSeats} usuários)` : ''}`
+      },
+      {
+        label: 'Modelos Principais Incluídos',
+        getValue: p => (p.includedModels || []).map(m => `<span class="badge-tag badge-frontier" style="font-size: 0.7rem; margin: 1px;">${m}</span>`).join('')
+      },
+      {
+        label: 'Franquia & Quotas',
+        getValue: p => p.quotaDescription
+      },
+      {
+        label: 'Superfícies de Acesso',
+        getValue: p => (p.modelAccess || []).map(m => m.surface).filter((v, i, a) => a.indexOf(v) === i).join(', ') || 'Chat Web'
+      },
+      {
+        label: 'Créditos Extras & Bundles',
+        getValue: p => p.extraCreditsIncluded ? `US$ ${p.extraCreditsIncluded}/mês inclusos` : 'Nenhum crédito extra'
+      },
+      {
+        label: 'Armazenamento em Nuvem',
+        getValue: p => p.storage?.includedGb ? `${p.storage.includedGb >= 1000 ? `${p.storage.includedGb / 1000} TB` : `${p.storage.includedGb} GB`} (${p.storage.type})` : 'Não inclui cloud storage'
+      },
+      {
+        label: 'Acesso à API & BYOK',
+        getValue: p => {
+          const feats = (p.features || []).join(' ').toLowerCase();
+          const hasByok = feats.includes('byok');
+          return `${p.apiIncluded ? '✅ API Incluída' : '❌ Sem endpoint direto de API'} · ${hasByok ? '🔑 Aceita BYOK' : '🔒 Sem BYOK'}`;
+        }
+      },
+      {
+        label: 'Previsibilidade de Custo',
+        getValue: p => {
+          const vb = PlanExplorer.getPlanVariableBilling(p);
+          return vb.predictable ? '<span style="color: #34d399;">✓ 100% Previsível</span>' : `<span style="color: #f87171;">⚠ Variável (${vb.items.join('; ')})</span>`;
+        }
+      },
+      {
+        label: 'Privacidade & Retenção (ZDR)',
+        getValue: p => {
+          if (!p.privacy) return p.privacyNotes || 'N/D';
+          return `${p.privacy.noTrainingByDefault ? '🔒 No-training por padrão' : '⚠ Pode reter para treino'} · ${p.privacy.zeroDataRetentionContract ? '🛡️ ZDR Formal' : 'Sem ZDR sob contrato'}`;
+        }
+      },
+      {
+        label: 'Melhor Para',
+        getValue: p => `<span style="color: var(--accent-cyan); font-weight: 600;">${p.bestFor}</span>`
+      }
+    ];
+
+    // Filtra se toggle de diferenças ativo
+    const filteredRows = AppState.compareOnlyDifferences ? rows.filter(r => {
+      const vals = plans.map(p => r.getValue(p));
+      return vals.some(v => v !== vals[0]);
+    }) : rows;
+
+    container.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <h3 style="margin: 0;">⚔️ Comparação Detalhada (${plans.length} planos)</h3>
+          <button class="btn-secondary btn-sm" onclick="window.AIApp.clearPlanCompare()">Limpar Comparação</button>
+        </div>
+        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.84rem; cursor: pointer;">
+          <input type="checkbox" id="toggleOnlyDifferences" ${AppState.compareOnlyDifferences ? 'checked' : ''} onchange="window.AIApp.toggleCompareDifferences(this.checked)">
+          <span>Mostrar Apenas Diferenças</span>
+        </label>
+      </div>
+
+      ${smartDiffHtml}
+
+      <div class="content-box">
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="min-width: 180px;">Atributo</th>
+                ${plans.map(p => `
+                  <th style="min-width: 220px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                      <div>
+                        <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">${p.provider} • ${p.product}</div>
+                        <div style="font-size: 1.05rem; color: var(--text-primary); font-weight: 700;">${p.planName}</div>
+                      </div>
+                      <button type="button" class="btn-table-action" onclick="window.AIApp.removePlanFromCompare('${p.id}')" title="Remover da comparação">&times;</button>
+                    </div>
+                  </th>
+                `).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${filteredRows.map(r => `
+                <tr>
+                  <td style="font-weight: 600; color: var(--text-secondary); background: var(--bg-surface);">${r.label}</td>
+                  ${plans.map(p => `<td>${r.getValue(p)}</td>`).join('')}
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  // ----------------------------------------------------
+  // SUB-VIEW 5: ABA FAVORITOS (Shortlist Salva — Seções 36-37)
+  // ----------------------------------------------------
+  function renderTabFavorites() {
+    const container = document.getElementById('favoritesExplorerContainer');
+    if (!container) return;
+
+    const favIds = AppState.planFavoritesList || [];
+    const favPlans = favIds.map(id => SUBSCRIPTION_PLANS_DATA.find(p => p.id === id)).filter(Boolean);
+
+    if (favPlans.length === 0) {
+      container.innerHTML = `
+        <div style="padding: 48px 20px; text-align: center; background: var(--bg-card); border-radius: var(--radius-md); border: 1px dashed var(--border-subtle); color: var(--text-muted);">
+          <div style="font-size: 2.2rem; margin-bottom: 8px;">⭐</div>
+          <h4 style="color: var(--text-primary); margin-bottom: 6px;">Sua lista de favoritos está vazia</h4>
+          <p style="font-size: 0.85rem; max-width: 450px; margin: 0 auto 16px auto;">
+            Clique no ícone de estrela <strong>☆</strong> no canto de qualquer card de plano para salvá-lo aqui e compará-los rapidamente.
+          </p>
+          <button class="btn-primary btn-sm" onclick="window.AIApp.switchPlanTab('plans')">Explorar Planos</button>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <h3 style="margin-bottom: 2px;">⭐ Meus Planos Favoritos (${favPlans.length})</h3>
+          <p style="font-size: 0.82rem; color: var(--text-muted);">Shortlist persistida localmente no seu navegador para tomada de decisão.</p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn-primary btn-sm" onclick="window.AIApp.compareAllFavorites()">⚔️ Comparar Todos os Favoritos</button>
+          <button class="btn-secondary btn-sm" onclick="window.AIApp.clearAllFavorites()">Limpar Favoritos</button>
+        </div>
+      </div>
+
+      <div class="plans-grid">
+        ${favPlans.map(p => renderPlanCard(p)).join('')}
+      </div>
+    `;
+  }
+
+  // ----------------------------------------------------
+  // MODAL DE DETALHES COMPLETOS DO PLANO (Seção 8)
+  // ----------------------------------------------------
+  function openPlanDetailsModal(planId) {
+    const plan = SUBSCRIPTION_PLANS_DATA.find(p => p.id === planId);
+    if (!plan) return;
+
+    const modal = document.getElementById('planDetailsModalOverlay');
+    const headerEl = document.getElementById('planDetailsHeaderContent');
+    const bodyEl = document.getElementById('planDetailsModalBody');
+    const footerLeftEl = document.getElementById('planDetailsFooterActionsLeft');
+    if (!modal || !headerEl || !bodyEl) return;
+
+    const dispPrice = PlanExplorer.getDisplayPrice(plan, AppState.planCurrency || 'BRL', FX_RATES_DATA);
+    const varBilling = PlanExplorer.getPlanVariableBilling(plan);
+    const isFav = (AppState.planFavoritesList || []).includes(plan.id);
+    const isCmp = (AppState.selectedPlanCompare || []).includes(plan.id);
+
+    headerEl.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+        <span class="badge-tag badge-frontier">${plan.provider.toUpperCase()} • ${plan.product}</span>
+        <span class="badge-tag ${plan.targetAudience === 'team' ? 'badge-warning' : 'badge-subdollar'}">${plan.targetAudience === 'team' ? '👥 Equipe' : '👤 Individual'}</span>
+      </div>
+      <h3 style="margin-top: 4px; font-size: 1.3rem;">${plan.planName}</h3>
+      <div style="font-size: 0.95rem; color: var(--accent-cyan); font-weight: 700; margin-top: 2px;">
+        ${dispPrice.text} <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: normal;">(${dispPrice.subtext})</span>
+      </div>
+    `;
+
+    // Tabela completa de modelAccess
+    const modelsRows = (plan.modelAccess || []).map(m => {
+      const badge = PlanExplorer.PLAN_UI_CONFIG.accessBadges[m.billingMode] || { label: m.billingMode, class: 'badge-frontier' };
+      return `
+        <tr>
+          <td><strong style="color: var(--text-primary);">${m.modelId}</strong></td>
+          <td><span class="badge-tag badge-frontier">${m.surface || 'Padrão'}</span></td>
+          <td><span class="badge-tag ${badge.class}">${badge.label}</span></td>
+          <td>${m.quotaPool || 'Pool Principal'}</td>
+          <td>${m.efforts || 'Todos os níveis'}</td>
+          <td style="font-size: 0.76rem; color: var(--text-muted);">${m.notes || '—'}</td>
+        </tr>
+      `;
+    }).join('');
+
+    bodyEl.innerHTML = `
+      <!-- Seção 1: Resumo & Posicionamento -->
+      <div class="content-box" style="margin-bottom: 16px;">
+        <h4 style="margin-bottom: 6px;">💡 Posicionamento & Melhor Caso de Uso</h4>
+        <p style="font-size: 0.85rem; color: var(--text-primary); margin-bottom: 8px;">${plan.bestFor}</p>
+        <div style="font-size: 0.8rem; color: var(--text-muted);">
+          <strong>Tags de Perfil:</strong> ${(plan.profileTags || []).join(', ')}
+        </div>
+      </div>
+
+      <!-- Seção 2: Modelos & Superfícies -->
+      <div class="content-box" style="margin-bottom: 16px;">
+        <h4 style="margin-bottom: 8px;">🧠 Modelos, Superfícies & Modos de Cobrança</h4>
+        <div class="table-responsive">
+          <table class="data-table" style="font-size: 0.8rem;">
+            <thead>
+              <tr>
+                <th>Modelo</th>
+                <th>Superfície</th>
+                <th>Cobrança</th>
+                <th>Pool</th>
+                <th>Reasoning / Thinking</th>
+                <th>Observações</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${modelsRows}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Seção 3: Quota & Cobrança -->
+      <div class="content-box" style="margin-bottom: 16px;">
+        <h4 style="margin-bottom: 6px;">⚡ Franquia, Quotas & Política de Excedente</h4>
+        <p style="font-size: 0.85rem; margin-bottom: 8px;">${plan.quotaDescription}</p>
+        <div style="font-size: 0.8rem; color: var(--text-muted);">
+          <strong>Previsibilidade:</strong> ${varBilling.predictable ? '✓ Custo 100% fixo' : `⚠ Custos variáveis possíveis: ${varBilling.items.join(', ')}`}
+        </div>
+        ${plan.overageAllowed ? `<div style="font-size: 0.8rem; color: #fbbf24; margin-top: 4px;">Permite faturamento de overage excedente no cartão.</div>` : ''}
+      </div>
+
+      <!-- Seção 4: Ferramentas & Storage -->
+      <div class="content-box" style="margin-bottom: 16px;">
+        <h4 style="margin-bottom: 6px;">☁️ Recursos, Cloud Storage & Integrações</h4>
+        <div style="font-size: 0.84rem; margin-bottom: 6px;">
+          <strong>Storage:</strong> ${plan.storage ? `${plan.storage.includedGb >= 1000 ? `${plan.storage.includedGb / 1000} TB` : `${plan.storage.includedGb} GB`} (${plan.storage.type})` : 'Nenhum armazenamento incluído'}
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-secondary);">
+          <strong>Recursos:</strong> ${(plan.features || []).join(' · ')}
+        </div>
+      </div>
+
+      <!-- Seção 5: Privacidade & Governança (Seção 83) -->
+      <div class="content-box" style="margin-bottom: 16px;">
+        <h4 style="margin-bottom: 6px;">🔒 Privacidade, Treinamento & Retenção de Dados</h4>
+        <div style="font-size: 0.82rem; margin-bottom: 4px;">
+          <strong>Política de Treinamento:</strong> ${plan.privacy?.noTrainingByDefault ? '🔒 Nenhum dado é usado para treino por padrão' : '⚠ Requer opt-out explícito ou pode ser retido'}
+        </div>
+        <div style="font-size: 0.82rem; margin-bottom: 4px;">
+          <strong>Zero Data Retention (ZDR):</strong> ${plan.privacy?.zeroDataRetentionContract ? '🛡️ Suporta ZDR formal contratual' : 'Retenção padrão da plataforma'}
+        </div>
+        <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">${plan.privacyNotes || ''}</div>
+      </div>
+
+      <!-- Seção 6: Fontes Auditadas & Freshness (Seções 91, 102) -->
+      <div style="background: var(--bg-surface); padding: 12px; border-radius: var(--radius-sm); font-size: 0.76rem; color: var(--text-muted);">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+          <span><strong>Fontes Oficiais:</strong> ${Object.entries(plan.sources || {}).map(([k, v]) => `<a href="${v}" target="_blank" rel="noopener" style="color: var(--accent-cyan); margin-right: 8px;">[${k}]</a>`).join('')}</span>
+          <span class="badge-tag badge-frontier">Verificado em: 03/09/2026</span>
+        </div>
+      </div>
+    `;
+
+    if (footerLeftEl) {
+      footerLeftEl.innerHTML = `
+        <button class="btn-secondary btn-sm" onclick="window.AIApp.togglePlanFavorite('${plan.id}'); window.AIApp.openPlanDetails('${plan.id}');">
+          ${isFav ? '★ Remover dos Favoritos' : '☆ Adicionar aos Favoritos'}
+        </button>
+        <button class="btn-secondary btn-sm" onclick="window.AIApp.togglePlanCompare('${plan.id}'); window.AIApp.openPlanDetails('${plan.id}');">
+          ${isCmp ? '✓ No Comparador' : '+ Adicionar ao Comparador'}
+        </button>
+      `;
+    }
+
+    modal.classList.add('active');
+  }
+
+  function closePlanDetailsModal() {
+    const modal = document.getElementById('planDetailsModalOverlay');
+    if (modal) modal.classList.remove('active');
+  }
+
+  // ----------------------------------------------------
+  // ASSISTENTE / WIZARD INTERATIVO (Seções 87-89)
+  // ----------------------------------------------------
+  function openPlanWizardModal() {
+    AppState.wizardStep = 1;
+    AppState.wizardAnswers = {
+      maxBudgetBrl: 250,
+      audience: 'individual',
+      primaryFocus: 'coding',
+      priorityModel: 'any',
+      requirePredictableCost: true
+    };
+    renderWizardStep();
+    const modal = document.getElementById('planWizardModalOverlay');
+    if (modal) modal.classList.add('active');
+  }
+
+  function closePlanWizardModal() {
+    const modal = document.getElementById('planWizardModalOverlay');
+    if (modal) modal.classList.remove('active');
+  }
+
+  function renderWizardStep() {
+    const bodyEl = document.getElementById('planWizardModalBody');
+    const footerEl = document.getElementById('planWizardModalFooter');
+    if (!bodyEl || !footerEl) return;
+
+    const step = AppState.wizardStep || 1;
+
+    const prevBtn = document.getElementById('btnWizardPrevStep');
+    const nextBtn = document.getElementById('btnWizardNextStep');
+    if (prevBtn) prevBtn.style.display = step > 1 ? 'inline-block' : 'none';
+
+    if (step === 1) {
+      bodyEl.innerHTML = `
+        <div class="wizard-step-box">
+          <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--accent-cyan); font-weight: 700;">Etapa 1 de 5</div>
+          <h4 style="margin: 8px 0;">Qual é o seu teto máximo de orçamento mensal?</h4>
+          <p style="font-size: 0.84rem; color: var(--text-secondary);">Isso filtra as ferramentas para evitar recomendações fora da sua realidade financeira.</p>
+
+          <div class="wizard-options-grid">
+            <button type="button" class="wizard-option-btn ${AppState.wizardAnswers.maxBudgetBrl === 0 ? 'active' : ''}" onclick="window.AIApp.setWizardAnswer('maxBudgetBrl', 0)">
+              <strong>R$ 0 (100% Gratuito)</strong>
+              <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">Tiers gratuitos e ferramentas open-source</div>
+            </button>
+            <button type="button" class="wizard-option-btn ${AppState.wizardAnswers.maxBudgetBrl === 60 ? 'active' : ''}" onclick="window.AIApp.setWizardAnswer('maxBudgetBrl', 60)">
+              <strong>Até ~R$ 60/mês</strong>
+              <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">Z.ai Coding, OpenCode Go ou Kimi</div>
+            </button>
+            <button type="button" class="wizard-option-btn ${AppState.wizardAnswers.maxBudgetBrl === 120 ? 'active' : ''}" onclick="window.AIApp.setWizardAnswer('maxBudgetBrl', 120)">
+              <strong>Até ~R$ 120/mês</strong>
+              <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">Google AI Pro (R$ 96,99), Cursor Pro ou Claude Pro</div>
+            </button>
+            <button type="button" class="wizard-option-btn ${AppState.wizardAnswers.maxBudgetBrl === 250 ? 'active' : ''}" onclick="window.AIApp.setWizardAnswer('maxBudgetBrl', 250)">
+              <strong>Até ~R$ 250/mês</strong>
+              <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">Stacks compostos (ex: Cursor + Google Pro)</div>
+            </button>
+            <button type="button" class="wizard-option-btn ${AppState.wizardAnswers.maxBudgetBrl === 600 ? 'active' : ''}" onclick="window.AIApp.setWizardAnswer('maxBudgetBrl', 600)">
+              <strong>R$ 500+ / mês</strong>
+              <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">Claude Max, Google Ultra 5x, Heavy-Agentic</div>
+            </button>
+          </div>
+        </div>
+      `;
+      if (nextBtn) nextBtn.textContent = 'Avançar →';
+    } else if (step === 2) {
+      bodyEl.innerHTML = `
+        <div class="wizard-step-box">
+          <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--accent-cyan); font-weight: 700;">Etapa 2 de 5</div>
+          <h4 style="margin: 8px 0;">A assinatura é para uso individual ou para equipe?</h4>
+          <div class="wizard-options-grid">
+            <button type="button" class="wizard-option-btn ${AppState.wizardAnswers.audience === 'individual' ? 'active' : ''}" onclick="window.AIApp.setWizardAnswer('audience', 'individual')">
+              <strong>👤 Individual / Desenvolvedor</strong>
+              <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">Para 1 usuário sem necessidade de gestão de time</div>
+            </button>
+            <button type="button" class="wizard-option-btn ${AppState.wizardAnswers.audience === 'team' ? 'active' : ''}" onclick="window.AIApp.setWizardAnswer('audience', 'team')">
+              <strong>👥 Equipe / Empresa (Teams)</strong>
+              <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">Múltiplos assentos, faturamento centralizado e SSO</div>
+            </button>
+          </div>
+        </div>
+      `;
+      if (nextBtn) nextBtn.textContent = 'Avançar →';
+    } else if (step === 3) {
+      bodyEl.innerHTML = `
+        <div class="wizard-step-box">
+          <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--accent-cyan); font-weight: 700;">Etapa 3 de 5</div>
+          <h4 style="margin: 8px 0;">Qual é o seu foco principal de utilização?</h4>
+          <div class="wizard-options-grid">
+            <button type="button" class="wizard-option-btn ${AppState.wizardAnswers.primaryFocus === 'coding' ? 'active' : ''}" onclick="window.AIApp.setWizardAnswer('primaryFocus', 'coding')">
+              <strong>💻 Coding & Engenharia de Software</strong>
+              <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">Editor nativo, agentes de código, terminal</div>
+            </button>
+            <button type="button" class="wizard-option-btn ${AppState.wizardAnswers.primaryFocus === 'general' ? 'active' : ''}" onclick="window.AIApp.setWizardAnswer('primaryFocus', 'general')">
+              <strong>💬 Chat, Redação & Pesquisa Geral</strong>
+              <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">Interface web, upload de documentos, redação</div>
+            </button>
+            <button type="button" class="wizard-option-btn ${AppState.wizardAnswers.primaryFocus === 'agent' ? 'active' : ''}" onclick="window.AIApp.setWizardAnswer('primaryFocus', 'agent')">
+              <strong>🤖 Agentes Autônomos & Execução Paralela</strong>
+              <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">Loop infinito de tarefas, streams concorrentes</div>
+            </button>
+          </div>
+        </div>
+      `;
+      if (nextBtn) nextBtn.textContent = 'Avançar →';
+    } else if (step === 4) {
+      bodyEl.innerHTML = `
+        <div class="wizard-step-box">
+          <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--accent-cyan); font-weight: 700;">Etapa 4 de 5</div>
+          <h4 style="margin: 8px 0;">Você tem preferência por um modelo ou família específica?</h4>
+          <div class="wizard-options-grid">
+            <button type="button" class="wizard-option-btn ${AppState.wizardAnswers.priorityModel === 'any' ? 'active' : ''}" onclick="window.AIApp.setWizardAnswer('priorityModel', 'any')">
+              <strong>Qualquer / Melhor Custo-Benefício</strong>
+            </button>
+            <button type="button" class="wizard-option-btn ${AppState.wizardAnswers.priorityModel === 'claude' ? 'active' : ''}" onclick="window.AIApp.setWizardAnswer('priorityModel', 'claude')">
+              <strong>Claude (Anthropic)</strong>
+              <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">Sonnet 4.6, Opus 4.6 ou Fable 5.1</div>
+            </button>
+            <button type="button" class="wizard-option-btn ${AppState.wizardAnswers.priorityModel === 'gemini' ? 'active' : ''}" onclick="window.AIApp.setWizardAnswer('priorityModel', 'gemini')">
+              <strong>Gemini (Google)</strong>
+              <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">Gemini 3.7 Flash / Pro e 5 TB de Drive</div>
+            </button>
+            <button type="button" class="wizard-option-btn ${AppState.wizardAnswers.priorityModel === 'openai' ? 'active' : ''}" onclick="window.AIApp.setWizardAnswer('priorityModel', 'openai')">
+              <strong>OpenAI</strong>
+              <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">GPT-5.6, Codex e Canvas</div>
+            </button>
+          </div>
+        </div>
+      `;
+      if (nextBtn) nextBtn.textContent = 'Avançar →';
+    } else if (step === 5) {
+      bodyEl.innerHTML = `
+        <div class="wizard-step-box">
+          <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--accent-cyan); font-weight: 700;">Etapa 5 de 5</div>
+          <h4 style="margin: 8px 0;">Qual a sua tolerância a cobranças variáveis adicionais?</h4>
+          <div class="wizard-options-grid">
+            <button type="button" class="wizard-option-btn ${AppState.wizardAnswers.requirePredictableCost === true ? 'active' : ''}" onclick="window.AIApp.setWizardAnswer('requirePredictableCost', true)">
+              <strong>💵 Exijo Custo 100% Fixo</strong>
+              <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">Zero cobranças variáveis na fatura além da mensalidade</div>
+            </button>
+            <button type="button" class="wizard-option-btn ${AppState.wizardAnswers.requirePredictableCost === false ? 'active' : ''}" onclick="window.AIApp.setWizardAnswer('requirePredictableCost', false)">
+              <strong>📈 Aceito Créditos e Variáveis</strong>
+              <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">Posso pagar extras por requisições ou modelos adicionais</div>
+            </button>
+          </div>
+        </div>
+      `;
+      if (nextBtn) nextBtn.textContent = 'Ver Recomendações 🎯';
+    } else if (step === 6) {
+      // Resultados: Executa recomendações determinísticas (Seções 87-89)
+      const recs = PlanExplorer.runPlanWizard(AppState.wizardAnswers, SUBSCRIPTION_PLANS_DATA);
+
+      bodyEl.innerHTML = `
+        <div class="wizard-step-box">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+            <span style="font-size: 1.5rem;">🎯</span>
+            <div>
+              <h4 style="margin: 0;">Top 3 Planos Recomendados para o Seu Perfil</h4>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Calculado a partir de scores determinísticos oficiais.</p>
+            </div>
+          </div>
+
+          ${recs.map((rec, i) => {
+            const p = rec.plan;
+            const disp = PlanExplorer.getDisplayPrice(p, AppState.planCurrency || 'BRL', FX_RATES_DATA);
+
+            return `
+              <div class="wizard-rec-card">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 8px;">
+                  <div>
+                    <span class="badge-tag ${i === 0 ? 'badge-subdollar' : 'badge-frontier'}">${i === 0 ? '🥇 Melhor Escolha' : i === 1 ? '🥈 2ª Opção' : '🥉 3ª Opção'}</span>
+                    <h4 style="margin: 4px 0; color: var(--text-primary);">${p.provider.toUpperCase()} • ${p.planName}</h4>
+                  </div>
+                  <div style="text-align: right;">
+                    <strong style="color: var(--accent-cyan); font-size: 1.1rem;">${disp.text}</strong>
+                    <div style="font-size: 0.72rem; color: var(--text-muted);">${disp.subtext}</div>
+                  </div>
+                </div>
+
+                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px;">
+                  <strong>Por que recomendamos:</strong>
+                  <ul style="margin: 4px 0 0 16px; padding: 0;">
+                    ${rec.reasons.map(r => `<li>${r}</li>`).join('')}
+                  </ul>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px;">
+                  <button class="btn-table-action" onclick="window.AIApp.closePlanWizard(); window.AIApp.openPlanDetails('${p.id}');">Ver Detalhes do Plano</button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+      if (nextBtn) nextBtn.textContent = 'Concluir';
+    }
+  }
+
+  // Helpers de UI e Ações da Interface
+  function togglePlanFavorite(planId) {
+    let list = AppState.planFavoritesList || [];
+    if (list.includes(planId)) {
+      list = list.filter(id => id !== planId);
+      showToast('Plano removido dos favoritos.');
+    } else {
+      list.push(planId);
+      showToast('Plano adicionado aos favoritos ⭐');
+    }
+    AppState.planFavoritesList = list;
+    try { localStorage.setItem('model_intel_favorite_plans', JSON.stringify(list)); } catch(e) {}
+    renderPlansView();
+  }
+
+  function togglePlanCompare(planId) {
+    let list = AppState.selectedPlanCompare || [];
+    if (list.includes(planId)) {
+      list = list.filter(id => id !== planId);
+    } else {
+      if (list.length >= 5) {
+        showToast('⚠️ Máximo de 5 planos simultâneos no comparador.');
+        return;
+      }
+      list.push(planId);
+    }
+    AppState.selectedPlanCompare = list;
+    updatePlanCompareTray();
+    renderPlansView();
   }
 
   function updatePlanCompareTray() {
@@ -3419,55 +4758,34 @@
     if (!tray || !countLabel) return;
 
     const list = AppState.selectedPlanCompare || [];
-    if (list.length > 0) {
+    if (list.length > 0 && (AppState.planActiveTab || 'plans') !== 'compare') {
       tray.style.display = 'block';
-      countLabel.textContent = `${list.length} plano(s) selecionado(s) para comparação (máx 4)`;
+      countLabel.textContent = `${list.length} plano(s) selecionado(s) para comparação (máx 5)`;
     } else {
       tray.style.display = 'none';
     }
   }
 
+  function resetAllPlanFilters() {
+    AppState.planSelectedCompanies = [];
+    AppState.planMaxPrice = 250;
+    AppState.planAudience = 'all';
+    AppState.planProfile = 'all';
+    AppState.planPrivacyFilter = 'all';
+    AppState.filterPredictableOnly = false;
+    AppState.filterByokOnly = false;
+    AppState.filterCloudStorageOnly = false;
+    AppState.planSearchQuery = '';
+    AppState.planSort = 'default';
+    AppState.planGrouping = 'company';
+    renderPlansView();
+    showToast('Filtros restaurados para o padrão.');
+  }
+
+  // Compatibilidade com a função legada openPlanCompareModal
   function openPlanCompareModal() {
-    const modal = document.getElementById('planCompareModalOverlay');
-    const thead = document.getElementById('planCompareHeaderRow');
-    const tbody = document.getElementById('planCompareTableBody');
-    if (!modal || !thead || !tbody) return;
-
-    const planIds = AppState.selectedPlanCompare || [];
-    if (planIds.length < 2) {
-      showToast('Selecione ao menos 2 planos para comparar lado a lado.');
-      return;
-    }
-
-    const plans = planIds.map(id => SUBSCRIPTION_PLANS_DATA.find(p => p.id === id)).filter(Boolean);
-
-    thead.innerHTML = `<th>Atributo</th>` + plans.map(p => `
-      <th style="min-width: 200px;">
-        <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">${p.provider}</div>
-        <div style="font-size: 1rem; color: var(--text-primary);">${p.planName}</div>
-      </th>
-    `).join('');
-
-    const rows = [
-      { label: 'Custo Mensal (BRL / FX 03/09)', fn: p => p.localizedPricing && p.localizedPricing.BRL && p.localizedPricing.BRL.official ? `<strong class="highlight-green">R$ ${p.localizedPricing.BRL.price.toFixed(2).replace('.', ',')} (Oficial)</strong>` : `~ R$ ${FX_HELPERS.convertUsdToBrl(p.monthlyPriceUsd).toFixed(2).replace('.', ',')}` },
-      { label: 'Preço Original USD / CNY', fn: p => p.nativeCurrency === 'CNY' ? `¥ ${p.monthlyPriceCny} / mo (~ US$ ${p.monthlyPriceUsd.toFixed(2)})` : `US$ ${p.monthlyPriceUsd.toFixed(2)} / mo` },
-      { label: 'Público Alvo', fn: p => p.targetAudience === 'team' ? '🏢 Equipe / Corporativo' : '👤 Individual / Dev' },
-      { label: 'Franquia & Pools', fn: p => p.quotaDescription },
-      { label: 'Modelos Principais', fn: p => (p.includedModels || []).join(', ') },
-      { label: 'Overage Excedente', fn: p => p.overageAllowed ? '✅ Permitido (on-demand ou créditos)' : '❌ Não permitido (bloqueia até reset)' },
-      { label: 'Créditos de API Inclusos?', fn: p => p.apiIncluded ? '✅ Sim (endpoint direto)' : '❌ Não (apenas app / IDE)' },
-      { label: 'Privacidade & ZDR', fn: p => p.privacyNotes },
-      { label: 'Melhor Adequação', fn: p => p.bestFor }
-    ];
-
-    tbody.innerHTML = rows.map(r => `
-      <tr>
-        <td style="font-weight: 600; color: var(--text-secondary);">${r.label}</td>
-        ${plans.map(p => `<td>${r.fn(p)}</td>`).join('')}
-      </tr>
-    `).join('');
-
-    modal.classList.add('active');
+    AppState.planActiveTab = 'compare';
+    renderPlansView();
   }
 
   function closePlanCompareModal() {
@@ -4538,6 +5856,103 @@
         if (overlay) overlay.classList.remove('open');
         window._commandResultsCache[idx].action();
       }
+    },
+    // Métodos do Explorador de Planos (06)
+    openPlanDetails: openPlanDetailsModal,
+    closePlanDetails: closePlanDetailsModal,
+    openPlanWizard: openPlanWizardModal,
+    closePlanWizard: closePlanWizardModal,
+    setWizardAnswer(key, val) {
+      AppState.wizardAnswers[key] = val;
+      renderWizardStep();
+    },
+    togglePlanFavorite,
+    togglePlanCompare,
+    toggleCompanyGroup(companyId) {
+      AppState.expandedCompanies[companyId] = !AppState.expandedCompanies[companyId];
+      renderPlansView();
+    },
+    toggleCompanyFilter(companyId) {
+      const idx = (AppState.planSelectedCompanies || []).indexOf(companyId);
+      if (idx > -1) {
+        AppState.planSelectedCompanies.splice(idx, 1);
+      } else {
+        AppState.planSelectedCompanies.push(companyId);
+      }
+      renderPlansView();
+    },
+    switchPlanTab(tabId) {
+      AppState.planActiveTab = tabId;
+      renderPlansView();
+    },
+    selectModelInExplorer(modelId) {
+      AppState.planSelectedModel = modelId;
+      renderTabModels();
+    },
+    setBudgetValue(val) {
+      AppState.planBudgetValue = parseFloat(val) || 0;
+      renderTabBudget();
+    },
+    setBudgetProfile(val) {
+      AppState.planBudgetProfile = val;
+      renderTabBudget();
+    },
+    toggleCompareDifferences(val) {
+      AppState.compareOnlyDifferences = !!val;
+      renderTabCompare();
+    },
+    removePlanFromCompare(planId) {
+      AppState.selectedPlanCompare = (AppState.selectedPlanCompare || []).filter(id => id !== planId);
+      updatePlanCompareTray();
+      renderTabCompare();
+    },
+    clearPlanCompare() {
+      AppState.selectedPlanCompare = [];
+      updatePlanCompareTray();
+      renderTabCompare();
+    },
+    compareAllFavorites() {
+      AppState.selectedPlanCompare = [...(AppState.planFavoritesList || [])];
+      AppState.planActiveTab = 'compare';
+      renderPlansView();
+    },
+    clearAllFavorites() {
+      AppState.planFavoritesList = [];
+      try { localStorage.removeItem('model_intel_favorite_plans'); } catch(e) {}
+      renderPlansView();
+    },
+    resetAllPlanFilters,
+    resetPriceFilter() {
+      AppState.planMaxPrice = 250;
+      renderPlansView();
+    },
+    setPlanAudience(val) {
+      AppState.planAudience = val;
+      renderPlansView();
+    },
+    setPlanProfile(val) {
+      AppState.planProfile = val;
+      renderPlansView();
+    },
+    togglePredictableOnly() {
+      AppState.filterPredictableOnly = !AppState.filterPredictableOnly;
+      renderPlansView();
+    },
+    toggleByokOnly() {
+      AppState.filterByokOnly = !AppState.filterByokOnly;
+      renderPlansView();
+    },
+    toggleStorageOnly() {
+      AppState.filterCloudStorageOnly = !AppState.filterCloudStorageOnly;
+      renderPlansView();
+    },
+    setPrivacyFilter(val) {
+      AppState.planPrivacyFilter = val;
+      renderPlansView();
+    },
+    clearPlanSearch() {
+      AppState.planSearchQuery = '';
+      renderPlansView();
     }
   };
 

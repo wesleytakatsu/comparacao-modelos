@@ -839,6 +839,21 @@ const CAMELAI_PLATFORM_DATA = {
     productName: 'camelCode',
     category: 'Full-Stack Coding Agent & App Builder',
     description: 'Agente de codificação autônomo com workspaces persistentes, criação e deploy full-stack de apps e integrações nativas.',
+    automationLimits: {
+      canonicalDocs: {
+        free: { count: 1, interval: 'daily' },
+        starter: { count: 1, interval: 'hourly' },
+        pro: { count: 50, intervalMinutes: 5 },
+        team: { countPerMember: 50, intervalMinutes: 5 }
+      },
+      marketingPage: {
+        free: { count: 2, interval: 'daily' },
+        starter: { count: 10, interval: 'hourly' },
+        pro: { count: 50 }
+      },
+      sourceConflict: true,
+      preferredSource: 'detailed-plan-documentation'
+    },
     hostedPlans: [
       {
         id: 'camelai-code-free',
@@ -884,8 +899,11 @@ const CAMELAI_PLATFORM_DATA = {
         byokAllowed: true,
         topUpAllowed: true,
         openAiLoginAllowed: true,
-        automations: '1 hourly (docs) / 10 hourly (marketing)',
-        automationConflict: true,
+        automationLimits: {
+          marketingClaim: '10 hourly',
+          documentationLimit: '1 hourly',
+          conflictStatus: 'unresolved'
+        },
         bestFor: 'Desenvolvedores individuais com projetos pessoais ativos.'
       },
       {
@@ -1142,10 +1160,10 @@ const PLATFORM_MODEL_CATALOG = {
     platformName: 'Cursor IDE',
     pools: {
       cursorModels: {
-        name: 'Cursor Models Pool',
+        name: 'Cursor Models (Included High-Allowance Pool)',
         pricingModel: 'included-generous',
-        description: 'Uso prioritário e generoso com taxa de requisições ampliada exclusivo para a família Grok e Composer.',
-        models: ['grok-4-6', 'grok-4-5', 'composer-2-5']
+        description: 'Pool canônico incluído de alta franquia de uso no plano Pro/Ultra. Não consome quota de Other Models.',
+        models: ['composer-2-5', 'grok-4-5', 'grok-4-6']
       },
       otherModels: {
         name: 'Other Models (Usage-Based / API Price)',
@@ -1154,9 +1172,15 @@ const PLATFORM_MODEL_CATALOG = {
         models: ['gemini-3-8-flash', 'claude-fable-5-1', 'claude-opus-5', 'claude-sonnet-5', 'gpt-5-6-sol', 'gpt-5-6-terra', 'kimi-k3', 'glm-5-3']
       }
     },
-    grokPricing: {
-      standard: { input: 2.00, cacheRead: 0.50, output: 6.00 },
-      fast: { input: 4.00, cacheRead: 1.00, output: 12.00 }
+    pricing: {
+      grok46: {
+        standard: { input: 2.00, cacheRead: 0.50, output: 6.00 },
+        fast: { input: 4.00, cacheRead: 1.00, output: 12.00 }
+      },
+      grok45: {
+        standard: { input: 2.00, cacheRead: 0.50, output: 6.00 },
+        fast: { input: 4.00, cacheRead: 1.00, output: 18.00 }
+      }
     }
   },
 
@@ -1176,60 +1200,580 @@ const PLATFORM_MODEL_CATALOG = {
     }
   },
 
-  // Matriz de disponibilidade dos 44 modelos canônicos
+  formatPlatformStatus(modelId, platformKey) {
+    const row = this.availabilityMatrix.find(r => r.modelId === modelId);
+    if (!row || !row.platforms || !row.platforms[platformKey]) {
+      return '🔴 Indisponível';
+    }
+    const p = row.platforms[platformKey];
+    switch (platformKey) {
+      case 'directApi':
+        if (!p.available) return p.priceDesc ? `🔴 ${p.priceDesc}` : '🔴 Indisponível';
+        if (p.status === 'legacy' || p.status === 'superseded') return `🟡 ${p.status === 'legacy' ? 'Legacy' : 'Superseded'} (${p.priceDesc || ''})`.trim();
+        if (p.status === 'open-weights') return `🟢 Open Weights (${p.priceDesc || 'Gratuito'})`.trim();
+        return `🟢 Sim (${p.priceDesc || 'API'})`;
+      case 'cursor':
+        if (!p.available) return '🔴 Indisponível';
+        if (p.pool === 'cursor-models') return `🟢 Cursor Models (${p.notes || 'Incluso'})`;
+        if (p.pool === 'local') return `🟢 Local via ${p.notes || 'vLLM'}`;
+        if (p.notes && p.notes.includes('Legacy')) return '🟡 Legacy';
+        if (p.notes && p.notes.includes('Superseded')) return '🟡 Superseded';
+        if (p.multiplier) return `🟢 Other Models (${p.multiplier}x)`;
+        return `🟢 Other Models (${p.notes || 'API Price'})`;
+      case 'opencode':
+        if (!p.available) return p.notes && p.notes.includes('Descontinuado') ? '🔴 Descontinuado' : '🔴 Indisponível';
+        return `🟢 Go (${p.burnRate}× burn • ${p.reqEstimate ? p.reqEstimate.toLocaleString('pt-BR') : ''} req)`;
+      case 'antigravity':
+        if (!p.available) return '🔴 Indisponível';
+        if (p.pool === 'pool1') return `🟢 Pool 1: Gemini (${p.notes || 'Nativo'})`;
+        if (p.pool === 'pool2') return `🟢 Pool 2 Compartilhado (${p.notes || 'Claude/GPT'})`;
+        return '🟢 Disponível';
+      case 'openrouter':
+        if (!p.available) return '🔴 Indisponível';
+        if (p.status === 'legacy' || p.status === 'superseded') return `🟡 ${p.status === 'legacy' ? 'Legacy' : 'Superseded'}`;
+        return `🟢 Sim (${p.notes || 'OpenRouter'})`;
+      case 'local':
+        if (!p.supported) return p.type === 'cloud-only' ? '🔴 Nuvem' : '🔴 Proprietário';
+        return `🟢 ${p.requirements || '100% Local'}`;
+      default:
+        return '⚪ Desconhecido';
+    }
+  },
+
+  // Matriz de disponibilidade dos 44 modelos canônicos estruturada por plataforma
   availabilityMatrix: [
-    { modelId: 'claude-fable-5-1', name: 'Claude Fable 5.1', directApi: '🟢 Sim ($10/$50)', cursor: '🟢 Other Models (Usage-based)', opencode: '🔴 Indisponível', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim (OpenRouter)', local: '🔴 Proprietário' },
-    { modelId: 'claude-fable-5', name: 'Claude Fable 5', directApi: '🟡 Superseded ($10/$50)', cursor: '🟡 Superseded', opencode: '🔴 Indisponível', antigravity: '🔴 Indisponível', openrouter: '🟡 Superseded', local: '🔴 Proprietário' },
-    { modelId: 'claude-opus-5', name: 'Claude Opus 5', directApi: '🟢 Sim ($5/$25)', cursor: '🟢 Other Models (1.5x)', opencode: '🔴 Indisponível', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🔴 Proprietário' },
-    { modelId: 'claude-sonnet-5', name: 'Claude Sonnet 5', directApi: '🟢 Sim ($2/$10)', cursor: '🟢 Other Models (1.0x)', opencode: '🔴 Indisponível', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🔴 Proprietário' },
-    { modelId: 'claude-opus-4-6', name: 'Claude Opus 4.6', directApi: '🟡 Legacy ($5/$25)', cursor: '🟡 Legacy', opencode: '🔴 Indisponível', antigravity: '🟢 Pool 2 Compartilhado', openrouter: '🟡 Legacy', local: '🔴 Proprietário' },
-    { modelId: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', directApi: '🟡 Legacy ($3/$15)', cursor: '🟡 Legacy', opencode: '🔴 Indisponível', antigravity: '🟢 Pool 2 Compartilhado', openrouter: '🟡 Legacy', local: '🔴 Proprietário' },
-    { modelId: 'claude-haiku-4-5', name: 'Claude Haiku 4.5', directApi: '🟢 Sim ($1/$5)', cursor: '🟢 Other Models (1.0x)', opencode: '🔴 Indisponível', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🔴 Proprietário' },
-    { modelId: 'gemini-3-8-flash', name: 'Gemini 3.8 Flash', directApi: '🟢 Sim ($0.75/$3.75 promo)', cursor: '🟢 Other Models ($0.75/$3.50 API Price)', opencode: '🔴 Indisponível', antigravity: '🟢 Pool 1: Gemini (Nativo 1M)', openrouter: '🟢 Sim', local: '🔴 Nuvem Google' },
-    { modelId: 'gemini-3-7-flash', name: 'Gemini 3.7 Flash', directApi: '🟢 Sim ($0.75/$3.75)', cursor: '🟢 Other Models ($0.75/$3.75)', opencode: '🔴 Indisponível', antigravity: '🟢 Pool 1: Gemini', openrouter: '🟢 Sim', local: '🔴 Nuvem Google' },
-    { modelId: 'gemini-3-5-flash', name: 'Gemini 3.5 Flash', directApi: '🟢 Sim ($0.075/$0.30)', cursor: '🟢 Other Models', opencode: '🔴 Indisponível', antigravity: '🟢 Pool 1: Gemini', openrouter: '🟢 Sim', local: '🔴 Nuvem Google' },
-    { modelId: 'gemini-3-1-pro', name: 'Gemini 3.1 Pro', directApi: '🟢 Sim ($1.25/$5.00)', cursor: '🟡 Other Models', opencode: '🔴 Indisponível', antigravity: '🟢 Pool 1: Gemini (Multimodal Pro)', openrouter: '🟢 Sim', local: '🔴 Nuvem Google' },
-    { modelId: 'gpt-5-6-sol', name: 'GPT-5.6 Sol', directApi: '🟢 Sim ($4/$20)', cursor: '🟢 Other Models (2.0x)', opencode: '🔴 Indisponível', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🔴 Proprietário' },
-    { modelId: 'gpt-5-6-terra', name: 'GPT-5.6 Terra', directApi: '🟢 Sim ($2/$12)', cursor: '🟢 Other Models (1.0x)', opencode: '🔴 Indisponível', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🔴 Proprietário' },
-    { modelId: 'gpt-5-6-luna', name: 'GPT-5.6 Luna', directApi: '🟢 Sim ($0.20/$1.20)', cursor: '🟢 Other Models', opencode: '🟢 Go (4× burn • 10.250 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🔴 Proprietário' },
-    { modelId: 'gpt-5-6-pro', name: 'GPT-5.6 Sol Pro', directApi: '🟢 Sim ($15/$60)', cursor: '🟡 Other Models (2.0x)', opencode: '🔴 Indisponível', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🔴 Proprietário' },
-    { modelId: 'gpt-oss-20b', name: 'gpt-oss-20b', directApi: '🟢 Open Weights', cursor: '🟢 Local via Ollama/vLLM', opencode: '🔴 Indisponível (Suporte Local CLI)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🟢 100% Local (16GB VRAM)' },
-    { modelId: 'gpt-oss-120b', name: 'gpt-oss-120b', directApi: '🟢 Open Weights', cursor: '🟢 Local via vLLM', opencode: '🔴 Indisponível (Suporte Local CLI)', antigravity: '🟢 Pool 2: Claude/GPT (Canal Lateral)', openrouter: '🟢 Sim', local: '🟢 100% Local (80GB VRAM)' },
-    { modelId: 'grok-4-6', name: 'Grok 4.6', directApi: '🟢 Sim ($2/$10 xAI API)', cursor: '🟢 Nativo Cursor Models (Standard $2/$6 | Fast $4/$12)', opencode: '🟢 Go (4× burn • 845 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🔴 Nuvem xAI' },
-    { modelId: 'grok-4-5', name: 'Grok 4.5', directApi: '🟢 Sim ($1/$5)', cursor: '🟢 Nativo Cursor Models', opencode: '🔴 Indisponível', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🔴 Nuvem xAI' },
-    { modelId: 'glm-5-3-flash', name: 'GLM-5.3-Flash (ex-Ox Alpha)', directApi: '🟢 Sim MIT ($0.15/$0.50)', cursor: '🟢 First-class (OpenRouter)', opencode: '🟢 Go (4× burn • 7.900 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim (OpenRouter)', local: '🟢 320B MoE (KTransformers)' },
-    { modelId: 'glm-5-3', name: 'GLM-5.3', directApi: '🟢 Sim ($1/$3)', cursor: '🟡 OpenRouter', opencode: '🟢 Go (4× burn • 1.080 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🟡 Cluster Multi-GPU' },
-    { modelId: 'glm-5-2', name: 'GLM-5.2', directApi: '🟢 Sim ($0.60/$2)', cursor: '🟡 OpenRouter', opencode: '🟢 Go (1× burn • 4.300 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🟡 Cluster Multi-GPU' },
-    { modelId: 'glm-5-1', name: 'GLM-5.1', directApi: '🟢 Sim ($0.40/$1.50)', cursor: '🟡 OpenRouter', opencode: '🟢 Go (1× burn • 4.300 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🟡 Cluster Multi-GPU' },
-    { modelId: 'kimi-k3', name: 'Kimi K3', directApi: '🟢 Sim (¥ / $)', cursor: '🟡 OpenRouter', opencode: '🟢 Go (4× burn • 490 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🟡 Cluster 8x H100' },
-    { modelId: 'kimi-k2-7-code', name: 'Kimi K2.7 Code', directApi: '🟢 Sim', cursor: '🟡 OpenRouter', opencode: '🟢 Go (1× burn • 6.750 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🟡 Cluster Multi-GPU' },
-    { modelId: 'kimi-k2-6', name: 'Kimi K2.6', directApi: '🟢 Sim', cursor: '🟡 OpenRouter', opencode: '🟢 Go (1× burn • 5.750 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🟡 Cluster Multi-GPU' },
-    { modelId: 'deepseek-v4-pro-0813', name: 'DeepSeek-V4-Pro', directApi: '🟢 Sim ($0.80/$2.40)', cursor: '🟢 OpenRouter / DeepSeek API', opencode: '🟢 Go (4× burn • 5.200 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🟡 Cluster FP8' },
-    { modelId: 'deepseek-v4-flash-0731', name: 'DeepSeek-V4-Flash', directApi: '🟢 Sim ($0.22/$0.66)', cursor: '🟢 OpenRouter / Direct API', opencode: '🟢 Go (2× burn • 37.800 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🟢 304B MoE Local' },
-    { modelId: 'deepseek-v4-vision-exp', name: 'DeepSeek-V4-Flash-Vision-Exp', directApi: '🟢 Sim ($0.22/$0.66)', cursor: '🟢 Direct API', opencode: '🟢 Go (4× burn • 18.900 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🟡 Preview de Pesquisa' },
-    { modelId: 'deepseek-v3-2', name: 'DeepSeek-V3.2', directApi: '🟡 Legacy ($0.14/$0.28)', cursor: '🟡 Legacy', opencode: '🔴 Descontinuado', antigravity: '🔴 Indisponível', openrouter: '🟡 Legacy', local: '🟢 671B MoE' },
-    { modelId: 'qwen3-8-max', name: 'Qwen3.8 Max', directApi: '🟢 Sim Alibaba Cloud', cursor: '🟡 OpenRouter', opencode: '🟢 Go (4× burn • 810 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🔴 Serviço Gerenciado' },
-    { modelId: 'qwen3-8-2-4t-a95b', name: 'Qwen3.8-2.4T-A95B', directApi: '🟢 Open Weights Apache 2.0', cursor: '🟡 vLLM / SGLang', opencode: '🔴 Indisponível', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🟡 Cluster 4x-8x H100' },
-    { modelId: 'qwen3-8-27b', name: 'Qwen3.8-27B', directApi: '🟢 Open Weights', cursor: '🟢 Ollama / vLLM', opencode: '🔴 Indisponível', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🟢 1x RTX 4090 / 32GB' },
-    { modelId: 'qwen3-7-max', name: 'Qwen3.7 Max', directApi: '🟡 Legacy', cursor: '🟡 Legacy', opencode: '🟢 Go (2× burn • 840 req)', antigravity: '🔴 Indisponível', openrouter: '🟡 Legacy', local: '🔴 Serviço' },
-    { modelId: 'mimo-v2-5-pro', name: 'MiMo-V2.5-Pro', directApi: '🟢 Sim ($0.40/$1.20)', cursor: '🟡 OpenRouter', opencode: '🟢 Go (4× burn • 16.300 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🟡 Cluster 500B' },
-    { modelId: 'mimo-v2-5', name: 'MiMo-V2.5 (Base)', directApi: '🟢 Sim ($0.05/$0.15)', cursor: '🟡 OpenRouter', opencode: '🟢 Go (1× burn • 150.400 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🟢 160B MoE (KTransformers)' },
-    { modelId: 'minimax-m3', name: 'MiniMax M3', directApi: '🟢 Sim ($0.40/$1.20)', cursor: '🟡 OpenRouter', opencode: '🟢 Go (1× burn • 16.000 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🟡 Cluster 420B' },
-    { modelId: 'minimax-m2-7', name: 'MiniMax M2.7', directApi: '🟢 Sim ($0.20/$0.60)', cursor: '🟡 OpenRouter', opencode: '🟢 Go (1× burn • 17.000 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🟢 230B MoE Local' },
-    { modelId: 'composer-2-5', name: 'Composer 2.5', directApi: '🔴 Exclusivo Cursor IDE', cursor: '🟢 Nativo Cursor Models', opencode: '🔴 Indisponível', antigravity: '🔴 Indisponível', openrouter: '🔴 Indisponível', local: '🔴 Proprietário Cursor' },
-    { modelId: 'nemotron-3-5-lightning', name: 'Nemotron 3.5 Lightning', directApi: '🟢 NVIDIA NIM / Open Weights', cursor: '🟢 Local / NIM', opencode: '🔴 Indisponível', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🟢 1x RTX 4090 (NVFP4)' },
-    { modelId: 'hy3-tencent', name: 'Tencent Hy3', directApi: '🟢 Sim ($0.14/$0.58)', cursor: '🟡 OpenRouter', opencode: '🟢 Go (1× burn • 21.500 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🟢 300B MoE Local' },
-    { modelId: 'longcat-2-0', name: 'LongCat-2.0', directApi: '🟢 Sim ($0.10/$0.30)', cursor: '🟡 OpenRouter', opencode: '🟢 Go (1× burn • 57.200 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🟡 Cluster Grande' },
-    { modelId: 'muse-spark-1-2', name: 'Muse Spark 1.2', directApi: '🟢 Open Weights MIT', cursor: '🟡 OpenRouter', opencode: '🟢 Go (1× burn • 226.600 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🟢 Local Multi-GPU' },
-    { modelId: 'gpt-5-5-preview', name: 'GPT-5.5 Preview', directApi: '🟡 Superseded', cursor: '🟡 Superseded', opencode: '🔴 Indisponível', antigravity: '🔴 Indisponível', openrouter: '🟡 Superseded', local: '🔴 Proprietário' }
+    {
+      modelId: 'claude-fable-5-1', name: 'Claude Fable 5.1',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: '$10/$50' },
+        cursor: { available: true, pool: 'other-models', multiplier: 2.0, notes: 'Usage-based' },
+        opencode: { available: false, tier: null, burnRate: null, reqEstimate: null, notes: 'Indisponível' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'OpenRouter' },
+        local: { supported: false, requirements: 'N/A', type: 'proprietary' }
+      }
+    },
+    {
+      modelId: 'claude-fable-5', name: 'Claude Fable 5',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'superseded', priceDesc: '$10/$50' },
+        cursor: { available: true, pool: 'other-models', multiplier: 2.0, notes: 'Superseded' },
+        opencode: { available: false, tier: null, burnRate: null, reqEstimate: null, notes: 'Indisponível' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'superseded', notes: 'Superseded' },
+        local: { supported: false, requirements: 'N/A', type: 'proprietary' }
+      }
+    },
+    {
+      modelId: 'claude-opus-5', name: 'Claude Opus 5',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: '$5/$25' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.5, notes: '1.5x' },
+        opencode: { available: false, tier: null, burnRate: null, reqEstimate: null, notes: 'Indisponível' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: false, requirements: 'N/A', type: 'proprietary' }
+      }
+    },
+    {
+      modelId: 'claude-sonnet-5', name: 'Claude Sonnet 5',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: '$2/$10' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: '1.0x' },
+        opencode: { available: false, tier: null, burnRate: null, reqEstimate: null, notes: 'Indisponível' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: false, requirements: 'N/A', type: 'proprietary' }
+      }
+    },
+    {
+      modelId: 'claude-opus-4-6', name: 'Claude Opus 4.6',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'legacy', priceDesc: '$5/$25' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.5, notes: 'Legacy' },
+        opencode: { available: false, tier: null, burnRate: null, reqEstimate: null, notes: 'Indisponível' },
+        antigravity: { available: true, pool: 'pool2', notes: 'Compartilhado' },
+        openrouter: { available: true, status: 'legacy', notes: 'Legacy' },
+        local: { supported: false, requirements: 'N/A', type: 'proprietary' }
+      }
+    },
+    {
+      modelId: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'legacy', priceDesc: '$3/$15' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'Legacy' },
+        opencode: { available: false, tier: null, burnRate: null, reqEstimate: null, notes: 'Indisponível' },
+        antigravity: { available: true, pool: 'pool2', notes: 'Compartilhado' },
+        openrouter: { available: true, status: 'legacy', notes: 'Legacy' },
+        local: { supported: false, requirements: 'N/A', type: 'proprietary' }
+      }
+    },
+    {
+      modelId: 'claude-haiku-4-5', name: 'Claude Haiku 4.5',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: '$1/$5' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: '1.0x' },
+        opencode: { available: false, tier: null, burnRate: null, reqEstimate: null, notes: 'Indisponível' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: false, requirements: 'N/A', type: 'proprietary' }
+      }
+    },
+    {
+      modelId: 'gemini-3-8-flash', name: 'Gemini 3.8 Flash',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: '$0.75/$3.75' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: '$0.75/$3.50 API Price' },
+        opencode: { available: false, tier: null, burnRate: null, reqEstimate: null, notes: 'Indisponível' },
+        antigravity: { available: true, pool: 'pool1', notes: 'Nativo 1M' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: false, requirements: 'N/A', type: 'cloud-only' }
+      }
+    },
+    {
+      modelId: 'gemini-3-7-flash', name: 'Gemini 3.7 Flash',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: '$0.75/$3.75' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: '$0.75/$3.75' },
+        opencode: { available: false, tier: null, burnRate: null, reqEstimate: null, notes: 'Indisponível' },
+        antigravity: { available: true, pool: 'pool1', notes: 'Gemini' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: false, requirements: 'N/A', type: 'cloud-only' }
+      }
+    },
+    {
+      modelId: 'gemini-3-5-flash', name: 'Gemini 3.5 Flash',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: '$0.075/$0.30' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'Other Models' },
+        opencode: { available: false, tier: null, burnRate: null, reqEstimate: null, notes: 'Indisponível' },
+        antigravity: { available: true, pool: 'pool1', notes: 'Gemini' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: false, requirements: 'N/A', type: 'cloud-only' }
+      }
+    },
+    {
+      modelId: 'gemini-3-1-pro', name: 'Gemini 3.1 Pro',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'preview', priceDesc: '$1.25/$5.00' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'Other Models' },
+        opencode: { available: false, tier: null, burnRate: null, reqEstimate: null, notes: 'Indisponível' },
+        antigravity: { available: true, pool: 'pool1', notes: 'Multimodal Pro' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: false, requirements: 'N/A', type: 'cloud-only' }
+      }
+    },
+    {
+      modelId: 'gpt-5-6-sol', name: 'GPT-5.6 Sol',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: '$4/$20' },
+        cursor: { available: true, pool: 'other-models', multiplier: 2.0, notes: '2.0x' },
+        opencode: { available: false, tier: null, burnRate: null, reqEstimate: null, notes: 'Indisponível' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: false, requirements: 'N/A', type: 'proprietary' }
+      }
+    },
+    {
+      modelId: 'gpt-5-6-terra', name: 'GPT-5.6 Terra',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: '$2/$12' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: '1.0x' },
+        opencode: { available: false, tier: null, burnRate: null, reqEstimate: null, notes: 'Indisponível' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: false, requirements: 'N/A', type: 'proprietary' }
+      }
+    },
+    {
+      modelId: 'gpt-5-6-luna', name: 'GPT-5.6 Luna',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: '$0.20/$1.20' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'Other Models' },
+        opencode: { available: true, tier: 'Go', burnRate: 4, reqEstimate: 10250, notes: '4x burn' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: false, requirements: 'N/A', type: 'proprietary' }
+      }
+    },
+    {
+      modelId: 'gpt-5-6-pro', name: 'GPT-5.6 Sol Pro',
+      platforms: {
+        directApi: { available: false, accessMode: 'none', pricingRef: null, status: 'unavailable', priceDesc: 'Indisponível (Exclusivo ChatGPT Pro)' },
+        cursor: { available: false, pool: 'unverified', multiplier: null, notes: 'Não verificado' },
+        opencode: { available: false, tier: null, burnRate: null, reqEstimate: null, notes: 'Indisponível' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: false, status: 'unverified', notes: 'Não verificado' },
+        local: { supported: false, requirements: 'N/A', type: 'proprietary' }
+      }
+    },
+    {
+      modelId: 'gpt-oss-20b', name: 'gpt-oss-20b',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: null, status: 'open-weights', priceDesc: 'Open Weights' },
+        cursor: { available: true, pool: 'local', multiplier: null, notes: 'Ollama/vLLM' },
+        opencode: { available: false, tier: null, burnRate: null, reqEstimate: null, notes: 'Indisponível' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: true, requirements: '16GB VRAM', type: 'open-weights' }
+      }
+    },
+    {
+      modelId: 'gpt-oss-120b', name: 'gpt-oss-120b',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: null, status: 'open-weights', priceDesc: 'Open Weights' },
+        cursor: { available: true, pool: 'local', multiplier: null, notes: 'vLLM' },
+        opencode: { available: false, tier: null, burnRate: null, reqEstimate: null, notes: 'Indisponível' },
+        antigravity: { available: true, pool: 'pool2', notes: 'Claude/GPT' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: true, requirements: '80GB VRAM', type: 'open-weights' }
+      }
+    },
+    {
+      modelId: 'grok-4-6', name: 'Grok 4.6',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: '$2/$0.50/$6 xAI API' },
+        cursor: { available: true, pool: 'cursor-models', multiplier: null, notes: 'Standard $2/$6 | Fast $4/$12' },
+        opencode: { available: true, tier: 'Go', burnRate: 4, reqEstimate: 845, notes: '4x burn' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: false, requirements: 'N/A', type: 'cloud-only' }
+      }
+    },
+    {
+      modelId: 'grok-4-5', name: 'Grok 4.5',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: '$2/$0.30/$6 xAI API' },
+        cursor: { available: true, pool: 'cursor-models', multiplier: null, notes: 'Standard $2/$6 | Fast $4/$18' },
+        opencode: { available: false, tier: null, burnRate: null, reqEstimate: null, notes: 'Indisponível' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: false, requirements: 'N/A', type: 'cloud-only' }
+      }
+    },
+    {
+      modelId: 'glm-5-3-flash', name: 'GLM-5.3-Flash (ex-Ox Alpha)',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'open-weights', priceDesc: 'MIT ($0.15/$0.50)' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'OpenRouter' },
+        opencode: { available: true, tier: 'Go', burnRate: 4, reqEstimate: 7900, notes: '4x burn' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'OpenRouter' },
+        local: { supported: true, requirements: '320B MoE (KTransformers)', type: 'open-weights' }
+      }
+    },
+    {
+      modelId: 'glm-5-3', name: 'GLM-5.3',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: '$1/$3' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'OpenRouter' },
+        opencode: { available: true, tier: 'Go', burnRate: 4, reqEstimate: 1080, notes: '4x burn' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: true, requirements: 'Cluster Multi-GPU', type: 'open-weights' }
+      }
+    },
+    {
+      modelId: 'glm-5-2', name: 'GLM-5.2',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: '$0.60/$2' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'OpenRouter' },
+        opencode: { available: true, tier: 'Go', burnRate: 1, reqEstimate: 4300, notes: '1x burn' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: true, requirements: 'Cluster Multi-GPU', type: 'open-weights' }
+      }
+    },
+    {
+      modelId: 'glm-5-1', name: 'GLM-5.1',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: '$0.40/$1.50' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'OpenRouter' },
+        opencode: { available: true, tier: 'Go', burnRate: 1, reqEstimate: 4300, notes: '1x burn' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: true, requirements: 'Cluster Multi-GPU', type: 'open-weights' }
+      }
+    },
+    {
+      modelId: 'kimi-k3', name: 'Kimi K3',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: '¥ / $' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'OpenRouter' },
+        opencode: { available: true, tier: 'Go', burnRate: 4, reqEstimate: 490, notes: '4x burn' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: true, requirements: 'Cluster 8x H100', type: 'open-weights' }
+      }
+    },
+    {
+      modelId: 'kimi-k2-7-code', name: 'Kimi K2.7 Code',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: 'Sim' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'OpenRouter' },
+        opencode: { available: true, tier: 'Go', burnRate: 1, reqEstimate: 6750, notes: '1x burn' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: true, requirements: 'Cluster Multi-GPU', type: 'open-weights' }
+      }
+    },
+    {
+      modelId: 'kimi-k2-6', name: 'Kimi K2.6',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: 'Sim' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'OpenRouter' },
+        opencode: { available: true, tier: 'Go', burnRate: 1, reqEstimate: 5750, notes: '1x burn' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: true, requirements: 'Cluster Multi-GPU', type: 'open-weights' }
+      }
+    },
+    {
+      modelId: 'deepseek-v4-pro-0813', name: 'DeepSeek-V4-Pro',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: '$0.80/$2.40' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'DeepSeek API' },
+        opencode: { available: true, tier: 'Go', burnRate: 4, reqEstimate: 5200, notes: '4x burn' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: true, requirements: 'Cluster FP8', type: 'open-weights' }
+      }
+    },
+    {
+      modelId: 'deepseek-v4-flash-0731', name: 'DeepSeek-V4-Flash',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: '$0.22/$0.66' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'Direct API' },
+        opencode: { available: true, tier: 'Go', burnRate: 2, reqEstimate: 37800, notes: '2x burn' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: true, requirements: '304B MoE Local', type: 'open-weights' }
+      }
+    },
+    {
+      modelId: 'deepseek-v4-vision-exp', name: 'DeepSeek-V4-Flash-Vision-Exp',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'preview', priceDesc: '$0.22/$0.66' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'Direct API' },
+        opencode: { available: true, tier: 'Go', burnRate: 4, reqEstimate: 18900, notes: '4x burn' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: false, requirements: 'Preview de Pesquisa', type: 'cloud-only' }
+      }
+    },
+    {
+      modelId: 'deepseek-v3-2', name: 'DeepSeek-V3.2',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'legacy', priceDesc: '$0.14/$0.28' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'Legacy' },
+        opencode: { available: false, tier: null, burnRate: null, reqEstimate: null, notes: 'Descontinuado' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'legacy', notes: 'Legacy' },
+        local: { supported: true, requirements: '671B MoE', type: 'open-weights' }
+      }
+    },
+    {
+      modelId: 'qwen3-8-max', name: 'Qwen3.8 Max',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: 'Alibaba Cloud' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'OpenRouter' },
+        opencode: { available: true, tier: 'Go', burnRate: 4, reqEstimate: 810, notes: '4x burn' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: false, requirements: 'N/A', type: 'cloud-only' }
+      }
+    },
+    {
+      modelId: 'qwen3-8-2-4t-a95b', name: 'Qwen3.8-2.4T-A95B',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: null, status: 'open-weights', priceDesc: 'Apache 2.0' },
+        cursor: { available: true, pool: 'local', multiplier: null, notes: 'vLLM / SGLang' },
+        opencode: { available: false, tier: null, burnRate: null, reqEstimate: null, notes: 'Indisponível' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: true, requirements: 'Cluster 4x-8x H100', type: 'open-weights' }
+      }
+    },
+    {
+      modelId: 'qwen3-8-27b', name: 'Qwen3.8-27B',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: null, status: 'open-weights', priceDesc: 'Open Weights' },
+        cursor: { available: true, pool: 'local', multiplier: null, notes: 'Ollama / vLLM' },
+        opencode: { available: false, tier: null, burnRate: null, reqEstimate: null, notes: 'Indisponível' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: true, requirements: '1x RTX 4090 / 32GB', type: 'open-weights' }
+      }
+    },
+    {
+      modelId: 'qwen3-7-max', name: 'Qwen3.7 Max',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'legacy', priceDesc: 'Legacy' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'Legacy' },
+        opencode: { available: true, tier: 'Go', burnRate: 2, reqEstimate: 840, notes: '2x burn' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'legacy', notes: 'Legacy' },
+        local: { supported: false, requirements: 'N/A', type: 'cloud-only' }
+      }
+    },
+    {
+      modelId: 'mimo-v2-5-pro', name: 'MiMo-V2.5-Pro',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: '$0.40/$1.20' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'OpenRouter' },
+        opencode: { available: true, tier: 'Go', burnRate: 4, reqEstimate: 16300, notes: '4x burn' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: true, requirements: 'Cluster 500B', type: 'open-weights' }
+      }
+    },
+    {
+      modelId: 'mimo-v2-5', name: 'MiMo-V2.5 (Base)',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: '$0.05/$0.15' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'OpenRouter' },
+        opencode: { available: true, tier: 'Go', burnRate: 1, reqEstimate: 150400, notes: '1x burn' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: true, requirements: '160B MoE (KTransformers)', type: 'open-weights' }
+      }
+    },
+    {
+      modelId: 'minimax-m3', name: 'MiniMax M3',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: '$0.40/$1.20' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'OpenRouter' },
+        opencode: { available: true, tier: 'Go', burnRate: 1, reqEstimate: 16000, notes: '1x burn' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: true, requirements: 'Cluster 420B', type: 'open-weights' }
+      }
+    },
+    {
+      modelId: 'minimax-m2-7', name: 'MiniMax M2.7',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: '$0.20/$0.60' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'OpenRouter' },
+        opencode: { available: true, tier: 'Go', burnRate: 1, reqEstimate: 17000, notes: '1x burn' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: true, requirements: '230B MoE Local', type: 'open-weights' }
+      }
+    },
+    {
+      modelId: 'composer-2-5', name: 'Composer 2.5',
+      platforms: {
+        directApi: { available: false, accessMode: 'none', pricingRef: null, status: 'unavailable', priceDesc: 'Exclusivo Cursor IDE' },
+        cursor: { available: true, pool: 'cursor-models', multiplier: null, notes: 'Incluso' },
+        opencode: { available: false, tier: null, burnRate: null, reqEstimate: null, notes: 'Indisponível' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: false, status: 'unavailable', notes: 'Indisponível' },
+        local: { supported: false, requirements: 'N/A', type: 'proprietary' }
+      }
+    },
+    {
+      modelId: 'nemotron-3-5-lightning', name: 'Nemotron 3.5 Lightning',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: null, status: 'open-weights', priceDesc: 'NVIDIA NIM' },
+        cursor: { available: true, pool: 'local', multiplier: null, notes: 'NIM' },
+        opencode: { available: false, tier: null, burnRate: null, reqEstimate: null, notes: 'Indisponível' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: true, requirements: '1x RTX 4090 (NVFP4)', type: 'open-weights' }
+      }
+    },
+    {
+      modelId: 'hy3-tencent', name: 'Tencent Hy3',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: '$0.14/$0.58' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'OpenRouter' },
+        opencode: { available: true, tier: 'Go', burnRate: 1, reqEstimate: 21500, notes: '1x burn' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: true, requirements: '300B MoE Local', type: 'open-weights' }
+      }
+    },
+    {
+      modelId: 'longcat-2-0', name: 'LongCat-2.0',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: '$0.10/$0.30' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'OpenRouter' },
+        opencode: { available: true, tier: 'Go', burnRate: 1, reqEstimate: 57200, notes: '1x burn' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: true, requirements: 'Cluster Grande', type: 'open-weights' }
+      }
+    },
+    {
+      modelId: 'muse-spark-1-2', name: 'Muse Spark 1.2',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: null, status: 'open-weights', priceDesc: 'MIT' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'OpenRouter' },
+        opencode: { available: true, tier: 'Go', burnRate: 1, reqEstimate: 226600, notes: '1x burn' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: true, requirements: 'Local Multi-GPU', type: 'open-weights' }
+      }
+    },
+    {
+      modelId: 'gpt-5-5-preview', name: 'GPT-5.5 Preview',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'superseded', priceDesc: 'Superseded' },
+        cursor: { available: true, pool: 'other-models', multiplier: 1.0, notes: 'Superseded' },
+        opencode: { available: false, tier: null, burnRate: null, reqEstimate: null, notes: 'Indisponível' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'superseded', notes: 'Superseded' },
+        local: { supported: false, requirements: 'N/A', type: 'proprietary' }
+      }
+    }
   ]
 };
 
+// Vincula dinamicamente getters compatíveis com legacy UI
+PLATFORM_MODEL_CATALOG.availabilityMatrix.forEach(row => {
+  ['directApi', 'cursor', 'opencode', 'antigravity', 'openrouter', 'local'].forEach(key => {
+    Object.defineProperty(row, key, {
+      get() {
+        return PLATFORM_MODEL_CATALOG.formatPlatformStatus(this.modelId, key);
+      },
+      enumerable: true,
+      configurable: true
+    });
+  });
+});
+
+// Metadados de integração e proveniência do Grok Bot (Seções 61 e 62)
+const GROK_BOT_METADATA = {
+  id: 'grok-bot',
+  name: 'Grok Bot',
+  announcedAt: '2026-08-26',
+  quotaType: 'dedicated-separate-pool',
+  eligiblePlans: [
+    'xai-supergrok',
+    'xai-supergrok-plus',
+    'xai-supergrok-heavy',
+    'cursor-pro',
+    'cursor-pro-plus',
+    'cursor-ultra',
+    'cursor-teams-standard',
+    'cursor-teams-premium'
+  ],
+  sourceConflict: true,
+  preferredSource: 'latest-plan-expansion-announcement',
+  rolloutDependent: true,
+  notes: 'Grok Bot possui sua própria quota separada do uso normal Grok/Cursor. Algumas páginas de setup ainda mostram elegibilidade mais restrita; a preferência do projeto é pelo anúncio oficial de expansão de planos de 26/08/2026.'
+};
+
+// Matriz canônica de disponibilidade de plataformas (Seção 40)
+const PLATFORM_AVAILABILITY_MATRIX = PLATFORM_MODEL_CATALOG.availabilityMatrix;
+
 // Exportação universal (Browser + Node.js)
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { OPENCODE_GO_DATA, CAMELAI_PLATFORM_DATA, PLATFORM_MODEL_CATALOG };
+  module.exports = { OPENCODE_GO_DATA, CAMELAI_PLATFORM_DATA, PLATFORM_MODEL_CATALOG, PLATFORM_AVAILABILITY_MATRIX, GROK_BOT_METADATA };
 }
 
 if (typeof window !== 'undefined') {
   window.CAMELAI_PLATFORM_DATA = CAMELAI_PLATFORM_DATA;
+  window.GROK_BOT_METADATA = GROK_BOT_METADATA;
+  window.PLATFORM_AVAILABILITY_MATRIX = PLATFORM_AVAILABILITY_MATRIX;
 }

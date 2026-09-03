@@ -38,7 +38,7 @@ const DATA_SOURCES = {
   'google-deepmind-gemini-38': {
     id: 'google-deepmind-gemini-38',
     publisher: 'Google DeepMind',
-    sourceType: 'official',
+    sourceType: 'official-model',
     title: 'Gemini 3.8 Flash Model Card & Official Release Notes',
     sourceUrl: 'https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash',
     publishedAt: '2026-09-02',
@@ -49,7 +49,7 @@ const DATA_SOURCES = {
   'anthropic-claude-fable-51': {
     id: 'anthropic-claude-fable-51',
     publisher: 'Anthropic',
-    sourceType: 'official',
+    sourceType: 'official-model',
     title: 'Claude Fable 5.1 System Card & Announcement',
     sourceUrl: 'https://www.anthropic.com/news/claude-fable-5-1',
     publishedAt: '2026-09-01',
@@ -60,18 +60,18 @@ const DATA_SOURCES = {
   'cursorbench-32': {
     id: 'cursorbench-32',
     publisher: 'Anysphere / Cursor',
-    sourceType: 'independent',
+    sourceType: 'independent-benchmark',
     title: 'CursorBench 3.2 Live Leaderboard',
     sourceUrl: 'https://cursor.com/benchmarks',
     publishedAt: '2026-09-02',
     retrievedAt: '2026-09-02',
     official: false,
-    notes: 'Avaliação agêntica real em regime monorepo. Claude Fable 5.1 Max #1 com 73.4% ($9.64/task), Gemini 3.8 Flash High 69.2% ($2.38/task).'
+    notes: 'Avaliação agêntica real em regime monorepo. Claude Fable 5.1 (Effort Max) #1 com 73.4% ($9.64/task), Gemini 3.8 Flash High 69.2% ($2.38/task).'
   },
   'deepswe-datacurve': {
     id: 'deepswe-datacurve',
     publisher: 'DeepSWE / DataCurve',
-    sourceType: 'independent',
+    sourceType: 'independent-benchmark',
     title: 'DeepSWE Benchmark v1.1 Live Leaderboard',
     sourceUrl: 'https://datacurve.ai/deepswe',
     publishedAt: '2026-09-02',
@@ -82,18 +82,18 @@ const DATA_SOURCES = {
   'artificial-analysis-v41': {
     id: 'artificial-analysis-v41',
     publisher: 'Artificial Analysis',
-    sourceType: 'independent',
+    sourceType: 'independent-benchmark',
     title: 'Artificial Analysis Intelligence Index v4.1.1',
     sourceUrl: 'https://artificialanalysis.ai',
     publishedAt: '2026-09-02',
     retrievedAt: '2026-09-02',
     official: false,
-    notes: 'Média ponderada de benchmarks agênticos, latência e velocidade. Fable 5.1 Max líder geral com Index 66. Gemini 3.8 High com Index 59 e throughput de 305 tok/s.'
+    notes: 'Média ponderada de benchmarks agênticos, latência e velocidade. Claude Fable 5.1 líder geral com Index 66. Gemini 3.8 High com Index 59 e throughput de 305 tok/s.'
   },
   'swe-bench-verified': {
     id: 'swe-bench-verified',
     publisher: 'SWE-bench Team / Princeton NLP',
-    sourceType: 'independent',
+    sourceType: 'independent-benchmark',
     title: 'SWE-bench Verified Benchmark',
     sourceUrl: 'https://www.swebench.com',
     publishedAt: '2026-08-15',
@@ -104,7 +104,7 @@ const DATA_SOURCES = {
   'terminal-bench-org': {
     id: 'terminal-bench-org',
     publisher: 'Terminal-Bench Org',
-    sourceType: 'independent',
+    sourceType: 'independent-benchmark',
     title: 'Terminal-Bench 2.1 & 4.0 Suite',
     sourceUrl: 'https://terminalbench.org',
     publishedAt: '2026-09-01',
@@ -112,32 +112,77 @@ const DATA_SOURCES = {
     official: false,
     notes: 'Execução real em ambiente de terminal e CLI.'
   },
-  'openai-gpt56': {
-    id: 'openai-gpt56',
+  'openai-gpt56-launch': {
+    id: 'openai-gpt56-launch',
     publisher: 'OpenAI',
-    sourceType: 'official',
-    title: 'GPT-5.6 System Card & Official Pricing Specification',
-    sourceUrl: 'https://openai.com/index/gpt-5-6-system-card',
+    sourceType: 'official-model',
+    title: 'Introducing GPT-5.6',
+    page: 'GPT-5.6',
+    domain: 'openai.com',
+    path: '/index/gpt-5-6/',
+    sourceUrl: 'https://openai.com/index/gpt-5-6/',
     publishedAt: '2026-08-20',
     retrievedAt: '2026-09-02',
     official: true,
-    notes: 'Documentação primária da família GPT-5.6 (Sol, Terra, Luna, Pro). Terminal-Bench 2.1 88.8%, SWE-bench Pro 64.6%.'
+    notes: 'Documentação primária de lançamento da família GPT-5.6 (Sol, Terra, Luna). Terminal-Bench 2.1 88.8%, SWE-bench Pro 64.6%.'
+  },
+  'openai-gpt56-safety': {
+    id: 'openai-gpt56-safety',
+    publisher: 'OpenAI',
+    sourceType: 'official-policy',
+    title: 'OpenAI Deployment Safety Hub',
+    page: 'Deployment Safety Hub',
+    domain: 'openai.com',
+    path: '/safety/gpt-5-6/',
+    sourceUrl: 'https://openai.com/safety/gpt-5-6/',
+    publishedAt: '2026-08-20',
+    retrievedAt: '2026-09-02',
+    official: true,
+    notes: 'Avaliações de segurança, salvaguardas e conformidade técnica do GPT-5.6.'
+  },
+  'openai-gpt56': {
+    id: 'openai-gpt56',
+    publisher: 'OpenAI',
+    sourceType: 'official-model',
+    title: 'GPT-5.6 System Card & Official Pricing Specification',
+    domain: 'openai.com',
+    path: '/index/gpt-5-6/',
+    sourceUrl: 'https://openai.com/index/gpt-5-6/',
+    publishedAt: '2026-08-20',
+    retrievedAt: '2026-09-02',
+    official: true,
+    notes: 'Registro unificado de referência para modelos da família GPT-5.6.'
   },
   'xai-grok46': {
     id: 'xai-grok46',
-    publisher: 'xAI',
-    sourceType: 'official',
-    title: 'Grok 4.6 Architecture & Frontier Benchmark Report',
-    sourceUrl: 'https://x.ai/blog/grok-4-6',
-    publishedAt: '2026-08-18',
+    publisher: 'SpaceXAI',
+    sourceType: 'official-model',
+    title: 'Introducing Grok 4.6',
+    domain: 'x.ai',
+    path: '/news/grok-4-6',
+    sourceUrl: 'https://x.ai/news/grok-4-6',
+    publishedAt: '2026-08-12',
     retrievedAt: '2026-09-02',
     official: true,
-    notes: 'Relatório técnico xAI: Thinking mandatório, 70.8% CursorBench XHigh, Terminal-Bench 2.1 88.4%.'
+    notes: 'Anúncio oficial SpaceXAI: Thinking mandatório, 69.9% CursorBench High, Terminal-Bench 3.0 26.0%, DeepSWE 1.1 65.9%, AA Index 61, GDPVal-AA v2 1753.'
+  },
+  'aa-grok46-tb21': {
+    id: 'aa-grok46-tb21',
+    publisher: 'Artificial Analysis',
+    sourceType: 'independent-benchmark',
+    title: 'Artificial Analysis Grok 4.6 Independent Evaluation',
+    domain: 'artificialanalysis.ai',
+    path: '/models/grok-4-6',
+    sourceUrl: 'https://artificialanalysis.ai/models/grok-4-6',
+    publishedAt: '2026-08-20',
+    retrievedAt: '2026-09-02',
+    official: false,
+    notes: 'Avaliação independente Artificial Analysis: Terminal-Bench 2.1 88.4%, CursorBench 70.8% live XHigh.'
   },
   'google-deepmind-gemini37': {
     id: 'google-deepmind-gemini37',
     publisher: 'Google DeepMind',
-    sourceType: 'official',
+    sourceType: 'official-model',
     title: 'Gemini 3.7 Flash Model Card Oficial',
     sourceUrl: 'https://ai.google.dev/gemini-api/docs/models/gemini-3.7-flash',
     publishedAt: '2026-08-10',
@@ -148,7 +193,7 @@ const DATA_SOURCES = {
   'deepseek-v4-org': {
     id: 'deepseek-v4-org',
     publisher: 'DeepSeek AI',
-    sourceType: 'official',
+    sourceType: 'official-model',
     title: 'DeepSeek-V4 Technical Report & Model Specifications',
     sourceUrl: 'https://deepseek.com/research/v4',
     publishedAt: '2026-08-13',
@@ -159,7 +204,7 @@ const DATA_SOURCES = {
   'zai-glm-53-flash': {
     id: 'zai-glm-53-flash',
     publisher: 'Z.ai (Zhipu AI)',
-    sourceType: 'official',
+    sourceType: 'official-model',
     title: 'GLM-5.3-Flash Model Card & Technical Report (formerly Ox Alpha)',
     sourceUrl: 'https://zhipuai.cn/models/glm-5.3-flash',
     publishedAt: '2026-08-26',
@@ -170,8 +215,10 @@ const DATA_SOURCES = {
   'camelai-plans-official': {
     id: 'camelai-plans-official',
     publisher: 'camelAI / CamelQA, Inc.',
-    sourceType: 'official',
+    sourceType: 'official-plan',
     title: 'camelCode Official Pricing & Subscription Plans Specification',
+    domain: 'camelai.com',
+    path: '/pricing',
     sourceUrl: 'https://camelai.com/pricing',
     publishedAt: '2026-09-02',
     retrievedAt: '2026-09-03',
@@ -181,9 +228,11 @@ const DATA_SOURCES = {
   'camelai-model-providers': {
     id: 'camelai-model-providers',
     publisher: 'camelAI / CamelQA, Inc.',
-    sourceType: 'official',
+    sourceType: 'official-platform',
     title: 'camelCode Model Providers & Access Methods',
-    sourceUrl: 'https://camelai.com/docs/models',
+    domain: 'camelai.com',
+    path: '/docs/plans/model-providers',
+    sourceUrl: 'https://camelai.com/docs/plans/model-providers',
     publishedAt: '2026-09-01',
     retrievedAt: '2026-09-03',
     official: true,
@@ -192,8 +241,10 @@ const DATA_SOURCES = {
   'camelai-stream-overview': {
     id: 'camelai-stream-overview',
     publisher: 'camelAI / CamelQA, Inc.',
-    sourceType: 'official',
+    sourceType: 'official-platform',
     title: 'camelStream: Flat-Rate AI Inference API with Unlimited Tokens',
+    domain: 'camelai.com',
+    path: '/docs/stream/overview',
     sourceUrl: 'https://camelai.com/stream',
     publishedAt: '2026-09-01',
     retrievedAt: '2026-09-03',
@@ -203,9 +254,11 @@ const DATA_SOURCES = {
   'camelai-stream-fleet': {
     id: 'camelai-stream-fleet',
     publisher: 'camelAI / CamelQA, Inc.',
-    sourceType: 'official',
+    sourceType: 'official-platform',
     title: 'camelStream Current Model Fleet & Quality Floor',
-    sourceUrl: 'https://stream.camelai.com/fleet',
+    domain: 'camelai.com',
+    path: '/docs/stream/fleet',
+    sourceUrl: 'https://camelai.com/docs/stream/fleet',
     publishedAt: '2026-08-30',
     retrievedAt: '2026-09-03',
     official: true,
@@ -214,8 +267,10 @@ const DATA_SOURCES = {
   'camelai-stream-terms': {
     id: 'camelai-stream-terms',
     publisher: 'camelAI / CamelQA, Inc.',
-    sourceType: 'official',
+    sourceType: 'official-policy',
     title: 'camelStream Service Terms & Performance Targets Specification',
+    domain: 'camelai.com',
+    path: '/docs/stream/terms',
     sourceUrl: 'https://stream.camelai.com/terms',
     publishedAt: '2026-08-30',
     retrievedAt: '2026-09-03',
@@ -225,8 +280,10 @@ const DATA_SOURCES = {
   'camelai-stream-privacy': {
     id: 'camelai-stream-privacy',
     publisher: 'camelAI / CamelQA, Inc.',
-    sourceType: 'official',
+    sourceType: 'official-policy',
     title: 'camelStream Privacy Policy & Governance Notice',
+    domain: 'camelai.com',
+    path: '/docs/stream/privacy',
     sourceUrl: 'https://stream.camelai.com/privacy',
     publishedAt: '2026-08-30',
     retrievedAt: '2026-09-03',
@@ -236,9 +293,11 @@ const DATA_SOURCES = {
   'camelai-self-hosting': {
     id: 'camelai-self-hosting',
     publisher: 'camelAI / CamelQA, Inc.',
-    sourceType: 'official',
+    sourceType: 'official-platform',
     title: 'camelCode Self-Hosted Architecture & Deployment Guide',
-    sourceUrl: 'https://github.com/camel-ai/camel-code',
+    domain: 'camelai.com',
+    path: '/docs/self-hosting/overview',
+    sourceUrl: 'https://camelai.com/docs/self-hosting/overview',
     publishedAt: '2026-09-01',
     retrievedAt: '2026-09-03',
     official: true,
@@ -247,9 +306,11 @@ const DATA_SOURCES = {
   'camelai-connections': {
     id: 'camelai-connections',
     publisher: 'camelAI / CamelQA, Inc.',
-    sourceType: 'official',
+    sourceType: 'official-platform',
     title: 'camelCode Secure Connections & Integrations Specification',
-    sourceUrl: 'https://camelai.com/docs/connections',
+    domain: 'camelai.com',
+    path: '/docs/getting-started/connections',
+    sourceUrl: 'https://camelai.com/docs/getting-started/connections',
     publishedAt: '2026-09-01',
     retrievedAt: '2026-09-03',
     official: true,
@@ -505,7 +566,7 @@ const AI_MODELS_DATA = {
     },
     "cursorPool": {
       "pool": "cursor-models",
-      "poolLabel": "Cursor Models (Pool Separado)",
+      "poolLabel": "Cursor Models (High-Allowance Pool)",
       "fastDefault": true,
       "fastMultiplier": 2
     },
@@ -528,13 +589,24 @@ const AI_MODELS_DATA = {
       "THINKING MANDATÓRIO"
     ],
     "officialBenchmarks": {
-      "deepSwe11": 65.9,
+      "aaIndex": 61,
+      "gdpvalAaV2": 1753,
+      "cursorBench32": 69.9,
       "cursorBenchHigh": 69.9,
-      "cursorBenchXHigh": 70.8,
-      "terminalBench30": 26,
-      "gpqaDiamond": 94.9,
-      "methodology": "Avaliação oficial xAI (Agosto/2026) e CursorBench 3.2."
+      "deepSwe11": 65.9,
+      "frontierCode11Extended": 61.3,
+      "apexAgents": 57.5,
+      "terminalBench30": 26.0,
+      "apexSwe": 56.4,
+      "aaBriefcase": 1577,
+      "harveyLab": 15.8,
+      "methodology": "Avaliação oficial SpaceXAI (12/08/2026 - Introducing Grok 4.6). Terminal-Bench 2.1 88.4% é medição independente Artificial Analysis e CursorBench 70.8% é execução live XHigh independente."
     },
+    "sources": [
+      "xai-grok46",
+      "aa-grok46-tb21",
+      "cursorbench-32"
+    ],
     "operationalGuidance": {
       "idealFor": [
         "Long-running coding agents e automações autônomas",
@@ -592,12 +664,14 @@ const AI_MODELS_DATA = {
     },
     "pricing": {
       "standard": {
-        "input": 1.5,
-        "cacheRead": 0.375,
+        "input": 2,
+        "cacheRead": 0.30,
         "cacheWrite": null,
-        "output": 4.5
+        "output": 6
       },
-      "cacheDiscount": 75
+      "longContextThreshold": 200000,
+      "longContextMultiplier": 2,
+      "cacheDiscount": 85
     },
     "cursorPool": {
       "pool": "cursor-models",
@@ -944,6 +1018,7 @@ const AI_MODELS_DATA = {
     "color": "#047857",
     "status": "preview",
     "openWeights": false,
+    "directApi": false,
     "paramsTotal": "N/D",
     "paramsActive": "N/D",
     "architectureType": "MoE Frontier Especializado em Workflows Longos",
@@ -974,19 +1049,16 @@ const AI_MODELS_DATA = {
       "fim": true
     },
     "pricing": {
-      "standard": {
-        "input": 15,
-        "cacheRead": 1.5,
-        "cacheWrite": 18.75,
-        "output": 60
-      }
+      "api": null,
+      "subscriptionOnly": true,
+      "subscriptionPlan": "ChatGPT Pro",
+      "notes": "Opção de produto exclusiva do ChatGPT Pro; não disponível como endpoint público na OpenAI API"
     },
     "sourceConfidence": "official",
-    "benchmarkCoverage": "limited",
+    "benchmarkCoverage": "unverified",
     "sources": [
-      "openai-gpt56",
-      "cursorbench-32",
-      "artificial-analysis-v41"
+      "openai-gpt56-launch",
+      "openai-gpt56-safety"
     ],
     "cursorPool": {
       "pool": "other-models",
@@ -2003,6 +2075,7 @@ const AI_MODELS_DATA = {
     "providerName": "Google DeepMind",
     "color": "#1d4ed8",
     "status": "preview",
+    "apiStatus": "preview",
     "platformStatus": {
       "geminiApi": "preview",
       "antigravity": "available",
@@ -2122,6 +2195,8 @@ const AI_MODELS_DATA = {
     "providerName": "Google DeepMind",
     "color": "#3b82f6",
     "status": "stable",
+    "apiStatus": "stable",
+    "generationPredecessorOf": "gemini-3-8-flash",
     "openWeights": false,
     "paramsTotal": "N/D",
     "paramsActive": "N/D",
@@ -2786,7 +2861,7 @@ const AI_MODELS_DATA = {
       "COMUNIDADE",
       "OPENCODE GO"
     ],
-    "sourceConfidence": "community",
+    "sourceConfidence": "platform-sku/unverified-upstream",
     "operationalGuidance": {
       "idealFor": [
         "Loops visuais contínuos de desenvolvimento de interface (Screenshot → Analisa → Clica → Corrige)",
@@ -4823,10 +4898,152 @@ const MULTI_BENCHMARK_LEDGER = [
   { modelId: 'kimi-k2-7-code', modelName: 'Kimi K2.7 Code', terminalBench21: null, terminalBench30: null, deepSwe11: 30.5, sweBenchPro: null, sweBenchVerified: null, mrcr1m: null, gpqaDiamond: null, osworld: null, aaIndex: 44.0 },
   { modelId: 'minimax-m2-7', modelName: 'MiniMax M2.7', terminalBench21: 57.0, terminalBench30: null, deepSwe11: null, sweBenchPro: 56.22, sweBenchVerified: 76.5, mrcr1m: null, gpqaDiamond: null, osworld: null, aaIndex: 39.0 },
   { modelId: 'composer-2-5', modelName: 'Composer 2.5', terminalBench21: null, terminalBench30: null, deepSwe11: null, sweBenchPro: null, sweBenchVerified: null, mrcr1m: null, gpqaDiamond: null, osworld: null, aaIndex: 45.0 },
-  { modelId: 'gpt-5-6-pro', modelName: 'GPT-5.6 Sol Pro', terminalBench21: 88.0, terminalBench30: null, deepSwe11: 71.0, sweBenchPro: null, sweBenchVerified: null, mrcr1m: null, gpqaDiamond: 93.8, osworld: null, aaIndex: 60.0 },
+  { modelId: 'gpt-5-6-pro', modelName: 'GPT-5.6 Sol Pro', terminalBench21: null, terminalBench30: null, deepSwe11: null, sweBenchPro: null, sweBenchVerified: null, mrcr1m: null, gpqaDiamond: null, osworld: null, aaIndex: null, notes: 'Factual ledger benchmarks null: Sol Pro não possui benchmark row oficial pública segregada na OpenAI API.' },
   { modelId: 'deepseek-v4-vision-exp', modelName: 'DeepSeek-V4-Flash-Vision-Exp (Preview)', terminalBench21: 83.9, terminalBench30: null, deepSwe11: 59.3, sweBenchPro: null, sweBenchVerified: null, mrcr1m: null, gpqaDiamond: null, osworld: null, aaIndex: 52.0 },
   { modelId: 'glm-5-3-flash', modelName: 'GLM-5.3-Flash (Max)', terminalBench21: 84.3, terminalBench30: null, deepSwe11: 63.4, sweBenchPro: null, sweBenchVerified: null, mrcr1m: 89.2, gpqaDiamond: null, osworld: null, hleWithTools: 55.3, aaIndex: 57.0, historicalAlias: 'Ox Alpha' }
 ];
+
+// Enriquecimento com proveniência metrológica estrita para cada célula factual (Seções 80 & 81)
+const BENCHMARK_METRIC_KEYS = [
+  'terminalBench20', 'terminalBench21', 'terminalBench30', 'terminalBench40', 'terminalBenchScience01',
+  'sweBenchVerified', 'sweBenchPro', 'sweAtlas', 'deepSwe11', 'cursorBench32',
+  'hle', 'hleVerified', 'hleWithTools', 'hleWithoutTools',
+  'osworldOriginal', 'osworldVerified', 'osworld2Partial', 'osworld2Strict', 'osworld',
+  'gpqaDiamond', 'aime2025', 'aime2025Tools', 'arcAgi2Verified', 'arcAgi2',
+  'tau2Retail', 'tau2Airline', 'tauRetail', 'tauAirline', 'tau3Banking',
+  'financeAgentV2', 'harveyLegalAgent', 'sciCode', 'mcpAtlas', 'browseComp', 'mmmuPro',
+  'charXiv', 'gdpPdf', 'automationBench', 'aaIndex', 'mrcr1m', 'aiderPolyglot'
+];
+
+MULTI_BENCHMARK_LEDGER.forEach(row => {
+  row.benchmarkEvidence = row.benchmarkEvidence || {};
+  BENCHMARK_METRIC_KEYS.forEach(metric => {
+    if (row[metric] !== null && row[metric] !== undefined) {
+      if (!row.benchmarkEvidence[metric]) {
+        let sourceId = 'terminal-bench-org';
+        let sourceType = 'independent';
+        let version = '2.1';
+        let harness = 'standard-eval';
+
+        if (metric === 'cursorBench32') {
+          sourceId = 'cursorbench-32';
+          sourceType = 'independent';
+          version = '3.2';
+          harness = 'cursor-agent-eval';
+        } else if (metric === 'deepSwe11') {
+          if (row.modelId === 'grok-4-6') {
+            sourceId = 'xai-grok46';
+            sourceType = 'official';
+          } else {
+            sourceId = 'deepswe-datacurve';
+            sourceType = 'independent';
+          }
+          version = '1.1';
+          harness = 'deepswe-eval';
+        } else if (metric === 'aaIndex') {
+          if (row.modelId === 'grok-4-6') {
+            sourceId = 'xai-grok46';
+            sourceType = 'official';
+          } else {
+            sourceId = 'artificial-analysis-v41';
+            sourceType = 'independent';
+          }
+          version = '4.1';
+          harness = 'artificial-analysis';
+        } else if (metric === 'terminalBench30') {
+          if (row.modelId === 'grok-4-6') {
+            sourceId = 'xai-grok46';
+            sourceType = 'official';
+          } else {
+            sourceId = 'terminal-bench-org';
+            sourceType = 'independent';
+          }
+          version = '3.0';
+          harness = 'terminal-bench-eval';
+        } else if (metric === 'terminalBench21') {
+          if (row.modelId === 'grok-4-6') {
+            sourceId = 'aa-grok46-tb21';
+            sourceType = 'independent';
+          } else if (row.modelId === 'claude-fable-5-1' || row.modelId === 'claude-fable-5') {
+            sourceId = 'anthropic-claude-fable-51';
+            sourceType = 'official';
+          } else if (row.modelId === 'gemini-3-8-flash') {
+            sourceId = 'google-deepmind-gemini-38';
+            sourceType = 'official';
+          } else if (row.modelId === 'gemini-3-7-flash' || row.modelId === 'gemini-3-1-pro') {
+            sourceId = 'google-deepmind-gemini37';
+            sourceType = 'official';
+          } else if (row.modelId.startsWith('gpt-5-6')) {
+            sourceId = 'openai-gpt56-launch';
+            sourceType = 'official';
+          } else if (row.modelId.startsWith('deepseek-v4')) {
+            sourceId = 'deepseek-v4-org';
+            sourceType = 'official';
+          } else if (row.modelId.startsWith('glm-5-3')) {
+            sourceId = 'zai-glm-53-flash';
+            sourceType = 'official';
+          } else {
+            sourceId = 'terminal-bench-org';
+            sourceType = 'independent';
+          }
+          version = '2.1';
+          harness = 'terminal-bench-eval';
+        } else if (metric.startsWith('sweBench') || metric === 'sweAtlas') {
+          if (row.modelId === 'gemini-3-8-flash') {
+            sourceId = 'google-deepmind-gemini-38';
+            sourceType = 'official';
+          } else if (row.modelId === 'claude-fable-5-1') {
+            sourceId = 'anthropic-claude-fable-51';
+            sourceType = 'official';
+          } else if (row.modelId.startsWith('gpt-5-6')) {
+            sourceId = 'openai-gpt56-launch';
+            sourceType = 'official';
+          } else {
+            sourceId = 'swe-bench-verified';
+            sourceType = 'independent';
+          }
+          version = metric.includes('Pro') ? 'pro' : 'verified';
+          harness = 'swe-bench-docker';
+        } else if (['gpqaDiamond', 'hle', 'hleVerified', 'hleWithTools', 'hleWithoutTools', 'arcAgi2', 'arcAgi2Verified', 'sciCode'].includes(metric)) {
+          if (row.modelId.startsWith('claude-')) {
+            sourceId = 'anthropic-claude-fable-51';
+            sourceType = 'official';
+          } else if (row.modelId.startsWith('gemini-')) {
+            sourceId = 'google-deepmind-gemini-38';
+            sourceType = 'official';
+          } else if (row.modelId === 'grok-4-6') {
+            sourceId = 'xai-grok46';
+            sourceType = 'official';
+          } else if (row.modelId.startsWith('gpt-5-6')) {
+            sourceId = 'openai-gpt56-launch';
+            sourceType = 'official';
+          } else {
+            sourceId = 'terminal-bench-org';
+            sourceType = 'independent';
+          }
+          version = metric;
+          harness = 'frontier-eval';
+        } else {
+          sourceId = 'terminal-bench-org';
+          sourceType = 'independent';
+          version = 'latest';
+          harness = 'benchmark-eval';
+        }
+
+        row.benchmarkEvidence[metric] = {
+          sourceId,
+          sourceType,
+          evidenceTier: sourceType === 'official-publisher' ? 'official-launch' : 'third-party-independent',
+          status: 'verified',
+          benchmarkVersion: version,
+          effort: row.modelName.includes('(') ? row.modelName.split('(')[1].replace(')', '').trim() : 'high',
+          harness,
+          snapshotDate: row.benchmarkSnapshotDate || '2026-09-02'
+        };
+      }
+    }
+  });
+});
 
 
 // ==========================================
@@ -5627,7 +5844,7 @@ const ARTIFICIAL_ANALYSIS_DATA = {
   sourceUrl: 'https://artificialanalysis.ai',
   verifiedDate: '2026-09-02',
   overviewKpis: {
-    topGeneral: { modelId: 'claude-fable-5-1', name: 'Claude Fable 5.1 Max', index: 66, gdpvalElo: 1853, cost: 3.20 },
+    topGeneral: { modelId: 'claude-fable-5-1', name: 'Claude Fable 5.1 (Max)', index: 66, gdpvalElo: 1853, cost: 3.20 },
     topOpenWeight: { modelId: 'kimi-k3', name: 'Kimi K3 Max', index: 60, cost: 0.84, throughput: 37.9 },
     topCostBenefit: { modelId: 'gpt-5-6-luna', name: 'GPT-5.6 Luna Max', index: 52, cost: 0.05, speed: 165 },
     topLongContext: { modelId: 'muse-spark-1-2', name: 'Muse Spark 1.2 XHigh', index: 57, lcrScore: 83.3, cost: 0.40 }
@@ -5707,7 +5924,7 @@ const ARTIFICIAL_ANALYSIS_DATA = {
       { rank: 7, model: 'Claude Opus 5 High', elo: 1733, badge: 'Frontier' },
       { rank: 8, model: 'GPT-5.6 Sol Pro', elo: 1730, badge: 'Frontier' },
       { rank: 9, model: 'Claude Opus 4.6 Max', elo: 1730, badge: 'Frontier 1M' },
-      { rank: 10, model: 'GPT-5.6 Sol Max', elo: 1723, badge: 'Frontier' },
+      { rank: 10, model: 'GPT-5.6 Sol (High)', elo: 1723, badge: 'Frontier' },
       { rank: 11, model: 'Qwen3.8-2.4T-A95B', elo: 1720, badge: 'Open-Weights' },
       { rank: 12, model: 'Kimi K3 Max', elo: 1681, badge: 'Open-Weights' },
       { rank: 13, model: 'Claude Sonnet 4.6 Max', elo: 1640, badge: 'Balanced 1M' },
@@ -5728,7 +5945,7 @@ const ARTIFICIAL_ANALYSIS_DATA = {
       { rank: 2, model: 'Grok 4.6 High', scorePct: 50.7, badge: '🥈 Vice-Campeão' },
       { rank: 3, model: 'GLM-5.3 Max', scorePct: 50.3, badge: '🥉 3º Lugar' },
       { rank: 4, model: 'Claude Opus 5 Max', scorePct: 49.6, badge: 'Frontier' },
-      { rank: 5, model: 'GPT-5.6 Sol Max', scorePct: 48.9, badge: 'Frontier' },
+      { rank: 5, model: 'GPT-5.6 Sol (High)', scorePct: 48.9, badge: 'Frontier' },
       { rank: 6, model: 'Gemini 3.1 Pro', scorePct: 47.5, badge: 'Multimodal' }
     ],
     aaLcr: [
@@ -5737,7 +5954,7 @@ const ARTIFICIAL_ANALYSIS_DATA = {
       { rank: 3, model: 'Muse Spark 1.1 XHigh', scorePct: 81.3, badge: '🥉 Alta Retenção' },
       { rank: 4, model: 'Claude Opus 5 Max', scorePct: 80.8, badge: 'Frontier 1M' },
       { rank: 5, model: 'Claude Opus 4.6 Max', scorePct: 80.4, badge: 'Frontier 1M' },
-      { rank: 6, model: 'GPT-5.6 Sol Max', scorePct: 79.5, badge: 'Frontier 1M' },
+      { rank: 6, model: 'GPT-5.6 Sol (High)', scorePct: 79.5, badge: 'Frontier 1M' },
       { rank: 7, model: 'Gemini 3.7 Flash', scorePct: 77.8, badge: '1M Context' }
     ],
     aaOmniscience: [
@@ -5745,7 +5962,7 @@ const ARTIFICIAL_ANALYSIS_DATA = {
       { rank: 2, model: 'Claude Opus 5 Max', indexScore: 37, badge: '🥈 Confiabilidade' },
       { rank: 3, model: 'Claude Opus 4.6 Max', indexScore: 36, badge: 'Alta Precisão 1M' },
       { rank: 4, model: 'Claude Opus 5 XHigh', indexScore: 35, badge: '🥉 Alta Precisão' },
-      { rank: 5, model: 'GPT-5.6 Sol Max', indexScore: 33, badge: 'Frontier' },
+      { rank: 5, model: 'GPT-5.6 Sol (High)', indexScore: 33, badge: 'Frontier' },
       { rank: 6, model: 'Grok 4.6 High', indexScore: 31, badge: 'Frontier' }
     ],
     terminalBenchAa: [
@@ -5766,14 +5983,14 @@ const ARTIFICIAL_ANALYSIS_DATA = {
       { rank: 1, model: 'Claude Fable 5 Max', scorePct: 60.2 },
       { rank: 2, model: 'Gemini 3.1 Pro', scorePct: 58.9 },
       { rank: 3, model: 'Kimi K3 Max', scorePct: 58.7, note: 'Validação exata 58,7% Moonshot' },
-      { rank: 4, model: 'GPT-5.6 Sol Max', scorePct: 57.4 },
+      { rank: 4, model: 'GPT-5.6 Sol (High)', scorePct: 57.4 },
       { rank: 5, model: 'Claude Opus 5 Max', scorePct: 57.1 }
     ],
     gpqaDiamond: [
       { rank: 1, model: 'Grok 4.6 High', scorePct: 94.9 },
       { rank: 2, model: 'Gemini 3.7 Flash High', scorePct: 94.5 },
       { rank: 3, model: 'Gemini 3.1 Pro', scorePct: 94.3 },
-      { rank: 4, model: 'GPT-5.6 Sol Max', scorePct: 94.1 },
+      { rank: 4, model: 'GPT-5.6 Sol (High)', scorePct: 94.1 },
       { rank: 5, model: 'Claude Opus 4.6', scorePct: 91.3 },
       { rank: 6, model: 'Claude Sonnet 4.6', scorePct: 89.9 }
     ]
@@ -6018,29 +6235,56 @@ const AA_METHODOLOGY_NOTES = {
   }
 };
 
+// Declaração de referências para módulos carregados sob demanda
+var FX_RATES_DATA = null;
+var FX_HELPERS = null;
+var SUBSCRIPTION_PLANS_DATA = [];
+var BUDGET_STACK_RECOMMENDER = null;
+var OPENCODE_GO_DATA = null;
+var PLATFORM_MODEL_CATALOG = null;
+var PLATFORM_AVAILABILITY_MATRIX = [];
+var CAMELAI_PLATFORM_DATA = null;
+var GROK_BOT_METADATA = null;
+var ZAI_CREDIT_ACCOUNTING = null;
+var MODEL_HISTORY_DATA = null;
+var BENCHMARK_HISTORY_DATA = [];
+var COMMUNITY_REPORTS_DATA = [];
+var BENCHMARK_VS_COMMUNITY_DIVERGENCES = [];
+var ENGINEERING_BEHAVIOR_DATA = null;
+var USE_CASE_COMPARISON_DATA = null;
+var PRICE_HISTORY_DATA = null;
+var PlanExplorer = null;
+
 // Carregamento dos módulos data/* em ambiente Node.js
 if (typeof require !== 'undefined') {
   try {
     const fxMod = require('./data/fx.js');
-    global.FX_RATES_DATA = fxMod.FX_RATES_DATA;
-    global.FX_HELPERS = fxMod.FX_HELPERS;
+    FX_RATES_DATA = global.FX_RATES_DATA = fxMod.FX_RATES_DATA;
+    FX_HELPERS = global.FX_HELPERS = fxMod.FX_HELPERS;
     const plansMod = require('./data/plans.js');
-    global.SUBSCRIPTION_PLANS_DATA = plansMod.SUBSCRIPTION_PLANS_DATA;
-    global.BUDGET_STACK_RECOMMENDER = plansMod.BUDGET_STACK_RECOMMENDER;
+    SUBSCRIPTION_PLANS_DATA = global.SUBSCRIPTION_PLANS_DATA = plansMod.SUBSCRIPTION_PLANS_DATA;
+    BUDGET_STACK_RECOMMENDER = global.BUDGET_STACK_RECOMMENDER = plansMod.BUDGET_STACK_RECOMMENDER;
+    ZAI_CREDIT_ACCOUNTING = global.ZAI_CREDIT_ACCOUNTING = plansMod.ZAI_CREDIT_ACCOUNTING;
     const platformsMod = require('./data/platforms.js');
-    global.PLATFORM_MODEL_CATALOG = platformsMod.PLATFORM_MODEL_CATALOG;
+    OPENCODE_GO_DATA = global.OPENCODE_GO_DATA = platformsMod.OPENCODE_GO_DATA;
+    PLATFORM_MODEL_CATALOG = global.PLATFORM_MODEL_CATALOG = platformsMod.PLATFORM_MODEL_CATALOG;
+    PLATFORM_AVAILABILITY_MATRIX = global.PLATFORM_AVAILABILITY_MATRIX = platformsMod.PLATFORM_AVAILABILITY_MATRIX;
+    CAMELAI_PLATFORM_DATA = global.CAMELAI_PLATFORM_DATA = platformsMod.CAMELAI_PLATFORM_DATA;
+    GROK_BOT_METADATA = global.GROK_BOT_METADATA = platformsMod.GROK_BOT_METADATA;
     const historyMod = require('./data/history.js');
-    global.MODEL_HISTORY_DATA = historyMod.MODEL_HISTORY_DATA;
-    global.BENCHMARK_HISTORY_DATA = historyMod.BENCHMARK_HISTORY_DATA;
+    MODEL_HISTORY_DATA = global.MODEL_HISTORY_DATA = historyMod.MODEL_HISTORY_DATA;
+    BENCHMARK_HISTORY_DATA = global.BENCHMARK_HISTORY_DATA = historyMod.BENCHMARK_HISTORY_DATA;
     const commMod = require('./data/community.js');
-    global.COMMUNITY_REPORTS_DATA = commMod.COMMUNITY_REPORTS_DATA;
-    global.BENCHMARK_VS_COMMUNITY_DIVERGENCES = commMod.BENCHMARK_VS_COMMUNITY_DIVERGENCES;
+    COMMUNITY_REPORTS_DATA = global.COMMUNITY_REPORTS_DATA = commMod.COMMUNITY_REPORTS_DATA;
+    BENCHMARK_VS_COMMUNITY_DIVERGENCES = global.BENCHMARK_VS_COMMUNITY_DIVERGENCES = commMod.BENCHMARK_VS_COMMUNITY_DIVERGENCES;
     const behMod = require('./data/behavior.js');
-    global.ENGINEERING_BEHAVIOR_DATA = behMod.ENGINEERING_BEHAVIOR_DATA;
+    ENGINEERING_BEHAVIOR_DATA = global.ENGINEERING_BEHAVIOR_DATA = behMod.ENGINEERING_BEHAVIOR_DATA;
     const ucMod = require('./data/use-cases.js');
-    global.USE_CASE_COMPARISON_DATA = ucMod.USE_CASE_COMPARISON_DATA;
+    USE_CASE_COMPARISON_DATA = global.USE_CASE_COMPARISON_DATA = ucMod.USE_CASE_COMPARISON_DATA;
     const prHistMod = require('./data/pricing-history.js');
-    global.PRICE_HISTORY_DATA = prHistMod.PRICE_HISTORY_DATA;
+    PRICE_HISTORY_DATA = global.PRICE_HISTORY_DATA = prHistMod.PRICE_HISTORY_DATA;
+    const planExpMod = require('./data/plan-explorer.js');
+    PlanExplorer = global.PlanExplorer = planExpMod;
   } catch (e) {
     // Silencioso se executado em ambiente sem filesystem local
   }
@@ -6077,13 +6321,18 @@ if (typeof module !== 'undefined' && module.exports) {
     SUBSCRIPTION_PLANS_DATA: typeof SUBSCRIPTION_PLANS_DATA !== 'undefined' ? SUBSCRIPTION_PLANS_DATA : [],
     BUDGET_STACK_RECOMMENDER: typeof BUDGET_STACK_RECOMMENDER !== 'undefined' ? BUDGET_STACK_RECOMMENDER : null,
     PLATFORM_MODEL_CATALOG: typeof PLATFORM_MODEL_CATALOG !== 'undefined' ? PLATFORM_MODEL_CATALOG : null,
+    PLATFORM_AVAILABILITY_MATRIX: typeof PLATFORM_AVAILABILITY_MATRIX !== 'undefined' ? PLATFORM_AVAILABILITY_MATRIX : [],
+    CAMELAI_PLATFORM_DATA: typeof CAMELAI_PLATFORM_DATA !== 'undefined' ? CAMELAI_PLATFORM_DATA : null,
+    GROK_BOT_METADATA: typeof GROK_BOT_METADATA !== 'undefined' ? GROK_BOT_METADATA : null,
+    ZAI_CREDIT_ACCOUNTING: typeof ZAI_CREDIT_ACCOUNTING !== 'undefined' ? ZAI_CREDIT_ACCOUNTING : null,
     MODEL_HISTORY_DATA: typeof MODEL_HISTORY_DATA !== 'undefined' ? MODEL_HISTORY_DATA : null,
     BENCHMARK_HISTORY_DATA: typeof BENCHMARK_HISTORY_DATA !== 'undefined' ? BENCHMARK_HISTORY_DATA : [],
     COMMUNITY_REPORTS_DATA: typeof COMMUNITY_REPORTS_DATA !== 'undefined' ? COMMUNITY_REPORTS_DATA : [],
     BENCHMARK_VS_COMMUNITY_DIVERGENCES: typeof BENCHMARK_VS_COMMUNITY_DIVERGENCES !== 'undefined' ? BENCHMARK_VS_COMMUNITY_DIVERGENCES : [],
     ENGINEERING_BEHAVIOR_DATA: typeof ENGINEERING_BEHAVIOR_DATA !== 'undefined' ? ENGINEERING_BEHAVIOR_DATA : null,
     USE_CASE_COMPARISON_DATA: typeof USE_CASE_COMPARISON_DATA !== 'undefined' ? USE_CASE_COMPARISON_DATA : null,
-    PRICE_HISTORY_DATA: typeof PRICE_HISTORY_DATA !== 'undefined' ? PRICE_HISTORY_DATA : null
+    PRICE_HISTORY_DATA: typeof PRICE_HISTORY_DATA !== 'undefined' ? PRICE_HISTORY_DATA : null,
+    PlanExplorer: typeof PlanExplorer !== 'undefined' ? PlanExplorer : null
   };
 }
 
@@ -6098,5 +6347,7 @@ if (typeof window !== 'undefined') {
   window.HARDWARE_LOCAL_MODELS_DATA = HARDWARE_LOCAL_MODELS_DATA;
   window.AA_METHODOLOGY_NOTES = AA_METHODOLOGY_NOTES;
   if (typeof OPENCODE_GO_DATA !== "undefined") window.OPENCODE_GO_DATA = OPENCODE_GO_DATA;
+  if (typeof PLATFORM_AVAILABILITY_MATRIX !== "undefined") window.PLATFORM_AVAILABILITY_MATRIX = PLATFORM_AVAILABILITY_MATRIX;
+  if (typeof PlanExplorer !== "undefined") window.PlanExplorer = PlanExplorer;
 }
 

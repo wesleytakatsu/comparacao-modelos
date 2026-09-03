@@ -722,7 +722,7 @@ $$\text{Score por Dólar} = \frac{\text{Pontuação de Benchmark (\%) (\$)}}{\te
 
 ## 15. Rankings Derivados e Análise de Pareto
 
-1. **Melhor Coding Absoluto**: GPT-5.6 Sol Max (88,8 TerminalBench) / DeepSeek V4 Pro 0813 (87,9 TerminalBench) / Grok 4.6 XHigh (70,8% CursorBench).
+1. **Melhor Coding Absoluto**: GPT-5.6 Sol High (88,8 TerminalBench) / DeepSeek V4 Pro 0813 (87,9 TerminalBench) / Grok 4.6 XHigh (70,8% CursorBench).
 2. **Melhor Relação Custo-Benefício por Dólar**: GPT-5.6 Luna Max ($0,39 / 61,1%) / DeepSeek V4 Flash 0731 ($0,22/M input / 82,7 TerminalBench).
 3. **Melhor Agente Visual de Baixo Custo**: DeepSeek V4 Flash Vision Exp (~384 tokens/img; $0,000084/imagem).
 4. **Melhor Executor de Subagentes em Alta Velocidade**: NVIDIA Nemotron 3.5 Lightning (30B-A3B LatentMoE, 86% PinchBench, decode ultrarrápido).
@@ -2537,7 +2537,7 @@ Score (%)
 71│                                                [Grok 4.6 XHigh] (70.8% / $2.81) ── [Claude Fable 5 Max] (70.5% / $17.32)
 70│                                      [Claude Opus 5 Max] (70.0% / $8.23)
 69│                            [Grok 4.6 High] (69.9% / $2.34)
-67│                 [Grok 4.6 Medium] (67.1% / $1.28) ── [GPT-5.6 Sol Max] (67.2% / $5.69)
+67│                 [Grok 4.6 Medium] (67.1% / $1.28) ── [GPT-5.6 Sol High] (67.2% / $5.69)
 65│            [GPT-5.6 Terra Max] (64.9% / $2.31)
 61│   [GPT-5.6 Luna Max] (61.1% / $0.39) ── [Gemini 3.7 Flash High] (61.6% / $1.20)
 57│   [GPT-5.6 Luna High] (56.8% / $0.16)
@@ -2586,7 +2586,7 @@ Cada registro carrega dois metadados essenciais de governança:
 
 | Papel Estratégico | Atributos Críticos Exigidos | Modelos Recomendados (Agosto/2026) |
 | :--- | :--- | :--- |
-| **Frontier Planner** | Raciocínio profundo, arquitetura, visão de longo prazo | `GPT-5.6 Sol Max`, `Claude Opus 5 High`, `Grok 4.6 XHigh` |
+| **Frontier Planner** | Raciocínio profundo, arquitetura, visão de longo prazo | `GPT-5.6 Sol High`, `Claude Opus 5 High`, `Grok 4.6 XHigh` |
 | **Balanced Frontier** | Alta capacidade com custo moderado para coding diário | `Grok 4.6 Medium/High`, `GPT-5.6 Terra Max` |
 | **Cheap Reasoning** | Raciocínio agêntico com custo por tarefa $< \$0,20$ | `GPT-5.6 Luna High/Max`, `DeepSeek V4 Flash 0731`, `MiMo-V2.5` |
 | **Heavy Open Agent** | MoE massivo aberto para infraestrutura dedicada | `DeepSeek V4 Pro 0813`, `Kimi K3 Max`, `Qwen3.8 Max` |
@@ -2922,7 +2922,7 @@ Ox Alpha (Gera Patch) ──► Executa Testes Locais ──► Modelo Revisor /
 
 | Modelo | Capacidade Técnica | Confiabilidade Agêntica | Velocidade de Serving | Transparência & Governança |
 | :--- | :---: | :---: | :---: | :---: |
-| **GPT-5.6 Sol Max** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| **GPT-5.6 Sol High** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
 | **Grok 4.6 High** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐½ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
 | **Claude Opus / Fable 5** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
 | **Kimi K3 Max** | ⭐⭐⭐⭐½ | ⭐⭐⭐⭐ | ⭐⭐½ | ⭐⭐⭐⭐⭐ |
@@ -3413,7 +3413,7 @@ O **AA Index** representa a capacidade cognitiva geral balanceada (escala 0 a 10
 | **Claude Opus 5 XHigh** | **63** | ~$1,80 | ~55 tok/s | 1M | 🥇 **Mesmo composite do Max com menor custo** |
 | **Claude Fable 5 Max** | **62** | ~$3,14 | ~71 tok/s | 1M | Frontier de raciocínio extremo |
 | **Claude Opus 5 High** | **61** | ~$1,23 | ~54 tok/s | 1M | Sweet spot de alta inteligência da Anthropic |
-| **GPT-5.6 Sol Max** | **61** | ~$1,23 | ~65–70 tok/s | 1M | Frontier máximo da OpenAI |
+| **GPT-5.6 Sol (High Reasoning)** | **61** | ~$1,23 | ~65–70 tok/s | 1M | Frontier máximo da OpenAI |
 | **Grok 4.6 High** | **61** | **~$0,84** | ~55–60 tok/s | 500k | Frontier com excepcional custo-benefício |
 | **Kimi K3 Max** | **60** | **$0,84** | 37,9 tok/s | 1M | 🥇 **#1 Open-Weights Global** |
 | **GLM-5.3 Max** | **60** | **~$0,68** | ~93 tok/s\* | ~1M\* | Frontier aberto / API de alta eficiência |
@@ -3498,7 +3498,7 @@ Leaderboard GDPval-AA v2 (Rating Elo - Avaliações Cegas):
 5. Claude Fable 5 Max      [1738 Elo] ██████████████████████████████
 6. Qwen3.8 Max             [1735 Elo] ██████████████████████████████
 7. Claude Opus 5 High      [1733 Elo] ██████████████████████████████
-8. GPT-5.6 Sol Max         [1723 Elo] █████████████████████████████
+8. GPT-5.6 Sol High        [1723 Elo] █████████████████████████████
 9. Qwen3.8 A95B            [1720 Elo] █████████████████████████████
 10. Kimi K3 Max            [1681 Elo] ████████████████████████████
 11. GPT-5.6 Sol XHigh      [~1679 Elo]███████████████████████████
@@ -3568,11 +3568,11 @@ A Artificial Analysis executa uma bateria isolada do Terminal-Bench 2.1 em conta
 #### C. GPQA Diamond (Ciência de Fronteira)
 - 🥇 **Grok 4.6 High**: **94,9%**
 - 🥈 **Gemini 3.7 Flash High**: **94,5%**
-- 🥉 **GPT-5.6 Sol Max**: **94,1%**
+- 🥉 **GPT-5.6 Sol High**: **94,1%**
 - *Análise*: O Gemini 3.7 Flash empata estatisticamente com Sol e Grok por uma fração do preço e com 340 tok/s.
 
 #### D. CritPt (Física Teórica Extrema)
-- 🥇 **GPT-5.6 Sol Max**: **32,3%**
+- 🥇 **GPT-5.6 Sol High**: **32,3%**
 - 🥈 **GPT-5.5 Pro XHigh**: **30,6%**
 - 🥉 **GPT-5.6 Terra Max**: **30,0%**
 - *Análise*: Demonstra a utilidade do Sol como modelo de escalonamento final (*Escalation Tier*).
@@ -3603,7 +3603,7 @@ quadrantChart
     quadrant-3 Executores Especializados (Nemotron, gpt-oss-20b)
     quadrant-4 Custo Elevado sem Frontier (Modelos Legados)
     "Claude Opus 5 Max": [0.85, 0.95]
-    "GPT-5.6 Sol Max": [0.70, 0.90]
+    "GPT-5.6 Sol High": [0.70, 0.90]
     "Grok 4.6 High": [0.45, 0.90]
     "Kimi K3 Max": [0.45, 0.88]
     "Gemini 3.7 Flash High": [0.25, 0.82]

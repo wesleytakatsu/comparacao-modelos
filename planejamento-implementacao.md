@@ -56,7 +56,7 @@ A plataforma é concebida como um **Portal de Engenharia de Software e DevTools 
 ### Módulo 1: `/#dashboard` — Painel Executivo & KPIs
 - **Header KPI Cards**:
   - 🌟 **Sweet Spot Geral**: `Grok 4.6 (Medium)` — 67,1% no CursorBench a $1,28/task (Pool Cursor).
-  - 👑 **Líder Absoluto de Score**: `Grok 4.6 (XHigh)` — 70,8% no CursorBench ($2,81) e `GPT-5.6 Sol Max` (88,8 Terminal-Bench).
+  - 👑 **Líder Absoluto de Score**: `Grok 4.6 (XHigh)` — 70,8% no CursorBench ($2,81) e `GPT-5.6 Sol High` (88,8 Terminal-Bench).
   - 💎 **Ultra Custo-Benefício**: `GPT-5.6 Luna (High/Max)` — 56,8% por $0,16 e 61,1% por $0,39.
   - ⚡ **Campeão Open-Weights Local**: `gpt-oss-20b (High)` — 60,7% no SWE-Verified cabendo em 16 GB (3,79 score/GB).
   - 🚀 **Executor de Altíssima Velocidade**: `Nemotron 3.5 Lightning (NVFP4)` — 135 tok/s decode e 45 ms TTFT.
