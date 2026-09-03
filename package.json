@@ -1,0 +1,13 @@
+{
+  "name": "comparacao-modelos",
+  "version": "1.0.0",
+  "description": "Comparativo Multidimensional de Modelos de IA",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["ai", "benchmark", "cursorbench", "deepseek", "grok", "gpt-5.6", "claude"],
+  "author": "",
+  "license": "MIT"
+}
