@@ -167,8 +167,94 @@ const DATA_SOURCES = {
     official: true,
     notes: 'Relatório oficial Z.ai revelando a identidade do teste stealth ox-alpha como GLM-5.3-Flash: MoE 320B/18B, 1M contexto, 128k output, licença MIT, Terminal-Bench 2.1 84.3%, DeepSWE 63.4%, Toolathlon 78.4%.'
   },
-
-
+  'camelai-plans-official': {
+    id: 'camelai-plans-official',
+    publisher: 'camelAI / CamelQA, Inc.',
+    sourceType: 'official',
+    title: 'camelCode Official Pricing & Subscription Plans Specification',
+    sourceUrl: 'https://camelai.com/pricing',
+    publishedAt: '2026-09-02',
+    retrievedAt: '2026-09-03',
+    official: true,
+    notes: 'Documentação detalhada de planos camelCode: Free ($0), Starter ($10), Pro ($40), Team ($50/seat, mín. 3 seats) e Enterprise. Créditos de modelos premium a taxa de provedor.'
+  },
+  'camelai-model-providers': {
+    id: 'camelai-model-providers',
+    publisher: 'camelAI / CamelQA, Inc.',
+    sourceType: 'official',
+    title: 'camelCode Model Providers & Access Methods',
+    sourceUrl: 'https://camelai.com/docs/models',
+    publishedAt: '2026-09-01',
+    retrievedAt: '2026-09-03',
+    official: true,
+    notes: 'Especificação das 4 formas de acesso a modelos premium: plan credits, top-up Stripe pré-pago, BYOK (Anthropic, OpenAI, OpenRouter, AWS Bedrock) e Sign in with OpenAI.'
+  },
+  'camelai-stream-overview': {
+    id: 'camelai-stream-overview',
+    publisher: 'camelAI / CamelQA, Inc.',
+    sourceType: 'official',
+    title: 'camelStream: Flat-Rate AI Inference API with Unlimited Tokens',
+    sourceUrl: 'https://camelai.com/stream',
+    publishedAt: '2026-09-01',
+    retrievedAt: '2026-09-03',
+    official: true,
+    notes: 'Visão geral da API camelStream: US$ 5/stream/mês, tokens ilimitados sem overage, 1 geração concorrente garantida por stream, modelo auto dinâmico.'
+  },
+  'camelai-stream-fleet': {
+    id: 'camelai-stream-fleet',
+    publisher: 'camelAI / CamelQA, Inc.',
+    sourceType: 'official',
+    title: 'camelStream Current Model Fleet & Quality Floor',
+    sourceUrl: 'https://stream.camelai.com/fleet',
+    publishedAt: '2026-08-30',
+    retrievedAt: '2026-09-03',
+    official: true,
+    notes: 'Fleet ativo verificado em 30/08/2026: DeepSeek V4 Flash 0731, Gemini Flash 3.7, GLM 5.3 Flash, GPT Luna 5.6, Muse Spark 1.2. Quality Floor: Terminal-Bench 2.1 >= 70% ou AA Index >= 50. Contexto mínimo 260K com visão.'
+  },
+  'camelai-stream-terms': {
+    id: 'camelai-stream-terms',
+    publisher: 'camelAI / CamelQA, Inc.',
+    sourceType: 'official',
+    title: 'camelStream Service Terms & Performance Targets Specification',
+    sourceUrl: 'https://stream.camelai.com/terms',
+    publishedAt: '2026-08-30',
+    retrievedAt: '2026-09-03',
+    official: true,
+    notes: 'Metas de velocidade: p10 >= 40 tok/s, p5 >= 20 tok/s, TTFT p95 < 5s (metas de engenharia, NÃO constituem SLA contratual). Ausência de SLA de uptime no plano standard.'
+  },
+  'camelai-stream-privacy': {
+    id: 'camelai-stream-privacy',
+    publisher: 'camelAI / CamelQA, Inc.',
+    sourceType: 'official',
+    title: 'camelStream Privacy Policy & Governance Notice',
+    sourceUrl: 'https://stream.camelai.com/privacy',
+    publishedAt: '2026-08-30',
+    retrievedAt: '2026-09-03',
+    official: true,
+    notes: 'Alerta crítico de privacidade: no plano standard, prompts e respostas podem ser retidos e utilizados para treinamento por camelAI e parceiros. Não há opt-out. Termos ZDR customizados exigem 1.000+ streams.'
+  },
+  'camelai-self-hosting': {
+    id: 'camelai-self-hosting',
+    publisher: 'camelAI / CamelQA, Inc.',
+    sourceType: 'official',
+    title: 'camelCode Self-Hosted Architecture & Deployment Guide',
+    sourceUrl: 'https://github.com/camel-ai/camel-code',
+    publishedAt: '2026-09-01',
+    retrievedAt: '2026-09-03',
+    official: true,
+    notes: 'Código aberto licença MIT ($0 licença). Requisitos Ubuntu 24.04 (4 vCPU, 8 GiB RAM, 100 GiB disco, Docker, Node 22, Bun). Single-node apenas. Risco de segurança: container possui acesso read-write ao Docker socket (root-equivalent).'
+  },
+  'camelai-connections': {
+    id: 'camelai-connections',
+    publisher: 'camelAI / CamelQA, Inc.',
+    sourceType: 'official',
+    title: 'camelCode Secure Connections & Integrations Specification',
+    sourceUrl: 'https://camelai.com/docs/connections',
+    publishedAt: '2026-09-01',
+    retrievedAt: '2026-09-03',
+    official: true,
+    notes: 'Mais de 50 integrações (Postgres, Redis, Mongo, BigQuery, Snowflake, Slack, Stripe). Credenciais criptografadas em repouso e injetadas server-side sem exposição em logs ou chats.'
+  }
 };
 
 const AI_PROVIDERS_DATA = {
@@ -336,6 +422,23 @@ const AI_PROVIDERS_DATA = {
     iconSvg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5zm0 2.8l6.8 3.8-6.8 3.8-6.8-3.8L12 4.8zm-7.6 5.4l6.8 3.8v7.6l-6.8-3.8V10.2zm8.4 11.4v-7.6l6.8-3.8v7.6l-6.8 3.8z"/></svg>',
     description: 'Desenvolvedora do Composer 2.5 e mantenedora do benchmark independente CursorBench 3.2.',
     website: 'https://cursor.com'
+  },
+  'camelai': {
+    id: 'camelai',
+    name: 'camelAI',
+    company: 'CamelQA, Inc.',
+    country: 'EUA',
+    logo: '🐪',
+    brandColor: '#f59e0b',
+    iconUrl: 'https://camelai.com/favicon.ico',
+    iconSvg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.5 7h-1.6l-1.8-3.6C15.8 2.6 15 2 14.1 2H11c-1.1 0-2 .9-2 2v2H6c-1.1 0-2 .9-2 2v2l-2 3v7h2v-5l2-2.5V20h2v-6h3v6h2v-6.5l2.4-3.5H19v6h2v-7l-1.5-2.5z"/></svg>',
+    website: 'https://camelai.com',
+    type: [
+      'coding-agent-platform',
+      'app-builder',
+      'inference-router'
+    ],
+    description: 'Plataforma integrada de coding agent autônomo (camelCode) e API de inferência de taxa fixa com tokens ilimitados (camelStream).'
   }
 };
 
@@ -4960,8 +5063,8 @@ const ANTIGRAVITY_POOLS_DATA = {
       models: [
         { id: 'gemini-3-8-flash', name: 'Gemini 3.8 Flash', role: 'Worker de Alto Throughput / Coding Agêntico / Multimodal 1M', context: '1M', tokensRatio: 'Econômico / Pool Gemini', supportedEfforts: ['low', 'medium', 'high'] },
         { id: 'gemini-3-7-flash', name: 'Gemini 3.7 Flash', role: 'Subagentes / Navegação / Triagem Mecânica', context: '1M', tokensRatio: '8x vs Pro' },
-        { id: 'gemini-3-1-pro', name: 'Gemini 3.1 Pro', role: 'Multimodal Complexo / Ciência', context: '1M', tokensRatio: '1x Base' },
-        { id: 'gemini-3-5-flash', name: 'Gemini 3.5 Flash', role: 'Boilerplate e Edição Rápida', context: '1M', tokensRatio: '10x vs Pro' }
+        { id: 'gemini-3-6-flash', name: 'Gemini 3.6 Flash', role: 'Boilerplate e Edição Rápida', context: '1M', tokensRatio: '10x vs Pro' },
+        { id: 'gemini-3-1-pro', name: 'Gemini 3.1 Pro', role: 'Multimodal Complexo / Ciência / Raciocínio Pesado', context: '1M', tokensRatio: '1x Base' }
       ],
       quotaMechanism: 'Proporcional ao preço equivalente de API (Maio/2026). Modelos Flash consomem até 8x menos do orçamento.',
       resetSchedule: 'Renovação dinâmica de 5 horas + Limite semanal próprio.'
@@ -5355,17 +5458,21 @@ const AI_DATA_HELPERS = {
   /**
    * Calculadora de ROI para equipes de desenvolvimento
    */
-  calculateTeamRoi(devCount = 5, tasksPerDevMonth = 120, avgTokensPerTask = 25000, energyCostKwhBrl = 0.85) {
+  calculateTeamRoi(devCount = 5, tasksPerDevMonth = 120, avgTokensPerTask = 25000, energyCostKwhBrl = 0.85, usdToBrl = null) {
+    const rate = (typeof usdToBrl === 'number' && !isNaN(usdToBrl) && usdToBrl > 0)
+      ? usdToBrl
+      : ((typeof FX_RATES_DATA !== 'undefined' && FX_RATES_DATA.USD_BRL && FX_RATES_DATA.USD_BRL.rate) ? FX_RATES_DATA.USD_BRL.rate : 5.108);
+
     const totalMonthlyTasks = devCount * tasksPerDevMonth;
     const totalMonthlyTokensM = (totalMonthlyTasks * avgTokensPerTask) / 1000000.0;
 
     // 1. Custo API Direta (Média ponderada GPT-5.6 Sol/Terra/Claude: ~$8/M tokens)
     const directApiMonthlyUsd = totalMonthlyTokensM * 8.0;
-    const directApiAnnualBrl = directApiMonthlyUsd * 12.0 * 5.60;
+    const directApiAnnualBrl = directApiMonthlyUsd * 12.0 * rate;
 
     // 2. Custo Assinaturas Híbridas (OpenCode Go $10 + Cursor Pro $20 = $30/dev/mês)
     const subscriptionsMonthlyUsd = devCount * 30.0;
-    const subscriptionsAnnualBrl = subscriptionsMonthlyUsd * 12.0 * 5.60;
+    const subscriptionsAnnualBrl = subscriptionsMonthlyUsd * 12.0 * rate;
 
     // 3. Custo Local Workstation (1x RTX 5090 R$ 18.000 + Energia)
     const workstationCapexBrl = 18000.0;
@@ -5374,7 +5481,7 @@ const AI_DATA_HELPERS = {
     const localAnnualTotalBrl = workstationCapexBrl + (localEnergyMonthlyBrl * 12.0);
 
     const annualSavingsBrl = directApiAnnualBrl - subscriptionsAnnualBrl;
-    const amortizationMonths = (workstationCapexBrl / (directApiMonthlyUsd * 5.60 - localEnergyMonthlyBrl));
+    const amortizationMonths = (workstationCapexBrl / (directApiMonthlyUsd * rate - localEnergyMonthlyBrl));
 
     return {
       totalMonthlyTasks,

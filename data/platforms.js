@@ -819,11 +819,324 @@ const OPENCODE_GO_DATA = {
 };
 
 // ============================================================================
+// 1.5. CAMELAI PLATFORM DATA (CAMELCODE & CAMELSTREAM)
+// Snapshot Oficial Verificado: 03/09/2026 (Fleet 30/08/2026)
+// ============================================================================
+
+const CAMELAI_PLATFORM_DATA = {
+  company: {
+    id: 'camelai',
+    name: 'camelAI',
+    legalName: 'CamelQA, Inc.',
+    website: 'https://camelai.com',
+    country: 'EUA',
+    type: ['coding-agent-platform', 'app-builder', 'inference-router'],
+    verifiedAt: '2026-09-03',
+    notes: 'Plataforma integrada de coding agent autônomo (camelCode) e API de inferência de taxa fixa com tokens ilimitados (camelStream).'
+  },
+
+  camelCode: {
+    productName: 'camelCode',
+    category: 'Full-Stack Coding Agent & App Builder',
+    description: 'Agente de codificação autônomo com workspaces persistentes, criação e deploy full-stack de apps e integrações nativas.',
+    hostedPlans: [
+      {
+        id: 'camelai-code-free',
+        name: 'Free',
+        monthlyPriceUsd: 0,
+        monthlyPriceBrlEstimate: 0,
+        seats: 1,
+        workspaces: 1,
+        storageGbPerWorkspace: 5,
+        deployedApps: 3,
+        customDomains: 0,
+        emailInbox: false,
+        rbac: false,
+        premiumModelCreditsUsd: 0,
+        camelFree: {
+          included: true,
+          priority: false,
+          capacity: 'shared',
+          notes: 'Capacidade compartilhada; pode sofrer lentidão em horários de pico.'
+        },
+        byokAllowed: true,
+        topUpAllowed: true,
+        openAiLoginAllowed: true,
+        creditCardRequired: false,
+        automations: '1 daily (docs) / 2 daily (marketing)',
+        automationConflict: true,
+        bestFor: 'Testes sem compromisso, estudantes e prototipagem leve.'
+      },
+      {
+        id: 'camelai-code-starter',
+        name: 'Starter',
+        monthlyPriceUsd: 10,
+        monthlyPriceBrlEstimate: 51.08,
+        seats: 1,
+        workspaces: 1,
+        storageGbPerWorkspace: 50,
+        deployedApps: 30,
+        customDomains: 10,
+        emailInbox: true,
+        rbac: false,
+        premiumModelCreditsUsd: 10,
+        camelFreePriority: true,
+        byokAllowed: true,
+        topUpAllowed: true,
+        openAiLoginAllowed: true,
+        automations: '1 hourly (docs) / 10 hourly (marketing)',
+        automationConflict: true,
+        bestFor: 'Desenvolvedores individuais com projetos pessoais ativos.'
+      },
+      {
+        id: 'camelai-code-pro',
+        name: 'Pro',
+        monthlyPriceUsd: 40,
+        monthlyPriceBrlEstimate: 204.32,
+        seats: 1,
+        workspaces: 1,
+        storageGbPerWorkspace: 100,
+        deployedApps: 'unlimited',
+        customDomains: 'unlimited',
+        emailInbox: true,
+        rbac: false,
+        premiumModelCreditsUsd: 40,
+        camelFreePriority: true,
+        byokAllowed: true,
+        topUpAllowed: true,
+        openAiLoginAllowed: true,
+        automations: 50,
+        automationMinimumIntervalMinutes: 5,
+        automationConflict: false,
+        bestFor: 'Solo builder usando camelAI como plataforma principal de desenvolvimento contínuo.'
+      },
+      {
+        id: 'camelai-code-team',
+        name: 'Team',
+        monthlyPriceUsdPerSeat: 50,
+        monthlyPriceBrlEstimatePerSeat: 255.40,
+        minimumSeats: 3,
+        minimumMonthlyCostUsd: 150,
+        minimumMonthlyCostBrlEstimate: 766.20,
+        workspaces: 2,
+        storageGbPerWorkspace: 100,
+        deployedApps: 'unlimited',
+        customDomains: 'unlimited',
+        emailInbox: true,
+        rbac: true,
+        premiumModelCreditsUsdPerSeat: 50,
+        camelFreePriority: true,
+        byokAllowed: true,
+        topUpAllowed: true,
+        openAiLoginAllowed: true,
+        automationsPerMember: 50,
+        automationMinimumIntervalMinutes: 5,
+        bestFor: 'Equipes técnicas com necessidade de RBAC, colaboração em múltiplos apps e credenciais compartilhadas.'
+      },
+      {
+        id: 'camelai-code-enterprise',
+        name: 'Enterprise',
+        monthlyPriceUsd: 'Custom / Contact Sales',
+        seats: 'Custom',
+        workspaces: 'Unlimited',
+        storageGbPerWorkspace: 'Custom',
+        deployedApps: 'unlimited',
+        customDomains: 'unlimited',
+        emailInbox: true,
+        rbac: true,
+        ssoSaml: true,
+        byoc: {
+          supported: true,
+          description: 'Deploy apps directly inside customer\'s Cloudflare account.'
+        },
+        compliance: ['HIPAA', 'SOC 2 Type II'],
+        dedicatedSupport: true,
+        bestFor: 'Grandes organizações com requisitos rigorosos de segurança e compliance.'
+      }
+    ],
+
+    modelAccess: {
+      fourAccessMethods: [
+        {
+          method: 'Plan credits',
+          description: 'Créditos mensais inclusos (Starter $10, Pro $40, Team $50/seat). Cobrança estritamente à taxa do provedor (provider rate) sem markup camelAI.'
+        },
+        {
+          method: 'Top-up credits',
+          description: 'Recargas pré-pagas via Stripe no mesmo saldo dos créditos do plano. Disponível inclusive no tier Free. Política de rollover: unknown/não confirmada.'
+        },
+        {
+          method: 'BYOK (Bring Your Own Key)',
+          description: 'Conexão direta com Anthropic, OpenAI, OpenRouter ou AWS Bedrock.',
+          importantLimitation: 'BYOK substitui TODOS os modelos hospedados pelo camelAI (inclusive Camel Free). Não é possível combinar chave de um provedor com créditos de outro simultaneamente. Para múltiplas famílias sob uma única chave, utilize OpenRouter.'
+        },
+        {
+          method: 'Sign in with OpenAI',
+          description: 'Utiliza a assinatura ChatGPT existente do usuário. Uso de modelos GPT sem custo adicional camelAI. Cobre apenas modelos da família GPT.'
+        }
+      ],
+      supportedFamilies: ['GPT', 'Gemini', 'Grok', 'Kimi', 'DeepSeek', 'Claude'],
+      creditDepletionBehavior: 'Quando os créditos premium esgotam, o serviço NÃO para: Camel Free continua funcionando, apps deployed continuam ativos, workspaces e automações permanecem intactos.',
+      camelFreeDetails: {
+        platformSku: true,
+        opaqueHostedModel: true,
+        canonicalModelId: null,
+        description: 'Modelo hospedado proprietário gratuito. Não incluído no catálogo dos 44 modelos canônicos por não possuir ledger público independente.'
+      }
+    },
+
+    capabilities: [
+      'Agente de codificação persistente com workspace preservado entre sessões',
+      'Construção de aplicações full-stack (stack recomendada: React, TypeScript, Tailwind)',
+      'One-click deployment com DNS, SSL e CDN totalmente gerenciados',
+      '50+ integrações (PostgreSQL, MySQL, MongoDB, Redis, Snowflake, BigQuery, Stripe, Slack, GitHub, Notion)',
+      'Segurança de conexões: credenciais criptografadas em repouso, injetadas server-side e nunca expostas em logs/chats'
+    ],
+
+    limitations: [
+      'Uso de LLM premium não é ilimitado: esgotados os créditos, requer top-up, BYOK ou login OpenAI',
+      'Planos individuais (Free, Starter, Pro) possuem apenas 1 workspace (Team tem 2); workspaces adicionais exigem contato comercial',
+      'Conflito documental nas automações dos planos Free e Starter (docs detalhados vs marketing page)'
+    ]
+  },
+
+  selfHosted: {
+    productName: 'camelCode Self-Hosted',
+    license: 'MIT (Open Source)',
+    softwareCostUsd: 0,
+    deploymentType: 'Self-Hosted / Single-Node',
+    userCosts: 'Infraestrutura própria (VM/servidor), custos de LLM provider (BYOK) e DNS/domínio.',
+    hardwareRequirements: {
+      os: 'x86_64 Linux (Ubuntu 24.04 LTS recomendado)',
+      vcpu: 4,
+      ramGib: 8,
+      diskGib: 100,
+      software: ['Docker Engine', 'Docker Compose v2', 'Git', 'Node.js 22', 'Bun 1.3.14']
+    },
+    prerequisites: ['Hostname público', 'Provedor OIDC para autenticação', 'Wildcard domain', 'Certificados TLS/DNS', 'API key de provedor'],
+    supportedProviders: ['AWS Bedrock', 'Anthropic', 'OpenAI', 'OpenRouter', 'Custom OpenAI-Compatible Endpoint'],
+    architecturalLimitations: [
+      'Single-node estrito: sem failover multi-node ou alta disponibilidade nativa',
+      'Sem control plane gerenciado, sem backup gerenciado e sem disaster recovery automático',
+      'Sem suporte a cadastro por senha com verificação de email ou SMTP interno',
+      'Convites de membros: admin gera URL de convite e entrega manualmente'
+    ],
+    criticalSecurityWarning: '🚨 O container da aplicação camelAI possui acesso read-write ao Docker socket (/var/run/docker.sock). Qualquer entidade que comprometa o container obtém efetivamente acesso root à máquina virtual hospedeira.'
+  },
+
+  camelStream: {
+    productName: 'camelStream',
+    serviceType: 'Flat-rate AI Inference API',
+    pricing: {
+      pricePerStreamUsdMonth: 5,
+      pricePerStreamBrlEstimate: 25.54,
+      selfServiceStreamRange: '1 a 50 streams',
+      enterpriseThreshold: '> 50 streams via contato comercial',
+      prorationPolicy: 'Ajustes de quantidade são rateados proporcionalmente no ciclo corrente.'
+    },
+    tokenPolicy: {
+      unlimitedTokens: true,
+      tokenMetered: false,
+      overageCharge: false,
+      summary: 'Tokens estritamente ilimitados. Preço fixo de $5 × número de streams sem cobrança adicional por volume de tokens.'
+    },
+    concurrencyRules: {
+      guaranteedConcurrencyPerStream: 1,
+      concurrencyExplanation: 'Cada stream garante 1 geração concorrente paralela. Requisições simultâneas excedentes entram em fila. 5 streams = 5 gerações paralelas simultâneas; 10 streams = 10 gerações.'
+    },
+    apiSpecs: {
+      baseUrl: 'https://stream.camelai.com/v1',
+      modelId: 'auto',
+      modelPinnedSupported: false,
+      compatibility: ['OpenAI Chat Completions', 'OpenAI Responses', 'Anthropic Messages'],
+      features: ['Streaming nativo', 'Tool calling', 'Structured output']
+    },
+    fleet: {
+      verifiedAt: '2026-08-30',
+      fleetDocsLagPossible: true,
+      notes: 'camelAI gerencia dinamicamente o fleet, provedores e versões. O usuário não consegue fixar (pin) um modelo específico.',
+      models: [
+        { name: 'DeepSeek V4 Flash', version: '0731 as of Aug 2026' },
+        { name: 'Gemini Flash', version: '3.7 as of Aug 2026' },
+        { name: 'GLM 5.3 Flash', version: 'Latest' },
+        { name: 'GPT Luna', version: '5.6 as of Aug 2026' },
+        { name: 'Muse Spark', version: '1.2 as of Aug 2026' }
+      ],
+      qualityFloor: 'Terminal-Bench 2.1 >= 70% OU Artificial Analysis Intelligence Index >= 50.',
+      contextGuarantee: 'Mínimo de 260K tokens com multimodalidade de visão nativa em todos os modelos do fleet.',
+      contextCompaction: 'Diálogos longos que excedem a janela do modelo sofrem compactação no meio (middle compaction), preservando tarefa original, turnos recentes, papéis e tool-call IDs.'
+    },
+    performanceTargets: {
+      isSla: false,
+      disclaimer: '⚠️ Performance targets, not SLA. Não há garantias contratuais de throughput, latência ou uptime no plano standard de $5.',
+      targets: {
+        throughputP10Tps: 40,
+        throughputP5Tps: 20,
+        ttftP95Seconds: 5
+      }
+    },
+    privacyWarning: {
+      criticalAlert: true,
+      standardPlanPolicy: '🚨 ATENÇÃO CRÍTICA DE PRIVACIDADE: No plano standard de $5/stream, prompts e respostas podem ser retidos e utilizados para treinamento por camelAI, provedores de inferência e parceiros. NÃO há opção de opt-out.',
+      confidentialityVerdict: 'NÃO recomendado para código proprietário confidencial, segredos comerciais, credenciais, PII, dados médicos ou financeiros.',
+      accountDataIsolation: 'Dados da conta (nome, email, billing, chave API, IP) NÃO são enviados aos provedores de inferência, mas o prompt original é integralmente transmitido.',
+      traceScrubbing: 'Filtros de privacidade mascaram dados sensíveis na cópia da trace que o camelAI armazena após a requisição, mas o provedor de serving recebe o prompt antes desse processo.',
+      enterpriseCustomTerms: 'Termos customizados de Zero Data Retention (ZDR) e sem treinamento estão disponíveis apenas para contratos de 1.000+ streams via contato comercial.'
+    },
+    harnessCompatibility: ['Hermes', 'Claude Code', 'Codex', 'OpenCode', 'Aider', 'Kilo Code'],
+    bestFor: 'Coding agents de alto volume contínuo, background workers não paralelos, processamento em lote, experimentos e código público.',
+    avoidFor: 'Código confidencial, dados sujeitos a ZDR, pipelines que exigem modelo específico fixo, concorrência de ultra-baixa latência com 1 stream e SLA corporativo.'
+  },
+
+  comparisonTables: {
+    codeVsStream: {
+      title: 'Comparativo Técnico: camelCode vs camelStream',
+      headers: ['Característica', 'camelCode (App Builder)', 'camelStream (Inference API)'],
+      rows: [
+        ['Função Principal', 'Coding agent autônomo e builder de apps full-stack', 'API de inferência com roteamento dinâmico'],
+        ['Estrutura de Preço', 'Planos de US$ 0, $10, $40 ou $50/seat/mês', 'US$ 5 por stream / mês'],
+        ['Política de Tokens', 'Créditos premium mensais inclusos + Camel Free', 'Tokens ilimitados (sem overage ou limite de tokens)'],
+        ['Seleção de Modelo', 'Usuário escolhe o modelo nas opções disponíveis', 'Roteamento automático (model: auto)'],
+        ['Suporte a BYOK', 'Sim (Anthropic, OpenAI, OpenRouter, Bedrock)', 'Não é a proposta do plano standard'],
+        ['Workspace Persistente', 'Sim (código, dependências e ambiente preservados)', 'Não (chamadas stateless via API)'],
+        ['Deploy de Aplicações', 'Sim (1-click com SSL, DNS e CDN inclusos)', 'Não'],
+        ['Automações (Cron Jobs)', 'Sim (de 1 diária a 50 a cada 5 minutos)', 'Não'],
+        ['Modelo de Concorrência', 'Por agente e plano', '1 geração paralela garantida por stream contratado'],
+        ['Privacidade de Dados', 'Política comercial camelCode / provedor BYOK', '🚨 Prompts/outputs podem ser usados para treino no standard']
+      ]
+    },
+    hostedVsSelfHosted: {
+      title: 'Comparativo Técnico: camelCode Hosted vs Self-Hosted',
+      headers: ['Dimensão', 'camelCode Hosted (Nuvem)', 'camelCode Self-Hosted (Local/VM)'],
+      rows: [
+        ['Licença & Custo de Software', 'SaaS comercial (US$ 0 a $50+/mês)', 'Open Source MIT ($0 licença de software)'],
+        ['Operação de Infraestrutura', 'Gerenciada 100% pelo camelAI', 'Operada integralmente pelo usuário'],
+        ['Custos Adicionais', 'Créditos inclusos no plano (top-up se esgotar)', 'Infraestrutura de nuvem/VM + chaves de API (BYOK)'],
+        ['Alta Disponibilidade', 'Nuvem multi-tenant gerenciada', 'Single-node (sem failover multi-node nativo)'],
+        ['SMTP / Emails', 'Inbox gerenciado nos planos pagos', 'Sem SMTP interno (convites entregues via URL)'],
+        ['Segurança de Acesso', 'Isolamento de tenant gerenciado', '🚨 Warning: container com read-write no Docker socket (root-equivalent)']
+      ]
+    }
+  },
+
+  legacy: {
+    professionalOld: {
+      id: 'camelai-legacy-professional',
+      current: false,
+      status: 'legacy',
+      monthlyPriceUsd: 200,
+      notes: 'Antigo plano camelAI Embedded Analytics ($200/mês + usage). Produto descontinuado e não desenvolvido ativamente.'
+    }
+  }
+};
+
+// ============================================================================
 // 2. PLATFORM MODEL CATALOG (MATRIZ GERAL & POOLS)
 // ============================================================================
 
 const PLATFORM_MODEL_CATALOG = {
   opencodeGo: OPENCODE_GO_DATA,
+  camelai: CAMELAI_PLATFORM_DATA,
 
   cursor: {
     platformName: 'Cursor IDE',
@@ -831,15 +1144,19 @@ const PLATFORM_MODEL_CATALOG = {
       cursorModels: {
         name: 'Cursor Models Pool',
         pricingModel: 'included-generous',
-        description: 'Uso prioritário e generoso com taxa de requisições ampliada.',
-        models: ['grok-4-6', 'grok-4-5', 'composer-2-5', 'gemini-3-8-flash']
+        description: 'Uso prioritário e generoso com taxa de requisições ampliada exclusivo para a família Grok e Composer.',
+        models: ['grok-4-6', 'grok-4-5', 'composer-2-5']
       },
       otherModels: {
-        name: 'Other Models ($20 Pool / Fast Requests)',
-        pricingModel: 'metered-or-capped',
-        description: '500 chamadas rápidas no plano Pro, 1.500 no Pro+, 10.000 no Ultra. Suporte a consumo on-demand a preços de API.',
-        models: ['claude-fable-5-1', 'claude-opus-5', 'claude-sonnet-5', 'gpt-5-6-sol', 'gpt-5-6-terra', 'kimi-k3', 'glm-5-3']
+        name: 'Other Models (Usage-Based / API Price)',
+        pricingModel: 'metered-api-price',
+        description: 'Franquia base no Pro, ~3x no Pro+, ~20x no Ultra. Demais requisições consumidas à taxa de API do modelo.',
+        models: ['gemini-3-8-flash', 'claude-fable-5-1', 'claude-opus-5', 'claude-sonnet-5', 'gpt-5-6-sol', 'gpt-5-6-terra', 'kimi-k3', 'glm-5-3']
       }
+    },
+    grokPricing: {
+      standard: { input: 2.00, cacheRead: 0.50, output: 6.00 },
+      fast: { input: 4.00, cacheRead: 1.00, output: 12.00 }
     }
   },
 
@@ -849,38 +1166,38 @@ const PLATFORM_MODEL_CATALOG = {
       pool1: {
         name: 'Pool 1: Gemini Models',
         description: 'Capacidade massiva e throughput nativo de 305 tok/s em 1 milhão de tokens.',
-        models: ['gemini-3-8-flash', 'gemini-3-7-flash', 'gemini-3-5-flash']
+        models: ['gemini-3-8-flash', 'gemini-3-7-flash', 'gemini-3-6-flash', 'gemini-3-1-pro']
       },
       pool2: {
         name: 'Pool 2: Claude & GPT Models (Compartilhado)',
         description: 'Cota compartilhada restrita para escalonamento crítico de profundidade de raciocínio.',
-        models: ['claude-opus-4-6', 'claude-sonnet-4-6', 'gemini-3-1-pro']
+        models: ['claude-sonnet-4-6', 'claude-opus-4-6', 'gpt-oss-120b']
       }
     }
   },
 
   // Matriz de disponibilidade dos 44 modelos canônicos
   availabilityMatrix: [
-    { modelId: 'claude-fable-5-1', name: 'Claude Fable 5.1', directApi: '🟢 Sim ($10/$50)', cursor: '🟡 Other Models (Pro+/Ultra)', opencode: '🔴 Indisponível', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim (z-ai/claude-fable-5-1)', local: '🔴 Proprietário' },
+    { modelId: 'claude-fable-5-1', name: 'Claude Fable 5.1', directApi: '🟢 Sim ($10/$50)', cursor: '🟢 Other Models (Usage-based)', opencode: '🔴 Indisponível', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim (OpenRouter)', local: '🔴 Proprietário' },
     { modelId: 'claude-fable-5', name: 'Claude Fable 5', directApi: '🟡 Superseded ($10/$50)', cursor: '🟡 Superseded', opencode: '🔴 Indisponível', antigravity: '🔴 Indisponível', openrouter: '🟡 Superseded', local: '🔴 Proprietário' },
     { modelId: 'claude-opus-5', name: 'Claude Opus 5', directApi: '🟢 Sim ($5/$25)', cursor: '🟢 Other Models (1.5x)', opencode: '🔴 Indisponível', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🔴 Proprietário' },
     { modelId: 'claude-sonnet-5', name: 'Claude Sonnet 5', directApi: '🟢 Sim ($2/$10)', cursor: '🟢 Other Models (1.0x)', opencode: '🔴 Indisponível', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🔴 Proprietário' },
     { modelId: 'claude-opus-4-6', name: 'Claude Opus 4.6', directApi: '🟡 Legacy ($5/$25)', cursor: '🟡 Legacy', opencode: '🔴 Indisponível', antigravity: '🟢 Pool 2 Compartilhado', openrouter: '🟡 Legacy', local: '🔴 Proprietário' },
     { modelId: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', directApi: '🟡 Legacy ($3/$15)', cursor: '🟡 Legacy', opencode: '🔴 Indisponível', antigravity: '🟢 Pool 2 Compartilhado', openrouter: '🟡 Legacy', local: '🔴 Proprietário' },
     { modelId: 'claude-haiku-4-5', name: 'Claude Haiku 4.5', directApi: '🟢 Sim ($1/$5)', cursor: '🟢 Other Models (1.0x)', opencode: '🔴 Indisponível', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🔴 Proprietário' },
-    { modelId: 'gemini-3-8-flash', name: 'Gemini 3.8 Flash', directApi: '🟢 Sim ($0.75/$3.75 promo)', cursor: '🟢 Cursor Models (Generoso)', opencode: '🔴 Indisponível', antigravity: '🟢 Pool 1 (Principal)', openrouter: '🟢 Sim', local: '🔴 Nuvem Google' },
-    { modelId: 'gemini-3-7-flash', name: 'Gemini 3.7 Flash', directApi: '🟢 Sim ($0.75/$3.75)', cursor: '🟢 Cursor Models', opencode: '🔴 Indisponível', antigravity: '🟢 Pool 1', openrouter: '🟢 Sim', local: '🔴 Nuvem Google' },
-    { modelId: 'gemini-3-5-flash', name: 'Gemini 3.5 Flash', directApi: '🟢 Sim ($0.075/$0.30)', cursor: '🟢 Other Models', opencode: '🔴 Indisponível', antigravity: '🟢 Pool 1', openrouter: '🟢 Sim', local: '🔴 Nuvem Google' },
-    { modelId: 'gemini-3-1-pro', name: 'Gemini 3.1 Pro', directApi: '🟢 Sim ($1.25/$5.00)', cursor: '🟡 Other Models', opencode: '🔴 Indisponível', antigravity: '🟢 Pool 2 (Base/Ultra)', openrouter: '🟢 Sim', local: '🔴 Nuvem Google' },
+    { modelId: 'gemini-3-8-flash', name: 'Gemini 3.8 Flash', directApi: '🟢 Sim ($0.75/$3.75 promo)', cursor: '🟢 Other Models ($0.75/$3.50 API Price)', opencode: '🔴 Indisponível', antigravity: '🟢 Pool 1: Gemini (Nativo 1M)', openrouter: '🟢 Sim', local: '🔴 Nuvem Google' },
+    { modelId: 'gemini-3-7-flash', name: 'Gemini 3.7 Flash', directApi: '🟢 Sim ($0.75/$3.75)', cursor: '🟢 Other Models ($0.75/$3.75)', opencode: '🔴 Indisponível', antigravity: '🟢 Pool 1: Gemini', openrouter: '🟢 Sim', local: '🔴 Nuvem Google' },
+    { modelId: 'gemini-3-5-flash', name: 'Gemini 3.5 Flash', directApi: '🟢 Sim ($0.075/$0.30)', cursor: '🟢 Other Models', opencode: '🔴 Indisponível', antigravity: '🟢 Pool 1: Gemini', openrouter: '🟢 Sim', local: '🔴 Nuvem Google' },
+    { modelId: 'gemini-3-1-pro', name: 'Gemini 3.1 Pro', directApi: '🟢 Sim ($1.25/$5.00)', cursor: '🟡 Other Models', opencode: '🔴 Indisponível', antigravity: '🟢 Pool 1: Gemini (Multimodal Pro)', openrouter: '🟢 Sim', local: '🔴 Nuvem Google' },
     { modelId: 'gpt-5-6-sol', name: 'GPT-5.6 Sol', directApi: '🟢 Sim ($4/$20)', cursor: '🟢 Other Models (2.0x)', opencode: '🔴 Indisponível', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🔴 Proprietário' },
     { modelId: 'gpt-5-6-terra', name: 'GPT-5.6 Terra', directApi: '🟢 Sim ($2/$12)', cursor: '🟢 Other Models (1.0x)', opencode: '🔴 Indisponível', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🔴 Proprietário' },
     { modelId: 'gpt-5-6-luna', name: 'GPT-5.6 Luna', directApi: '🟢 Sim ($0.20/$1.20)', cursor: '🟢 Other Models', opencode: '🟢 Go (4× burn • 10.250 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🔴 Proprietário' },
     { modelId: 'gpt-5-6-pro', name: 'GPT-5.6 Sol Pro', directApi: '🟢 Sim ($15/$60)', cursor: '🟡 Other Models (2.0x)', opencode: '🔴 Indisponível', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🔴 Proprietário' },
     { modelId: 'gpt-oss-20b', name: 'gpt-oss-20b', directApi: '🟢 Open Weights', cursor: '🟢 Local via Ollama/vLLM', opencode: '🔴 Indisponível (Suporte Local CLI)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🟢 100% Local (16GB VRAM)' },
-    { modelId: 'gpt-oss-120b', name: 'gpt-oss-120b', directApi: '🟢 Open Weights', cursor: '🟢 Local via vLLM', opencode: '🔴 Indisponível (Suporte Local CLI)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🟢 100% Local (80GB VRAM)' },
-    { modelId: 'grok-4-6', name: 'Grok 4.6', directApi: '🟢 Sim ($2/$10)', cursor: '🟢 Cursor Models (Generoso)', opencode: '🟢 Go (4× burn • 845 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🔴 Nuvem xAI' },
-    { modelId: 'grok-4-5', name: 'Grok 4.5', directApi: '🟢 Sim ($1/$5)', cursor: '🟢 Cursor Models', opencode: '🔴 Indisponível', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🔴 Nuvem xAI' },
-    { modelId: 'glm-5-3-flash', name: 'GLM-5.3-Flash (ex-Ox Alpha)', directApi: '🟢 Sim MIT ($0.15/$0.50)', cursor: '🟢 First-class (OpenRouter)', opencode: '🟢 Go (4× burn • 7.900 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 z-ai/glm-5.3-flash', local: '🟢 320B MoE (KTransformers)' },
+    { modelId: 'gpt-oss-120b', name: 'gpt-oss-120b', directApi: '🟢 Open Weights', cursor: '🟢 Local via vLLM', opencode: '🔴 Indisponível (Suporte Local CLI)', antigravity: '🟢 Pool 2: Claude/GPT (Canal Lateral)', openrouter: '🟢 Sim', local: '🟢 100% Local (80GB VRAM)' },
+    { modelId: 'grok-4-6', name: 'Grok 4.6', directApi: '🟢 Sim ($2/$10 xAI API)', cursor: '🟢 Nativo Cursor Models (Standard $2/$6 | Fast $4/$12)', opencode: '🟢 Go (4× burn • 845 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🔴 Nuvem xAI' },
+    { modelId: 'grok-4-5', name: 'Grok 4.5', directApi: '🟢 Sim ($1/$5)', cursor: '🟢 Nativo Cursor Models', opencode: '🔴 Indisponível', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🔴 Nuvem xAI' },
+    { modelId: 'glm-5-3-flash', name: 'GLM-5.3-Flash (ex-Ox Alpha)', directApi: '🟢 Sim MIT ($0.15/$0.50)', cursor: '🟢 First-class (OpenRouter)', opencode: '🟢 Go (4× burn • 7.900 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim (OpenRouter)', local: '🟢 320B MoE (KTransformers)' },
     { modelId: 'glm-5-3', name: 'GLM-5.3', directApi: '🟢 Sim ($1/$3)', cursor: '🟡 OpenRouter', opencode: '🟢 Go (4× burn • 1.080 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🟡 Cluster Multi-GPU' },
     { modelId: 'glm-5-2', name: 'GLM-5.2', directApi: '🟢 Sim ($0.60/$2)', cursor: '🟡 OpenRouter', opencode: '🟢 Go (1× burn • 4.300 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🟡 Cluster Multi-GPU' },
     { modelId: 'glm-5-1', name: 'GLM-5.1', directApi: '🟢 Sim ($0.40/$1.50)', cursor: '🟡 OpenRouter', opencode: '🟢 Go (1× burn • 4.300 req)', antigravity: '🔴 Indisponível', openrouter: '🟢 Sim', local: '🟡 Cluster Multi-GPU' },
@@ -910,5 +1227,9 @@ const PLATFORM_MODEL_CATALOG = {
 
 // Exportação universal (Browser + Node.js)
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { OPENCODE_GO_DATA, PLATFORM_MODEL_CATALOG };
+  module.exports = { OPENCODE_GO_DATA, CAMELAI_PLATFORM_DATA, PLATFORM_MODEL_CATALOG };
+}
+
+if (typeof window !== 'undefined') {
+  window.CAMELAI_PLATFORM_DATA = CAMELAI_PLATFORM_DATA;
 }

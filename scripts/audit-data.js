@@ -181,32 +181,104 @@ console.log(`🕸️ Total de modelos no Radar 10D: ${Object.keys(CAPABILITY_RAD
 assert(CAPABILITY_RADAR_10D['gemini-3-8-flash'], 'Radar 10D ausente para "gemini-3-8-flash"');
 assert(CAPABILITY_RADAR_10D['claude-fable-5-1'], 'Radar 10D ausente para "claude-fable-5-1"');
 
-// 7. Câmbio FX e Helpers
+// 7. Câmbio FX e Helpers (Snapshot de Mercado 03/09/2026 - Sem Ptax Oficial)
 console.log('💵 Verificando dados e helpers de câmbio FX...');
-assert(FX_RATES_DATA && FX_RATES_DATA.USD_BRL && FX_RATES_DATA.USD_BRL.rate === 5.1556, `Cotação USD_BRL deve ser 5.1556. Encontrado: ${FX_RATES_DATA && FX_RATES_DATA.USD_BRL ? FX_RATES_DATA.USD_BRL.rate : 'N/D'}`);
-assert(FX_RATES_DATA && FX_RATES_DATA.CNY_BRL && FX_RATES_DATA.CNY_BRL.rate === 0.7595, `Cotação CNY_BRL deve ser 0.7595`);
+assert(FX_RATES_DATA && FX_RATES_DATA.USD_BRL && FX_RATES_DATA.USD_BRL.rate === 5.108, `Cotação USD_BRL deve ser 5.108. Encontrado: ${FX_RATES_DATA && FX_RATES_DATA.USD_BRL ? FX_RATES_DATA.USD_BRL.rate : 'N/D'}`);
+assert(FX_RATES_DATA && FX_RATES_DATA.USD_BRL && FX_RATES_DATA.USD_BRL.officialPtax === false, 'USD_BRL deve ter officialPtax === false (é snapshot de mercado)');
+assert(FX_RATES_DATA && FX_RATES_DATA.CNY_BRL && FX_RATES_DATA.CNY_BRL.rate === 0.7599, `Cotação CNY_BRL deve ser 0.7599. Encontrado: ${FX_RATES_DATA && FX_RATES_DATA.CNY_BRL ? FX_RATES_DATA.CNY_BRL.rate : 'N/D'}`);
+assert(FX_RATES_DATA && FX_RATES_DATA.CNY_BRL && FX_RATES_DATA.CNY_BRL.officialPtax === false, 'CNY_BRL deve ter officialPtax === false');
 const convBrl = FX_HELPERS.convertUsdToBrl(20);
-assert(Math.abs(convBrl - 103.112) < 0.001, `Conversão de $20 USD para BRL incorreta: ${convBrl}`);
+assert(Math.abs(convBrl - 102.16) < 0.001, `Conversão de $20 USD para BRL incorreta: ${convBrl}`);
 
-// 8. Planos e Assinaturas (Subscriptions)
+// 8. Planos e Assinaturas (Subscriptions & camelAI)
 console.log(`💳 Total de planos cadastrados: ${SUBSCRIPTION_PLANS_DATA ? SUBSCRIPTION_PLANS_DATA.length : 0}`);
-assert(Array.isArray(SUBSCRIPTION_PLANS_DATA) && SUBSCRIPTION_PLANS_DATA.length === 32, `Esperado exatamente 32 planos de assinatura. Encontrado: ${SUBSCRIPTION_PLANS_DATA.length}`);
+assert(Array.isArray(SUBSCRIPTION_PLANS_DATA) && SUBSCRIPTION_PLANS_DATA.length >= 35, `Esperado no mínimo 35 planos de assinatura cadastrados. Encontrado: ${SUBSCRIPTION_PLANS_DATA ? SUBSCRIPTION_PLANS_DATA.length : 0}`);
 
-// Preços Oficiais Brasil
+// Google AI Plans
+const gPlus = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'google-ai-plus');
+assert(gPlus && gPlus.localizedPricing.BRL.price === 24.99 && gPlus.localizedPricing.BRL.official === true, 'Google AI Plus deve ter preço oficial BRL de R$ 24,99');
+assert(gPlus && gPlus.storageGb === 400 && gPlus.geminiUsageMultiplierVsFree === 2, 'Google AI Plus deve ter 400 GB storage e Gemini usage 2x Free');
+
 const gPro = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'google-ai-pro');
 assert(gPro && gPro.localizedPricing.BRL.price === 96.99 && gPro.localizedPricing.BRL.official === true, 'Google AI Pro deve ter preço oficial BRL de R$ 96,99');
+assert(gPro && gPro.storageTb === 5, `Google AI Pro deve ter RIGOROSAMENTE 5 TB de armazenamento (NUNCA 2 TB). Encontrado: ${gPro ? gPro.storageTb : 'N/D'}`);
 
 const gUltra5x = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'google-ai-ultra-5x');
 assert(gUltra5x && gUltra5x.localizedPricing.BRL.price === 779.90 && gUltra5x.localizedPricing.BRL.official === true, 'Google AI Ultra 5x deve ter preço oficial BRL de R$ 779,90');
+assert(gUltra5x && gUltra5x.storageTb === 20, 'Google AI Ultra 5x deve ter 20 TB storage');
 
-const chatGptPro = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'openai-chatgpt-pro');
-assert(chatGptPro && chatGptPro.monthlyPriceUsd === 200 && chatGptPro.targetAudience === 'individual', 'ChatGPT Pro individual deve custar $200');
+const gUltra20x = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'google-ai-ultra-20x');
+assert(gUltra20x && gUltra20x.localizedPricing.BRL.price === 999.90 && gUltra20x.localizedPricing.BRL.official === true, 'Google AI Ultra 20x deve ter preço oficial BRL de R$ 999,90');
+assert(gUltra20x && gUltra20x.storageTb === 30, 'Google AI Ultra 20x deve ter 30 TB storage');
+
+// ChatGPT Pro Plans (5x e 20x sem faturamento anual)
+const chatGptPro5x = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'openai-chatgpt-pro-5x');
+assert(chatGptPro5x && chatGptPro5x.monthlyPriceUsd === 100 && chatGptPro5x.annualPriceUsd === null, 'ChatGPT Pro 5x deve custar $100/mês sem faturamento anual');
+
+const chatGptPro20x = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'openai-chatgpt-pro-20x');
+assert(chatGptPro20x && chatGptPro20x.monthlyPriceUsd === 200 && chatGptPro20x.annualPriceUsd === null, 'ChatGPT Pro 20x deve custar $200/mês sem faturamento anual');
+
+// Claude / Anthropic Plans
+const claudePro = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'anthropic-claude-pro');
+assert(claudePro && claudePro.fableAccess && claudePro.fableAccess.includedInBaseQuota === false && claudePro.fableAccess.requiresUsageCredits === true, 'Claude Pro deve ter Fable 5.1 fora da cota base (requiresUsageCredits === true)');
 
 const claudeMax5 = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'anthropic-claude-max-5x');
-assert(claudeMax5 && claudeMax5.monthlyPriceUsd === 100, 'Claude Max 5x deve custar $100');
+assert(claudeMax5 && claudeMax5.monthlyPriceUsd === 100 && claudeMax5.fableAccess && claudeMax5.fableAccess.includedInBaseQuota === true, 'Claude Max 5x deve custar $100 com Fable 5.1 incluso na base');
 
 const claudeMax20 = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'anthropic-claude-max-20x');
-assert(claudeMax20 && claudeMax20.monthlyPriceUsd === 200, 'Claude Max 20x deve custar $200');
+assert(claudeMax20 && claudeMax20.monthlyPriceUsd === 200 && claudeMax20.fableAccess && claudeMax20.fableAccess.includedInBaseQuota === true, 'Claude Max 20x deve custar $200 com Fable 5.1 incluso na base');
+
+const claudeTeamStd = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'anthropic-claude-team-standard');
+assert(claudeTeamStd && claudeTeamStd.monthlyPriceUsd === 25 && claudeTeamStd.minSeats === 2 && claudeTeamStd.fableAccess.includedInBaseQuota === false, 'Claude Team Standard deve custar $25/seat com mín. 2 usuários e Fable via usage credits');
+
+const claudeTeamPrem = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'anthropic-claude-team-premium');
+assert(claudeTeamPrem && claudeTeamPrem.monthlyPriceUsd === 125 && claudeTeamPrem.minSeats === 2 && claudeTeamPrem.fableAccess.includedInBaseQuota === true, 'Claude Team Premium deve custar $125/seat com mín. 2 usuários e Fable incluso');
+
+// Cursor Pools e Pricing
+const cursorPool = PLATFORM_MODEL_CATALOG.cursor.pools.cursorModels.models;
+const expectedCursorModels = ['composer-2-5', 'grok-4-5', 'grok-4-6'];
+assert(JSON.stringify([...cursorPool].sort()) === JSON.stringify(expectedCursorModels.sort()), `Cursor Models pool deve conter RIGOROSAMENTE grok-4-6, grok-4-5 e composer-2-5. Encontrado: ${JSON.stringify(cursorPool)}`);
+assert(!cursorPool.includes('gemini-3-8-flash'), 'Gemini 3.8 Flash NÃO deve constar no pool Cursor Models');
+assert(PLATFORM_MODEL_CATALOG.cursor.pools.otherModels.models.includes('gemini-3-8-flash'), 'Gemini 3.8 Flash deve constar em otherModels do Cursor');
+
+// Antigravity Pools
+const agPool1 = PLATFORM_MODEL_CATALOG.antigravity.pools.pool1.models;
+assert(agPool1.includes('gemini-3-1-pro'), 'Gemini 3.1 Pro deve estar no Pool 1 (Gemini) do Antigravity');
+assert(agPool1.includes('gemini-3-8-flash') && agPool1.includes('gemini-3-7-flash') && agPool1.includes('gemini-3-6-flash'), 'Pool 1 do Antigravity deve conter Gemini 3.8, 3.7 e 3.6 Flash');
+const agPool2 = PLATFORM_MODEL_CATALOG.antigravity.pools.pool2.models;
+assert(agPool2.includes('gpt-oss-120b'), 'GPT-OSS-120B deve estar no Pool 2 (Claude/GPT) do Antigravity');
+assert(!agPool2.includes('gemini-3-1-pro'), 'Gemini 3.1 Pro NÃO deve estar no Pool 2 do Antigravity');
+
+// camelAI Plans e Validações
+const cFree = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'camelai-code-free');
+assert(cFree && cFree.monthlyPriceUsd === 0, 'camelCode Free deve existir com custo $0');
+
+const cStarter = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'camelai-code-starter');
+assert(cStarter && cStarter.monthlyPriceUsd === 10 && cStarter.premiumModelCreditsUsd === 10, 'camelCode Starter deve custar $10 com $10 em créditos');
+
+const cProPlan = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'camelai-code-pro');
+assert(cProPlan && cProPlan.monthlyPriceUsd === 40 && cProPlan.premiumModelCreditsUsd === 40, 'camelCode Pro deve custar $40 com $40 em créditos');
+
+const cTeam = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'camelai-code-team');
+assert(cTeam && cTeam.monthlyPriceUsd === 50 && cTeam.minSeats === 3 && cTeam.minimumMonthlyCostUsd === 150, 'camelCode Team deve custar $50/seat com mín. 3 assentos ($150 total)');
+
+const cEnterprise = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'camelai-code-enterprise');
+assert(cEnterprise && cEnterprise.workspaces === 'unlimited' && cEnterprise.ssoSaml === true, 'camelCode Enterprise deve ter workspaces ilimitados e SSO');
+
+const cStream = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'camelai-stream');
+assert(cStream && cStream.monthlyPriceUsd === 5, 'camelStream deve custar $5/stream/mês');
+assert(cStream && cStream.unlimitedTokens === true, 'camelStream deve ter unlimitedTokens === true');
+assert(cStream && cStream.concurrencyPerStream === 1, 'camelStream deve garantir concorrência de 1 por stream');
+assert(cStream && cStream.modelRoutingId === 'auto', 'camelStream deve usar modelRoutingId "auto"');
+assert(cStream && cStream.trainingPossible === true && cStream.zdrSupported === false, 'camelStream standard deve indicar retenção/treino e sem ZDR');
+
+const cLegacy = SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'camelai-legacy-professional');
+assert(cLegacy && cLegacy.current !== true && cLegacy.status === 'legacy', 'camelAI legacy professional deve ter current !== true e status "legacy"');
+
+// Validação Anti-Hardcode de Dólar no index.html
+const htmlPath = path.join(__dirname, '..', 'index.html');
+const htmlContent = fs.readFileSync(htmlPath, 'utf8');
+assert(!htmlContent.includes('value="5.80"'), 'index.html NÃO deve conter o valor hardcoded value="5.80"');
 
 // 9. Histórico e Linhagens
 console.log('🌳 Verificando linhagens e eventos históricos...');

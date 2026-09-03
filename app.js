@@ -2718,39 +2718,61 @@
   // 13. CALCULADORA DE ROI DE EQUIPES
   // ==========================================
   function initRoiCalculator() {
-    const devSlider = document.getElementById('roiDevCount');
-    const tasksSlider = document.getElementById('roiTasksPerDev');
-    const tokensSlider = document.getElementById('roiAvgTokens');
+    const devInput = document.getElementById('roiTeamSize') || document.getElementById('roiDevCount');
+    const tasksInput = document.getElementById('roiTasksPerDev');
+    const tokensInput = document.getElementById('roiAvgTokens');
+    const usdInput = document.getElementById('roiUsdRate');
     const energyInput = document.getElementById('roiEnergyRate');
 
-    [devSlider, tasksSlider, tokensSlider, energyInput].forEach(ctrl => {
+    // Inicialização dinâmica do dólar via FX_RATES_DATA sem hardcode
+    if (usdInput && typeof FX_RATES_DATA !== 'undefined' && FX_RATES_DATA.USD_BRL && FX_RATES_DATA.USD_BRL.rate) {
+      if (!usdInput.value) {
+        usdInput.value = FX_RATES_DATA.USD_BRL.rate.toFixed(3);
+      }
+    }
+
+    [devInput, tasksInput, tokensInput, usdInput, energyInput].forEach(ctrl => {
       if (ctrl) {
         ctrl.addEventListener('input', () => {
-          if (ctrl === devSlider) document.getElementById('lblRoiDevCount').innerText = `${devSlider.value} devs`;
-          if (ctrl === tasksSlider) document.getElementById('lblRoiTasks').innerText = `${tasksSlider.value} tarefas`;
-          if (ctrl === tokensSlider) document.getElementById('lblRoiTokens').innerText = `${parseInt(tokensSlider.value).toLocaleString('pt-BR')} tokens`;
           updateRoiCalculation();
         });
       }
     });
+
+    updateRoiCalculation();
   }
 
   function updateRoiCalculation() {
-    const devs = parseInt(document.getElementById('roiDevCount').value);
-    const tasks = parseInt(document.getElementById('roiTasksPerDev').value);
-    const tokens = parseInt(document.getElementById('roiAvgTokens').value);
-    const energyRate = parseFloat(document.getElementById('roiEnergyRate').value) || 0.85;
+    const devCtrl = document.getElementById('roiTeamSize') || document.getElementById('roiDevCount');
+    const devs = devCtrl ? (parseInt(devCtrl.value, 10) || 5) : 5;
+    const tasksCtrl = document.getElementById('roiTasksPerDev');
+    const tasks = tasksCtrl ? (parseInt(tasksCtrl.value, 10) || 120) : 120;
+    const tokensCtrl = document.getElementById('roiAvgTokens');
+    const tokens = tokensCtrl ? (parseInt(tokensCtrl.value, 10) || 25000) : 25000;
+    const usdCtrl = document.getElementById('roiUsdRate');
+    const usdRate = usdCtrl && parseFloat(usdCtrl.value) > 0
+      ? parseFloat(usdCtrl.value)
+      : (typeof FX_RATES_DATA !== 'undefined' && FX_RATES_DATA.USD_BRL ? FX_RATES_DATA.USD_BRL.rate : 5.108);
+    const energyCtrl = document.getElementById('roiEnergyRate');
+    const energyRate = energyCtrl ? (parseFloat(energyCtrl.value) || 0.85) : 0.85;
 
-    const roi = AI_DATA_HELPERS.calculateTeamRoi(devs, tasks, tokens, energyRate);
+    const roi = AI_DATA_HELPERS.calculateTeamRoi(devs, tasks, tokens, energyRate, usdRate);
 
-    document.getElementById('roiDirectApiCostBrl').innerText = `R$ ${roi.directApiAnnualBrl.toLocaleString('pt-BR')}`;
-    document.getElementById('roiSubscriptionsCostBrl').innerText = `R$ ${roi.subscriptionsAnnualBrl.toLocaleString('pt-BR')}`;
-    document.getElementById('roiLocalWorkstationCostBrl').innerText = `R$ ${roi.localAnnualTotalBrl.toLocaleString('pt-BR')}`;
+    const directElem = document.getElementById('roiDirectApiCostBrl');
+    const subElem = document.getElementById('roiSubscriptionsCostBrl');
+    const localElem = document.getElementById('roiLocalWorkstationCostBrl');
+    const bannerElem = document.getElementById('roiSavingsBanner');
 
-    document.getElementById('roiSavingsBanner').innerHTML = `
-      💰 <strong>Economia Anual com Pool de Assinaturas:</strong> R$ ${roi.annualSavingsBrl.toLocaleString('pt-BR')} economizados em relação a APIs diretas. 
-      <br>Amortização de Workstation dedicada (RTX 5090): <strong>${roi.amortizationMonths} meses</strong>.
-    `;
+    if (directElem) directElem.innerText = `R$ ${roi.directApiAnnualBrl.toLocaleString('pt-BR')}`;
+    if (subElem) subElem.innerText = `R$ ${roi.subscriptionsAnnualBrl.toLocaleString('pt-BR')}`;
+    if (localElem) localElem.innerText = `R$ ${roi.localAnnualTotalBrl.toLocaleString('pt-BR')}`;
+
+    if (bannerElem) {
+      bannerElem.innerHTML = `
+        💰 <strong>Economia Anual com Pool de Assinaturas:</strong> R$ ${roi.annualSavingsBrl.toLocaleString('pt-BR')} economizados vs APIs diretas (câmbio base: R$ ${usdRate.toFixed(3)}). 
+        <br>Amortização de Workstation dedicada (RTX 5090): <strong>${roi.amortizationMonths} meses</strong>.
+      `;
+    }
   }
 
   // ==========================================
@@ -3215,7 +3237,12 @@
         let priceHtml = '';
         const officialBrl = plan.localizedPricing && plan.localizedPricing.BRL && plan.localizedPricing.BRL.official;
 
-        if (currency === 'BRL') {
+        if (plan.monthlyPriceUsd === null || plan.monthlyPriceUsd === undefined) {
+          priceHtml = `
+            <div class="plan-price-main">Sob Consulta</div>
+            <div class="plan-price-sub">Custom Enterprise / Contato Comercial</div>
+          `;
+        } else if (currency === 'BRL') {
           if (plan.monthlyPriceUsd === 0 && (!plan.monthlyPriceCny || plan.monthlyPriceCny === 0)) {
             priceHtml = `<div class="plan-price-main">R$ 0,00</div><div class="plan-price-sub">Gratuito / Free Tier</div>`;
           } else if (officialBrl) {
@@ -3227,13 +3254,13 @@
               </div>
             `;
           } else if (plan.nativeCurrency === 'CNY') {
-            const brl = typeof FX_HELPERS !== 'undefined' ? FX_HELPERS.convertCnyToBrl(plan.monthlyPriceCny) : plan.monthlyPriceCny * 0.7595;
+            const brl = typeof FX_HELPERS !== 'undefined' ? FX_HELPERS.convertCnyToBrl(plan.monthlyPriceCny) : plan.monthlyPriceCny * 0.7599;
             priceHtml = `
               <div class="plan-price-main">~ R$ ${brl.toFixed(2).replace('.', ',')}</div>
               <div class="plan-price-sub">¥ ${plan.monthlyPriceCny} / mês (CNY) · ~ US$ ${plan.monthlyPriceUsd.toFixed(2)}</div>
             `;
           } else {
-            const brl = typeof FX_HELPERS !== 'undefined' ? FX_HELPERS.convertUsdToBrl(plan.monthlyPriceUsd) : plan.monthlyPriceUsd * 5.1556;
+            const brl = typeof FX_HELPERS !== 'undefined' ? FX_HELPERS.convertUsdToBrl(plan.monthlyPriceUsd) : plan.monthlyPriceUsd * 5.108;
             priceHtml = `
               <div class="plan-price-main">~ R$ ${brl.toFixed(2).replace('.', ',')}</div>
               <div class="plan-price-sub">US$ ${plan.monthlyPriceUsd.toFixed(2)} / mês comercial</div>
@@ -3250,7 +3277,7 @@
           } else {
             priceHtml = `
               <div class="plan-price-main">US$ ${plan.monthlyPriceUsd.toFixed(2)}</div>
-              <div class="plan-price-sub">${plan.billingPeriod === 'user/month' ? 'per user / month' : 'per month'}</div>
+              <div class="plan-price-sub">${plan.billingPeriod === 'user/month' ? 'per user / month' : plan.billingPeriod === 'stream/month' ? 'per stream / month' : 'per month'}</div>
             `;
           }
         } else {
@@ -3979,6 +4006,32 @@
       searchInput.dataset.listenerBound = 'true';
     }
     renderMatrixTable();
+
+    // --- 4. Tabelas Comparativas da Plataforma camelAI ---
+    const tbodyCodeVsStream = document.getElementById('camelaiCodeVsStreamTbody');
+    const tbodyHostedVsSelf = document.getElementById('camelaiHostedVsSelfTbody');
+
+    if (typeof CAMELAI_PLATFORM_DATA !== 'undefined' && CAMELAI_PLATFORM_DATA.comparisonTables) {
+      if (tbodyCodeVsStream && CAMELAI_PLATFORM_DATA.comparisonTables.codeVsStream) {
+        tbodyCodeVsStream.innerHTML = CAMELAI_PLATFORM_DATA.comparisonTables.codeVsStream.rows.map(row => `
+          <tr>
+            <td><strong>${row[0]}</strong></td>
+            <td style="font-size: 0.82rem;">${row[1]}</td>
+            <td style="font-size: 0.82rem;">${row[2]}</td>
+          </tr>
+        `).join('');
+      }
+
+      if (tbodyHostedVsSelf && CAMELAI_PLATFORM_DATA.comparisonTables.hostedVsSelfHosted) {
+        tbodyHostedVsSelf.innerHTML = CAMELAI_PLATFORM_DATA.comparisonTables.hostedVsSelfHosted.rows.map(row => `
+          <tr>
+            <td><strong>${row[0]}</strong></td>
+            <td style="font-size: 0.82rem;">${row[1]}</td>
+            <td style="font-size: 0.82rem;">${row[2]}</td>
+          </tr>
+        `).join('');
+      }
+    }
   }
 
   // ==========================================

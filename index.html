@@ -1126,17 +1126,45 @@
               <input type="number" id="roiTeamSize" class="input-text" value="5" min="1" max="100">
             </div>
             <div class="form-group">
-              <label for="roiDevSalary">Salário Médio Dev (R$/mês):</label>
-              <input type="number" id="roiDevSalary" class="input-text" value="18000" step="1000">
+              <label for="roiTasksPerDev">Tarefas / Mês por Dev:</label>
+              <input type="number" id="roiTasksPerDev" class="input-text" value="120" min="10" max="1000" step="10">
+            </div>
+            <div class="form-group">
+              <label for="roiAvgTokens">Tokens Médios / Tarefa:</label>
+              <input type="number" id="roiAvgTokens" class="input-text" value="25000" min="5000" max="200000" step="5000">
             </div>
             <div class="form-group">
               <label for="roiUsdRate">Cotação do Dólar (USD/BRL):</label>
-              <input type="number" id="roiUsdRate" class="input-text" value="5.80" step="0.05">
+              <input type="number" id="roiUsdRate" class="input-text" step="0.001" placeholder="Sincronizado via FX">
             </div>
             <div class="form-group">
               <label for="roiEnergyRate">Custo de Energia (R$/kWh):</label>
               <input type="number" id="roiEnergyRate" class="input-text" value="0.85" step="0.05">
             </div>
+          </div>
+
+          <!-- Cartões de Comparação Anual de Custo -->
+          <div class="sim-comparison-cards" style="margin-top: 24px;">
+            <div class="sim-card">
+              <h4>1. API Direta em Nuvem</h4>
+              <div class="sim-stat" id="roiDirectApiCostBrl">R$ 0</div>
+              <p class="sim-note">Faturamento puro por token sem pool fixo (~$8/M ponderado).</p>
+            </div>
+            <div class="sim-card highlight-card">
+              <h4>2. Assinaturas Híbridas</h4>
+              <div class="sim-stat highlight-cyan" id="roiSubscriptionsCostBrl">R$ 0</div>
+              <p class="sim-note">Pool inteligente: OpenCode Go ($10) + Cursor Pro ($20) por dev.</p>
+            </div>
+            <div class="sim-card">
+              <h4>3. Workstation Local (RTX 5090)</h4>
+              <div class="sim-stat" id="roiLocalWorkstationCostBrl">R$ 0</div>
+              <p class="sim-note">Capex inicial R$ 18.000 + consumo de energia elétrica (600W).</p>
+            </div>
+          </div>
+
+          <!-- Banner de Veredito de Economia -->
+          <div id="roiSavingsBanner" style="margin-top: 18px; padding: 14px 18px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-md); font-size: 0.9rem; color: #34d399;">
+            <!-- Calculado dinamicamente via JS -->
           </div>
         </div>
       </section>
@@ -1816,6 +1844,117 @@
                 <!-- Injetado dinamicamente via JS -->
               </tbody>
             </table>
+          </div>
+        </div>
+
+        <!-- Seção 3: Plataforma camelAI (camelCode & camelStream) -->
+        <div class="content-box" style="margin-top: 30px;" id="camelai-platform-section">
+          <div class="box-header">
+            <div>
+              <h3 style="display: flex; align-items: center; gap: 8px;">
+                <span>🐪</span> Plataforma camelAI (CamelQA, Inc.)
+              </h3>
+              <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 2px;">
+                Ecossistema unificado para desenvolvimento autônomo de software (camelCode) e API de inferência de taxa fixa com tokens ilimitados (camelStream).
+              </p>
+            </div>
+            <div>
+              <span class="badge-tag" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3);">
+                Snapshot Oficial: 03/09/2026
+              </span>
+            </div>
+          </div>
+
+          <!-- Alerta Crítico de Privacidade do camelStream -->
+          <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 20px;">
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <span style="font-size: 1.4rem; line-height: 1;">🚨</span>
+              <div style="font-size: 0.86rem; color: #fca5a5; line-height: 1.5;">
+                <strong style="color: #ef4444;">Aviso Crítico de Governança & Treinamento (camelStream Standard):</strong> No plano standard de US$ 5/stream, prompts e saídas <strong>podem ser retidos e usados para treinamento</strong> pelo camelAI e provedores parceiros sem opção de opt-out. <strong>NÃO recomendado para código proprietário confidencial, dados bancários, PII ou segredos industriais</strong>. Contratos corporativos com ZDR e sem treino exigem 1.000+ streams via contato comercial.
+              </div>
+            </div>
+          </div>
+
+          <!-- Grid de Visão dos Produtos camelAI -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 24px;">
+            <!-- Card camelCode -->
+            <div class="sim-card" style="text-align: left; padding: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h4 style="font-size: 1.05rem; color: var(--accent-cyan);">camelCode (App Builder & Agent)</h4>
+                <span class="badge-tag" style="background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan);">Hosted + Self-Hosted</span>
+              </div>
+              <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 12px;">
+                Coding agent persistente que cria e publica apps full-stack (React, TypeScript, Tailwind) com 1 clique. Suporte a 50+ integrações seguras e modelo gratuito <em>Camel Free</em>.
+              </p>
+              <ul style="font-size: 0.82rem; color: var(--text-primary); line-height: 1.6; padding-left: 18px; margin: 0 0 14px 0;">
+                <li><strong>Planos Hospedados:</strong> Free ($0), Starter ($10/mês), Pro ($40/mês) e Team ($50/seat/mês, mín. 3 seats).</li>
+                <li><strong>Créditos Premium:</strong> Cobrança à taxa pura do provedor sem markup camelAI.</li>
+                <li><strong>Automações:</strong> Tarefas agendadas a cada 5 minutos (50 automações no Pro e Team).</li>
+                <li><strong>Limitação:</strong> BYOK substitui modelos hospedados; solo builder possui 1 workspace.</li>
+              </ul>
+              <div style="font-size: 0.78rem; color: var(--text-muted); border-top: 1px solid var(--border-subtle); padding-top: 10px;">
+                Opção <strong>Self-Hosted MIT</strong> disponível ($0 licença, Ubuntu 24.04, 4 vCPU, 8 GiB RAM). ⚠️ Container requer acesso read-write ao Docker socket (root-equivalent).
+              </div>
+            </div>
+
+            <!-- Card camelStream -->
+            <div class="sim-card highlight-card" style="text-align: left; padding: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h4 style="font-size: 1.05rem; color: #34d399;">camelStream (Inference API)</h4>
+                <span class="badge-tag badge-subdollar">US$ 5 / stream / mês</span>
+              </div>
+              <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 12px;">
+                API de inferência flat-rate compatível com OpenAI e Anthropic (Chat Completions, Responses, Messages). Roteamento dinâmico inteligente (<code>model: auto</code>).
+              </p>
+              <ul style="font-size: 0.82rem; color: var(--text-primary); line-height: 1.6; padding-left: 18px; margin: 0 0 14px 0;">
+                <li><strong>Tokens Ilimitados:</strong> Sem medidor de tokens, sem franquia e sem cobrança por overage.</li>
+                <li><strong>Concorrência por Lane:</strong> 1 geração concorrente paralela garantida por stream contratado (excesso enfileira).</li>
+                <li><strong>Piso de Qualidade:</strong> Terminal-Bench 2.1 &ge; 70% OU Artificial Analysis Index &ge; 50.</li>
+                <li><strong>Contexto & Multimodalidade:</strong> Mínimo 260K tokens com visão nativa e compactação automática de contexto longo.</li>
+                <li><strong>Metas de Velocidade (Não-SLA):</strong> p10 &ge; 40 tok/s, TTFT p95 &lt; 5s.</li>
+              </ul>
+              <div style="font-size: 0.78rem; color: var(--text-muted); border-top: 1px solid var(--border-subtle); padding-top: 10px;">
+                Compatível diretamente com Hermes, Claude Code, Codex, OpenCode, Aider e Kilo Code.
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabela Comparativa 1: camelCode vs camelStream -->
+          <div style="margin-bottom: 24px;">
+            <h4 style="color: var(--text-primary); font-size: 0.95rem; margin-bottom: 10px;">Tabela Comparativa: camelCode vs camelStream</h4>
+            <div class="table-responsive">
+              <table class="data-table" id="camelaiCodeVsStreamTable">
+                <thead>
+                  <tr>
+                    <th>Característica</th>
+                    <th>camelCode (App Builder)</th>
+                    <th>camelStream (Inference API)</th>
+                  </tr>
+                </thead>
+                <tbody id="camelaiCodeVsStreamTbody">
+                  <!-- Preenchido dinamicamente via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Tabela Comparativa 2: camelCode Hosted vs Self-Hosted -->
+          <div>
+            <h4 style="color: var(--text-primary); font-size: 0.95rem; margin-bottom: 10px;">Tabela Comparativa: camelCode Hosted vs Self-Hosted</h4>
+            <div class="table-responsive">
+              <table class="data-table" id="camelaiHostedVsSelfTable">
+                <thead>
+                  <tr>
+                    <th>Dimensão</th>
+                    <th>camelCode Hosted (Nuvem)</th>
+                    <th>camelCode Self-Hosted (Local/VM)</th>
+                  </tr>
+                </thead>
+                <tbody id="camelaiHostedVsSelfTbody">
+                  <!-- Preenchido dinamicamente via JS -->
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>

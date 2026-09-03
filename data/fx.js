@@ -5,26 +5,28 @@
 
 const FX_RATES_DATA = {
   USD_BRL: {
-    rate: 5.1556,
+    rate: 5.108,
     asOf: '2026-09-03',
-    type: 'market-snapshot',
-    source: 'Banco Central do Brasil / Fechamento de Mercado Ptax',
-    notes: 'Cotação de referência comercial para conversão aproximada de planos e tokens em USD para BRL.'
+    verifiedAt: '2026-09-03',
+    type: 'mid-market-snapshot',
+    officialPtax: false,
+    notes: 'Snapshot de mercado para conversão indicativa de planos e tokens em USD para BRL. Não é taxa oficial PTAX.'
   },
   CNY_BRL: {
-    rate: 0.7595,
+    rate: 0.7599,
     asOf: '2026-09-03',
-    type: 'market-snapshot',
-    source: 'Mercado de Câmbio Internacional (CNY/USD/BRL)',
-    notes: 'Cotação para conversão de planos em Yuan Renminbi chinês (Kimi) para BRL.'
+    verifiedAt: '2026-09-03',
+    type: 'mid-market-snapshot',
+    officialPtax: false,
+    notes: 'Snapshot de mercado para conversão de planos em Yuan Renminbi chinês (Kimi) para BRL.'
   },
   history: [
     { date: '2026-08-01', usd_brl: 5.1820, cny_brl: 0.7610 },
     { date: '2026-08-15', usd_brl: 5.1680, cny_brl: 0.7602 },
     { date: '2026-09-01', usd_brl: 5.1590, cny_brl: 0.7598 },
-    { date: '2026-09-03', usd_brl: 5.1556, cny_brl: 0.7595 }
+    { date: '2026-09-03', usd_brl: 5.1080, cny_brl: 0.7599 }
   ],
-  disclaimer: 'Conversões em reais (R$) são aproximadas baseadas na cotação comercial de 03/09/2026 (US$ 1 = R$ 5,1556). A cobrança efetiva na fatura do usuário pode variar conforme preço oficial localizado, impostos federais/estaduais, IOF e taxas de spread cambial da operadora do cartão.'
+  disclaimer: 'Conversões em reais (R$) são indicativas baseadas no snapshot de mercado de 03/09/2026 (US$ 1 ≈ R$ 5,108). Preços oficiais localizados sempre prevalecem sobre a conversão direta. A cobrança final na fatura pode variar conforme impostos (IOF), taxas de emissor e spread cambial.'
 };
 
 const FX_HELPERS = {
