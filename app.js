@@ -1064,8 +1064,8 @@
         : `$${model.pricing.standard.input.toFixed(2)} / $${model.pricing.standard.output.toFixed(2)}`;
 
       const goBadge = model.openCodeGo && model.openCodeGo.available
-        ? `<span class="badge-tag badge-subdollar">${model.openCodeGo.quotaMultiplier}x (${(model.openCodeGo.estReqMonth || 0).toLocaleString()} req)</span>`
-        : '<span class="badge-subtle">Não disponível</span>';
+        ? `<span class="badge-tag ${model.openCodeGo.quotaBurnMultiplier === 1 ? 'badge-go-60' : model.openCodeGo.quotaBurnMultiplier === 2 ? 'badge-go-30' : 'badge-go-15'}" title="OpenCode Go: Classe US$${model.openCodeGo.usageAllowanceUsd} (${model.openCodeGo.quotaBurnMultiplier}× Quota Burn)">Go ${model.openCodeGo.quotaBurnMultiplier}× burn (~${(model.openCodeGo.estReqMonth || 0).toLocaleString()} req)</span>`
+        : '<span class="badge-subtle">Não listado</span>';
 
       const provider = AI_PROVIDERS_DATA[model.provider] || {};
       const brandIconHtml = provider.iconSvg 
@@ -1605,7 +1605,7 @@
               <div class="spec-item-card" style="border-color: rgba(34, 197, 94, 0.4);"><div class="spec-label">Batch API (50% de Desconto)</div><div class="spec-value highlight-green">$${model.pricing.batch.input.toFixed(2)} in / $${model.pricing.batch.output.toFixed(2)} out</div></div>
             ` : ''}
             <div class="spec-item-card"><div class="spec-label">Pool no Cursor Pro</div><div class="spec-value">${model.cursorPool ? model.cursorPool.poolLabel : 'Standard ($0,50/$2,50)'}</div></div>
-            <div class="spec-item-card"><div class="spec-label">Multiplicador OpenCode Go</div><div class="spec-value">${model.openCodeGo && model.openCodeGo.available ? `${model.openCodeGo.quotaMultiplier}x (~${model.openCodeGo.estReqMonth.toLocaleString()} req/mês)` : 'Não listado no Go'}</div></div>
+            <div class="spec-item-card"><div class="spec-label">OpenCode Go ($10/mês)</div><div class="spec-value">${model.openCodeGo && model.openCodeGo.available ? `Classe US$${model.openCodeGo.usageAllowanceUsd} (${model.openCodeGo.quotaBurnMultiplier}× burn • ~${model.openCodeGo.estReqMonth.toLocaleString()} req/mês)` : 'Não listado no Go'}</div></div>
             ${model.pricing.sonnetComparison ? `
               <div class="spec-item-card"><div class="spec-label">Paridade vs Claude Sonnet 5</div><div class="spec-value highlight-cyan">${model.pricing.sonnetComparison}</div></div>
             ` : ''}
@@ -1639,7 +1639,7 @@
               </div>
               <div class="spec-item-card">
                 <div class="spec-label">OpenCode Go ($10/mês)</div>
-                <div class="spec-value highlight-green">${model.openCodeGo && model.openCodeGo.available ? `${model.openCodeGo.quotaMultiplier}x cota (~${model.openCodeGo.estReqMonth.toLocaleString()} req/mês)` : 'Não listado no plano Go'}</div>
+                <div class="spec-value ${model.openCodeGo && model.openCodeGo.available ? (model.openCodeGo.quotaBurnMultiplier === 1 ? 'highlight-green' : model.openCodeGo.quotaBurnMultiplier === 2 ? 'highlight-amber' : 'highlight-rose') : ''}">${model.openCodeGo && model.openCodeGo.available ? `Classe US$${model.openCodeGo.usageAllowanceUsd} (${model.openCodeGo.quotaBurnMultiplier}× burn • ~${model.openCodeGo.estReqMonth.toLocaleString()} req/mês)` : 'Não listado no plano Go'}</div>
               </div>
               <div class="spec-item-card">
                 <div class="spec-label">Google Antigravity</div>
@@ -2532,7 +2532,7 @@
       { label: 'Preço Entrada (Input)', get: m => m.openWeights ? '$0,00' : `$${m.pricing.standard.input.toFixed(2)} / M` },
       { label: 'Preço Saída (Output)', get: m => m.openWeights ? '$0,00' : `$${m.pricing.standard.output.toFixed(2)} / M` },
       { label: 'Desconto Cache Hit', get: m => m.pricing.cacheDiscount ? `${m.pricing.cacheDiscount}%` : 'Padrão' },
-      { label: 'Cota no OpenCode Go', get: m => m.openCodeGo && m.openCodeGo.available ? `${m.openCodeGo.quotaMultiplier}x (~${m.openCodeGo.estReqMonth} req/mês)` : 'Não listado' },
+      { label: 'Cota no OpenCode Go', get: m => m.openCodeGo && m.openCodeGo.available ? `Classe US$${m.openCodeGo.usageAllowanceUsd} (${m.openCodeGo.quotaBurnMultiplier}× burn • ~${(m.openCodeGo.estReqMonth || 0).toLocaleString()} req/mês)` : 'Não listado' },
       { label: 'Pool no Cursor Pro', get: m => m.cursorPool ? m.cursorPool.poolLabel : 'Via API' },
       { label: '🛡️ Google Antigravity Pool', get: m => m.antigravity ? `<span class="badge-tag ${m.antigravity.pool.includes('Gemini') ? 'badge-subdollar' : 'badge-danger'}">${m.antigravity.poolLabel}</span>` : 'N/D no Seletor Pro' },
       { label: 'Sweet Spot de Eficiência', get: m => m.sweetSpot || 'Standard' },
@@ -2810,7 +2810,7 @@
     const totalApiMonthly = costPerTurnSol * tasks;
 
     document.getElementById('simDirectApiCost').innerText = `$${totalApiMonthly.toFixed(2)} / mês`;
-    document.getElementById('simGoLongevity').innerText = `Suporta ${Math.round(15000 / (tokens / 20000))} turnos`;
+    document.getElementById('simGoLongevity').innerText = `Até $60 nominal (1× a 4× burn)`;
   }
 
   function renderStandardizedWorkloadsTable(workloadId) {
@@ -2862,7 +2862,7 @@
           : m.cursorPool && m.cursorPool.pool === 'cursor-models' 
             ? '<span class="badge-tag badge-subdollar">Pool Cursor (Grátis)</span>'
             : m.openCodeGo && m.openCodeGo.available
-              ? `<span class="badge-tag badge-frontier">OpenCode Go (${m.openCodeGo.quotaMultiplier}x)</span>`
+              ? `<span class="badge-tag ${m.openCodeGo.quotaBurnMultiplier === 1 ? 'badge-go-60' : m.openCodeGo.quotaBurnMultiplier === 2 ? 'badge-go-30' : 'badge-go-15'}">Go ${m.openCodeGo.quotaBurnMultiplier}× burn</span>`
               : '<span class="badge-tag badge-sweetspot">Pay-as-you-go</span>';
 
         return `
@@ -3758,32 +3758,202 @@
   // ==========================================
   // 21. VIEW: PLATAFORMAS & OPENCODE GO
   // ==========================================
-  function renderPlatformsView() {
-    if (typeof PLATFORM_MODEL_CATALOG === 'undefined') return;
+  let _goSimInitialized = false;
 
-    const tbodyGo = document.getElementById('opencodeDetailedTableBody');
-    if (tbodyGo && PLATFORM_MODEL_CATALOG.opencodeGo) {
-      tbodyGo.innerHTML = PLATFORM_MODEL_CATALOG.opencodeGo.catalog.map(item => `
-        <tr>
-          <td><strong>${item.displayName}</strong></td>
-          <td>
-            ${item.canonicalId ? `
-              <strong style="color: var(--accent-cyan); cursor: pointer;" onclick="location.hash='#model/${item.canonicalId}'">${item.canonicalId}</strong>
-            ` : '<span style="color: var(--text-muted);">Exclusivo OpenCode</span>'}
-          </td>
-          <td><span class="badge-tag ${item.multiplier <= 0.5 ? 'badge-subdollar' : item.multiplier <= 1.5 ? 'badge-sweetspot' : 'badge-danger'}">${item.multiplier}x</span></td>
-          <td><strong>${item.req5h.toLocaleString()}</strong> req</td>
-          <td><strong>${item.reqWeek.toLocaleString()}</strong> req</td>
-          <td><strong class="highlight-green">${item.reqMonth.toLocaleString()}</strong> req</td>
-          <td>${item.context}</td>
-          <td><span class="badge-tag ${item.status === 'active' ? 'badge-frontier' : item.status === 'preview' ? 'badge-warning' : 'badge-subdollar'}">${item.status}</span></td>
-        </tr>
-      `).join('');
+  function renderPlatformsView() {
+    if (typeof OPENCODE_GO_DATA === 'undefined') return;
+
+    // --- 1. Simulador Interativo de Quota Go ---
+    const modelSelect = document.getElementById('goSimModelSelect');
+    const windowSelect = document.getElementById('goSimWindowSelect');
+    const reqInput = document.getElementById('goSimRequestsInput');
+    const fillBaselineBtn = document.getElementById('goSimFillBaselineBtn');
+    const resultsCard = document.getElementById('goSimResultsCard');
+
+    if (modelSelect && !_goSimInitialized) {
+      modelSelect.innerHTML = OPENCODE_GO_DATA.models.map(m => {
+        const icon = m.usageAllowanceUsd === 60 ? '🟢' : m.usageAllowanceUsd === 30 ? '🟡' : '🔴';
+        const burnLabel = m.usageAllowanceUsd === 60 ? '1× burn' : m.usageAllowanceUsd === 30 ? '2× burn' : '4× burn';
+        return `<option value="${m.id}">${icon} ${m.displayName} (US$ ${m.usageAllowanceUsd} • ${burnLabel})</option>`;
+      }).join('');
+
+      const updateSimulation = () => {
+        const selModelId = modelSelect.value;
+        const selWindow = windowSelect ? windowSelect.value : 'monthly';
+        const requests = reqInput ? (parseInt(reqInput.value, 10) || 0) : 1000;
+        const sim = OPENCODE_GO_DATA.calculateQuotaConsumption(selModelId, requests, selWindow);
+        if (!sim || !resultsCard) return;
+
+        const m = sim.model;
+        const windowLabels = {
+          monthly: 'Mensal (Limite Nominal: US$ 60)',
+          weekly: 'Semanal (Limite Nominal: US$ 30)',
+          fiveHours: '5 Horas (Limite Nominal: US$ 12)'
+        };
+
+        const progressColor = sim.pctConsumed > 100 ? '#f87171' : sim.pctConsumed > 75 ? '#fbbf24' : '#34d399';
+
+        resultsCard.innerHTML = `
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px;">
+            <div class="spec-item-card" style="padding: 10px 14px;">
+              <div class="spec-label">Classe de Uso & Valor</div>
+              <div class="spec-value ${m.usageAllowanceUsd === 60 ? 'highlight-green' : m.usageAllowanceUsd === 30 ? 'highlight-amber' : 'highlight-rose'}">
+                US$ ${m.usageAllowanceUsd} <small style="font-size: 0.75rem; color: var(--text-muted);">(${m.valueMultiplierVsSubscription}× vs US$ 10)</small>
+              </div>
+            </div>
+            <div class="spec-item-card" style="padding: 10px 14px;">
+              <div class="spec-label">Multiplicador Quota Burn</div>
+              <div class="spec-value ${m.quotaBurnMultiplier === 1 ? 'highlight-green' : m.quotaBurnMultiplier === 2 ? 'highlight-amber' : 'highlight-rose'}">
+                ${m.quotaBurnMultiplier}× <small style="font-size: 0.75rem; color: var(--text-muted);">${m.quotaBurnMultiplier === 1 ? 'consumo 1:1' : m.quotaBurnMultiplier + '× mais rápido'}</small>
+              </div>
+            </div>
+            <div class="spec-item-card" style="padding: 10px 14px;">
+              <div class="spec-label">Franquia Efetiva Go</div>
+              <div class="spec-value highlight-cyan">${m.effectiveQuotaPct}% <small style="font-size: 0.75rem; color: var(--text-muted);">(US$ ${m.usageAllowanceUsd} máx)</small></div>
+            </div>
+            <div class="spec-item-card" style="padding: 10px 14px;">
+              <div class="spec-label">Cota Nominal Consumida</div>
+              <div class="spec-value" style="color: ${progressColor};">
+                US$ ${sim.normalizedGoQuotaConsumedUsd.toFixed(2)} <small style="font-size: 0.75rem; color: var(--text-muted);">/ US$ ${sim.windowLimitUsd}</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Barra de Progresso de Consumo da Cota -->
+          <div style="margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 4px; color: var(--text-secondary);">
+              <span>Consumo da Franquia Nominal (${windowLabels[selWindow]}):</span>
+              <strong style="color: ${progressColor};">${sim.pctConsumed}%</strong>
+            </div>
+            <div style="height: 10px; background: rgba(255,255,255,0.08); border-radius: 5px; overflow: hidden;">
+              <div style="height: 10px; width: ${Math.min(100, sim.pctConsumed)}%; background: ${progressColor}; transition: width 0.3s ease;"></div>
+            </div>
+          </div>
+
+          <!-- Warnings & Notas Específicas do Modelo -->
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            ${sim.exceedsQuota ? `
+              <div style="padding: 10px 14px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: var(--radius-sm); font-size: 0.82rem; color: #fca5a5;">
+                ⚠️ <strong>Cota nominal esgotada nesta janela!</strong> O tráfego excedente continuará operando via <strong>OpenCode Zen Balance</strong> (se você habilitar a opção <em>"Use balance"</em>) ou você poderá continuar utilizando os modelos gratuitos da plataforma.
+              </div>
+            ` : ''}
+
+            ${m.quotaBurnMultiplier === 4 ? `
+              <div style="padding: 10px 14px; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-sm); font-size: 0.82rem; color: #fca5a5;">
+                ⚠️ <strong>Aviso de Quota Burn (4×):</strong> Embora o plano anuncie até US$ 60 de uso nominal, o modelo <strong>${m.displayName}</strong> pertence à classe <strong>US$ 15</strong>. Cada US$ 1 de uso equivalente consome aproximadamente <strong>US$ 4</strong> da sua franquia nominal Go (queima 4× mais rápido que modelos Full Go de US$ 60).
+              </div>
+            ` : m.quotaBurnMultiplier === 2 ? `
+              <div style="padding: 10px 14px; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-sm); font-size: 0.82rem; color: #fcd34d;">
+                ⚠️ <strong>Aviso de Quota Burn (2×):</strong> O modelo <strong>${m.displayName}</strong> pertence à classe <strong>US$ 30</strong>. Ele consome cota aproximadamente <strong>2× mais rápido</strong> que modelos Full Go de US$ 60 (aproveitamento efetivo de até 50% do valor nominal).
+              </div>
+            ` : `
+              <div style="padding: 10px 14px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-sm); font-size: 0.82rem; color: #6ee7b7;">
+                🟢 <strong>Eficiência Máxima (1× Burn):</strong> O modelo <strong>${m.displayName}</strong> recebe o valor total de <strong>US$ 60</strong> (6× a assinatura de US$ 10) consumindo a franquia na proporção 1:1.
+              </div>
+            `}
+
+            ${m.privacy && m.privacy.trainingUsed ? `
+              <div style="padding: 10px 14px; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; border-radius: var(--radius-sm); font-size: 0.82rem; color: #fca5a5;">
+                🚨 <strong>Aviso de Privacidade Crítico:</strong> Prompts e respostas deste modelo Contributor são utilizados para <strong>treinamento de modelos da Meta</strong> em troca do valor ultra-baixo. NÃO possui Zero Data Retention (ZDR).
+              </div>
+            ` : ''}
+
+            ${m.id === 'opencode-go/deepseek-v4-flash' ? `
+              <div style="padding: 10px 14px; background: rgba(245, 158, 11, 0.12); border: 1px solid #f59e0b; border-radius: var(--radius-sm); font-size: 0.82rem; color: #fcd34d;">
+                ⚠️ <strong>Status de Governança ZDR:</strong> A tabela oficial indica 0 dias de retenção, mas a nota do termo de compromisso publicada estava documentada até <strong>31/08/2026</strong>. Revalidação contratual necessária.
+              </div>
+            ` : ''}
+
+            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">
+              ℹ️ <em>Perfil de Tokens Médio Estimado por Request:</em> ${m.tokenProfile.input.toLocaleString()} in / ${m.tokenProfile.cache.toLocaleString()} cache / ${m.tokenProfile.output.toLocaleString()} out • Endpoint: <code>${m.endpoint}</code> (${m.sdkPackage})
+            </div>
+          </div>
+        `;
+      };
+
+      modelSelect.addEventListener('change', updateSimulation);
+      if (windowSelect) windowSelect.addEventListener('change', updateSimulation);
+      if (reqInput) reqInput.addEventListener('input', updateSimulation);
+
+      if (fillBaselineBtn) {
+        fillBaselineBtn.addEventListener('click', () => {
+          const selModelId = modelSelect.value;
+          const selWindow = windowSelect ? windowSelect.value : 'monthly';
+          const m = OPENCODE_GO_DATA.getModel(selModelId);
+          if (m && reqInput) {
+            reqInput.value = selWindow === 'fiveHours' ? m.req5h : selWindow === 'weekly' ? m.reqWeek : m.reqMonth;
+            updateSimulation();
+          }
+        });
+      }
+
+      _goSimInitialized = true;
+      updateSimulation();
     }
 
+    // --- 2. Tabela Detalhada dos 26 Modelos Oficiais ---
+    const tbodyGo = document.getElementById('opencodeDetailedTableBody');
+    const filterClassSelect = document.getElementById('goTableFilterClass');
+
+    const renderGoTable = () => {
+      if (!tbodyGo) return;
+      const classFilter = filterClassSelect ? filterClassSelect.value : 'all';
+      const models = OPENCODE_GO_DATA.models.filter(m => {
+        if (classFilter === 'all') return true;
+        return m.usageAllowanceUsd === parseInt(classFilter, 10);
+      });
+
+      tbodyGo.innerHTML = models.map(item => {
+        const badgeClass = item.usageAllowanceUsd === 60 ? 'badge-go-60' : item.usageAllowanceUsd === 30 ? 'badge-go-30' : 'badge-go-15';
+        const burnPillClass = `burn-pill-${item.quotaBurnMultiplier}x`;
+        
+        let privacyBadge = '<span class="badge-tag badge-subdollar" title="Zero Data Retention ativo">✅ ZDR 0-day</span>';
+        if (item.privacy.isContributor) {
+          privacyBadge = '<span class="badge-tag badge-danger" title="Prompts usados para treino Meta">❌ Treino Meta</span>';
+        } else if (item.privacy.zdrAgreementRequiresRenewal) {
+          privacyBadge = '<span class="badge-tag badge-warning" title="Acordo publicado até 31/08/2026; revalidação necessária">⚠️ ZDR (Revalidação)</span>';
+        } else if (item.privacy.retentionDays === 30) {
+          privacyBadge = '<span class="badge-tag badge-warning" title="Retenção de 30 dias para prevenção de abuso">30d retenção (Abuso)</span>';
+        }
+
+        return `
+          <tr>
+            <td>
+              <div style="font-weight: 700; color: var(--text-primary);">${item.displayName}</div>
+              <div style="font-size: 0.72rem; color: var(--accent-cyan);"><code>${item.id}</code></div>
+            </td>
+            <td>
+              <span class="badge-tag ${badgeClass}">US$ ${item.usageAllowanceUsd}</span>
+            </td>
+            <td><strong>${item.valueMultiplierVsSubscription}×</strong></td>
+            <td><strong class="${burnPillClass}">${item.quotaBurnMultiplier}×</strong></td>
+            <td><strong>${item.effectiveQuotaPct}%</strong></td>
+            <td>${item.req5h.toLocaleString()}</td>
+            <td>${item.reqWeek.toLocaleString()}</td>
+            <td><strong class="highlight-green">${item.reqMonth.toLocaleString()}</strong></td>
+            <td style="font-size: 0.78rem;">
+              <code>${item.endpoint}</code><br>
+              <span style="color: var(--text-muted);">${item.sdkPackage}</span>
+            </td>
+            <td>${privacyBadge}</td>
+          </tr>
+        `;
+      }).join('');
+    };
+
+    if (filterClassSelect && !filterClassSelect.dataset.listenerBound) {
+      filterClassSelect.addEventListener('change', renderGoTable);
+      filterClassSelect.dataset.listenerBound = 'true';
+    }
+    renderGoTable();
+
+    // --- 3. Matriz Geral de Disponibilidade dos 44 Modelos ---
     const tbodyMatrix = document.getElementById('platformMatrixTableBody');
-    if (tbodyMatrix && PLATFORM_MODEL_CATALOG.availabilityMatrix) {
-      const query = (AppState.platformSearchQuery || '').toLowerCase().trim();
+    const searchInput = document.getElementById('platformMatrixSearch');
+
+    const renderMatrixTable = () => {
+      if (!tbodyMatrix || typeof PLATFORM_MODEL_CATALOG === 'undefined') return;
+      const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
       const rows = PLATFORM_MODEL_CATALOG.availabilityMatrix.filter(r => {
         if (!query) return true;
         return r.name.toLowerCase().includes(query) || r.modelId.toLowerCase().includes(query);
@@ -3802,7 +3972,13 @@
           <td style="font-size: 0.8rem;">${r.local}</td>
         </tr>
       `).join('');
+    };
+
+    if (searchInput && !searchInput.dataset.listenerBound) {
+      searchInput.addEventListener('input', renderMatrixTable);
+      searchInput.dataset.listenerBound = 'true';
     }
+    renderMatrixTable();
   }
 
   // ==========================================

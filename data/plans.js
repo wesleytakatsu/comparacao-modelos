@@ -506,22 +506,44 @@ const SUBSCRIPTION_PLANS_DATA = [
     annualPriceUsd: null,
     localizedPricing: null,
     billingPeriod: 'monthly',
-    includedModels: [
-      'GPT-5.6 Luna (10.250 req/mês)',
-      'GLM-5.3-Flash (7.900 req/mês)',
-      'DeepSeek V4 Flash (37.800 req/mês)',
-      'MiMo-V2.5 (150.400 req/mês)',
-      'Muse Spark 1.2 (226.600 req/mês)',
-      'GLM-5.3 (1.080 req/mês)',
-      'Grok 4.6 (845 req/mês)',
-      'Qwen3.8 Max (810 req/mês)'
+    nominalLimits: {
+      fiveHoursUsd: 12,
+      weeklyUsd: 30,
+      monthlyUsd: 60
+    },
+    targetValueMultiplier: 6,
+    subscriberLimitPerWorkspace: 1,
+    providerCredentialIncluded: true,
+    externalProviderCreditsIncluded: false,
+    zenBalanceFallbackSupported: true,
+    zenBalanceFallbackRequiresOptIn: true,
+    freeModelsAfterLimit: true,
+    currentModelCount: 26,
+    modelCatalogSource: 'OPENCODE_GO_DATA',
+    privacyModelSpecific: true,
+    get includedModels() {
+      if (typeof OPENCODE_GO_DATA !== 'undefined' && OPENCODE_GO_DATA.models) {
+        return OPENCODE_GO_DATA.models.map(m => `${m.displayName} (${m.usageAllowanceUsd === 60 ? '1× burn' : m.usageAllowanceUsd === 30 ? '2× burn' : '4× burn'} • ~${m.reqMonth.toLocaleString()} req/mês)`);
+      }
+      return [
+        'MiMo-V2.5 (1× burn • 150.400 req/mês)',
+        'LongCat-2.0 (1× burn • 57.200 req/mês)',
+        'DeepSeek V4 Flash (2× burn • 37.800 req/mês)',
+        'GPT-5.6 Luna (4× burn • 10.250 req/mês)',
+        'GLM-5.3-Flash (4× burn • 7.900 req/mês)',
+        'Grok 4.6 (4× burn • 845 req/mês)'
+      ];
+    },
+    pools: [
+      'Classe US$ 60 (1× burn / 6× valor - 13 modelos)',
+      'Classe US$ 30 (2× burn / 3× valor - 4 modelos)',
+      'Classe US$ 15 (4× burn / 1,5× valor - 9 modelos)'
     ],
-    pools: ['Go Unified Catalog (24+ modelos)'],
-    quotaDescription: 'Limites monetários de consumo calculados por multiplicador do modelo: $12 em 5 horas, $30 semanal e $60 mensal.',
-    overageAllowed: false,
-    apiIncluded: false,
-    privacyNotes: 'Termos de serviço garantem Zero Data Retention (0 dias) contratual para todos os modelos da rota Go.',
-    bestFor: 'Melhor custo-benefício de plataforma aberta: dezenas de milhares de requisições por ~$10/mês.',
+    quotaDescription: 'Limites nominais: $12 em 5h, $30 semanal e $60 mensal. O volume real depende da classe de uso do modelo (1×, 2× ou 4× burn). Modelos 4× queimam a quota 4 vezes mais rápido.',
+    overageAllowed: true, // Suporte a fallback no OpenCode Zen balance
+    apiIncluded: true, // Fornece API key para endpoints /responses, /chat/completions e /messages
+    privacyNotes: 'Privacidade específica por modelo: 22 modelos com ZDR estrito (0 dias); Grok 4.6 e GPT-5.6 Luna retêm logs por até 30 dias para prevenção de abuso; DeepSeek V4 Flash requer revalidação; Muse Spark Contributor autoriza treino Meta.',
+    bestFor: 'Assinatura versátil de US$ 10/mês para uso com OpenCode e outros coding agents compatíveis via API dedicada.',
     verifiedAt: '2026-09-03',
     current: true
   },
@@ -794,11 +816,11 @@ const BUDGET_STACK_RECOMMENDER = {
         monthlyCostBrl: goBrl,
         monthlyCostUsd: goPlan.monthlyPriceUsd,
         plans: [goPlan],
-        planner: 'GLM-5.3 (1.080 req/mês) ou Grok 4.6 (845 req/mês)',
-        executor: 'GPT-5.6 Luna (10.250 req/mês) ou GLM-5.3-Flash (7.900 req/mês)',
-        reviewer: 'Qwen3.8 Max (810 req/mês)',
-        pros: 'Volume absurdo de tokens (~100T/dia declarado), mais de 24 modelos e ZDR garantido.',
-        cons: 'Interface focada em terminal/CLI; requer harness OpenCode.'
+        planner: 'GLM-5.3 (1.080 req/mês - 4× burn) ou Qwen3.7 Max (840 req/mês - 2× burn)',
+        executor: 'Workers 1× burn: MiMo-V2.5 (150k req) / LongCat-2.0 (57k req) / Kimi K2.7 Code (6.7k req) ou DeepSeek V4 Flash (2× burn • 37.8k req)',
+        reviewer: 'GLM-5.2 (4.300 req - 1× burn) ou GPT-5.6 Luna (10.250 req - 4× burn)',
+        pros: 'Excelente custo-benefício de US$ 10/mês com 26 modelos oficiais e chave API compatível com múltiplos coding agents.',
+        cons: 'O volume mensal varia fortemente por modelo (de 490 a 226k req); modelos 4× queimam quota 4 vezes mais rápido.'
       });
     } else if (budgetBrl <= 110) {
       const googlePro = plans.find(p => p.id === 'google-ai-pro');
@@ -842,8 +864,8 @@ const BUDGET_STACK_RECOMMENDER = {
         planner: 'GPT-5.6 Sol (Cursor) ou GLM-5.3 (OpenCode)',
         executor: 'Grok 4.6 (Cursor) + GPT-5.6 Luna / GLM-5.3-Flash (Go)',
         reviewer: 'Claude Sonnet 5 (Cursor)',
-        pros: 'A combinação favorita da comunidade: IDE Cursor para UI/edição rápida e OpenCode Go como worker de fundo ilimitado.',
-        cons: 'Dois ambientes e faturas separadas.'
+        pros: 'Combinação consagrada: IDE Cursor para UI/edição rápida e OpenCode Go como pool flexível de workers (priorizando modelos 1× e 2× burn).',
+        cons: 'Dois ambientes; modelos 4× burn no Go devem ser usados com critério para não esgotar a cota.'
       });
 
       results.push({

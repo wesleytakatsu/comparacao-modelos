@@ -1,3 +1,24 @@
+// Carregamento de módulos complementares em ambiente Node.js
+if (typeof module !== "undefined" && module.exports) {
+  try {
+    if (typeof FX_RATES_DATA === "undefined") {
+      const _fx = require("./data/fx");
+      global.FX_RATES_DATA = _fx.FX_RATES_DATA;
+      global.FX_HELPERS = _fx.FX_HELPERS;
+    }
+    if (typeof SUBSCRIPTION_PLANS_DATA === "undefined") {
+      const _plans = require("./data/plans");
+      global.SUBSCRIPTION_PLANS_DATA = _plans.SUBSCRIPTION_PLANS_DATA;
+      global.BUDGET_STACK_RECOMMENDER = _plans.BUDGET_STACK_RECOMMENDER;
+    }
+    if (typeof OPENCODE_GO_DATA === "undefined") {
+      const _platforms = require("./data/platforms");
+      global.OPENCODE_GO_DATA = _platforms.OPENCODE_GO_DATA;
+      global.PLATFORM_MODEL_CATALOG = _platforms.PLATFORM_MODEL_CATALOG;
+    }
+  } catch (e) {}
+}
+
 /**
  * Base de Dados Estruturada e Consolidada de Inteligência de Modelos de IA
  * Portal de Engenharia, Benchmarks Multidimensionais, Hardware & Precificação (Edição Setembro/2026)
@@ -385,12 +406,6 @@ const AI_MODELS_DATA = {
       "fastDefault": true,
       "fastMultiplier": 2
     },
-    "openCodeGo": {
-      "available": true,
-      "id": "xai/grok-4.6",
-      "quotaMultiplier": 3,
-      "estReqMonth": 3200
-    },
     "sweetSpot": "Medium (67,1% no CursorBench a $1,28/task)",
     "strengths": [
       "Líder isolado em qualidade máxima com XHigh (70,8%) e DeepSWE 1.1 (65,9%)",
@@ -487,12 +502,6 @@ const AI_MODELS_DATA = {
       "fastDefault": false,
       "fastMultiplier": 1
     },
-    "openCodeGo": {
-      "available": true,
-      "id": "xai/grok-4.5",
-      "quotaMultiplier": 1.5,
-      "estReqMonth": 6400
-    },
     "sweetSpot": "Standard / High (66,7% CursorBench)",
     "strengths": [
       "83,3% no Terminal-Bench 2.1 e 53,0% no DeepSWE 1.1",
@@ -586,12 +595,6 @@ const AI_MODELS_DATA = {
       "poolLabel": "Other Models ($20 Pool)",
       "fastDefault": true,
       "fastMultiplier": 2
-    },
-    "openCodeGo": {
-      "available": true,
-      "id": "openai/gpt-5.6-sol",
-      "quotaMultiplier": 6,
-      "estReqMonth": 1200
     },
     "sweetSpot": "High / Max (88,8 no Terminal-Bench 2.1 e 72,7 no DeepSWE)",
     "strengths": [
@@ -693,12 +696,6 @@ const AI_MODELS_DATA = {
       "fastDefault": false,
       "fastMultiplier": 1
     },
-    "openCodeGo": {
-      "available": true,
-      "id": "openai/gpt-5.6-terra",
-      "quotaMultiplier": 3,
-      "estReqMonth": 3600
-    },
     "sweetSpot": "Max (64,9% CursorBench a $2,31/task)",
     "strengths": [
       "87,4% Terminal-Bench 2.1 e 69,6% DeepSWE 1.1 (muito próximo do Sol)",
@@ -795,12 +792,6 @@ const AI_MODELS_DATA = {
       "poolLabel": "Other Models ($20 Pool)",
       "fastDefault": false,
       "fastMultiplier": 1
-    },
-    "openCodeGo": {
-      "available": true,
-      "id": "openai/gpt-5.6-luna",
-      "quotaMultiplier": 1.5,
-      "estReqMonth": 10250
     },
     "sweetSpot": "High (56,8% CursorBench a $0,16/task)",
     "strengths": [
@@ -900,12 +891,6 @@ const AI_MODELS_DATA = {
       "fastDefault": false,
       "fastMultiplier": 2
     },
-    "openCodeGo": {
-      "available": false,
-      "id": "openai/gpt-5.6-pro",
-      "quotaMultiplier": 8,
-      "estReqMonth": 600
-    },
     "sweetSpot": "Max (Escalonamento Crítico)",
     "strengths": [
       "Opção de maior capacidade para tarefas extremamente difíceis e workflows longos",
@@ -983,12 +968,6 @@ const AI_MODELS_DATA = {
       "poolLabel": "Other Models",
       "fastDefault": false,
       "fastMultiplier": 1
-    },
-    "openCodeGo": {
-      "available": true,
-      "id": "openai/gpt-5.5",
-      "quotaMultiplier": 4,
-      "estReqMonth": 1800
     },
     "sweetSpot": "High (58,4% CursorBench)",
     "strengths": [
@@ -1075,12 +1054,6 @@ const AI_MODELS_DATA = {
       "poolLabel": "Self-Hosted",
       "fastDefault": false,
       "fastMultiplier": 1
-    },
-    "openCodeGo": {
-      "available": true,
-      "id": "openai/gpt-oss-120b",
-      "quotaMultiplier": 1,
-      "estReqMonth": 20000
     },
     "antigravity": {
       "available": true,
@@ -1180,12 +1153,6 @@ const AI_MODELS_DATA = {
       "poolLabel": "Self-Hosted",
       "fastDefault": false,
       "fastMultiplier": 1
-    },
-    "openCodeGo": {
-      "available": true,
-      "id": "openai/gpt-oss-20b",
-      "quotaMultiplier": 1,
-      "estReqMonth": 35000
     },
     "sweetSpot": "High (60,7% SWE-bench Verified / Cabe em 16 GB VRAM)",
     "strengths": [
@@ -1294,13 +1261,6 @@ const AI_MODELS_DATA = {
       "poolLabel": "Other Models ($20 Pool)",
       "fastDefault": false,
       "fastMultiplier": 2
-    },
-    "openCodeGo": {
-      "available": false,
-      "id": "anthropic/claude-fable-5-1",
-      "quotaMultiplier": 6.0,
-      "estReqMonth": 550,
-      "notes": "Disponibilidade restrita com opt-in de segurança"
     },
     "sweetSpot": "XHigh (72,8% CursorBench / $6,96) e High (69,4% / $4,80)",
     "strengths": [
@@ -1429,12 +1389,6 @@ const AI_MODELS_DATA = {
       "fastDefault": false,
       "fastMultiplier": 2
     },
-    "openCodeGo": {
-      "available": true,
-      "id": "anthropic/claude-fable-5",
-      "quotaMultiplier": 6,
-      "estReqMonth": 600
-    },
     "sweetSpot": "High / Max (70,5% CursorBench / 80,0% SWE-Pro)",
     "strengths": [
       "Frontier absoluto: 70,5% no CursorBench Max e 69,7% no DeepSWE",
@@ -1526,12 +1480,6 @@ const AI_MODELS_DATA = {
       "fastDefault": false,
       "fastMultiplier": 1.5
     },
-    "openCodeGo": {
-      "available": true,
-      "id": "anthropic/claude-opus-5",
-      "quotaMultiplier": 6,
-      "estReqMonth": 1250
-    },
     "sweetSpot": "High (66,7% CursorBench a $3,91/task / 73,6% DeepSWE)",
     "strengths": [
       "Líder em DeepSWE 1.1 (73,6%) e CursorBench Max (70,0%)",
@@ -1618,12 +1566,6 @@ const AI_MODELS_DATA = {
       "poolLabel": "Other Models ($20 Pool)",
       "fastDefault": false,
       "fastMultiplier": 1
-    },
-    "openCodeGo": {
-      "available": true,
-      "id": "anthropic/claude-sonnet-5",
-      "quotaMultiplier": 3,
-      "estReqMonth": 3800
     },
     "sweetSpot": "High (56,9% CursorBench a $2,13/task)",
     "strengths": [
@@ -1714,12 +1656,6 @@ const AI_MODELS_DATA = {
       "fastDefault": false,
       "fastMultiplier": 1
     },
-    "openCodeGo": {
-      "available": true,
-      "id": "anthropic/claude-haiku-4-5",
-      "quotaMultiplier": 1.5,
-      "estReqMonth": 12000
-    },
     "sweetSpot": "Standard (Sem Thinking / Subagente Worker)",
     "strengths": [
       "73,3% no SWE-bench Verified oficial",
@@ -1808,12 +1744,6 @@ const AI_MODELS_DATA = {
       "poolLabel": "Other Models",
       "fastDefault": false,
       "fastMultiplier": 1.5
-    },
-    "openCodeGo": {
-      "available": false,
-      "id": "anthropic/claude-opus-4.6",
-      "quotaMultiplier": 5,
-      "estReqMonth": 1500
     },
     "antigravity": {
       "available": true,
@@ -1914,12 +1844,6 @@ const AI_MODELS_DATA = {
       "poolLabel": "Other Models",
       "fastDefault": false,
       "fastMultiplier": 1
-    },
-    "openCodeGo": {
-      "available": false,
-      "id": "anthropic/claude-sonnet-4.6",
-      "quotaMultiplier": 3,
-      "estReqMonth": 3000
     },
     "antigravity": {
       "available": true,
@@ -2034,12 +1958,6 @@ const AI_MODELS_DATA = {
       "fastDefault": false,
       "fastMultiplier": 1
     },
-    "openCodeGo": {
-      "available": true,
-      "id": "google/gemini-3.1-pro",
-      "quotaMultiplier": 2.5,
-      "estReqMonth": 3000
-    },
     "sweetSpot": "Standard / Medium Reasoning",
     "strengths": [
       "Raciocínio científico e matemático extremo (GPQA Diamond 94,3% e ARC-AGI-2 77,1%)",
@@ -2149,12 +2067,6 @@ const AI_MODELS_DATA = {
       "poolLabel": "Other Models ($20 Pool)",
       "fastDefault": false,
       "fastMultiplier": 1
-    },
-    "openCodeGo": {
-      "available": true,
-      "id": "google/gemini-3.7-flash",
-      "quotaMultiplier": 1.5,
-      "estReqMonth": 7800
     },
     "sweetSpot": "High (61,6% CursorBench / Vídeo & Áudio Nativo / 65,3% DeepSWE)",
     "strengths": [
@@ -2326,12 +2238,6 @@ const AI_MODELS_DATA = {
       "role": "Worker de Alto Throughput & Multimodalidade 1M",
       "tokensRatio": "Econômico / Pool Gemini"
     },
-    "openCodeGo": {
-      "available": true,
-      "id": "google/gemini-3.8-flash",
-      "quotaMultiplier": 1.5,
-      "estReqMonth": 8200
-    },
     "sweetSpot": "Medium (67,0% CursorBench / $1,93) e High (69,2% CursorBench / 74,0% DeepSWE)",
     "strengths": [
       "90,8% no Terminal-Bench 2.1 e 74,0% no DeepSWE v1.1 (líder em eficiência agêntica)",
@@ -2470,12 +2376,6 @@ const AI_MODELS_DATA = {
       "fastDefault": false,
       "fastMultiplier": 1
     },
-    "openCodeGo": {
-      "available": true,
-      "id": "google/gemini-3.5-flash",
-      "quotaMultiplier": 1.5,
-      "estReqMonth": 14000
-    },
     "sweetSpot": "Standard (Boilerplate / Multimodal Econômico)",
     "strengths": [
       "Terminal-Bench 2.1 de 76,2% e OSWorld de 78,4%",
@@ -2563,12 +2463,6 @@ const AI_MODELS_DATA = {
       "poolLabel": "Other Models",
       "fastDefault": false,
       "fastMultiplier": 1
-    },
-    "openCodeGo": {
-      "available": true,
-      "id": "deepseek/deepseek-v4-pro",
-      "quotaMultiplier": 3,
-      "estReqMonth": 5200
     },
     "sweetSpot": "High (87,9% Terminal-Bench 2.1 / 62,7% DeepSWE)",
     "strengths": [
@@ -2658,12 +2552,6 @@ const AI_MODELS_DATA = {
       "poolLabel": "Other Models",
       "fastDefault": false,
       "fastMultiplier": 1
-    },
-    "openCodeGo": {
-      "available": true,
-      "id": "deepseek/deepseek-v4-flash",
-      "quotaMultiplier": 1.5,
-      "estReqMonth": 37800
     },
     "sweetSpot": "Medium / High (82,7% Terminal-Bench 2.1 / 54,4% DeepSWE)",
     "strengths": [
@@ -2763,14 +2651,6 @@ const AI_MODELS_DATA = {
       "poolLabel": "Other Models / API Externa",
       "fastDefault": false,
       "fastMultiplier": 1
-    },
-    "openCodeGo": {
-      "available": true,
-      "id": "opencode-go/deepseek-v4-flash-vision-exp",
-      "quotaMultiplier": 1.5,
-      "monthlyQuotaUsd": 15,
-      "estReqMonth": 18900,
-      "zdr": true
     },
     "officialBenchmarks": {
       "terminalBench21": 83.9,
@@ -2874,12 +2754,6 @@ const AI_MODELS_DATA = {
       "fastDefault": false,
       "fastMultiplier": 1
     },
-    "openCodeGo": {
-      "available": false,
-      "id": "deepseek/deepseek-v3.2",
-      "quotaMultiplier": 1,
-      "estReqMonth": 0
-    },
     "sweetSpot": "Standard (73,1% SWE-bench Verified)",
     "strengths": [
       "73,1% no SWE-bench Verified oficial",
@@ -2959,12 +2833,6 @@ const AI_MODELS_DATA = {
       "poolLabel": "Other Models",
       "fastDefault": false,
       "fastMultiplier": 1
-    },
-    "openCodeGo": {
-      "available": true,
-      "id": "alibaba/qwen3.8-max",
-      "quotaMultiplier": 3,
-      "estReqMonth": 810
     },
     "sweetSpot": "High (86,6% Terminal-Bench 2.1 / 67,7% SWE-Pro)",
     "strengths": [
@@ -3053,12 +2921,6 @@ const AI_MODELS_DATA = {
       "fastDefault": false,
       "fastMultiplier": 1
     },
-    "openCodeGo": {
-      "available": false,
-      "id": "alibaba/qwen3.8-2.4t",
-      "quotaMultiplier": 1,
-      "estReqMonth": 0
-    },
     "sweetSpot": "Cluster Deployment (92 Layers / 512 Experts)",
     "strengths": [
       "2.4T parâmetros totais com 95B ativos em 92 camadas e 512 experts",
@@ -3143,12 +3005,6 @@ const AI_MODELS_DATA = {
       "fastDefault": false,
       "fastMultiplier": 1
     },
-    "openCodeGo": {
-      "available": true,
-      "id": "alibaba/qwen3.8-27b",
-      "quotaMultiplier": 1,
-      "estReqMonth": 30000
-    },
     "sweetSpot": "Q4 / INT4 (Cabe perfeitamente em 24 GB de VRAM)",
     "strengths": [
       "Melhor modelo denso open-weights para workstation pessoal (1x RTX 4090/5090)",
@@ -3230,12 +3086,6 @@ const AI_MODELS_DATA = {
       "fastDefault": false,
       "fastMultiplier": 1
     },
-    "openCodeGo": {
-      "available": true,
-      "id": "alibaba/qwen3.7-max",
-      "quotaMultiplier": 3,
-      "estReqMonth": 1500
-    },
     "sweetSpot": "Standard",
     "strengths": [
       "74,5% no Terminal-Bench 2.1 e 60,6% no SWE-bench Pro"
@@ -3316,12 +3166,6 @@ const AI_MODELS_DATA = {
       "poolLabel": "Other Models",
       "fastDefault": false,
       "fastMultiplier": 1
-    },
-    "openCodeGo": {
-      "available": true,
-      "id": "moonshot/kimi-k3",
-      "quotaMultiplier": 6,
-      "estReqMonth": 490
     },
     "sweetSpot": "Max (88,3% Terminal-Bench 2.1 / 67,5% DeepSWE / 60,8% CursorBench)",
     "strengths": [
@@ -3409,12 +3253,6 @@ const AI_MODELS_DATA = {
       "fastDefault": false,
       "fastMultiplier": 1
     },
-    "openCodeGo": {
-      "available": true,
-      "id": "moonshot/kimi-k2.7-code",
-      "quotaMultiplier": 1.5,
-      "estReqMonth": 6750
-    },
     "sweetSpot": "Default (49,7% CursorBench a $1,43/task)",
     "strengths": [
       "Worker especializado para implementação de especificações já delimitadas",
@@ -3498,12 +3336,6 @@ const AI_MODELS_DATA = {
       "fastDefault": false,
       "fastMultiplier": 1
     },
-    "openCodeGo": {
-      "available": true,
-      "id": "moonshot/kimi-k2.6",
-      "quotaMultiplier": 1.5,
-      "estReqMonth": 6750
-    },
     "sweetSpot": "Standard (80,2% SWE-bench Verified)",
     "strengths": [
       "80,2% no SWE-bench Verified oficial",
@@ -3585,12 +3417,6 @@ const AI_MODELS_DATA = {
       "poolLabel": "Other Models",
       "fastDefault": false,
       "fastMultiplier": 1
-    },
-    "openCodeGo": {
-      "available": true,
-      "id": "zai/glm-5.3",
-      "quotaMultiplier": 3,
-      "estReqMonth": 1080
     },
     "sweetSpot": "Max (88,2% Terminal-Bench 2.1 / 66,9% DeepSWE)",
     "strengths": [
@@ -3678,12 +3504,6 @@ const AI_MODELS_DATA = {
       "fastDefault": false,
       "fastMultiplier": 1
     },
-    "openCodeGo": {
-      "available": true,
-      "id": "zai/glm-5.2",
-      "quotaMultiplier": 1.5,
-      "estReqMonth": 4300
-    },
     "sweetSpot": "High / Max (81,0% Terminal-Bench 2.1 / 55,0% CursorBench)",
     "strengths": [
       "Uma das alternativas abertas mais maduras para agentes: 1M, MIT, 81,0% Terminal 2.1",
@@ -3770,12 +3590,6 @@ const AI_MODELS_DATA = {
       "fastDefault": false,
       "fastMultiplier": 1
     },
-    "openCodeGo": {
-      "available": false,
-      "id": "zai/glm-5.1",
-      "quotaMultiplier": 1,
-      "estReqMonth": 0
-    },
     "sweetSpot": "Cluster Local (754B Checkpoint)",
     "strengths": [
       "Capacidade comprovada de sustentar loops agênticos longos em 1M"
@@ -3857,12 +3671,6 @@ const AI_MODELS_DATA = {
       "poolLabel": "Other Models",
       "fastDefault": false,
       "fastMultiplier": 1
-    },
-    "openCodeGo": {
-      "available": true,
-      "id": "xiaomi/mimo-v2.5-pro",
-      "quotaMultiplier": 1.5,
-      "estReqMonth": 16300
     },
     "sweetSpot": "High (78,9% SWE-bench Verified)",
     "strengths": [
@@ -3950,12 +3758,6 @@ const AI_MODELS_DATA = {
       "fastDefault": false,
       "fastMultiplier": 1
     },
-    "openCodeGo": {
-      "available": true,
-      "id": "xiaomi/mimo-v2.5",
-      "quotaMultiplier": 1.5,
-      "estReqMonth": 150400
-    },
     "sweetSpot": "Standard (Recordista de Volume: 150.400 req/mês no Go)",
     "strengths": [
       "Recorde absoluto de volume: 150.400 requisições/mês no OpenCode Go",
@@ -4038,12 +3840,6 @@ const AI_MODELS_DATA = {
       "poolLabel": "Other Models",
       "fastDefault": false,
       "fastMultiplier": 1
-    },
-    "openCodeGo": {
-      "available": true,
-      "id": "minimax/minimax-m3",
-      "quotaMultiplier": 1.5,
-      "estReqMonth": 16000
     },
     "sweetSpot": "High (80,5% SWE-bench Verified / Custo Ultra-Agressivo)",
     "strengths": [
@@ -4130,12 +3926,6 @@ const AI_MODELS_DATA = {
       "fastDefault": false,
       "fastMultiplier": 1
     },
-    "openCodeGo": {
-      "available": true,
-      "id": "minimax/minimax-m2.7",
-      "quotaMultiplier": 1.5,
-      "estReqMonth": 16000
-    },
     "sweetSpot": "Standard (76,5% SWE-bench Verified)",
     "strengths": [
       "76,5% no SWE-bench Verified oficial",
@@ -4215,12 +4005,6 @@ const AI_MODELS_DATA = {
       "poolLabel": "Self-Hosted (RTX 5090 / 1x H100)",
       "fastDefault": false,
       "fastMultiplier": 1
-    },
-    "openCodeGo": {
-      "available": true,
-      "id": "nvidia/nemotron-3.5-lightning",
-      "quotaMultiplier": 1,
-      "estReqMonth": 50000
     },
     "sweetSpot": "NVFP4 / Local (100–400 tok/s / 1M Contexto)",
     "strengths": [
@@ -4309,12 +4093,6 @@ const AI_MODELS_DATA = {
       "fastDefault": false,
       "fastMultiplier": 1
     },
-    "openCodeGo": {
-      "available": true,
-      "id": "tencent/hy3",
-      "quotaMultiplier": 1.5,
-      "estReqMonth": 21500
-    },
     "sweetSpot": "Standard (78,0% SWE-bench Verified / 71,7% Terminal 2.1)",
     "strengths": [
       "78,0% no SWE-bench Verified oficial e 71,7% no Terminal-Bench 2.1",
@@ -4400,12 +4178,6 @@ const AI_MODELS_DATA = {
       "poolLabel": "Self-Hosted",
       "fastDefault": false,
       "fastMultiplier": 1
-    },
-    "openCodeGo": {
-      "available": false,
-      "id": "meituan/longcat-2.0",
-      "quotaMultiplier": 1,
-      "estReqMonth": 0
     },
     "sweetSpot": "High (Cluster 8x B200 / Monorepos)",
     "strengths": [
@@ -4497,12 +4269,6 @@ const AI_MODELS_DATA = {
       "fastDefault": false,
       "fastMultiplier": 1
     },
-    "openCodeGo": {
-      "available": true,
-      "id": "meta/muse-spark-1.2-contributor",
-      "quotaMultiplier": 0.5,
-      "estReqMonth": 226600
-    },
     "sweetSpot": "XHigh (82,9% Terminal-Bench 2.1 / 54,9% DeepSWE)",
     "strengths": [
       "Combina agentic coding (82,9% Terminal 2.1, 54,9% DeepSWE) + multimodalidade total + Computer Use",
@@ -4585,12 +4351,6 @@ const AI_MODELS_DATA = {
       "poolLabel": "Cursor Models (Pool Dedicado)",
       "fastDefault": true,
       "fastMultiplier": 1
-    },
-    "openCodeGo": {
-      "available": true,
-      "id": "cursor/composer-2.5",
-      "quotaMultiplier": 1,
-      "estReqMonth": 12000
     },
     "sweetSpot": "Fast / Interactive (56,1% CursorBench a $0,44/task)",
     "strengths": [
@@ -4704,14 +4464,6 @@ const AI_MODELS_DATA = {
       "poolLabel": "Other Models (OpenRouter / Z.ai API)",
       "fastDefault": false,
       "fastMultiplier": 1
-    },
-    "openCodeGo": {
-      "available": true,
-      "id": "zai/glm-5.3-flash",
-      "displayName": "GLM-5.3-Flash (formerly ox-alpha)",
-      "quotaMultiplier": 0.8,
-      "estReqMonth": 15000,
-      "zdr": true
     },
     "officialBenchmarks": {
       "terminalBench21": 84.3,
@@ -5028,39 +4780,45 @@ const CAPABILITY_RADAR_10D = {
 
 
 // ==========================================
-// 7. CATÁLOGO COMPLETO DO OPENCODE GO (29 IDS)
+// 7. CATÁLOGO COMPLETO DO OPENCODE GO (FONTE ÚNICA CANÔNICA)
 // ==========================================
+// OPENCODE_GO_DATA é a única fonte canônica (definida em data/platforms.js)
+const OPENCODE_GO_CATALOG = (typeof OPENCODE_GO_DATA !== "undefined" && OPENCODE_GO_DATA.models)
+  ? OPENCODE_GO_DATA.models
+  : [];
 
-const OPENCODE_GO_CATALOG = [
-  { id: 'zai/glm-5.3-flash', name: 'GLM-5.3-Flash (formerly ox-alpha)', multiplier: 0.8, estReqMonth: 15000, zdr: true, context: '1M', notes: 'Z.ai Flash Multimodal 1M (ex-Ox Alpha)' },
-  { id: 'meta/muse-spark-1.2-contributor', name: 'Muse Spark 1.2 Contributor', multiplier: 0.5, estReqMonth: 226600, zdr: false, context: '1M', notes: 'Treinamento autorizado pela Meta' },
-  { id: 'xiaomi/mimo-v2.5', name: 'MiMo-V2.5', multiplier: 1.5, estReqMonth: 150400, zdr: true, context: '1M', notes: 'Recorde de volume' },
-  { id: 'deepseek/deepseek-v4-flash', name: 'DeepSeek-V4-Flash-0731', multiplier: 1.5, estReqMonth: 37800, zdr: true, context: '1M', notes: 'ZDR formal até 31/08/2026' },
-  { id: 'tencent/hy3', name: 'Tencent Hy3', multiplier: 1.5, estReqMonth: 21500, zdr: true, context: '1M', notes: '78% SWE-Verified' },
-  { id: 'opencode-go/deepseek-v4-flash-vision-exp', name: 'DeepSeek V4 Flash Vision Exp', multiplier: 1.5, estReqMonth: 18900, zdr: true, context: '1M', notes: 'Visão nativa (~384 tok/img)' },
-  { id: 'xiaomi/mimo-v2.5-pro', name: 'MiMo-V2.5-Pro', multiplier: 1.5, estReqMonth: 16300, zdr: true, context: '1M', notes: '78,9% SWE-Verified' },
-  { id: 'minimax/minimax-m3', name: 'MiniMax M3', multiplier: 1.5, estReqMonth: 16000, zdr: true, context: '1M', notes: '80,5% SWE-Verified' },
-  { id: 'minimax/minimax-m2.7', name: 'MiniMax M2.7', multiplier: 1.5, estReqMonth: 16000, zdr: true, context: '205k', notes: '62 tok/s' },
-  { id: 'google/gemini-3.5-flash', name: 'Gemini 3.5 Flash', multiplier: 1.5, estReqMonth: 14000, zdr: true, context: '1M', notes: 'Multimodal' },
-  { id: 'anthropic/claude-haiku-4-5', name: 'Claude Haiku 4.5', multiplier: 1.5, estReqMonth: 12000, zdr: true, context: '200k', notes: 'Subagentes e triagem rápida' },
-  { id: 'openai/gpt-5.6-luna', name: 'GPT-5.6 Luna', multiplier: 1.5, estReqMonth: 10250, zdr: true, context: '1M', notes: '84,7% Terminal-Bench' },
-  { id: 'google/gemini-3.7-flash', name: 'Gemini 3.7 Flash', multiplier: 1.5, estReqMonth: 7800, zdr: true, context: '1M', notes: 'Vídeo + Áudio Nativo' },
-  { id: 'moonshot/kimi-k2.6', name: 'Kimi K2.6', multiplier: 1.5, estReqMonth: 6750, zdr: true, context: '256k', notes: '80,2% SWE-Verified' },
-  { id: 'moonshot/kimi-k2.7-code', name: 'Kimi K2.7 Code', multiplier: 1.5, estReqMonth: 6750, zdr: true, context: '256k', notes: 'INT4' },
-  { id: 'deepseek/deepseek-v4-pro', name: 'DeepSeek-V4-Pro-0813', multiplier: 3.0, estReqMonth: 5200, zdr: true, context: '1M', notes: '87,9% Terminal-Bench' },
-  { id: 'zai/glm-5.2', name: 'GLM-5.2', multiplier: 1.5, estReqMonth: 4300, zdr: true, context: '200k', notes: '82,7% Terminal' },
-  { id: 'anthropic/claude-sonnet-5', name: 'Claude Sonnet 5', multiplier: 3.0, estReqMonth: 3800, zdr: true, context: '1M', notes: '$2/$10 permanente' },
-  { id: 'openai/gpt-5.6-terra', name: 'GPT-5.6 Terra', multiplier: 3.0, estReqMonth: 3600, zdr: true, context: '1M', notes: '87,4% Terminal' },
-  { id: 'xai/grok-4.6', name: 'Grok 4.6', multiplier: 3.0, estReqMonth: 3200, zdr: true, context: '500k', notes: '70,8% CursorBench' },
-  { id: 'google/gemini-3.1-pro', name: 'Gemini 3.1 Pro', multiplier: 3.0, estReqMonth: 2200, zdr: true, context: '2M', notes: '2M contexto' },
-  { id: 'alibaba/qwen3.7-max', name: 'Qwen3.7 Max', multiplier: 3.0, estReqMonth: 1500, zdr: true, context: '500k', notes: 'Legado' },
-  { id: 'anthropic/claude-opus-5', name: 'Claude Opus 5', multiplier: 6.0, estReqMonth: 1250, zdr: true, context: '1M', notes: 'Melhor Claude' },
-  { id: 'openai/gpt-5.6-sol', name: 'GPT-5.6 Sol', multiplier: 6.0, estReqMonth: 1200, zdr: true, context: '1M', notes: '88,8% Terminal-Bench' },
-  { id: 'zai/glm-5.3', name: 'GLM-5.3', multiplier: 3.0, estReqMonth: 1080, zdr: true, context: '1M', notes: '88,2% Terminal' },
-  { id: 'alibaba/qwen3.8-max', name: 'Qwen3.8 Max', multiplier: 3.0, estReqMonth: 810, zdr: true, context: '1M', notes: '67,7% SWE-Pro' },
-  { id: 'anthropic/claude-fable-5', name: 'Claude Fable 5', multiplier: 6.0, estReqMonth: 600, zdr: true, context: '1M', notes: 'Experimental Max' },
-  { id: 'moonshot/kimi-k3', name: 'Kimi K3', multiplier: 6.0, estReqMonth: 490, zdr: true, context: '1M', notes: '88,3% Terminal' }
-];
+// Vinculação dinâmica de disponibilidade OpenCode Go em AI_MODELS_DATA
+if (typeof OPENCODE_GO_DATA !== "undefined" && OPENCODE_GO_DATA.models) {
+  Object.keys(AI_MODELS_DATA).forEach(modelId => {
+    const m = AI_MODELS_DATA[modelId];
+    const goModel = OPENCODE_GO_DATA.getModel(modelId);
+    if (goModel) {
+      m.openCodeGo = {
+        available: true,
+        id: goModel.id,
+        displayName: goModel.displayName,
+        usageAllowanceUsd: goModel.usageAllowanceUsd,
+        valueMultiplierVsSubscription: goModel.valueMultiplierVsSubscription,
+        quotaBurnMultiplier: goModel.quotaBurnMultiplier,
+        quotaMultiplier: goModel.quotaBurnMultiplier,
+        effectiveQuotaPct: goModel.effectiveQuotaPct,
+        req5h: goModel.req5h,
+        reqWeek: goModel.reqWeek,
+        estReqMonth: goModel.reqMonth,
+        tokenProfile: goModel.tokenProfile,
+        endpoint: goModel.endpoint,
+        sdkPackage: goModel.sdkPackage,
+        goPricing: goModel.goPricing,
+        privacy: goModel.privacy,
+        zdr: goModel.privacy.zdr
+      };
+    } else {
+      m.openCodeGo = {
+        available: false
+      };
+    }
+  });
+}
 
 
 // ==========================================
@@ -5373,7 +5131,13 @@ const TROUBLESHOOTER_DATABASE = [
 // ==========================================
 
 const PRIVACY_ZDR_DATABASE = {
-  'opencode-go-general': { provider: 'OpenCode Go (Geral)', retentionDays: 0, trainingOnPrompts: false, zdrGuaranteed: true, notes: 'ZDR formal garantido em contrato para GLM-5.3-Flash, GLM, Kimi, MiMo, Qwen, MiniMax e Hy3.' },
+  'opencode-go-general': {
+    provider: 'OpenCode Go (Geral)',
+    retentionDays: 0,
+    trainingOnPrompts: false,
+    zdrGuaranteed: false,
+    notes: 'Privacidade variável por modelo: 22 modelos possuem ZDR (0 dias) sem treino; Grok 4.6 e GPT 5.6 Luna retêm logs por até 30 dias para moderação de abuso; Muse Spark Contributor autoriza treino Meta; DeepSeek V4 Flash possui acordo documentado até 31/08/2026 sob revalidação.'
+  },
   'deepseek-direct': { provider: 'DeepSeek Direct API', retentionDays: 0, trainingOnPrompts: false, zdrGuaranteed: true, notes: 'Política ZDR formal revalidada em Setembro/2026; dados de API comercial não são utilizados para treinamento.' },
   'anthropic-fable-5-1': { provider: 'Anthropic (Claude Fable 5.1)', modelId: 'claude-fable-5-1', retentionDays: 30, trainingOnPrompts: false, zdrGuaranteed: false, notes: 'Retenção padrão de até 30 dias para moderação de segurança em contas comerciais; ZDR (0 dias) requer contrato Enterprise com Frontier Safeguards Compliance. No Cursor exige aprovação explícita do administrador.' },
   'cursor-privacy-mode': { provider: 'Cursor Privacy Mode', retentionDays: 0, trainingOnPrompts: false, zdrGuaranteed: true, notes: 'Código local e prompts não são armazenados nos servidores da Anysphere. Fable 5.1 requer opt-in prévio de administrador.' },
@@ -6185,6 +5949,7 @@ if (typeof module !== 'undefined' && module.exports) {
     MARGINAL_GAINS_DATA,
     MULTI_BENCHMARK_LEDGER,
     CAPABILITY_RADAR_10D,
+    OPENCODE_GO_DATA: typeof OPENCODE_GO_DATA !== "undefined" ? OPENCODE_GO_DATA : null,
     OPENCODE_GO_CATALOG,
     HARDWARE_GPU_DATABASE,
     KV_CACHE_COMPRESSION_FACTORS,
@@ -6225,5 +5990,6 @@ if (typeof window !== 'undefined') {
   window.HARDWARE_WORKSTATIONS_BR = HARDWARE_WORKSTATIONS_BR;
   window.HARDWARE_LOCAL_MODELS_DATA = HARDWARE_LOCAL_MODELS_DATA;
   window.AA_METHODOLOGY_NOTES = AA_METHODOLOGY_NOTES;
+  if (typeof OPENCODE_GO_DATA !== "undefined") window.OPENCODE_GO_DATA = OPENCODE_GO_DATA;
 }
 

@@ -24,6 +24,7 @@ const {
   MARGINAL_GAINS_DATA,
   MULTI_BENCHMARK_LEDGER,
   CAPABILITY_RADAR_10D,
+  OPENCODE_GO_DATA,
   OPENCODE_GO_CATALOG,
   HARDWARE_LOCAL_MODELS_DATA,
   HARDWARE_GPU_DATABASE,
@@ -227,9 +228,108 @@ USE_CASE_COMPARISON_DATA.useCases.forEach(uc => {
 });
 assert(USE_CASE_COMPARISON_DATA.orchestrationRecipes && USE_CASE_COMPARISON_DATA.orchestrationRecipes.length === 3, 'Esperado 3 receitas de orquestração multi-modelo');
 
-// 12. Plataformas e OpenCode Go
-console.log('🚀 Verificando catálogo de plataformas...');
-assert(PLATFORM_MODEL_CATALOG && PLATFORM_MODEL_CATALOG.opencodeGo.catalog.length === 25, `OpenCode Go deve conter 25 modelos. Encontrado: ${PLATFORM_MODEL_CATALOG.opencodeGo.catalog.length}`);
+// 12. Plataformas e OpenCode Go (Snapshot Oficial 03/09/2026 - Documentação 02/09/2026)
+console.log('🚀 Verificando catálogo canônico do OpenCode Go e plataformas...');
+assert(OPENCODE_GO_DATA && Array.isArray(OPENCODE_GO_DATA.models), 'OPENCODE_GO_DATA.models deve ser um array');
+assert(OPENCODE_GO_DATA.models.length === 26, `OpenCode Go deve conter RIGOROSAMENTE 26 modelos oficiais. Encontrado: ${OPENCODE_GO_DATA.models.length}`);
+
+// Seção 63: Verificação de Modelos Obrigatórios e Proibidos
+assert(OPENCODE_GO_DATA.getModel('opencode-go/muse-spark-1.3-contributor'), 'Muse Spark 1.3 Contributor DEVE existir no catálogo Go');
+assert(OPENCODE_GO_DATA.getModel('opencode-go/grok-4.6'), 'Grok 4.6 DEVE existir no catálogo Go');
+assert(OPENCODE_GO_DATA.getModel('opencode-go/gpt-5.6-luna'), 'GPT 5.6 Luna DEVE existir no catálogo Go');
+assert(OPENCODE_GO_DATA.getModel('opencode-go/deepseek-v4-flash'), 'DeepSeek V4 Flash DEVE existir no catálogo Go');
+
+const forbiddenGoModels = [
+  'gpt-5-6-sol',
+  'gpt-5-6-terra',
+  'gpt-5-5-preview',
+  'gpt-oss-120b',
+  'gpt-oss-20b',
+  'claude-fable-5-1',
+  'claude-fable-5',
+  'claude-opus-5',
+  'claude-sonnet-5',
+  'claude-haiku-4-5',
+  'gemini-3-8-flash',
+  'gemini-3-7-flash',
+  'gemini-3-5-flash',
+  'gemini-3-1-pro'
+];
+forbiddenGoModels.forEach(mId => {
+  assert(!OPENCODE_GO_DATA.getModel(mId), `Modelo proibido "${mId}" NÃO deve constar no catálogo Go`);
+  if (AI_MODELS_DATA[mId]) {
+    assert(AI_MODELS_DATA[mId].openCodeGo && AI_MODELS_DATA[mId].openCodeGo.available === false, `AI_MODELS_DATA["${mId}"].openCodeGo.available deve ser false`);
+  }
+});
+
+// Seções 64, 65, 66: Classes de Uso, Quota Burn e Value Multiplier
+const validUsageClasses = [15, 30, 60];
+OPENCODE_GO_DATA.models.forEach(m => {
+  assert(validUsageClasses.includes(m.usageAllowanceUsd), `Modelo "${m.id}" possui usageAllowanceUsd inválido: ${m.usageAllowanceUsd}`);
+  assert(m.quotaBurnMultiplier === (60 / m.usageAllowanceUsd), `Modelo "${m.id}" quotaBurnMultiplier incorreto: ${m.quotaBurnMultiplier} vs ${60 / m.usageAllowanceUsd}`);
+  assert(m.valueMultiplierVsSubscription === (m.usageAllowanceUsd / 10), `Modelo "${m.id}" valueMultiplierVsSubscription incorreto: ${m.valueMultiplierVsSubscription}`);
+  assert(m.effectiveQuotaPct === (m.usageAllowanceUsd / 60) * 100, `Modelo "${m.id}" effectiveQuotaPct incorreto: ${m.effectiveQuotaPct}`);
+  assert(m.id.startsWith('opencode-go/'), `ID do modelo "${m.id}" deve começar com "opencode-go/"`);
+});
+
+// Seção 67: Validação da Tabela Oficial de Requisições
+const officialRequestTable = {
+  'opencode-go/grok-4.6': { req5h: 169, reqWeek: 423, reqMonth: 845, usage: 15, burn: 4 },
+  'opencode-go/gpt-5.6-luna': { req5h: 2050, reqWeek: 5100, reqMonth: 10250, usage: 15, burn: 4 },
+  'opencode-go/glm-5.3-flash': { req5h: 1580, reqWeek: 3950, reqMonth: 7900, usage: 15, burn: 4 },
+  'opencode-go/glm-5.3': { req5h: 220, reqWeek: 540, reqMonth: 1080, usage: 15, burn: 4 },
+  'opencode-go/glm-5.2': { req5h: 880, reqWeek: 2150, reqMonth: 4300, usage: 60, burn: 1 },
+  'opencode-go/glm-5.1': { req5h: 880, reqWeek: 2150, reqMonth: 4300, usage: 60, burn: 1 },
+  'opencode-go/kimi-k3': { req5h: 110, reqWeek: 250, reqMonth: 490, usage: 15, burn: 4 },
+  'opencode-go/kimi-k2.7-code': { req5h: 1350, reqWeek: 3380, reqMonth: 6750, usage: 60, burn: 1 },
+  'opencode-go/kimi-k2.6': { req5h: 1150, reqWeek: 2880, reqMonth: 5750, usage: 60, burn: 1 },
+  'opencode-go/longcat-2.0': { req5h: 11400, reqWeek: 28600, reqMonth: 57200, usage: 60, burn: 1 },
+  'opencode-go/mimo-v2.5': { req5h: 30100, reqWeek: 75200, reqMonth: 150400, usage: 60, burn: 1 },
+  'opencode-go/mimo-v2.5-pro': { req5h: 3250, reqWeek: 8150, reqMonth: 16300, usage: 15, burn: 4 },
+  'opencode-go/minimax-m3': { req5h: 3200, reqWeek: 8000, reqMonth: 16000, usage: 60, burn: 1 },
+  'opencode-go/minimax-m2.7': { req5h: 3400, reqWeek: 8500, reqMonth: 17000, usage: 60, burn: 1 },
+  'opencode-go/muse-spark-1.3-contributor': { req5h: 45300, reqWeek: 113300, reqMonth: 226600, usage: 60, burn: 1 },
+  'opencode-go/muse-spark-1.2-contributor': { req5h: 45300, reqWeek: 113300, reqMonth: 226600, usage: 60, burn: 1 },
+  'opencode-go/qwen3.8-max': { req5h: 160, reqWeek: 400, reqMonth: 810, usage: 15, burn: 4 },
+  'opencode-go/qwen3.8-flash': { req5h: 5400, reqWeek: 13500, reqMonth: 27000, usage: 30, burn: 2 },
+  'opencode-go/qwen3.7-max': { req5h: 170, reqWeek: 420, reqMonth: 840, usage: 30, burn: 2 },
+  'opencode-go/qwen3.7-plus': { req5h: 4300, reqWeek: 10800, reqMonth: 21600, usage: 60, burn: 1 },
+  'opencode-go/qwen3.6-plus': { req5h: 3300, reqWeek: 8200, reqMonth: 16300, usage: 60, burn: 1 },
+  'opencode-go/deepseek-v4-pro': { req5h: 1050, reqWeek: 2600, reqMonth: 5200, usage: 15, burn: 4 },
+  'opencode-go/deepseek-v4-flash': { req5h: 7600, reqWeek: 18900, reqMonth: 37800, usage: 30, burn: 2 },
+  'opencode-go/deepseek-v4-flash-vision-exp': { req5h: 3800, reqWeek: 9450, reqMonth: 18900, usage: 15, burn: 4 },
+  'opencode-go/hy4-preview': { req5h: 1350, reqWeek: 3380, reqMonth: 6770, usage: 30, burn: 2 },
+  'opencode-go/hy3': { req5h: 4300, reqWeek: 10750, reqMonth: 21500, usage: 60, burn: 1 }
+};
+
+Object.keys(officialRequestTable).forEach(mId => {
+  const expected = officialRequestTable[mId];
+  const actual = OPENCODE_GO_DATA.getModel(mId);
+  assert(actual, `Modelo "${mId}" da tabela oficial não encontrado`);
+  assert(actual.req5h === expected.req5h, `req5h incorreto para ${mId}: ${actual.req5h} vs ${expected.req5h}`);
+  assert(actual.reqWeek === expected.reqWeek, `reqWeek incorreto para ${mId}: ${actual.reqWeek} vs ${expected.reqWeek}`);
+  assert(actual.reqMonth === expected.reqMonth, `reqMonth incorreto para ${mId}: ${actual.reqMonth} vs ${expected.reqMonth}`);
+  assert(actual.usageAllowanceUsd === expected.usage, `usageAllowanceUsd incorreto para ${mId}`);
+  assert(actual.quotaBurnMultiplier === expected.burn, `quotaBurnMultiplier incorreto para ${mId}`);
+});
+
+// Seção 68: Testes Específicos de Privacidade e ZDR
+const grokGo = OPENCODE_GO_DATA.getModel('opencode-go/grok-4.6');
+assert(grokGo && grokGo.privacy.retentionDays === 30 && grokGo.privacy.zdr === false, 'Grok 4.6 no Go deve reter logs por 30 dias (não é ZDR)');
+
+const lunaGo = OPENCODE_GO_DATA.getModel('opencode-go/gpt-5.6-luna');
+assert(lunaGo && lunaGo.privacy.retentionDays === 30 && lunaGo.privacy.zdr === false, 'GPT 5.6 Luna no Go deve ter retenção de 30 dias (não é ZDR)');
+
+const muse13 = OPENCODE_GO_DATA.getModel('opencode-go/muse-spark-1.3-contributor');
+assert(muse13 && muse13.privacy.trainingUsed === true && muse13.privacy.zdr === false, 'Muse Spark 1.3 Contributor deve ter trainingUsed === true e zdr === false');
+
+const muse12 = OPENCODE_GO_DATA.getModel('opencode-go/muse-spark-1.2-contributor');
+assert(muse12 && muse12.privacy.trainingUsed === true && muse12.privacy.zdr === false, 'Muse Spark 1.2 Contributor deve ter trainingUsed === true e zdr === false');
+
+const dsFlashGo = OPENCODE_GO_DATA.getModel('opencode-go/deepseek-v4-flash');
+assert(dsFlashGo && dsFlashGo.privacy.zdrAgreementRequiresRenewal === true, 'DeepSeek V4 Flash deve marcar necessidade de revalidação de acordo ZDR');
+
+// Matriz de disponibilidade dos 44 modelos
 assert(PLATFORM_MODEL_CATALOG && PLATFORM_MODEL_CATALOG.availabilityMatrix.length === 44, `Matriz de disponibilidade deve cobrir 44 modelos. Encontrado: ${PLATFORM_MODEL_CATALOG.availabilityMatrix.length}`);
 
 // 13. Auditoria Estática Anti-Duplicação de Chaves em data.js e data/*.js

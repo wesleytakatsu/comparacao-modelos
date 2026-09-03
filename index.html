@@ -1009,8 +1009,8 @@
           <div class="sim-comparison-cards">
             <div class="sim-card">
               <h4>OpenCode Go ($10/mês)</h4>
-              <div class="sim-stat" id="simGoLongevity">~15.000 requisições</div>
-              <p class="sim-note">Multiplicadores de 0,5x a 6x com ZDR formal garantido.</p>
+              <div class="sim-stat" id="simGoLongevity">Até US$ 60 nominal</div>
+              <p class="sim-note">3 classes oficiais (1×, 2× ou 4× burn). Volume varia de 490 a 226k req/mês.</p>
             </div>
             <div class="sim-card">
               <h4>Cursor Pro ($20/mês)</h4>
@@ -1678,28 +1678,105 @@
           </div>
         </div>
 
-        <!-- Seção 1: Catálogo OpenCode Go -->
+        <!-- Banner Explicativo Oficial da Economia Go & Quota Burn -->
+        <div class="go-explainer-banner" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95)); border: 1px solid var(--accent-cyan); border-radius: var(--radius-md); padding: 18px 22px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+          <div style="display: flex; align-items: flex-start; gap: 14px;">
+            <div style="font-size: 1.8rem; line-height: 1;">⚡</div>
+            <div>
+              <h3 style="color: var(--accent-cyan); margin-bottom: 6px; font-size: 1.05rem;">Economia Real do OpenCode Go: Entendendo as 3 Classes de Quota Burn</h3>
+              <p style="font-size: 0.88rem; color: var(--text-primary); line-height: 1.5; margin-bottom: 12px;">
+                <strong>O OpenCode Go custa US$ 10/mês e oferece até US$ 60 de valor de uso nominal, mas esse multiplicador de 6× não vale igualmente para todos os modelos.</strong> Modelos da classe <strong>US$ 60</strong> consomem quota a <strong>1×</strong> (Full Value); modelos <strong>US$ 30</strong> consomem aproximadamente <strong>2× mais rápido</strong> (Half Value); e modelos <strong>US$ 15</strong> consomem aproximadamente <strong>4× mais rápido</strong> (Quarter Value). Consulte a classe de uso antes de escolher o modelo principal para seus coding loops.
+              </p>
+              <div style="display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.8rem;">
+                <span class="badge-tag badge-go-60">
+                  🟢 <strong>Classe US$ 60 (13 modelos):</strong> Full 6× Value • 1× Burn • 100% Quota Efetiva
+                </span>
+                <span class="badge-tag badge-go-30">
+                  🟡 <strong>Classe US$ 30 (4 modelos):</strong> Half 3× Value • 2× Burn • 50% Quota Efetiva
+                </span>
+                <span class="badge-tag badge-go-15">
+                  🔴 <strong>Classe US$ 15 (9 modelos):</strong> Quarter 1,5× Value • 4× Burn • 25% Quota Efetiva
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seção 1: Simulador Interativo de Quota & Consumo Go -->
+        <div class="content-box" style="margin-bottom: 26px; border: 1px solid var(--border-medium);">
+          <div class="box-header">
+            <div>
+              <h3 style="color: var(--accent-cyan); display: flex; align-items: center; gap: 8px;">
+                <span>🧮</span> Simulador Interativo de Quota Go
+              </h3>
+              <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 2px;">
+                Simule o impacto de qualquer volume de requisições sobre as cotas nominais de US$ 12 (5h), US$ 30 (Semanal) e US$ 60 (Mensal).
+              </p>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 16px;">
+            <div>
+              <label for="goSimModelSelect" style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">1. Selecione o Modelo Go (26 modelos oficiais):</label>
+              <select id="goSimModelSelect" class="filter-select" style="width: 100%;">
+                <!-- Populado dinamicamente via JS -->
+              </select>
+            </div>
+            <div>
+              <label for="goSimWindowSelect" style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">2. Janela de Avaliação:</label>
+              <select id="goSimWindowSelect" class="filter-select" style="width: 100%;">
+                <option value="monthly" selected>Mensal (Limite Nominal: US$ 60)</option>
+                <option value="weekly">Semanal (Limite Nominal: US$ 30)</option>
+                <option value="fiveHours">5 Horas (Limite Nominal: US$ 12)</option>
+              </select>
+            </div>
+            <div>
+              <label for="goSimRequestsInput" style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">3. Requisições Estimadas:</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="number" id="goSimRequestsInput" class="form-input" min="1" max="500000" value="1000" style="flex: 1;">
+                <button id="goSimFillBaselineBtn" class="btn-toggle" style="font-size: 0.75rem; white-space: nowrap;">Cota Típica</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cartão de Resultado da Simulação -->
+          <div id="goSimResultsCard">
+            <!-- Injetado dinamicamente via JS -->
+          </div>
+        </div>
+
+        <!-- Seção 2: Catálogo Completo OpenCode Go (26 Modelos Oficiais) -->
         <div class="content-box" style="margin-bottom: 30px;">
           <div class="box-header">
             <div>
-              <h3>Catálogo OpenCode Go ($10/mês) — Cotas & Requisições Estimadas</h3>
+              <h3>Catálogo Oficial OpenCode Go (26 Modelos) — Metrologia de Uso & Burn</h3>
               <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 2px;">
-                Baseado em limites monetários de $12 por 5 horas, $30 semanal e $60 mensal. Zero Data Retention (ZDR) garantido em contrato.
+                Snapshot oficial 02/09/2026. Requisições são estimativas baseadas em perfis de token médios de coding. API dedicada (<code>https://opencode.ai/zen/go/v1/</code>).
               </p>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <select id="goTableFilterClass" class="filter-select" style="min-width: 160px;">
+                <option value="all">Todas as Classes</option>
+                <option value="60">Classe US$ 60 (1× burn)</option>
+                <option value="30">Classe US$ 30 (2× burn)</option>
+                <option value="15">Classe US$ 15 (4× burn)</option>
+              </select>
             </div>
           </div>
           <div class="table-responsive">
             <table class="data-table" id="opencodeDetailedTable">
               <thead>
                 <tr>
-                  <th>Modelo OpenCode</th>
-                  <th>Modelo Canônico</th>
-                  <th>Multiplicador</th>
-                  <th>Cota 5 Horas</th>
-                  <th>Cota Semanal</th>
-                  <th>Cota Mensal</th>
-                  <th>Contexto</th>
-                  <th>Status</th>
+                  <th>Modelo OpenCode (SKU)</th>
+                  <th>Classe de Uso</th>
+                  <th>Go Value</th>
+                  <th>Quota Burn</th>
+                  <th>Quota Efetiva</th>
+                  <th>5 Horas</th>
+                  <th>Semanal</th>
+                  <th>Mensal</th>
+                  <th>Endpoint & SDK</th>
+                  <th>Privacidade & ZDR</th>
                 </tr>
               </thead>
               <tbody id="opencodeDetailedTableBody">

@@ -3950,3 +3950,33 @@ input[type="range"]::-webkit-slider-thumb:hover {
   padding: 18px;
 }
 
+/* --- OPENCODE GO ENHANCEMENTS & SIMULATOR --- */
+.badge-go-60 {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+}
+.badge-go-30 {
+  background: rgba(245, 158, 11, 0.15) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+}
+.badge-go-15 {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+}
+.burn-pill-1x {
+  color: #34d399;
+  font-weight: 700;
+}
+.burn-pill-2x {
+  color: #fbbf24;
+  font-weight: 700;
+}
+.burn-pill-4x {
+  color: #f87171;
+  font-weight: 700;
+}
+
+
