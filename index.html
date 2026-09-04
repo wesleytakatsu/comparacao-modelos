@@ -99,177 +99,138 @@
   <div class="app-layout">
     
     <!-- SIDEBAR DE NAVEGAÇÃO (PINNED + 4 ZONAS RECOLHÍVEIS) -->
+    <!-- SIDEBAR DE NAVEGAÇÃO (PRINCIPAL + 2 GRUPOS RECOLHÍVEIS) -->
     <aside class="app-sidebar" id="appSidebar">
       <nav class="sidebar-nav">
         
-        <!-- PINNED SHORTCUTS (SEMPRE VISÍVEIS) -->
+        <!-- NAVEGAÇÃO PRINCIPAL (6 ITENS ESSENCIAIS) -->
         <div class="nav-pinned-zone">
-          <div class="zone-title">⚡ Acesso Rápido</div>
+          <div class="zone-title">⚡ Navegação Principal</div>
           <ul class="nav-list">
             <li>
               <a href="#dashboard" class="nav-link active" data-route="dashboard" aria-current="page">
-                <span class="nav-icon">📊</span>
-                <span class="nav-label">Dashboard & KPIs</span>
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Início</span>
+              </a>
+            </li>
+            <li>
+              <a href="#models" class="nav-link" data-route="models">
+                <span class="nav-icon">🤖</span>
+                <span class="nav-label">Modelos</span>
+                <span class="nav-counter" id="hdrModelCountBadge">47</span>
               </a>
             </li>
             <li>
               <a href="#plans" class="nav-link" data-route="plans">
                 <span class="nav-icon">💳</span>
-                <span class="nav-label">Planos & Assinaturas</span>
+                <span class="nav-label">Planos</span>
                 <span class="nav-badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-size: 0.65rem; padding: 2px 5px; border-radius: 4px;">USD/BRL</span>
-              </a>
-            </li>
-            <li>
-              <a href="#comparator" class="nav-link" data-route="comparator">
-                <span class="nav-icon">⚔️</span>
-                <span class="nav-label">Comparador Lado a Lado</span>
-              </a>
-            </li>
-            <li>
-              <a href="#router" class="nav-link" data-route="router">
-                <span class="nav-icon">🧭</span>
-                <span class="nav-label">Model Router (Decisão)</span>
-              </a>
-            </li>
-            <li>
-              <a href="#calculator" class="nav-link" data-route="calculator">
-                <span class="nav-icon">🖥️</span>
-                <span class="nav-label">Calculadora de VRAM Real</span>
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        <!-- ZONA 1: DESCOBERTA & CATÁLOGO -->
-        <details class="nav-zone" id="navZoneDiscovery" open>
-          <summary class="zone-summary">
-            <span class="zone-title">🎯 Descoberta & Linhagens</span>
-            <span class="zone-arrow">▾</span>
-          </summary>
-          <ul class="nav-list">
-            <li>
-              <a href="#history" class="nav-link" data-route="history">
-                <span class="nav-icon">📜</span>
-                <span class="nav-label">Linhagens & Linha do Tempo</span>
-                <span class="nav-badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; font-size: 0.65rem; padding: 2px 5px; border-radius: 4px;">ÁRVORES</span>
               </a>
             </li>
             <li>
               <a href="#use-cases" class="nav-link" data-route="use-cases">
                 <span class="nav-icon">🎯</span>
-                <span class="nav-label">Casos de Uso & Projetos</span>
+                <span class="nav-label">Casos de Uso</span>
                 <span class="nav-badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; font-size: 0.65rem; padding: 2px 5px; border-radius: 4px;">12 CASOS</span>
               </a>
             </li>
             <li>
-              <a href="#community" class="nav-link" data-route="community">
-                <span class="nav-icon">💬</span>
-                <span class="nav-label">Comunidade & Comportamento</span>
+              <a href="#compare" class="nav-link" data-route="compare">
+                <span class="nav-icon">⚔️</span>
+                <span class="nav-label">Comparar</span>
               </a>
             </li>
             <li>
-              <a href="#platforms" class="nav-link" data-route="platforms">
-                <span class="nav-icon">🚀</span>
-                <span class="nav-label">Plataformas & OpenCode Go</span>
-              </a>
-            </li>
-            <li>
-              <a href="#providers" class="nav-link" data-route="providers">
-                <span class="nav-icon">🏢</span>
-                <span class="nav-label">Hub de Provedores</span>
-                <span class="nav-counter" aria-hidden="true" title="16 provedores">16</span>
+              <a href="#router" class="nav-link" data-route="router">
+                <span class="nav-icon">🧭</span>
+                <span class="nav-label">Decidir (Router)</span>
               </a>
             </li>
           </ul>
-        </details>
+        </div>
 
-        <!-- ZONA 2: INTELIGÊNCIA & RACIOCÍNIO -->
-        <details class="nav-zone" id="navZoneIntelligence">
+        <!-- GRUPO RECOLHÍVEL: FERRAMENTAS -->
+        <details class="nav-zone" id="navZoneTools" open>
           <summary class="zone-summary">
-            <span class="zone-title">🧠 Inteligência & Raciocínio</span>
-            <span class="zone-arrow">▾</span>
-          </summary>
-          <ul class="nav-list">
-            <li>
-              <a href="#artificial-analysis" class="nav-link" data-route="artificial-analysis">
-                <span class="nav-icon">🛡️</span>
-                <span class="nav-label">Artificial Analysis</span>
-                <span class="nav-badge aa-badge-nav" aria-hidden="true" title="Versão 4.1.1">v4.1.1</span>
-              </a>
-            </li>
-            <li>
-              <a href="#benchmarks" class="nav-link" data-route="benchmarks">
-                <span class="nav-icon">📈</span>
-                <span class="nav-label">Thinking & Benchmarks</span>
-              </a>
-            </li>
-            <li>
-              <a href="#radar" class="nav-link" data-route="radar">
-                <span class="nav-icon">🕸️</span>
-                <span class="nav-label">Radar 10D de Habilidades</span>
-              </a>
-            </li>
-            <li>
-              <a href="#pareto" class="nav-link" data-route="pareto">
-                <span class="nav-icon">⚖️</span>
-                <span class="nav-label">Fronteira de Pareto</span>
-              </a>
-            </li>
-          </ul>
-        </details>
-
-        <!-- ZONA 3: ENGENHARIA & HARDWARE -->
-        <details class="nav-zone" id="navZoneEngineering">
-          <summary class="zone-summary">
-            <span class="zone-title">⚙️ Engenharia & Hardware</span>
-            <span class="zone-arrow">▾</span>
-          </summary>
-          <ul class="nav-list">
-            <li>
-              <a href="#harnesses" class="nav-link" data-route="harnesses">
-                <span class="nav-icon">🔌</span>
-                <span class="nav-label">Harnesses & Configs IDE</span>
-              </a>
-            </li>
-            <li>
-              <a href="#troubleshoot" class="nav-link" data-route="troubleshoot">
-                <span class="nav-icon">🛠️</span>
-                <span class="nav-label">Troubleshooter de Erros</span>
-              </a>
-            </li>
-          </ul>
-        </details>
-
-        <!-- ZONA 4: FINANÇAS & GOVERNANÇA -->
-        <details class="nav-zone" id="navZoneFinance">
-          <summary class="zone-summary">
-            <span class="zone-title">💰 Finanças & Governança</span>
+            <span class="zone-title">⚙️ Ferramentas</span>
             <span class="zone-arrow">▾</span>
           </summary>
           <ul class="nav-list">
             <li>
               <a href="#simulator" class="nav-link" data-route="simulator">
                 <span class="nav-icon">💵</span>
-                <span class="nav-label">Simulador Go & Cursor</span>
+                <span class="nav-label">Custos & Simulador</span>
+              </a>
+            </li>
+            <li>
+              <a href="#calculator" class="nav-link" data-route="calculator">
+                <span class="nav-icon">🖥️</span>
+                <span class="nav-label">VRAM & Hardware</span>
               </a>
             </li>
             <li>
               <a href="#roi" class="nav-link" data-route="roi">
                 <span class="nav-icon">⏱️</span>
-                <span class="nav-label">Calculadora de ROI Time</span>
+                <span class="nav-label">Calculadora de ROI</span>
               </a>
             </li>
             <li>
-              <a href="#antigravity-pools" class="nav-link" data-route="antigravity-pools">
-                <span class="nav-icon">🛡️</span>
-                <span class="nav-label">Governança Antigravity</span>
-                <span class="nav-badge aa-badge-nav" aria-hidden="true" title="2 Pools">2 Pools</span>
+              <a href="#harnesses" class="nav-link" data-route="harnesses">
+                <span class="nav-icon">🔌</span>
+                <span class="nav-label">Harnesses & Configs</span>
+              </a>
+            </li>
+            <li>
+              <a href="#troubleshoot" class="nav-link" data-route="troubleshoot">
+                <span class="nav-icon">🛠️</span>
+                <span class="nav-label">Troubleshooter</span>
+              </a>
+            </li>
+          </ul>
+        </details>
+
+        <!-- GRUPO RECOLHÍVEL: PESQUISA & EVIDÊNCIAS -->
+        <details class="nav-zone" id="navZoneEvidence" open>
+          <summary class="zone-summary">
+            <span class="zone-title">🔬 Pesquisa & Evidências</span>
+            <span class="zone-arrow">▾</span>
+          </summary>
+          <ul class="nav-list">
+            <li>
+              <a href="#benchmarks" class="nav-link" data-route="benchmarks">
+                <span class="nav-icon">📈</span>
+                <span class="nav-label">Benchmarks & Performance</span>
+                <span class="nav-badge aa-badge-nav">AA + DeepSWE</span>
+              </a>
+            </li>
+            <li>
+              <a href="#history" class="nav-link" data-route="history">
+                <span class="nav-icon">📜</span>
+                <span class="nav-label">Histórico & Linhagens</span>
+              </a>
+            </li>
+            <li>
+              <a href="#community" class="nav-link" data-route="community">
+                <span class="nav-icon">💬</span>
+                <span class="nav-label">Comunidade & Relatos</span>
+              </a>
+            </li>
+            <li>
+              <a href="#sources" class="nav-link" data-route="sources">
+                <span class="nav-icon">📚</span>
+                <span class="nav-label">Metodologia & Fontes</span>
               </a>
             </li>
             <li>
               <a href="#privacy" class="nav-link" data-route="privacy">
                 <span class="nav-icon">🔒</span>
-                <span class="nav-label">Privacidade, ZDR & Fontes</span>
+                <span class="nav-label">Privacidade & Governança</span>
+              </a>
+            </li>
+            <li>
+              <a href="#platforms" class="nav-link" data-route="platforms">
+                <span class="nav-icon">🚀</span>
+                <span class="nav-label">Ecossistema & Plataformas</span>
               </a>
             </li>
           </ul>
@@ -292,182 +253,203 @@
     <main class="app-main" id="appMain">
       
       <!-- ========================================== -->
-      <!-- VIEW 1: DASHBOARD GERAL & KPIS -->
+      <!-- VIEW 1: INÍCIO / DECISION SYSTEM (SEÇÃO 6) -->
       <!-- ========================================== -->
       <section class="spa-view active" id="view-dashboard">
         <div class="view-header">
           <div class="view-title-group">
-            <h2>Visão Geral da Fronteira de IA</h2>
-            <p class="view-subtitle">Metrologia rigorosa, benchmarks agênticos e economia real de tokens de todos os modelos catalogados para desenvolvimento de software.</p>
+            <h2>Portal de Inteligência de Modelos de IA</h2>
+            <p class="view-subtitle">Sistema de decisão sustentado por evidências auditáveis, metrologia rigorosa e custo real de tokens (Snapshot Setembro/2026).</p>
           </div>
           <div class="view-actions">
-            <a href="#dashboard-catalog" class="btn-secondary" style="font-size: 0.8rem; padding: 6px 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
-              <span>📋</span> Ir ao Catálogo ↓
+            <a href="#models" class="btn-primary" style="font-size: 0.85rem; padding: 8px 16px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+              <span>🤖</span> Catálogo de Modelos →
             </a>
           </div>
         </div>
 
-        <!-- KPI Cards Grid -->
-        <div class="kpi-grid">
-          <!-- Card 1: Grok 4.6 Sweet Spot -->
-          <button type="button" class="kpi-card card-sweetspot" data-model-id="grok-4-6">
-            <div class="kpi-tag">🌟 Sweet Spot Geral</div>
-            <div class="kpi-body">
-              <div class="kpi-model-name">Grok 4.6 (Medium)</div>
-              <div class="kpi-primary-score">67,1%</div>
+        <!-- BLOCO 1: O QUE MUDOU? (Seção 6 - Lançamentos & Atualizações Recentes) -->
+        <div class="home-block" id="homeBlockWhatsNew">
+          <div class="home-block-header">
+            <div>
+              <h3 style="margin: 0; font-size: 1.15rem; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                <span>⚡</span> O que mudou recentemente?
+              </h3>
+              <p style="font-size: 0.82rem; color: var(--text-muted); margin: 2px 0 0 0;">
+                Últimos lançamentos de modelos, atualizações de benchmarks e alterações de preço registradas.
+              </p>
             </div>
-            <div class="kpi-footer">
-              <span>$1,28 / task • 17,9k tokens</span>
-              <span class="kpi-badge pool-cursor">Cursor Pool</span>
-            </div>
-          </button>
-
-          <!-- Card 2: Claude Fable 5.1 (Max) Novo Líder CursorBench -->
-          <button type="button" class="kpi-card card-top" data-model-id="claude-fable-5-1">
-            <div class="kpi-tag">👑 1º Lugar Geral CursorBench</div>
-            <div class="kpi-body">
-              <div class="kpi-model-name">Claude Fable 5.1 (Max)</div>
-              <div class="kpi-primary-score">73,4%</div>
-            </div>
-            <div class="kpi-footer">
-              <span>$9,64 / task • 72,1k tokens</span>
-              <span class="kpi-badge pool-anthropic">Frontier #1</span>
-            </div>
-          </button>
-
-          <!-- Card 3: Claude Fable 5.1 (Max) Campeão Terminal -->
-          <button type="button" class="kpi-card card-sol" data-model-id="claude-fable-5-1">
-            <div class="kpi-tag">👑 1º Lugar Terminal-Bench</div>
-            <div class="kpi-body">
-              <div class="kpi-model-name">Claude Fable 5.1 (Max)</div>
-              <div class="kpi-primary-score">91,4%</div>
-            </div>
-            <div class="kpi-footer">
-              <span>71,5% DeepSWE • 81,2% SWE-Pro</span>
-              <span class="kpi-badge pool-anthropic">Anthropic Frontier</span>
-            </div>
-          </button>
-
-          <!-- Card 4: GPT-5.6 Luna Ultra Custo-Benefício -->
-          <button type="button" class="kpi-card card-luna" data-model-id="gpt-5-6-luna">
-            <div class="kpi-tag">💎 Ultra Custo/Benefício</div>
-            <div class="kpi-body">
-              <div class="kpi-model-name">GPT-5.6 Luna (Max)</div>
-              <div class="kpi-primary-score">61,1%</div>
-            </div>
-            <div class="kpi-footer">
-              <span>$0,39 / task • 10.250 req/mês no Go</span>
-              <span class="kpi-badge pool-openai">OpenCode Go</span>
-            </div>
-          </button>
-
-          <!-- Card 5: gpt-oss-20b Campeão Local -->
-          <button type="button" class="kpi-card card-local" data-model-id="gpt-oss-20b">
-            <div class="kpi-tag">🏠 Campeão 100% Local</div>
-            <div class="kpi-body">
-              <div class="kpi-model-name">gpt-oss-20b (High)</div>
-              <div class="kpi-primary-score">60,7%</div>
-            </div>
-            <div class="kpi-footer">
-              <span>Roda em 16 GB • 3,79 score/GB</span>
-              <span class="kpi-badge pool-local">Open Weights</span>
-            </div>
-          </button>
-
-          <!-- Card 6: Gemini 3.8 Flash Velocidade & Throughput -->
-          <button type="button" class="kpi-card card-speed" data-model-id="gemini-3-8-flash">
-            <div class="kpi-tag">⚡ Ultra Velocidade & 1M</div>
-            <div class="kpi-body">
-              <div class="kpi-model-name">Gemini 3.8 Flash</div>
-              <div class="kpi-primary-score">305 tok/s</div>
-            </div>
-            <div class="kpi-footer">
-              <span>90,8% TB 2.1 • 1M Multimodal</span>
-              <span class="kpi-badge pool-google">Google Flash</span>
-            </div>
-          </button>
-
-          <!-- Card 7: DeepSeek V4 Flash Vision Exp -->
-          <button type="button" class="kpi-card card-vision" data-model-id="deepseek-v4-vision-exp">
-            <div class="kpi-tag">👁️ Visão Nativa Barata</div>
-            <div class="kpi-body">
-              <div class="kpi-model-name">DeepSeek V4 Flash Vision Exp</div>
-              <div class="kpi-primary-score">75,9%</div>
-            </div>
-            <div class="kpi-footer">
-              <span>~$0,000084/img • Toolathlon</span>
-              <span class="kpi-badge pool-deepseek">DeepSeek API</span>
-            </div>
-          </button>
-
-          <!-- Card 8: GLM-5.3-Flash Open Weights MIT -->
-          <button type="button" class="kpi-card card-go" data-model-id="glm-5-3-flash">
-            <div class="kpi-tag">🎁 Aberto MIT & 1M Multimodal</div>
-            <div class="kpi-body">
-              <div class="kpi-model-name">GLM-5.3-Flash</div>
-              <div class="kpi-primary-score">320B MoE</div>
-            </div>
-            <div class="kpi-footer">
-              <span>84,3% TB 2.1 • Ex-Ox Alpha</span>
-              <span class="kpi-badge pool-zai">Open Weights MIT</span>
-            </div>
-          </button>
-
-          <!-- Card 9: Claude Haiku 4.5 Fastest Claude / Worker -->
-          <button type="button" class="kpi-card card-haiku" data-model-id="claude-haiku-4-5">
-            <div class="kpi-tag">⚡ Mais Rápido da Anthropic</div>
-            <div class="kpi-body">
-              <div class="kpi-model-name">Claude Haiku 4.5</div>
-              <div class="kpi-primary-score">73,3%</div>
-            </div>
-            <div class="kpi-footer">
-              <span>SWE-Verified • ~92–125 tok/s • $1/$5</span>
-              <span class="kpi-badge pool-anthropic">Worker Subagents</span>
-            </div>
-          </button>
-        </div>
-
-        <!-- Live Quick Estimator Widget -->
-        <div class="widget-box quick-estimator-widget">
-          <div class="widget-header">
-            <h3>⚡ Simulador de Custo por Turno Interativo (Live Estimator)</h3>
-            <span class="badge-subtle">Ajuste os parâmetros e compare o custo instantaneamente</span>
+            <a href="#history" class="btn-secondary btn-sm" style="text-decoration: none;">Ver linha do tempo completa ↗</a>
           </div>
-          <div class="estimator-controls">
-            <div class="control-group">
-              <label for="sliderNewInput">Tokens Novos de Input: <strong id="valNewInput">20.000</strong></label>
-              <input type="range" id="sliderNewInput" min="1000" max="200000" step="1000" value="20000">
-            </div>
-            <div class="control-group">
-              <label for="sliderCachedInput">Tokens em Cache (Hit): <strong id="valCachedInput">100.000</strong></label>
-              <input type="range" id="sliderCachedInput" min="0" max="500000" step="5000" value="100000">
-            </div>
-            <div class="control-group">
-              <label for="sliderOutput">Tokens de Saída / Reasoning: <strong id="valOutput">4.000</strong></label>
-              <input type="range" id="sliderOutput" min="500" max="32000" step="500" value="4000">
-            </div>
-          </div>
-          <div class="estimator-results-grid" id="estimatorResultsContainer">
-            <!-- Renderizado dinamicamente via JS -->
+          <div class="home-whats-new-feed" id="homeWhatsNewFeed">
+            <!-- Injetado dinamicamente via JS a partir de MODEL_HISTORY_DATA -->
           </div>
         </div>
 
-        <!-- Tabela Densa Consolidada -->
+        <!-- BLOCO 2: O QUE VOCÊ QUER FAZER? (Seção 6 - Atalhos Orientados à Intenção) -->
+        <div class="home-block" id="homeBlockIntents">
+          <div class="home-block-header">
+            <div>
+              <h3 style="margin: 0; font-size: 1.15rem; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                <span>🎯</span> O que você quer fazer?
+              </h3>
+              <p style="font-size: 0.82rem; color: var(--text-muted); margin: 2px 0 0 0;">
+                Escolha seu objetivo para acessar diretamente a análise contextual ideal.
+              </p>
+            </div>
+          </div>
+          <div class="home-intent-grid">
+            <a href="#models?filter=frontier" class="intent-card">
+              <div class="intent-icon">💻</div>
+              <div class="intent-title">Coding Complexo & SWE</div>
+              <div class="intent-desc">Modelos de fronteira para engenharia, refatoração de repositórios e testes.</div>
+            </a>
+            <a href="#models?filter=sub-dollar" class="intent-card">
+              <div class="intent-icon">💎</div>
+              <div class="intent-title">Melhor Custo/Benefício</div>
+              <div class="intent-desc">Inteligência de ponta gastando menos de $1/M tokens com alto throughput.</div>
+            </a>
+            <a href="#use-cases" class="intent-card">
+              <div class="intent-icon">🤖</div>
+              <div class="intent-title">Agentes & Ferramentas</div>
+              <div class="intent-desc">Excelente aderência a esquemas, function calling e tool calling avançado.</div>
+            </a>
+            <a href="#models?filter=multimodal" class="intent-card">
+              <div class="intent-icon">👁️</div>
+              <div class="intent-title">Visão Técnica & PDF</div>
+              <div class="intent-desc">Leitura de diagramas, telas de UI, tabelas complexas e extração tabular.</div>
+            </a>
+            <a href="#calculator" class="intent-card">
+              <div class="intent-icon">🖥️</div>
+              <div class="intent-title">Tenho uma GPU Específica</div>
+              <div class="intent-desc">Dimensione VRAM, quantizações INT4/BF16 e viabilidade de hardware local.</div>
+            </a>
+            <a href="#plans" class="intent-card">
+              <div class="intent-icon">💳</div>
+              <div class="intent-title">Quero Escolher um Plano</div>
+              <div class="intent-desc">Compare assinaturas (Cursor, OpenCode, Google Pro) e cotas em USD e R$.</div>
+            </a>
+            <a href="#compare" class="intent-card">
+              <div class="intent-icon">⚔️</div>
+              <div class="intent-title">Comparar Modelos Lado a Lado</div>
+              <div class="intent-desc">Confronte até 4 modelos em Specs, Benchmarks, Radar 10D e Fronteira de Pareto.</div>
+            </a>
+            <a href="#router" class="intent-card">
+              <div class="intent-icon">🧭</div>
+              <div class="intent-title">Model Router Inteligente</div>
+              <div class="intent-desc">Recomendação determinística com justificativas de trade-offs por tarefa.</div>
+            </a>
+          </div>
+        </div>
+
+        <!-- BLOCO 3: DESTAQUES DINÂMICOS (Seção 6 - Zero Hardcoding, Calculados via DomainRankings) -->
+        <div class="home-block" id="homeBlockAwards">
+          <div class="home-block-header">
+            <div>
+              <h3 style="margin: 0; font-size: 1.15rem; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                <span>🏆</span> Destaques & Lideranças do Ecossistema
+              </h3>
+              <p style="font-size: 0.82rem; color: var(--text-muted); margin: 2px 0 0 0;">
+                Calculados matematicamente em runtime pelos motores de domínio com base em evidências comprovadas.
+              </p>
+            </div>
+            <span class="badge-tag badge-frontier">Derivado em Runtime</span>
+          </div>
+          <div class="kpi-grid" id="homeDynamicKpis">
+            <!-- Injetado dinamicamente via JS via DomainRankings.getDynamicHomeAwards() -->
+          </div>
+        </div>
+
+        <!-- BLOCO 4: CATÁLOGO RESUMIDO & CTA PARA #MODELS (Seção 6) -->
+        <div class="home-block" id="homeBlockCatalogSummary">
+          <div class="home-block-header">
+            <div>
+              <h3 style="margin: 0; font-size: 1.15rem; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                <span>📋</span> Modelos em Foco
+              </h3>
+              <p style="font-size: 0.82rem; color: var(--text-muted); margin: 2px 0 0 0;">
+                Amostra dos modelos mais representativos da safra atual de IA (Setembro/2026).
+              </p>
+            </div>
+            <a href="#models" class="btn-primary btn-sm" style="text-decoration: none;">
+              Ver Todos os <span id="homeCatCount">47</span> Modelos →
+            </a>
+          </div>
+          <div class="home-catalog-preview" id="homeCatalogPreview">
+            <!-- Injetado dinamicamente via JS -->
+          </div>
+        </div>
+
+        <!-- Live Quick Estimator Widget (Recolhível na Home) -->
+        <details class="content-box quick-estimator-widget-wrapper" style="margin-top: 24px;">
+          <summary class="widget-header" style="cursor: pointer; list-style: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <h3 style="margin: 0; font-size: 1rem;">⚡ Simulador Rápido de Custo por Turno (Live Estimator)</h3>
+              <span class="summary-arrow" style="font-size: 0.9rem; color: var(--text-muted);">▾ Expandir</span>
+            </div>
+          </summary>
+          <div style="padding-top: 14px;">
+            <div class="estimator-controls">
+              <div class="control-group">
+                <label for="sliderNewInput">Tokens Novos de Input: <strong id="valNewInput">20.000</strong></label>
+                <input type="range" id="sliderNewInput" min="1000" max="200000" step="1000" value="20000">
+              </div>
+              <div class="control-group">
+                <label for="sliderCachedInput">Tokens em Cache (Hit): <strong id="valCachedInput">100.000</strong></label>
+                <input type="range" id="sliderCachedInput" min="0" max="500000" step="5000" value="100000">
+              </div>
+              <div class="control-group">
+                <label for="sliderOutput">Tokens de Saída / Reasoning: <strong id="valOutput">4.000</strong></label>
+                <input type="range" id="sliderOutput" min="500" max="32000" step="500" value="4000">
+              </div>
+            </div>
+            <div class="estimator-results-grid" id="estimatorResultsContainer">
+              <!-- Renderizado dinamicamente via JS -->
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW DEDICADA: MODELOS (CATÁLOGO COMPLETO - SEÇÃO 7) -->
+      <!-- ========================================== -->
+      <section class="spa-view" id="view-models">
+        <div class="view-header">
+          <div class="view-title-group">
+            <h2>🤖 Catálogo de Modelos de IA</h2>
+            <p class="view-subtitle">Explore os <span id="catTotalCount">47</span> modelos catalogados com filtros de provedor, arquitetura, contexto, status e qualidade de evidência.</p>
+          </div>
+          <div class="view-actions">
+            <!-- Alternador de Visualização: Cards vs Tabela Densa -->
+            <div class="view-mode-toggle" id="catalogViewModeToggle" role="group" aria-label="Modo de Visualização">
+              <button type="button" class="btn-toggle active" data-mode="table" title="Visualização em Tabela Densa">
+                <span>📋</span> Tabela
+              </button>
+              <button type="button" class="btn-toggle" data-mode="grid" title="Visualização em Grade de Cards">
+                <span>🔲</span> Cards
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabela Densa e Controles de Filtros Consolidada -->
         <div class="content-box" id="dashboard-catalog">
-          <div class="box-header">
-            <h3>📋 Catálogo Consolidado de Modelos (<span id="catTotalCount">44</span> Entidades)</h3>
-            <div class="table-search-bar">
-              <input type="text" id="dashboardSearchInput" class="input-search" placeholder="Filtrar o catálogo por nome, família, contexto...">
+          <div class="box-header" style="flex-wrap: wrap; gap: 12px;">
+            <div class="table-search-bar" style="flex: 1; min-width: 260px;">
+              <input type="text" id="dashboardSearchInput" class="input-search" placeholder="Filtrar por nome, família, provedor, contexto...">
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button type="button" class="btn-secondary btn-sm" id="btnResetFilters" style="display: none;">Limpar Filtros</button>
             </div>
           </div>
 
           <!-- Filter Controls: Segmented Axis + More Filters Details -->
           <div class="catalog-filters-wrapper">
             <div class="catalog-filter-tabs" id="dashboardFilterChips" role="tablist" aria-label="Eixos de Filtro do Catálogo">
-              <button type="button" class="chip-btn active" data-filter="all" role="tab" aria-selected="true">Todos (<span id="chipAllCount">44</span>)</button>
+              <button type="button" class="chip-btn active" data-filter="all" role="tab" aria-selected="true">Todos (<span id="chipAllCount">47</span>)</button>
               <button type="button" class="chip-btn" data-filter="frontier" role="tab" aria-selected="false">Frontier</button>
               <button type="button" class="chip-btn" data-filter="subagents" role="tab" aria-selected="false">Worker</button>
-              <button type="button" class="chip-btn" data-filter="open-weights" role="tab" aria-selected="false">Local</button>
+              <button type="button" class="chip-btn" data-filter="open-weights" role="tab" aria-selected="false">Open Weights (Local)</button>
             </div>
 
             <details class="more-filters-details" id="moreFiltersDetails">
@@ -476,14 +458,17 @@
                 <span class="summary-arrow">▾</span>
               </summary>
               <div class="more-filters-dropdown" id="dashboardMoreFilterChips">
-                <button type="button" class="chip-btn" data-filter="multimodal">Multimodal (Vídeo/Img)</button>
-                <button type="button" class="chip-btn" data-filter="sub-dollar">Sub-dólar (<$1/M)</button>
-                <button type="button" class="chip-btn" data-filter="opencode-go">Disponível no Go</button>
+                <button type="button" class="chip-btn" data-filter="multimodal">Multimodal (Vídeo/Img/Áudio)</button>
+                <button type="button" class="chip-btn" data-filter="sub-dollar">Sub-dólar (&lt;$1/M)</button>
+                <button type="button" class="chip-btn" data-filter="1m-context">Contexto &ge; 1M</button>
+                <button type="button" class="chip-btn" data-filter="opencode-go">Disponível no OpenCode Go</button>
+                <button type="button" class="chip-btn" data-filter="include-superseded">Incluir Históricos/Superseded</button>
               </div>
             </details>
           </div>
 
-          <div class="table-responsive">
+          <!-- Visão em Tabela Densa -->
+          <div class="table-responsive" id="catalogTableViewContainer">
             <table class="data-table" id="dashboardDataTable">
               <thead>
                 <tr>
@@ -497,7 +482,7 @@
                   <th title="Terminal-Bench 2.1: 89 tarefas complexas em ambiente shell/terminal">Terminal 2.1</th>
                   <th title="DeepSWE 1.1: 113 tarefas agênticas em repositórios reais">DeepSWE</th>
                   <th>Preço In / Out</th>
-                  <th>OpenCode Go</th>
+                  <th>Ações</th>
                 </tr>
               </thead>
               <tbody id="dashboardTableBody">
@@ -505,18 +490,10 @@
               </tbody>
             </table>
           </div>
-        </div>
 
-        <!-- Floating Comparison Tray -->
-        <div class="comparison-floating-bar" id="comparatorFloatingBar" aria-live="polite">
-          <div class="floating-bar-info">
-            <span class="floating-bar-icon">⚖️</span>
-            <span class="floating-bar-text" id="comparatorSelectedCount">0 de 4 selecionados</span>
-            <div class="floating-bar-chips" id="comparatorSelectedChips"></div>
-          </div>
-          <div class="floating-bar-actions">
-            <button type="button" class="btn-secondary btn-sm" id="btnCancelComparison">Limpar</button>
-            <button type="button" class="btn-primary btn-sm" id="btnLaunchComparison">Comparar Modelos</button>
+          <!-- Visão em Grade de Cards (Alternativa) -->
+          <div class="catalog-grid-view" id="catalogGridViewContainer" style="display: none;">
+            <!-- Preenchido dinamicamente via JS quando modo grid estiver ativo -->
           </div>
         </div>
       </section>
@@ -883,12 +860,71 @@
           </div>
         </div>
 
-        <!-- Tabela Comparativa Head-to-Head -->
-        <div class="content-box">
-          <div class="table-responsive">
-            <table class="comparator-table" id="comparatorMainTable">
-              <!-- Renderizado dinamicamente via JS -->
-            </table>
+        <!-- Modos do Comparador: Tabs Unificadas (Seção 25) -->
+        <div class="comparator-modes-nav" id="comparatorModesNav">
+          <button type="button" class="comp-mode-btn active" data-mode="specs">📋 Especificações & Resumo</button>
+          <button type="button" class="comp-mode-btn" data-mode="benchmarks">📊 Benchmarks</button>
+          <button type="button" class="comp-mode-btn" data-mode="radar">🕸️ Radar 10D</button>
+          <button type="button" class="comp-mode-btn" data-mode="pareto">⚖️ Fronteira de Pareto</button>
+          <button type="button" class="comp-mode-btn" data-mode="access">🚀 Acesso, Custos & Planos</button>
+          <button type="button" class="comp-mode-btn" data-mode="governance">🛡️ Governança & Privacidade</button>
+        </div>
+
+        <!-- Painel Modo 1: Specs / Tabela Principal -->
+        <div class="comp-mode-panel active" id="compModeSpecsPanel">
+          <div class="content-box">
+            <div class="table-responsive">
+              <table class="comparator-table" id="comparatorMainTable">
+                <!-- Renderizado dinamicamente via JS -->
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Painel Modo 2: Benchmarks Lado a Lado -->
+        <div class="comp-mode-panel" id="compModeBenchmarksPanel" style="display: none;">
+          <div class="content-box" id="compBenchmarksContainer">
+            <!-- Injetado dinamicamente via JS -->
+          </div>
+        </div>
+
+        <!-- Painel Modo 3: Radar 10D dos Modelos Selecionados -->
+        <div class="comp-mode-panel" id="compModeRadarPanel" style="display: none;">
+          <div class="content-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <h3 style="margin: 0; font-size: 1.05rem; color: var(--accent-cyan);">🕸️ Radar Multidimensional dos Modelos Selecionados</h3>
+              <span style="font-size: 0.8rem; color: var(--text-secondary);">Escala normalizada [0 - 100]</span>
+            </div>
+            <div class="radar-container" style="max-width: 700px; margin: 0 auto; height: 480px; position: relative;">
+              <canvas id="compRadarCanvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Painel Modo 4: Pareto dos Modelos Selecionados -->
+        <div class="comp-mode-panel" id="compModeParetoPanel" style="display: none;">
+          <div class="content-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <h3 style="margin: 0; font-size: 1.05rem; color: var(--accent-cyan);">⚖️ Eficiência de Pareto: Custo por Tarefa ($) × Qualidade SWE/Benchmark</h3>
+              <span style="font-size: 0.8rem; color: var(--text-secondary);">Modelos no topo superior-esquerdo dominam a fronteira</span>
+            </div>
+            <div class="chart-container" style="height: 480px; position: relative;">
+              <canvas id="compParetoCanvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Painel Modo 5: Acesso & Custos -->
+        <div class="comp-mode-panel" id="compModeAccessPanel" style="display: none;">
+          <div class="content-box" id="compAccessContainer">
+            <!-- Injetado dinamicamente via JS -->
+          </div>
+        </div>
+
+        <!-- Painel Modo 6: Governança & Privacidade -->
+        <div class="comp-mode-panel" id="compModeGovernancePanel" style="display: none;">
+          <div class="content-box" id="compGovernanceContainer">
+            <!-- Injetado dinamicamente via JS -->
           </div>
         </div>
       </section>
@@ -2121,7 +2157,144 @@
         </div>
       </section>
 
+      <!-- ========================================== -->
+      <!-- VIEW 20: METODOLOGIA & FONTES (Seção 53) -->
+      <!-- ========================================== -->
+      <section class="spa-view" id="view-sources">
+        <div class="view-header">
+          <div class="view-title">
+            <h2>🔬 Metodologia & Catálogo de Fontes</h2>
+            <p>Critérios científicos de avaliação, taxonomia de evidências, calibração de scores e registro de fontes auditáveis.</p>
+          </div>
+          <div class="view-actions">
+            <button class="btn-secondary" id="btnExportSources">📋 Copiar Metodologia</button>
+          </div>
+        </div>
+
+        <!-- Bloco 1: Taxonomia Estrita de Evidências -->
+        <div class="content-box" style="margin-bottom: 24px;">
+          <div class="box-header">
+            <h3>🏷️ Taxonomia de Evidências & Rastreabilidade</h3>
+          </div>
+          <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 16px;">
+            Cada número e alegação no portal possui um selo de metrologia indicando seu grau de confiança e processo de coleta:
+          </p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
+            <div class="evidence-legend-card" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-md); padding: 14px;">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                <span class="evidence-badge badge-m">[M] Medido</span>
+                <strong style="color: var(--accent-emerald); font-size: 0.9rem;">Empírico / Direto</strong>
+              </div>
+              <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0; line-height: 1.4;">
+                Benchmark executado em ambiente reproduzível (ex: SWE-bench Verified com harness oficial, Artificial Analysis API test, mlperf).
+              </p>
+            </div>
+
+            <div class="evidence-legend-card" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: var(--radius-md); padding: 14px;">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                <span class="evidence-badge badge-d">[D] Derivado</span>
+                <strong style="color: var(--accent-blue); font-size: 0.9rem;">Cálculo / Fórmula</strong>
+              </div>
+              <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0; line-height: 1.4;">
+                Cálculo determinístico a partir de parâmetros oficiais (ex: VRAM = Pesos quantizados + KV Cache MLA + Buffers CUDA; Custo SWE por tarefa).
+              </p>
+            </div>
+
+            <div class="evidence-legend-card" style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-md); padding: 14px;">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                <span class="evidence-badge badge-c">[C] Calibrado</span>
+                <strong style="color: var(--accent-amber); font-size: 0.9rem;">Harmonização Multivariada</strong>
+              </div>
+              <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0; line-height: 1.4;">
+                Normalização estatística com z-scores ponderados para harmonizar avaliações com distribuições ou pass@k distintos.
+              </p>
+            </div>
+
+            <div class="evidence-legend-card" style="background: rgba(148, 163, 184, 0.08); border: 1px solid rgba(148, 163, 184, 0.3); border-radius: var(--radius-md); padding: 14px;">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                <span class="evidence-badge badge-a">[A] Anedótico</span>
+                <strong style="color: var(--text-muted); font-size: 0.9rem;">Comunidade / Relatos</strong>
+              </div>
+              <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0; line-height: 1.4;">
+                Casos de uso relatados pela comunidade em fóruns técnicos e repositórios (GitHub, Reddit, X), identificados com amostragem e data.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloco 2: Regras de Freshness & Auditoria Temporal -->
+        <div class="content-box" style="margin-bottom: 24px;">
+          <div class="box-header">
+            <h3>⏳ Frescor dos Dados (Freshness & Staleness)</h3>
+          </div>
+          <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 12px;">
+            A inteligência artificial evolui semanalmente. Nosso sistema marca dados coletados há mais de 30 dias como <em>stale</em> (desatualizados) e há mais de 60 dias como <em>legado</em>, forçando nova rodada de auditoria. Dados oficiais possuem data de snapshot, link do relatório e hash de verificação.
+          </p>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">🟢 Recente (&lt; 15 dias): Alta Confiança</span>
+            <span class="badge-tag" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3);">🟡 Monitorado (15-45 dias): Em vigência</span>
+            <span class="badge-tag" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);">🔴 Stale (&gt; 45 dias): Reavaliação requerida</span>
+          </div>
+        </div>
+
+        <!-- Bloco 3: Catálogo Canônico de Fontes (SOURCE_REGISTRY) -->
+        <div class="content-box">
+          <div class="box-header">
+            <div>
+              <h3>📚 Catálogo Canônico de Fontes Auditadas (<span id="sourceRegistryTotal">0</span> fontes)</h3>
+              <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 2px;">
+                Inventário completo de publicações, technical reports e harness evaluations que alimentam as decisões do portal.
+              </p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <select id="sourceFilterType" class="filter-select" style="min-width: 140px;">
+                <option value="all">Todos os tipos</option>
+                <option value="official">Oficial (Laboratórios)</option>
+                <option value="independent">Independente (Auditores)</option>
+                <option value="academic">Acadêmico / Papers</option>
+                <option value="community">Comunidade</option>
+              </select>
+              <input type="text" id="sourceSearchInput" class="form-input" placeholder="Buscar fontes..." style="min-width: 200px;">
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table" id="sourcesTable">
+              <thead>
+                <tr>
+                  <th>Identificador (ID)</th>
+                  <th>Título da Fonte</th>
+                  <th>Publicador</th>
+                  <th>Tipo</th>
+                  <th>Data Publicação</th>
+                  <th>Coleta / Acesso</th>
+                </tr>
+              </thead>
+              <tbody id="sourcesTableBody">
+                <!-- Populado dinamicamente via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
     </main>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- BANDEJA DE COMPARAÇÃO PERSISTENTE (Seção 68) -->
+  <!-- ========================================== -->
+  <div class="comparator-floating-bar" id="comparatorFloatingBar" style="display: none;" role="region" aria-label="Bandeja de Comparação Rápida">
+    <div class="floating-bar-inner">
+      <div class="floating-bar-info">
+        <span class="floating-bar-icon">⚔️</span>
+        <span class="floating-bar-count" id="floatingCompareCount">Comparar 0/4</span>
+        <div class="floating-bar-chips" id="floatingCompareChips"></div>
+      </div>
+      <div class="floating-bar-actions">
+        <button type="button" class="btn-clear-tray" id="btnFloatingClear" title="Limpar seleção">&times; Limpar</button>
+        <button type="button" class="btn-primary btn-compare-tray" id="btnFloatingCompare">Comparar Modelos →</button>
+      </div>
+    </div>
   </div>
 
   <!-- ========================================== -->
@@ -2135,8 +2308,9 @@
     <div class="drawer-content" id="drawerContent">
       <!-- Preenchido dinamicamente via JS -->
     </div>
-    <div class="drawer-footer">
-      <button type="button" class="btn-primary full-width" id="drawerBtnFullDossier">📄 Abrir Dossiê Completo</button>
+    <div class="drawer-footer" style="display: flex; gap: 8px;">
+      <button type="button" class="btn-secondary" id="btnDrawerCompare" style="flex: 1;">⚔️ Comparar</button>
+      <button type="button" class="btn-primary full-width" id="drawerBtnFullDossier" style="flex: 2;">📄 Abrir Dossiê Completo</button>
     </div>
   </aside>
   <div class="drawer-backdrop" id="drawerBackdrop"></div>
@@ -2154,9 +2328,11 @@
       <div class="command-filter-chips">
         <button type="button" class="cmd-chip active" data-filter="all">Todos</button>
         <button type="button" class="cmd-chip" data-filter="models">Modelos</button>
+        <button type="button" class="cmd-chip" data-filter="plans">Planos</button>
+        <button type="button" class="cmd-chip" data-filter="use-cases">Casos de Uso</button>
         <button type="button" class="cmd-chip" data-filter="providers">Provedores</button>
-        <button type="button" class="cmd-chip" data-filter="benchmarks">Benchmarks</button>
         <button type="button" class="cmd-chip" data-filter="hardware">Hardware</button>
+        <button type="button" class="cmd-chip" data-filter="tools">Ferramentas</button>
       </div>
       <div class="command-results-list" id="commandResultsList" role="listbox" aria-label="Resultados da busca">
         <!-- Injetado dinamicamente via JS -->
@@ -2271,6 +2447,7 @@
   <button class="back-to-top-btn" id="backToTopBtn" title="Voltar ao Topo" aria-label="Voltar ao topo da página">↑</button>
 
   <!-- Scripts de Dados Modulares (Arquitetura sem Framework / GitHub Pages Nativo) -->
+  <script src="data/domain.js"></script>
   <script src="data/fx.js"></script>
   <script src="data/plans.js"></script>
   <script src="data/platforms.js"></script>

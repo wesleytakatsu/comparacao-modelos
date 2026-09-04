@@ -625,6 +625,163 @@ requiredSourceTypes.forEach(st => {
 
 console.log('   ✅ Todas as 11 suítes de auditoria das Seções 121 a 131 foram validadas com sucesso!');
 
+// ====================================================
+// 🚀 VALIDANDO TESTES DO PLANO 08 (SISTEMA DE DECISÃO & CAMADA DE DOMÍNIO)
+// ====================================================
+console.log('\n🚀 VALIDANDO TESTES DO PLANO 08 (SISTEMA DE DECISÃO & CAMADA DE DOMÍNIO)...');
+
+let domain;
+try {
+  domain = require('../data/domain.js');
+} catch (e) {
+  errors.push('Não foi possível carregar data/domain.js: ' + e.message);
+}
+
+if (domain) {
+  const { DomainRankings, DomainEvidence, DomainFreshness, DomainEntities } = domain;
+
+  // 1. Teste DomainRankings: Funções existem e calculam valores dinamicamente
+  console.log('   - [Plano 08 / Seção 14-15] Verificando motor de rankings dinâmicos (zero hardcode)...');
+  assert(typeof DomainRankings.getBenchmarkLeader === 'function', 'DomainRankings.getBenchmarkLeader deve ser função');
+  assert(typeof DomainRankings.getSweetSpotModel === 'function', 'DomainRankings.getSweetSpotModel deve ser função');
+  assert(typeof DomainRankings.getBestValueModel === 'function', 'DomainRankings.getBestValueModel deve ser função');
+  assert(typeof DomainRankings.getBestLocalModel === 'function', 'DomainRankings.getBestLocalModel deve ser função');
+  assert(typeof DomainRankings.getDynamicHomeAwards === 'function', 'DomainRankings.getDynamicHomeAwards deve ser função');
+
+  const topCursor = DomainRankings.getBenchmarkLeader('cursorBench');
+  assert(topCursor && topCursor.score >= 70, 'Top cursor score deve ser >= 70');
+  const maxCursorInDb = Math.max(...CURSORBENCH_32_DATA.map(r => r.score));
+  assert(topCursor.score === maxCursorInDb, `Líder dinâmico do CursorBench (${topCursor.score}) deve bater com o maior do banco (${maxCursorInDb})`);
+
+  const topTerminal = DomainRankings.getBenchmarkLeader('terminalBench21');
+  const maxTerminalInDb = Math.max(...MULTI_BENCHMARK_LEDGER.filter(r => r.terminalBench21).map(r => r.terminalBench21));
+  assert(topTerminal.score === maxTerminalInDb, `Líder dinâmico do Terminal-Bench (${topTerminal.score}) deve bater com o maior do banco (${maxTerminalInDb})`);
+
+  const awards = DomainRankings.getDynamicHomeAwards();
+  assert(awards.length >= 4, `Destaques dinâmicos da Home deve retornar pelo menos 4 awards. Encontrados: ${awards.length}`);
+
+  // 2. Teste DomainEvidence: Metrologia estrita e cálculo determinístico de cobertura
+  console.log('   - [Plano 08 / Seção 20] Verificando taxonomia de evidência [M], [D], [C], [A] e cobertura...');
+  ['M', 'D', 'C', 'A'].forEach(code => {
+    const b = DomainEvidence.getProvenanceBadge(code);
+    assert(b && b.code === code, `Badge para metrologia ${code} deve existir`);
+  });
+
+  const covSample = DomainEvidence.getCoverage('gemini-3-8-flash');
+  assert(covSample && typeof covSample.coveragePercent === 'number', 'Coverage deve retornar coveragePercent numérico');
+  assert(covSample.coveragePercent >= 50 && covSample.coveragePercent <= 100, `Coverage deve estar entre 50% e 100%. Encontrado: ${covSample.coveragePercent}%`);
+  assert(covSample.measuredFields > 0, 'Deve ter measuredFields > 0');
+
+  // 3. Teste DomainFreshness: Rótulos temporais
+  console.log('   - [Plano 08 / Seção 22] Verificando freshness temporal determinístico...');
+  const freshRecent = DomainFreshness.getFreshness('2026-09-02');
+  assert(freshRecent && freshRecent.status === 'recent', 'Data de 02/09/2026 deve ser classificada como recent');
+
+  const freshOld = DomainFreshness.getFreshness('2026-05-01');
+  assert(freshOld && freshOld.status === 'legacy', 'Data de 05/2026 deve ser classificada como legacy');
+
+  // 4. Teste DomainEntities: Relação Modelos <-> Planos
+  console.log('   - [Plano 08 / Seção 11-12] Verificando relação bidirecional Modelos e Planos...');
+  const plansForGrok = DomainEntities.getPlansForModel('grok-4-6');
+  assert(Array.isArray(plansForGrok) && plansForGrok.length > 0, 'Deve encontrar planos que incluem grok-4-6');
+  assert(plansForGrok.some(p => p.id.includes('cursor')), 'Grok 4.6 deve estar disponível em planos Cursor');
+
+  const plansForFable = DomainEntities.getPlansForModel('claude-fable-5-1');
+  assert(Array.isArray(plansForFable) && plansForFable.length > 0, 'Deve encontrar planos que incluem claude-fable-5-1');
+  assert(plansForFable.some(p => p.id.includes('claude-pro') || p.id.includes('cursor')), 'Claude Fable deve constar no Claude Pro / Cursor');
+
+  // 5. Teste Referencial: Validação de predecessores
+  console.log('   - [Plano 08 / Seção 10] Verificando integridade de linhagens (predecessores existentes)...');
+  Object.values(AI_MODELS_DATA).forEach(m => {
+    if (m.predecessor) {
+      assert(AI_MODELS_DATA[m.predecessor], `Predecessor "${m.predecessor}" do modelo "${m.id}" não existe no catálogo AI_MODELS_DATA`);
+    }
+  });
+
+  // 6. [Seção 54] Auditoria Automática de Texto Competitivo
+  console.log('   - [Plano 08 / Seção 54] Varrendo textos editoriais por termos competitivos congelados...');
+  const suspiciousTerms = ['imbatível', 'supremo', 'indiscutível', 'líder absoluto', 'campeão absoluto'];
+  let competitiveWarnings = 0;
+  Object.values(AI_MODELS_DATA).forEach(m => {
+    const textToCheck = [
+      ...(m.strengths || []),
+      ...(m.bestFor || []),
+      ...(m.badges || [])
+    ].join(' ').toLowerCase();
+
+    suspiciousTerms.forEach(term => {
+      if (textToCheck.includes(term)) {
+        warn(false, `[Seção 54] Termo competitivo forte "${term}" detectado no modelo "${m.id}". Recomenda-se derivar em runtime.`);
+        competitiveWarnings++;
+      }
+    });
+  });
+  console.log(`     Termos competitivos auditados (${competitiveWarnings} ocorrências sob monitoramento).`);
+
+  // 7. [Seção 55] Auditoria de Duplicação de Preço
+  console.log('   - [Plano 08 / Seção 55] Verificando ausência de preços divergentes duplicados em prosa...');
+  Object.values(AI_MODELS_DATA).forEach(m => {
+    if (m.pricing && m.pricing.standard) {
+      const canonicalInput = m.pricing.standard.input;
+      const strengthsText = (m.strengths || []).join(' ');
+      const priceMatches = strengthsText.match(/\$([0-9]+(?:\.[0-9]+)?)/g);
+      if (priceMatches) {
+        priceMatches.forEach(pm => {
+          const val = parseFloat(pm.replace('$', ''));
+          if (Math.abs(val - canonicalInput) > 0.05 && Math.abs(val - (m.pricing.standard.output || 0)) > 0.05) {
+            warn(false, `[Seção 55] Possível divergência de preço no modelo "${m.id}": texto cita "${pm}" mas pricing.standard é $${canonicalInput}`);
+          }
+        });
+      }
+    }
+  });
+
+  // 8. [Seção 56] Auditoria de Referências e Integridade Referencial Completa
+  console.log('   - [Plano 08 / Seção 56] Verificando integridade referencial em todas as tabelas...');
+  MULTI_BENCHMARK_LEDGER.forEach(row => {
+    assert(AI_MODELS_DATA[row.modelId], `[Seção 56] Ledger referencia modelId inexistente: "${row.modelId}"`);
+  });
+  CURSORBENCH_32_DATA.forEach(run => {
+    assert(AI_MODELS_DATA[run.modelId], `[Seção 56] CursorBench referencia modelId inexistente: "${run.modelId}"`);
+  });
+  const knownPlatformSkus = ['kimi-for-coding', 'kimi-for-coding-highspeed', 'camel-free', 'premium-models', 'grok-bot', 'stream-fleet-auto'];
+  SUBSCRIPTION_PLANS_DATA.forEach(plan => {
+    (plan.modelAccess || []).forEach(ma => {
+      const isValid = AI_MODELS_DATA[ma.modelId] || knownPlatformSkus.includes(ma.modelId);
+      assert(isValid, `[Seção 56] Plano "${plan.id}" referencia modelId inexistente em modelAccess: "${ma.modelId}"`);
+    });
+  });
+
+  // 9. [Seção 57] Auditoria de Fontes para Claims Críticos
+  console.log('   - [Plano 08 / Seção 57] Verificando fontes auditadas e rastreabilidade...');
+  assert(typeof SOURCE_REGISTRY !== 'undefined' && Object.keys(SOURCE_REGISTRY).length >= 10,
+    '[Seção 57] SOURCE_REGISTRY deve conter pelo menos 10 fontes auditadas canônicas');
+  Object.values(SOURCE_REGISTRY).forEach(src => {
+    assert(src.id && src.title && src.publisher && src.sourceType, `[Seção 57] Fonte "${src.id}" possui metadados incompletos`);
+  });
+
+  // 10. [Seção 36] Auditoria de Status Canônico de Modelos
+  console.log('   - [Plano 08 / Seção 36] Verificando padronização de status (active, stable, preview, legacy, superseded)...');
+  const allowedStatuses = ['active', 'stable', 'preview', 'legacy', 'superseded', 'retired', 'stealth-revealed'];
+  Object.values(AI_MODELS_DATA).forEach(m => {
+    if (m.status) {
+      assert(allowedStatuses.includes(m.status), `[Seção 36] Modelo "${m.id}" possui status não canônico: "${m.status}"`);
+    }
+  });
+
+  // 11. [Seção 50] Ausência de NaN em Preços e Cálculos
+  console.log('   - [Plano 08 / Seção 50] Verificando ausência de NaN em precificação e medições...');
+  Object.values(AI_MODELS_DATA).forEach(m => {
+    if (m.pricing && m.pricing.standard) {
+      assert(!isNaN(m.pricing.standard.input), `[Seção 50] Input price NaN em "${m.id}"`);
+      assert(!isNaN(m.pricing.standard.output), `[Seção 50] Output price NaN em "${m.id}"`);
+    }
+    assert(!isNaN(m.contextWindow), `[Seção 50] contextWindow NaN em "${m.id}"`);
+  });
+
+  console.log('   ✅ Todas as suítes do Plano 08 validadas com 100% de aprovação!');
+}
+
 console.log('====================================================\n');
 
 if (warnings.length > 0) {

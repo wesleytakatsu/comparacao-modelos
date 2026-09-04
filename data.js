@@ -16,6 +16,15 @@ if (typeof module !== "undefined" && module.exports) {
       global.OPENCODE_GO_DATA = _platforms.OPENCODE_GO_DATA;
       global.PLATFORM_MODEL_CATALOG = _platforms.PLATFORM_MODEL_CATALOG;
     }
+    if (typeof DomainRankings === "undefined") {
+      try {
+        const _domain = require("./data/domain");
+        global.DomainRankings = _domain.DomainRankings;
+        global.DomainEvidence = _domain.DomainEvidence;
+        global.DomainFreshness = _domain.DomainFreshness;
+        global.DomainEntities = _domain.DomainEntities;
+      } catch (e) {}
+    }
   } catch (e) {}
 }
 
@@ -572,7 +581,7 @@ const AI_MODELS_DATA = {
     },
     "sweetSpot": "Medium (67,1% no CursorBench a $1,28/task)",
     "strengths": [
-      "Líder isolado em qualidade máxima com XHigh (70,8%) e DeepSWE 1.1 (65,9%)",
+      "Capacidade de ponta com esforço XHigh (70,8% CursorBench) e 65,9% no DeepSWE 1.1",
       "500k de contexto com excelente compreensão de monorepos complexos",
       "Suporte nativo a visão/imagem e 4 níveis de esforço de raciocínio",
       "Pool separado no Cursor Pro ($20 Pool)"
@@ -583,8 +592,8 @@ const AI_MODELS_DATA = {
       "Long-context menor que modelos de 1M/2M"
     ],
     "badges": [
-      "👑 LÍDER ABSOLUTO",
-      "🌟 SWEET SPOT (MED)",
+      "FRONTIER MOE",
+      "500K CONTEXT",
       "CURSOR POOL",
       "THINKING MANDATÓRIO"
     ],
@@ -786,7 +795,7 @@ const AI_MODELS_DATA = {
       "Sobretaxa após 272k tokens"
     ],
     "badges": [
-      "👑 CAMPEÃO TERMINAL-BENCH",
+      "ADAPTIVE REASONING",
       "FRONTIER TIER 1",
       "STRICT SCHEMA",
       "FIM NATIVO"
@@ -1939,7 +1948,7 @@ const AI_MODELS_DATA = {
       "Terminal-Bench 2.0 de 65,4% superado por modelos mais novos"
     ],
     "badges": [
-      "👑 LÍDER MRCR 1M (76%)",
+      "MRCR 1M (76%)",
       "ARC-AGI 68.8%",
       "ANTIGRAVITY POOL 2"
     ],
@@ -2735,7 +2744,7 @@ const AI_MODELS_DATA = {
     "strengths": [
       "Salto agêntico extraordinário no checkpoint final: 82,7% Terminal 2.1 e 54,4% DeepSWE",
       "284B total com apenas 13B ativos (checkpoint oficial de ~167 GB)",
-      "Custo imbatível de API ($0,14 in / $0,28 out) e 37.800 req/mês no OpenCode Go",
+      "Custo ultrabaixo de API ($0,14 in / $0,28 out) e 37.800 req/mês no OpenCode Go",
       "Licença aberta MIT"
     ],
     "weaknesses": [
@@ -2743,7 +2752,7 @@ const AI_MODELS_DATA = {
       "Requer 2x H200 para rodar local com folga de KV cache"
     ],
     "badges": [
-      "🚀 CAMPEÃO CUSTO/BENEFÍCIO",
+      "13B ATIVOS",
       "82.7% TB 2.1",
       "37.800 REQ/MÊS GO",
       "MIT"
@@ -3355,7 +3364,7 @@ const AI_MODELS_DATA = {
       "Consumo elevado de cota no OpenCode Go (6,0x multiplicador)"
     ],
     "badges": [
-      "👑 LÍDER AGÊNTICO",
+      "AGENTIC SPECIALIST",
       "88.3% TB 2.1",
       "67.5% DEEPSWE",
       "1M CTX"
@@ -3606,7 +3615,7 @@ const AI_MODELS_DATA = {
       "Disponibilização gradual de pesos para download público"
     ],
     "badges": [
-      "👑 CAMPEÃO TERMINAL (88.2%)",
+      "88.2% TB 2.1",
       "66.9% DEEPSWE",
       "1M CTX"
     ],
@@ -4532,7 +4541,7 @@ const AI_MODELS_DATA = {
     },
     "sweetSpot": "Fast / Interactive (56,1% CursorBench a $0,44/task)",
     "strengths": [
-      "56,1% no CursorBench 3.2 com custo imbatível de ~$0,44 por tarefa concluída",
+      "56,1% no CursorBench 3.2 com custo econômico de ~$0,44 por tarefa concluída",
       "Otimizado nativamente para o motor de diff e multi-file editing do Cursor IDE",
       "Throughput ultrarrápido com latência TTFT mínima"
     ],
@@ -6608,7 +6617,11 @@ if (typeof module !== 'undefined' && module.exports) {
     getDossierBenchmarkSnapshots: typeof getDossierBenchmarkSnapshots !== 'undefined' ? getDossierBenchmarkSnapshots : null,
     calculatePerformanceFingerprint: typeof calculatePerformanceFingerprint !== 'undefined' ? calculatePerformanceFingerprint : null,
     getDeepSweLeaderboard: typeof getDeepSweLeaderboard !== 'undefined' ? getDeepSweLeaderboard : null,
-    getProvenanceBadge: typeof getProvenanceBadge !== 'undefined' ? getProvenanceBadge : null
+    getProvenanceBadge: typeof getProvenanceBadge !== 'undefined' ? getProvenanceBadge : null,
+    DomainRankings: typeof DomainRankings !== 'undefined' ? DomainRankings : null,
+    DomainEvidence: typeof DomainEvidence !== 'undefined' ? DomainEvidence : null,
+    DomainFreshness: typeof DomainFreshness !== 'undefined' ? DomainFreshness : null,
+    DomainEntities: typeof DomainEntities !== 'undefined' ? DomainEntities : null
   };
 }
 
@@ -6634,5 +6647,9 @@ if (typeof window !== 'undefined') {
   if (typeof calculatePerformanceFingerprint !== "undefined") window.calculatePerformanceFingerprint = calculatePerformanceFingerprint;
   if (typeof getDeepSweLeaderboard !== "undefined") window.getDeepSweLeaderboard = getDeepSweLeaderboard;
   if (typeof getProvenanceBadge !== "undefined") window.getProvenanceBadge = getProvenanceBadge;
+  if (typeof DomainRankings !== "undefined") window.DomainRankings = DomainRankings;
+  if (typeof DomainEvidence !== "undefined") window.DomainEvidence = DomainEvidence;
+  if (typeof DomainFreshness !== "undefined") window.DomainFreshness = DomainFreshness;
+  if (typeof DomainEntities !== "undefined") window.DomainEntities = DomainEntities;
 }
 

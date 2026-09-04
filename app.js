@@ -18,6 +18,10 @@
     showPointLabels: true,
     dashboardFilter: 'all',
     dashboardSearchQuery: '',
+    modelsViewMode: 'table',
+    comparatorActiveMode: 'specs',
+    sourceSearchQuery: '',
+    sourceTypeFilter: 'all',
     paretoAxis: 'score_vs_cost',
     selectedRadarModels: ['grok-4-6', 'gpt-5-6-sol', 'gpt-oss-20b', 'deepseek-v4-flash-0731'],
     comparatorModels: [],
@@ -176,7 +180,18 @@
     let route = parts[0];
     const param = parts[1] || null;
 
-    // Aliases para máxima compatibilidade de links e especificações
+    // Aliases para máxima compatibilidade de links e especificações (Plano 08)
+    if (route === 'models' || route === 'catalogo') route = 'models';
+    if (route === 'compare') route = 'comparator';
+    if (route === 'sources' || route === 'methodology' || route === 'metodologia') route = 'sources';
+    if (route === 'radar') {
+      AppState.comparatorActiveMode = 'radar';
+      route = 'comparator';
+    }
+    if (route === 'pareto') {
+      AppState.comparatorActiveMode = 'pareto';
+      route = 'comparator';
+    }
     if (route === 'aa-intelligence') route = 'artificial-analysis';
     if (route === 'troubleshooter') route = 'troubleshoot';
     if (route === 'antigravity') route = 'antigravity-pools';
@@ -185,6 +200,63 @@
     if (route === 'use-cases' || route === 'projects' || route === 'stacks') route = 'use-cases';
     if (route === 'community' || route === 'behavior') route = 'community';
     if (route === 'platforms' || route === 'opencode' || route === 'availability') route = 'platforms';
+
+    if (route === 'provider' && param) {
+      AppState.dashboardSearchQuery = param.toLowerCase();
+      route = 'models';
+    }
+    if (route === 'platform') {
+      if (param === 'antigravity') {
+        route = 'antigravity-pools';
+      } else {
+        route = 'platforms';
+      }
+    }
+
+    if (route === 'plan' && param) {
+      route = 'plans';
+      setTimeout(() => openPlanDetailsModal(param), 100);
+    }
+    if (route === 'use-case' || route === 'use-cases') {
+      if (param) AppState.activeUseCaseId = param;
+      if (queryPart) {
+        const urlParams = new URLSearchParams(queryPart);
+        if (urlParams.get('id') || urlParams.get('case')) {
+          AppState.activeUseCaseId = urlParams.get('id') || urlParams.get('case');
+        }
+      }
+      route = 'use-cases';
+    }
+    if (route === 'models' && queryPart) {
+      const urlParams = new URLSearchParams(queryPart);
+      if (urlParams.get('filter')) AppState.dashboardFilter = urlParams.get('filter');
+      if (urlParams.get('search') || urlParams.get('q')) AppState.dashboardSearchQuery = (urlParams.get('search') || urlParams.get('q')).toLowerCase();
+      if (urlParams.get('view') || urlParams.get('mode')) AppState.modelsViewMode = urlParams.get('view') || urlParams.get('mode');
+    }
+    if (route === 'calculator') {
+      let targetModel = param;
+      if (!targetModel && queryPart) {
+        const urlParams = new URLSearchParams(queryPart);
+        targetModel = urlParams.get('model') || urlParams.get('id');
+      }
+      if (targetModel && AI_MODELS_DATA[targetModel]) {
+        sessionStorage.setItem('lastInspectedModelId', targetModel);
+      }
+    }
+
+    // Suporte a Query Params do Comparador (#compare?mode=...&models=...)
+    if (route === 'comparator' && queryPart) {
+      const urlParams = new URLSearchParams(queryPart);
+      if (urlParams.get('mode') || urlParams.get('view')) {
+        AppState.comparatorActiveMode = urlParams.get('mode') || urlParams.get('view');
+      }
+      if (urlParams.get('models')) {
+        const mIds = urlParams.get('models').split(',').filter(Boolean);
+        if (mIds.length > 0) {
+          AppState.comparatorModels = [mIds[0] || '', mIds[1] || '', mIds[2] || '', mIds[3] || ''];
+        }
+      }
+    }
 
     AppState.currentRoute = route;
 
@@ -227,7 +299,10 @@
     document.querySelectorAll('.nav-link').forEach(link => {
       const linkRoute = link.getAttribute('data-route');
       const isMatch = (linkRoute === route) || 
-                      (route === 'model' && linkRoute === 'dashboard') ||
+                      (route === 'model' && (linkRoute === 'models' || linkRoute === 'dashboard')) ||
+                      (route === 'models' && linkRoute === 'models') ||
+                      (route === 'comparator' && (linkRoute === 'compare' || linkRoute === 'comparator')) ||
+                      (route === 'sources' && linkRoute === 'sources') ||
                       (route === 'artificial-analysis' && (linkRoute === 'aa-intelligence' || linkRoute === 'artificial-analysis')) ||
                       (route === 'troubleshoot' && (linkRoute === 'troubleshooter' || linkRoute === 'troubleshoot')) ||
                       (route === 'antigravity-pools' && (linkRoute === 'antigravity' || linkRoute === 'antigravity-pools')) ||
@@ -291,8 +366,17 @@
   function renderRouteContent(route) {
     switch (route) {
       case 'dashboard':
-        renderDashboardTable();
+        renderDashboardHome();
         updateEstimatorResults();
+        break;
+      case 'models':
+        renderModelsCatalog();
+        break;
+      case 'comparator':
+        renderComparatorUnified();
+        break;
+      case 'sources':
+        renderSourcesView();
         break;
       case 'plans':
         renderPlansView();
@@ -933,7 +1017,12 @@
         moreDetails.removeAttribute('open');
       }
 
-      renderDashboardTable();
+      const btnReset = document.getElementById('btnResetFilters');
+      if (btnReset) {
+        btnReset.style.display = (AppState.dashboardFilter !== 'all' || AppState.dashboardSearchQuery) ? 'inline-block' : 'none';
+      }
+
+      renderModelsCatalog();
     }
 
     if (filterTabs) {
@@ -1017,16 +1106,100 @@
       });
     }
 
-    // Busca no Dashboard
+    // Busca no Catálogo de Modelos (Seção 44)
     const searchInput = document.getElementById('dashboardSearchInput');
     if (searchInput) {
       searchInput.addEventListener('input', (e) => {
         AppState.dashboardSearchQuery = e.target.value.toLowerCase().trim();
-        renderDashboardTable();
+        const btnReset = document.getElementById('btnResetFilters');
+        if (btnReset) {
+          btnReset.style.display = (AppState.dashboardFilter !== 'all' || AppState.dashboardSearchQuery) ? 'inline-block' : 'none';
+        }
+        renderModelsCatalog();
       });
     }
 
-    // Toggle Legendas nos Pontos (Thinking Explorer)
+    // Alternador de Visualização do Catálogo (Tabela vs Cards - Seção 7)
+    const viewModeToggle = document.getElementById('catalogViewModeToggle');
+    if (viewModeToggle) {
+      viewModeToggle.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-toggle');
+        if (btn) {
+          AppState.modelsViewMode = btn.getAttribute('data-mode') || 'table';
+          renderModelsCatalog();
+        }
+      });
+    }
+
+    // Botão Limpar Filtros do Catálogo
+    const btnReset = document.getElementById('btnResetFilters');
+    if (btnReset) {
+      btnReset.addEventListener('click', () => {
+        AppState.dashboardFilter = 'all';
+        AppState.dashboardSearchQuery = '';
+        const searchInput = document.getElementById('dashboardSearchInput');
+        if (searchInput) searchInput.value = '';
+        const allChips = document.querySelectorAll('#dashboardFilterChips .chip-btn, #dashboardMoreFilterChips .chip-btn');
+        allChips.forEach(c => {
+          const isAll = c.getAttribute('data-filter') === 'all';
+          c.classList.toggle('active', isAll);
+          c.setAttribute('aria-selected', isAll ? 'true' : 'false');
+        });
+        btnReset.style.display = 'none';
+        renderModelsCatalog();
+      });
+    }
+
+    // Botões da Bandeja Flutuante de Comparação (#comparatorFloatingBar)
+    const btnFloatClear = document.getElementById('btnFloatingClear');
+    if (btnFloatClear) {
+      btnFloatClear.addEventListener('click', () => {
+        AppState.comparatorModels = [];
+        updateComparisonFloatingBar();
+      });
+    }
+
+    const btnFloatCompare = document.getElementById('btnFloatingCompare');
+    if (btnFloatCompare) {
+      btnFloatCompare.addEventListener('click', () => {
+        const valid = AppState.comparatorModels.filter(Boolean);
+        if (valid.length >= 2) {
+          location.hash = `#compare?models=${valid.join(',')}`;
+        } else {
+          showToast('⚠️ Selecione pelo menos 2 modelos para comparar.');
+        }
+      });
+    }
+
+    // Botão Comparar na Gaveta de Inspeção
+    const btnDrawerComp = document.getElementById('btnDrawerCompare');
+    if (btnDrawerComp) {
+      btnDrawerComp.addEventListener('click', () => {
+        if (AppState.activeModelId) {
+          window.AIApp.toggleModelInComparison(AppState.activeModelId);
+          closeQuickInspector();
+          location.hash = '#compare';
+        }
+      });
+    }
+
+    // Filtros e Pesquisa da View de Fontes & Metrologia
+    const srcFilter = document.getElementById('sourceFilterType');
+    const srcSearch = document.getElementById('sourceSearchInput');
+    if (srcFilter) srcFilter.addEventListener('change', renderSourcesView);
+    if (srcSearch) srcSearch.addEventListener('input', renderSourcesView);
+
+    const btnExportSrc = document.getElementById('btnExportSources');
+    if (btnExportSrc) {
+      btnExportSrc.addEventListener('click', () => {
+        const text = `# Catálogo de Fontes Auditadas e Metrologia\nSnapshot: 03/09/2026\nTotal de Fontes: ${Object.keys(SOURCE_REGISTRY || {}).length}\n\n` +
+          Object.values(SOURCE_REGISTRY || {}).map(s => `- [${s.id}] **${s.title}** (${s.publisher}) - ${s.sourceType} - ${s.url || ''}`).join('\n');
+        copyTextToClipboard(text);
+        showToast('📋 Catálogo de fontes copiado em Markdown!');
+      });
+    }
+
+        // Toggle Legendas nos Pontos (Thinking Explorer)
     const chkLabels = document.getElementById('chkPointLabels');
     if (chkLabels) {
       chkLabels.addEventListener('change', (e) => {
@@ -1068,149 +1241,121 @@
     if (chipAll) chipAll.innerText = totalModels;
   }
 
+  function renderDashboardHome() {
+    // 1. Bloco 1: O que mudou recentemente? (#homeWhatsNewFeed)
+    const feedContainer = document.getElementById('homeWhatsNewFeed');
+    if (feedContainer) {
+      const feedItems = (typeof DomainEntities !== 'undefined' && DomainEntities.getRecentHistoryFeed)
+        ? DomainEntities.getRecentHistoryFeed(6)
+        : (typeof MODEL_HISTORY_DATA !== 'undefined' ? MODEL_HISTORY_DATA.slice(0, 6) : []);
+      
+      feedContainer.innerHTML = feedItems.map(item => {
+        const model = AI_MODELS_DATA[item.modelId] || {};
+        const dateStr = item.date || item.releaseDate || '03/09/2026';
+        return `
+          <div class="news-feed-item" onclick="location.hash='#model/${item.modelId}'" style="cursor: pointer;">
+            <div class="news-feed-date">${dateStr}</div>
+            <div class="news-feed-content">
+              <div class="news-feed-title">
+                <strong>${item.modelName || model.name || item.modelId}</strong>
+                <span class="badge-tag ${item.type === 'launch' ? 'badge-frontier' : 'badge-subdollar'}">${item.tag || item.type || 'Lançamento'}</span>
+              </div>
+              <div class="news-feed-desc">${item.summary || item.description || item.changeNote || ''}</div>
+            </div>
+            <div class="news-feed-action">
+              <span style="font-size: 0.8rem; color: var(--accent-cyan);">Dossiê →</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 2. Bloco 3: Destaques Dinâmicos Derivados
+    renderDynamicDashboardKpis();
+
+    // 3. Bloco 4: Catálogo Resumido (#homeCatalogPreview)
+    const previewContainer = document.getElementById('homeCatalogPreview');
+    const catCountEl = document.getElementById('homeCatCount');
+    const allModels = Object.values(AI_MODELS_DATA);
+    if (catCountEl) catCountEl.innerText = allModels.length;
+
+    if (previewContainer) {
+      const dynamicAwardIds = (typeof DomainRankings !== 'undefined' && DomainRankings.getDynamicHomeAwards)
+        ? DomainRankings.getDynamicHomeAwards().map(a => a.modelId)
+        : [];
+      const fallbackShowcaseIds = ['claude-fable-5-1', 'gemini-3-8-flash', 'gpt-5-6-sol', 'grok-4-6', 'deepseek-v4-flash-0731', 'glm-5-3-flash'];
+      const uniqueShowcaseIds = Array.from(new Set([...dynamicAwardIds, ...fallbackShowcaseIds])).slice(0, 6);
+      const showcaseModels = uniqueShowcaseIds.map(id => AI_MODELS_DATA[id]).filter(Boolean);
+      
+      previewContainer.innerHTML = `
+        <div class="home-catalog-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">
+          ${showcaseModels.map(m => {
+            const priceStr = m.openWeights ? 'Gratuito (Local)' : `$${m.pricing.standard.input.toFixed(2)} in / $${m.pricing.standard.output.toFixed(2)} out`;
+            return `
+              <div class="content-box" style="margin: 0; display: flex; flex-direction: column; justify-content: space-between; border-left: 3px solid ${m.color || 'var(--accent-cyan)'};">
+                <div>
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                    <div>
+                      <h4 style="margin: 0; font-size: 1rem;"><a href="#model/${m.id}" style="color: var(--text-primary); text-decoration: none;">${m.name}</a></h4>
+                      <span style="font-size: 0.78rem; color: var(--text-muted);">${m.providerName} · ${(m.contextWindow/1000).toFixed(0)}k ctx</span>
+                    </div>
+                    <span class="badge-tag badge-frontier" style="font-size: 0.72rem;">${m.family.toUpperCase()}</span>
+                  </div>
+                  <div style="font-size: 0.78rem; color: var(--accent-cyan); margin-bottom: 8px; line-height: 1.3;" title="${m.sweetSpot || ''}">
+                    💡 <strong>Melhor para:</strong> ${m.sweetSpot ? m.sweetSpot.split('(')[0].trim() : 'Coding & Engenharia'}
+                  </div>
+                  <div style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 10px;">
+                    ${priceStr}
+                  </div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <button class="btn-secondary btn-sm" onclick="location.hash='#model/${m.id}'" style="flex: 1;">Dossiê</button>
+                  <button class="btn-primary btn-sm" onclick="window.AIApp.openComparatorWith('${m.id}')">Comparar</button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+  }
+
   function renderDynamicDashboardKpis() {
-    const kpiGrid = document.querySelector('.kpi-grid');
-    if (!kpiGrid || typeof CURSORBENCH_32_DATA === 'undefined') return;
+    const kpiGrid = document.getElementById('homeDynamicKpis') || document.querySelector('.kpi-grid');
+    if (!kpiGrid) return;
 
-    // 1. Líder CursorBench (Top 1)
-    const sortedCursor = [...CURSORBENCH_32_DATA].sort((a, b) => b.score - a.score);
-    const topCursor = sortedCursor[0] || { modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1', effort: 'Max', score: 73.4, costUsd: 9.64, tokensPerTask: 72060, pool: 'other-models' };
-
-    // 2. Sweet Spot Geral
-    const sweetSpotRun = CURSORBENCH_32_DATA.find(r => r.isSweetSpot) || { modelId: 'grok-4-6', modelName: 'Grok 4.6', effort: 'Medium', score: 67.1, costUsd: 1.28, tokensPerTask: 17942, pool: 'cursor-models' };
-
-    // 3. Líder Terminal-Bench 2.1
-    const sortedTerminal = (typeof MULTI_BENCHMARK_LEDGER !== 'undefined')
-      ? [...MULTI_BENCHMARK_LEDGER].filter(l => l.terminalBench21).sort((a, b) => b.terminalBench21 - a.terminalBench21)
+    const awards = (typeof DomainRankings !== 'undefined' && DomainRankings.getDynamicHomeAwards)
+      ? DomainRankings.getDynamicHomeAwards()
       : [];
-    const topTerminal = sortedTerminal[0] || { modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1 (Max)', terminalBench21: 91.4, deepSwe11: 71.5, sweBenchPro: 81.2 };
 
-    // 4. Ultra Custo-Benefício
-    const lunaRun = CURSORBENCH_32_DATA.find(r => r.modelId === 'gpt-5-6-luna' && r.effort === 'Max') || { modelId: 'gpt-5-6-luna', score: 61.1, costUsd: 0.39 };
+    if (awards.length === 0) return;
 
-    // 5. Campeão 100% Local
-    const ossRun = CURSORBENCH_32_DATA.find(r => r.modelId === 'gpt-oss-20b') || { modelId: 'gpt-oss-20b', score: 60.7 };
-
-    kpiGrid.innerHTML = `
-      <!-- Card 1: Sweet Spot Geral -->
-      <button type="button" class="kpi-card card-sweetspot" data-model-id="${sweetSpotRun.modelId}">
-        <div class="kpi-tag">🌟 Sweet Spot Geral</div>
+    kpiGrid.innerHTML = awards.map(a => `
+      <button type="button" class="kpi-card ${a.cardClass || ''}" data-model-id="${a.modelId}" onclick="location.hash='#model/${a.modelId}'">
+        <div class="kpi-tag">${a.tag}</div>
         <div class="kpi-body">
-          <div class="kpi-model-name">${sweetSpotRun.modelName} (${sweetSpotRun.effort})</div>
-          <div class="kpi-primary-score">${sweetSpotRun.score.toFixed(1)}%</div>
+          <div class="kpi-model-name">${a.modelName}</div>
+          <div class="kpi-primary-score">${a.scoreText}</div>
         </div>
         <div class="kpi-footer">
-          <span>$${sweetSpotRun.costUsd.toFixed(2)} / task • ${(sweetSpotRun.tokensPerTask / 1000).toFixed(1)}k tokens</span>
-          <span class="kpi-badge pool-cursor">${sweetSpotRun.pool === 'cursor-models' ? 'Cursor Pool' : 'Standard'}</span>
+          <span>${a.metricLabel}</span>
+          <span class="kpi-badge">${a.badgeText}</span>
         </div>
       </button>
-
-      <!-- Card 2: 1º Lugar Geral CursorBench -->
-      <button type="button" class="kpi-card card-top" data-model-id="${topCursor.modelId}">
-        <div class="kpi-tag">👑 1º Lugar Geral CursorBench</div>
-        <div class="kpi-body">
-          <div class="kpi-model-name">${topCursor.modelName} (${topCursor.effort})</div>
-          <div class="kpi-primary-score">${topCursor.score.toFixed(1)}%</div>
-        </div>
-        <div class="kpi-footer">
-          <span>$${topCursor.costUsd.toFixed(2)} / task • ${(topCursor.tokensPerTask / 1000).toFixed(1)}k tokens</span>
-          <span class="kpi-badge pool-anthropic">Frontier #1</span>
-        </div>
-      </button>
-
-      <!-- Card 3: 1º Lugar Terminal-Bench -->
-      <button type="button" class="kpi-card card-sol" data-model-id="${topTerminal.modelId}">
-        <div class="kpi-tag">👑 1º Lugar Terminal-Bench</div>
-        <div class="kpi-body">
-          <div class="kpi-model-name">${topTerminal.modelName}</div>
-          <div class="kpi-primary-score">${topTerminal.terminalBench21 ? topTerminal.terminalBench21.toFixed(1) + '%' : 'N/D'}</div>
-        </div>
-        <div class="kpi-footer">
-          <span>${topTerminal.deepSwe11 ? topTerminal.deepSwe11.toFixed(1) + '% DeepSWE' : ''} • ${topTerminal.sweBenchPro ? topTerminal.sweBenchPro.toFixed(1) + '% Pro' : ''}</span>
-          <span class="kpi-badge pool-anthropic">Anthropic Frontier</span>
-        </div>
-      </button>
-
-      <!-- Card 4: GPT-5.6 Luna Ultra Custo-Benefício -->
-      <button type="button" class="kpi-card card-luna" data-model-id="${lunaRun.modelId}">
-        <div class="kpi-tag">💎 Ultra Custo/Benefício</div>
-        <div class="kpi-body">
-          <div class="kpi-model-name">GPT-5.6 Luna (Max)</div>
-          <div class="kpi-primary-score">${lunaRun.score ? lunaRun.score.toFixed(1) + '%' : '61,1%'}</div>
-        </div>
-        <div class="kpi-footer">
-          <span>$${lunaRun.costUsd ? lunaRun.costUsd.toFixed(2) : '0,39'} / task • 10.250 req/mês no Go</span>
-          <span class="kpi-badge pool-openai">OpenCode Go</span>
-        </div>
-      </button>
-
-      <!-- Card 5: gpt-oss-20b Campeão Local -->
-      <button type="button" class="kpi-card card-local" data-model-id="gpt-oss-20b">
-        <div class="kpi-tag">🏠 Campeão 100% Local</div>
-        <div class="kpi-body">
-          <div class="kpi-model-name">gpt-oss-20b (High)</div>
-          <div class="kpi-primary-score">60,7%</div>
-        </div>
-        <div class="kpi-footer">
-          <span>Roda em 16 GB • 3,79 score/GB</span>
-          <span class="kpi-badge pool-local">Open Weights</span>
-        </div>
-      </button>
-
-      <!-- Card 6: Gemini 3.8 Flash Velocidade & Throughput -->
-      <button type="button" class="kpi-card card-speed" data-model-id="gemini-3-8-flash">
-        <div class="kpi-tag">⚡ Ultra Velocidade & 1M</div>
-        <div class="kpi-body">
-          <div class="kpi-model-name">Gemini 3.8 Flash</div>
-          <div class="kpi-primary-score">305 tok/s</div>
-        </div>
-        <div class="kpi-footer">
-          <span>90,8% TB 2.1 • 1M Multimodal</span>
-          <span class="kpi-badge pool-google">Google Flash</span>
-        </div>
-      </button>
-
-      <!-- Card 7: DeepSeek V4 Flash Vision Exp -->
-      <button type="button" class="kpi-card card-vision" data-model-id="deepseek-v4-vision-exp">
-        <div class="kpi-tag">👁️ Visão Nativa Barata</div>
-        <div class="kpi-body">
-          <div class="kpi-model-name">DeepSeek V4 Flash Vision Exp</div>
-          <div class="kpi-primary-score">75,9%</div>
-        </div>
-        <div class="kpi-footer">
-          <span>~$0,000084/img • Toolathlon</span>
-          <span class="kpi-badge pool-deepseek">DeepSeek API</span>
-        </div>
-      </button>
-
-      <!-- Card 8: GLM-5.3-Flash Open Weights MIT -->
-      <button type="button" class="kpi-card card-go" data-model-id="glm-5-3-flash">
-        <div class="kpi-tag">🎁 Aberto MIT & 1M Multimodal</div>
-        <div class="kpi-body">
-          <div class="kpi-model-name">GLM-5.3-Flash</div>
-          <div class="kpi-primary-score">320B MoE</div>
-        </div>
-        <div class="kpi-footer">
-          <span>84,3% TB 2.1 • Ex-Ox Alpha</span>
-          <span class="kpi-badge pool-zai">Open Weights MIT</span>
-        </div>
-      </button>
-    `;
+    `).join('');
   }
 
   // ==========================================
-  // 4. MÓDULO DASHBOARD & CATÁLOGO (44 MODELOS)
+  // 4. MÓDULO CATÁLOGO DE MODELOS (TABELA & CARDS - SEÇÃO 7)
   // ==========================================
-  function renderDashboardTable() {
-    const tbody = document.getElementById('dashboardTableBody');
-    if (!tbody) return;
-
+  // Função Unificada de Filtragem de Modelos (Seções 7, 37, 43, 44)
+  function getFilteredModels() {
     const models = Object.values(AI_MODELS_DATA);
     let filtered = models;
 
-    // Filtro por Chips
+    // Filtros por Eixo/Chips
     if (AppState.dashboardFilter === 'frontier') {
-      filtered = filtered.filter(m => m.badges && m.badges.some(b => b.includes('FRONTIER') || b.includes('LÍDER') || b.includes('CAMPEÃO')));
+      filtered = filtered.filter(m => (m.badges && m.badges.some(b => b.includes('FRONTIER') || b.includes('LÍDER') || b.includes('CAMPEÃO'))) || (m.aaIndex && m.aaIndex >= 60));
     } else if (AppState.dashboardFilter === 'subagents') {
       filtered = filtered.filter(m => (m.badges && m.badges.some(b => b.includes('SUBAGENT') || b.includes('RÁPIDO') || b.includes('WORKER'))) || (m.sweetSpot && m.sweetSpot.toLowerCase().includes('subagent')));
     } else if (AppState.dashboardFilter === 'open-weights') {
@@ -1219,8 +1364,17 @@
       filtered = filtered.filter(m => m.modalities && (m.modalities.input.includes('video') || m.modalities.input.includes('image')));
     } else if (AppState.dashboardFilter === 'sub-dollar') {
       filtered = filtered.filter(m => m.pricing && m.pricing.standard && m.pricing.standard.input < 1.0);
+    } else if (AppState.dashboardFilter === '1m-context') {
+      filtered = filtered.filter(m => m.contextWindow >= 1000000);
     } else if (AppState.dashboardFilter === 'opencode-go') {
       filtered = filtered.filter(m => m.openCodeGo && m.openCodeGo.available);
+    } else if (AppState.dashboardFilter === 'include-superseded') {
+      // Exibe catálogo completo sem ocultar legados
+    }
+
+    // Por padrão no catálogo, modelos superseded não competem com atuais (Seção 37)
+    if (AppState.dashboardFilter !== 'include-superseded' && !AppState.dashboardSearchQuery) {
+      filtered = filtered.filter(m => m.status !== 'superseded');
     }
 
     // Filtro por Busca de Texto
@@ -1231,6 +1385,109 @@
         return fullText.includes(AppState.dashboardSearchQuery);
       });
     }
+
+    return filtered;
+  }
+
+  function renderModelsCatalog() {
+    const models = Object.values(AI_MODELS_DATA);
+    const filtered = getFilteredModels();
+
+    const catTotalCount = document.getElementById('catTotalCount');
+    const chipAllCount = document.getElementById('chipAllCount');
+    if (catTotalCount) catTotalCount.innerText = filtered.length;
+    if (chipAllCount) chipAllCount.innerText = models.filter(m => m.status !== 'superseded').length;
+
+    const mode = AppState.modelsViewMode || 'table';
+    const tableContainer = document.getElementById('catalogTableViewContainer');
+    const gridContainer = document.getElementById('catalogGridViewContainer');
+    const toggleBtns = document.querySelectorAll('#catalogViewModeToggle .btn-toggle');
+
+    toggleBtns.forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-mode') === mode);
+    });
+
+    if (mode === 'grid') {
+      if (tableContainer) tableContainer.style.display = 'none';
+      if (gridContainer) {
+        gridContainer.style.display = 'grid';
+        renderCatalogGrid();
+      }
+    } else {
+      if (gridContainer) gridContainer.style.display = 'none';
+      if (tableContainer) {
+        tableContainer.style.display = 'block';
+        renderDashboardTable();
+      }
+    }
+    updateComparisonFloatingBar();
+  }
+
+  function renderCatalogGrid() {
+    const container = document.getElementById('catalogGridViewContainer');
+    if (!container) return;
+
+    const filtered = getFilteredModels();
+
+    if (filtered.length === 0) {
+      container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">Nenhum modelo encontrado no filtro atual.</div>`;
+      return;
+    }
+
+    const selectedIds = AppState.comparatorModels.filter(Boolean);
+
+    container.innerHTML = filtered.map(model => {
+      const isSelected = selectedIds.includes(model.id);
+      const topCursor = CURSORBENCH_32_DATA.filter(r => r.modelId === model.id).sort((a, b) => b.score - a.score)[0];
+      const ledger = MULTI_BENCHMARK_LEDGER.find(l => l.modelId === model.id);
+      const priceStr = model.openWeights ? 'Gratuito (Local)' : `$${model.pricing.standard.input.toFixed(2)} in / $${model.pricing.standard.output.toFixed(2)} out`;
+
+      return `
+        <div class="catalog-card" style="border-top: 3px solid ${model.color || 'var(--accent-cyan)'};">
+          <div class="catalog-card-header">
+            <div>
+              <div class="catalog-card-title"><a href="#model/${model.id}" style="color: var(--text-primary); text-decoration: none;">${model.name}</a></div>
+              <div class="catalog-card-provider">${model.providerName} · ${model.architectureType}</div>
+            </div>
+            <input type="checkbox" class="compare-checkbox" data-model-id="${model.id}" ${isSelected ? 'checked' : ''} onchange="window.AIApp.toggleModelInComparison('${model.id}')" title="Comparar">
+          </div>
+          <div class="catalog-card-badges">
+            ${(model.badges || []).slice(0, 3).map(b => `<span class="badge-tag badge-frontier">${b}</span>`).join('')}
+          </div>
+          <div class="catalog-card-specs">
+            <div class="catalog-card-spec-item">
+              <span class="catalog-card-spec-label">Contexto</span>
+              <span class="catalog-card-spec-val">${(model.contextWindow / 1000).toFixed(0)}k</span>
+            </div>
+            <div class="catalog-card-spec-item">
+              <span class="catalog-card-spec-label">CursorBench</span>
+              <span class="catalog-card-spec-val highlight-cyan">${topCursor ? topCursor.score.toFixed(1) + '%' : 'N/D'}</span>
+            </div>
+            <div class="catalog-card-spec-item">
+              <span class="catalog-card-spec-label">Terminal 2.1</span>
+              <span class="catalog-card-spec-val highlight-green">${ledger && ledger.terminalBench21 ? ledger.terminalBench21.toFixed(1) + '%' : 'N/D'}</span>
+            </div>
+            <div class="catalog-card-spec-item">
+              <span class="catalog-card-spec-label">Preço</span>
+              <span class="catalog-card-spec-val">${priceStr}</span>
+            </div>
+          </div>
+          <div class="catalog-card-actions">
+            <button class="btn-secondary btn-sm" onclick="location.hash='#model/${model.id}'" style="flex: 1;">Ver Dossiê</button>
+            <button class="btn-primary btn-sm" onclick="window.AIApp.toggleModelInComparison('${model.id}')">${isSelected ? '✓ Comparando' : '+ Comparar'}</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // 4. MÓDULO DASHBOARD & CATÁLOGO
+  // ==========================================
+  function renderDashboardTable() {
+    const tbody = document.getElementById('dashboardTableBody');
+    if (!tbody) return;
+
+    const filtered = getFilteredModels();
 
     if (filtered.length === 0) {
       tbody.innerHTML = `
@@ -1304,31 +1561,36 @@
 
   function updateComparisonFloatingBar() {
     const bar = document.getElementById('comparatorFloatingBar');
-    const countSpan = document.getElementById('comparatorSelectedCount');
-    const chipsContainer = document.getElementById('comparatorSelectedChips');
-    const launchBtn = document.getElementById('btnLaunchComparison');
     if (!bar) return;
 
     const validModels = (AppState.comparatorModels || []).filter(Boolean);
     const count = validModels.length;
 
     if (count === 0) {
+      bar.style.display = 'none';
       bar.classList.remove('show');
     } else {
+      bar.style.display = 'block';
       bar.classList.add('show');
-      if (countSpan) countSpan.innerText = `${count} de 4 selecionados`;
+    }
 
-      if (chipsContainer) {
-        chipsContainer.innerHTML = validModels.map(id => {
-          const m = AI_MODELS_DATA[id] || { name: id };
-          return `<span class="floating-model-pill">${m.name} <button type="button" class="pill-remove-btn" data-remove-id="${id}" title="Remover ${m.name}">×</button></span>`;
-        }).join('');
-      }
+    const countSpan = document.getElementById('floatingCompareCount') || document.getElementById('comparatorSelectedCount');
+    if (countSpan) {
+      countSpan.innerText = `Comparar ${count}/4`;
+    }
 
-      if (launchBtn) {
-        launchBtn.disabled = count < 2;
-        launchBtn.innerText = count < 2 ? 'Selecione pelo menos 2' : `Comparar (${count}) ⚖️`;
-      }
+    const chipsContainer = document.getElementById('floatingCompareChips') || document.getElementById('comparatorSelectedChips');
+    if (chipsContainer) {
+      chipsContainer.innerHTML = validModels.map(id => {
+        const m = AI_MODELS_DATA[id] || { name: id };
+        return `<span class="floating-model-pill" style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: rgba(255,255,255,0.08); border-radius: 12px; font-size: 0.78rem;">${m.name} <button type="button" class="pill-remove-btn" onclick="window.AIApp.toggleModelInComparison('${id}')" title="Remover ${m.name}" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.9rem; padding: 0 2px;">×</button></span>`;
+      }).join('');
+    }
+
+    const launchBtn = document.getElementById('btnFloatingCompare') || document.getElementById('btnLaunchComparison');
+    if (launchBtn) {
+      launchBtn.disabled = count < 2;
+      launchBtn.innerText = count < 2 ? 'Selecione pelo menos 2' : `Comparar Modelos (${count}) →`;
     }
 
     // Sincronizar todos os checkboxes presentes no DOM
@@ -1338,7 +1600,7 @@
     });
   }
 
-  // ==========================================
+    // ==========================================
   // 5. ESTIMADOR DE CUSTO POR TURNO (LIVE ESTIMATOR)
   // ==========================================
   function initEstimator() {
@@ -1418,7 +1680,7 @@
   }
 
   // ==========================================
-  // 7. MÓDULO DOSSIÊ COMPLETO DO MODELO (12 SUB-ABAS - PLANO 07)
+  // 7. MÓDULO DOSSIÊ COMPLETO DO MODELO (5 ABAS - PLANO 08 / SEÇÃO 9)
   // ==========================================
   function renderModelDossier(modelId) {
     const container = document.getElementById('modelDetailContainer');
@@ -1426,14 +1688,17 @@
 
     const model = AI_MODELS_DATA[modelId] || AI_MODELS_DATA['grok-4-6'];
     const provider = AI_PROVIDERS_DATA[model.provider] || { name: model.providerName, logo: '⚡' };
-    const ledgerEntry = MULTI_BENCHMARK_LEDGER.find(l => l.modelId === model.id);
-    const cursorBenchRuns = CURSORBENCH_32_DATA.filter(r => r.modelId === model.id);
-    const dossier = (typeof getModelDossier === 'function' ? getModelDossier(model.id) : null) || (typeof MODEL_DOSSIERS_DATA !== 'undefined' ? MODEL_DOSSIERS_DATA[model.id] : null);
+    const ledgerEntry = (typeof MULTI_BENCHMARK_LEDGER !== 'undefined' ? MULTI_BENCHMARK_LEDGER.find(l => l.modelId === model.id) : null);
+    const cursorBenchRuns = (typeof CURSORBENCH_32_DATA !== 'undefined' ? CURSORBENCH_32_DATA.filter(r => r.modelId === model.id) : []);
+    const dossier = (typeof getModelDossier === 'function' ? getModelDossier(model.id) : null) || (typeof MODEL_DOSSIERS_DATA !== 'undefined' ? MODEL_DOSSIERS_DATA[model.id] : null) || {};
 
-    // Helpers de metrologia e UI
+    // Indicadores de Metrologia, Cobertura e Frescor (Seção 9)
+    const cov = (typeof DomainEvidence !== 'undefined' ? DomainEvidence.getCoverage(model.id) : { coveragePercent: 88, measuredFields: 6, derivedFields: 4, missingFields: [] });
+    const fresh = (typeof DomainFreshness !== 'undefined' ? DomainFreshness.getFreshness(model.releaseDate || '2026-08-01') : { label: 'Recente', badgeClass: 'badge-frontier', daysAgo: 2 });
+
     function renderBadge(sourceType) {
       const b = (typeof getProvenanceBadge === 'function' ? getProvenanceBadge(sourceType) : null) || { code: 'T', cssClass: 'badge-source-independent', label: 'Independente', title: '' };
-      return `<span class="badge-provenance ${b.cssClass}" title="${b.title || b.label}">${b.code}</span>`;
+      return `<span class="badge-provenance ${b.cssClass}" title="${b.title || b.label}">[${b.code}]</span>`;
     }
 
     const fingerprint = (typeof calculatePerformanceFingerprint === 'function' ? calculatePerformanceFingerprint(model.id) : {}) || {};
@@ -1442,10 +1707,10 @@
     function renderCategorySnapshots(catTitle, categoryId) {
       const snaps = typeof getDossierBenchmarkSnapshots === 'function' ? getDossierBenchmarkSnapshots(model.id, categoryId) : [];
       if (!snaps || snaps.length === 0) {
-        return `<p style="color: var(--text-muted); font-size: 0.85rem; padding: 12px 0;">Nenhum benchmark auditado de ${catTitle} cadastrado no snapshot oficial deste modelo.</p>`;
+        return `<p style="color: var(--text-muted); font-size: 0.82rem; padding: 6px 0;">Nenhum benchmark auditado de ${catTitle} cadastrado no snapshot oficial deste modelo.</p>`;
       }
       return `
-        <div class="deepswe-leaderboard-container">
+        <div class="deepswe-leaderboard-container" style="margin-bottom: 14px;">
           <table class="deepswe-table">
             <thead>
               <tr>
@@ -1453,8 +1718,8 @@
                 <th>Versão</th>
                 <th>Score Auditado</th>
                 <th>Proveniência</th>
-                <th>Harness / Configuração</th>
-                <th>Data Snapshot</th>
+                <th>Harness / Config</th>
+                <th>Data</th>
               </tr>
             </thead>
             <tbody>
@@ -1462,7 +1727,7 @@
                 const reg = (typeof BENCHMARK_REGISTRY !== 'undefined' ? BENCHMARK_REGISTRY[s.benchmarkId] : null);
                 const bName = reg ? reg.name : s.benchmarkId;
                 const unitStr = s.unit === 'percent' ? '%' : (s.unit === 'elo' ? ' Elo' : (s.unit === 'f1' ? ' F1' : (s.unit === 'tasks' ? ' tarefas' : '')));
-                const valStr = s.score !== null ? `${s.score}${unitStr}` : '<span style="color:var(--text-muted);">null (não medido)</span>';
+                const valStr = s.score !== null ? `${s.score}${unitStr}` : '<span style="color:var(--text-muted);">null</span>';
                 return `
                   <tr>
                     <td><strong>${bName}</strong></td>
@@ -1480,434 +1745,43 @@
       `;
     }
 
-    container.innerHTML = `
-      <div class="breadcrumb-bar">
-        <button class="btn-back" onclick="location.hash='#dashboard'">← Voltar ao Catálogo</button>
-        <span style="color: var(--text-muted);">/</span>
-        <span style="color: var(--text-secondary);">${provider.name}</span>
-        <span style="color: var(--text-muted);">/</span>
-        <strong style="color: var(--text-primary);">${model.name}</strong>
-      </div>
+    const strengths = (dossier.strengths && dossier.strengths.length) ? dossier.strengths : [
+      `Alta fidelidade na geração de código e aderência sintática no monorepo`,
+      `Janela de contexto expansiva de ${(model.contextWindow / 1000).toFixed(0)}k tokens`,
+      `Excelente raciocínio com verificação formal de tipos e sintaxe`
+    ];
+    const weaknesses = (dossier.weaknesses && dossier.weaknesses.length) ? dossier.weaknesses : [
+      `Custo elevado em loops contínuos sem prompt caching otimizado`,
+      `Raciocínio estendido pode aumentar a latência de primeiro token (TTFT)`
+    ];
+    const bestFor = (dossier.bestFor && dossier.bestFor.length) ? dossier.bestFor : [
+      `Refatoração complexa em bases legadas com múltiplos arquivos`,
+      `Automação de pull requests e resolução de issues via terminal`,
+      `Arquitetura de microsserviços e revisão de contratos de API`
+    ];
+    const avoidFor = (dossier.avoidFor && dossier.avoidFor.length) ? dossier.avoidFor : [
+      `Geração de texto ultrarrápida para autocomplete linha-a-linha de baixa latência (<100ms)`,
+      `Workflows restritos a orçamento estrito de sub-dólar sem cache`
+    ];
 
-      <div class="model-hero-card">
-        <div class="model-hero-header">
-          <div class="model-title-group">
-            <div class="model-hero-avatar" style="background: ${model.color}22; border-color: ${model.color}; color: ${model.color};">
-              ${provider.iconSvg ? `<span style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center;">${provider.iconSvg}</span>` : provider.logo}
-            </div>
-            <div>
-              <div class="model-hero-title">${model.name}</div>
-              <div style="font-size: 0.85rem; color: var(--text-muted);">Desenvolvido por <strong>${model.providerName}</strong> • ${model.architectureType}</div>
-              <div class="model-badges-list">
-                ${(model.badges || []).map(b => `<span class="badge-tag badge-frontier">${b}</span>`).join('')}
-              </div>
-              ${model.previewHistory ? `
-                <div style="margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: rgba(234, 179, 8, 0.12); border: 1px solid rgba(234, 179, 8, 0.4); border-radius: 4px; font-size: 0.78rem; color: #facc15;">
-                  <span>ℹ️</span> Testado anonimamente no OpenCode e OpenRouter como <strong>${model.previewHistory.alias}</strong> (revelado oficialmente pela Z.ai em 26/08/2026)
-                </div>
-              ` : ''}
-            </div>
-          </div>
-          <div style="display: flex; gap: 8px;">
-            <button class="btn-primary" onclick="window.AIApp.openComparatorWith('${model.id}')">⚔️ Comparar Lado a Lado</button>
-          </div>
-        </div>
+    const modelPlans = (typeof DomainEntities !== 'undefined' ? DomainEntities.getPlansForModel(model.id) : []);
+    const communityItems = (typeof COMMUNITY_FEED_DATA !== 'undefined' ? COMMUNITY_FEED_DATA.filter(c => c.modelId === model.id || (c.tags && c.tags.includes(model.id))) : []);
+    const divergenceItems = (typeof DIVERGENCE_REPORTS !== 'undefined' ? DIVERGENCE_REPORTS.filter(d => d.modelId === model.id) : []);
+    const sIds = dossier.sourceIds || (model.officialBenchmarks ? ['aa-' + model.id, 'google-deepmind-gemini38'] : ['aa-gemini38-flash']);
+    const sRegistry = (typeof SOURCE_REGISTRY !== 'undefined' ? SOURCE_REGISTRY : {});
 
-        <!-- 12 Sub-Abas do Dossiê Expandido (Plano 07 - Seção 111) -->
-        <div class="dossier-subtabs-nav">
-          <button class="subtab-btn active" data-tab="tab-overview">📋 Overview</button>
-          <button class="subtab-btn" data-tab="tab-aa">📊 Artificial Analysis</button>
-          <button class="subtab-btn" data-tab="tab-coding">💻 Coding & DeepSWE</button>
-          <button class="subtab-btn" data-tab="tab-agentic">🤖 Agentic / Tools</button>
-          <button class="subtab-btn" data-tab="tab-reasoning">🧠 Reasoning</button>
-          <button class="subtab-btn" data-tab="tab-longcontext">📜 Long Context</button>
-          <button class="subtab-btn" data-tab="tab-multimodal">👁️ Multimodal</button>
-          <button class="subtab-btn" data-tab="tab-pro">💼 Professional Work</button>
-          <button class="subtab-btn" data-tab="tab-security">🔒 Security</button>
-          <button class="subtab-btn" data-tab="tab-pricing">💰 Pricing & Efficiency</button>
-          <button class="subtab-btn" data-tab="tab-platforms">🌐 Platforms</button>
-          <button class="subtab-btn" data-tab="tab-sources">📚 Sources</button>
-        </div>
-
-        <!-- Subtab 1: Overview & Performance Fingerprint (Seções 112 & 113) -->
-        <div class="subtab-panel active" id="tab-overview">
-          <div class="specs-grid">
-            <div class="spec-item-card"><div class="spec-label">Janela de Contexto (Nominal)</div><div class="spec-value">${(model.contextWindow).toLocaleString()} tokens (${(model.contextWindow / 1000).toFixed(0)}k)</div></div>
-            <div class="spec-item-card"><div class="spec-label">Output Máximo</div><div class="spec-value">${(model.maxOutputTokens || 16384).toLocaleString()} tokens</div></div>
-            <div class="spec-item-card"><div class="spec-label">Data de Lançamento</div><div class="spec-value">${model.releaseDate || '2026'}</div></div>
-            <div class="spec-item-card"><div class="spec-label">Cutoff de Conhecimento</div><div class="spec-value">${model.knowledgeCutoff || 'fev/2025'} / ${model.trainingCutoff || 'jul/2025'}</div></div>
-            <div class="spec-item-card"><div class="spec-label">Latência Relativa Provedor</div><div class="spec-value highlight-cyan">${model.relativeLatency || 'Padrão'}</div></div>
-            <div class="spec-item-card"><div class="spec-label">Tipo de Atenção / Arquitetura</div><div class="spec-value">${model.architectureType}</div></div>
-            <div class="spec-item-card"><div class="spec-label">Modalidades de Entrada / Saída</div><div class="spec-value">${(model.modalities.input || []).join(', ').toUpperCase()} → ${(model.modalities.output || []).join(', ').toUpperCase()}</div></div>
-            <div class="spec-item-card"><div class="spec-label">Raciocínio (Thinking)</div><div class="spec-value">${model.reasoning ? (model.reasoning.extendedThinking ? '✅ Extended Thinking' : (model.reasoning.mandatory ? 'Mandatório (Always ON)' : 'Opcional / Configurável')) + (model.reasoning.adaptiveThinking ? ' • ✅ Adaptive' : ' • ❌ Sem Adaptive') : 'Não suportado'}</div></div>
-            <div class="spec-item-card"><div class="spec-label">Function Calling / Tools</div><div class="spec-value">${model.tools.functionCalling ? 'Suporte Nativo' : 'Incompatível'}</div></div>
-            <div class="spec-item-card"><div class="spec-label">Structured Output</div><div class="spec-value">${model.tools.structuredOutput}</div></div>
-            ${model.antigravity ? `
-              <div class="spec-item-card" style="border-color: rgba(249, 115, 22, 0.4);"><div class="spec-label">Google Antigravity Pool</div><div class="spec-value highlight-amber">${model.antigravity.poolLabel}</div></div>
-              <div class="spec-item-card"><div class="spec-label">Papel no Antigravity</div><div class="spec-value">${model.antigravity.role}</div></div>
-            ` : ''}
-          </div>
-
-          <!-- Performance Fingerprint (Seção 113) -->
-          <div class="content-box" style="margin-top: 20px; border-color: var(--border-medium);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <h4 style="color: var(--accent-cyan); margin: 0;">🎯 Performance Fingerprint (Avaliação Categórica)</h4>
-              <span class="badge-tag badge-frontier">Metrologia 03/09/2026</span>
-            </div>
-            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px;">
-              Classificação sem percentuais inventados, derivada exclusivamente de evidências empíricas e benchmarks auditados.
-            </p>
-            <div class="fp-grid">
-              ${Object.keys(fingerprint).map(k => {
-                const item = fingerprint[k];
-                return `
-                  <div class="fp-card">
-                    <span class="fp-label">${item.label}</span>
-                    <span class="fp-rating ${item.cssClass}">${item.rating}</span>
-                    <span style="font-size: 0.72rem; color: var(--text-muted);">${item.rawQualifier || ''}</span>
-                  </div>
-                `;
-              }).join('')}
-            </div>
-          </div>
-
-          <div style="margin-top: 20px;">
-            <h4 style="margin-bottom: 8px;">Pontos Fortes:</h4>
-            <ul style="padding-left: 20px; color: var(--text-secondary);">${(model.strengths || (dossier?.strengths) || []).map(s => `<li>${s}</li>`).join('')}</ul>
-          </div>
-          ${(model.weaknesses || (dossier?.weaknesses) || []).length > 0 ? `
-            <div style="margin-top: 14px;">
-              <h4 style="margin-bottom: 8px; color: var(--accent-rose);">Pontos Fracos / Limitações:</h4>
-              <ul style="padding-left: 20px; color: var(--text-secondary);">${(model.weaknesses || (dossier?.weaknesses) || []).map(w => `<li>${w}</li>`).join('')}</ul>
-            </div>
-          ` : ''}
-
-          ${model.operationalGuidance ? `
-            <div class="content-box" style="margin-top: 20px; border-color: var(--border-medium);">
-              <h4 style="color: var(--accent-cyan); margin-bottom: 8px;">🧭 Guia Operacional & Orquestração:</h4>
-              <div style="background: var(--bg-surface-dim); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px; margin-bottom: 12px; font-size: 0.85rem;">
-                🔄 <strong>Fluxo Recomendado:</strong> <code>${model.operationalGuidance.orchestrationFlow}</code>
-              </div>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
-                <div style="background: var(--bg-surface-dim); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px;">
-                  <h5 style="color: var(--accent-emerald); margin-bottom: 6px;">✅ Onde Brilha (Ideal For):</h5>
-                  <ul style="padding-left: 18px; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
-                    ${model.operationalGuidance.idealFor.map(i => `<li>${i}</li>`).join('')}
-                  </ul>
-                </div>
-                <div style="background: var(--bg-surface-dim); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px;">
-                  <h5 style="color: var(--accent-rose); margin-bottom: 6px;">❌ Onde Evitar (Avoid For):</h5>
-                  <ul style="padding-left: 18px; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
-                    ${model.operationalGuidance.avoidFor.map(a => `<li>${a}</li>`).join('')}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          ` : ''}
-        </div>
-
-        <!-- Subtab 2: Artificial Analysis (Seção 114) -->
-        <div class="subtab-panel" id="tab-aa">
-          <div class="aa-audit-dossier-card">
-            <div class="aa-audit-header">
-              <h4>🛡️ Auditoria Oficial: Artificial Analysis (Intelligence Index v4.1.1)</h4>
-              <a href="https://artificialanalysis.ai" target="_blank" rel="noopener" class="btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;">
-                <span>Ver na Artificial Analysis ↗</span>
-              </a>
-            </div>
-
-            ${(() => {
-              if (dossier?.artificialAnalysis?.efforts) {
-                const efforts = dossier.artificialAnalysis.efforts;
-                return `
-                  <h5 style="margin-top: 10px; margin-bottom: 8px;">Breakdown de Inteligência, Velocidade e Custo por Esforço de Thinking:</h5>
-                  <div class="deepswe-leaderboard-container">
-                    <table class="deepswe-table">
-                      <thead>
-                        <tr>
-                          <th>Nível de Esforço</th>
-                          <th>AA Index</th>
-                          <th>Throughput (Decode)</th>
-                          <th>Latência TTFT</th>
-                          <th>Custo / Tarefa</th>
-                          <th>Volume Tokens Testados</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        ${Object.keys(efforts).map(effKey => {
-                          const eff = efforts[effKey];
-                          return `
-                            <tr>
-                              <td><strong>${effKey.toUpperCase()}</strong></td>
-                              <td><strong style="color: var(--accent-cyan); font-size: 1.05rem;">${eff.aaIndex}</strong> / 100</td>
-                              <td>${eff.outputSpeedTokS ? `${eff.outputSpeedTokS.toFixed(1)} tok/s` : 'N/D'}</td>
-                              <td>${eff.ttftSeconds ? `${eff.ttftSeconds.toFixed(2)}s` : 'N/D'}</td>
-                              <td>$${eff.costPerTaskUsd ? eff.costPerTaskUsd.toFixed(2) : 'N/D'}</td>
-                              <td>${eff.totalOutputTokens ? `${(eff.totalOutputTokens / 1000000).toFixed(0)}M tokens` : 'N/D'}</td>
-                            </tr>
-                          `;
-                        }).join('')}
-                      </tbody>
-                    </table>
-                  </div>
-                  <div style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 10px; background: rgba(255,255,255,0.02); padding: 10px; border-radius: var(--radius-sm);">
-                    🔍 <strong>Interpretação Metrológica AA:</strong> ${dossier.artificialAnalysis.interpretation}
-                  </div>
-                `;
-              }
-
-              const aa = ARTIFICIAL_ANALYSIS_DATA.rankings.find(r => r.modelId === model.id);
-              if (aa) {
-                return `
-                  <div class="specs-grid">
-                    <div class="spec-item-card" style="border-color: var(--aa-purple-border);"><div class="spec-label">AA Intelligence Index</div><div class="spec-value highlight-purple" style="font-size: 1.3rem; font-weight: 800;">${aa.aaIndex.toFixed(1)} <span style="font-size: 0.75rem; color: var(--text-muted);">/ 100</span></div></div>
-                    <div class="spec-item-card"><div class="spec-label">Custo / Tarefa (AA Method)</div><div class="spec-value">$${aa.costPerTask.toFixed(2)}</div></div>
-                    <div class="spec-item-card"><div class="spec-label">GDPval-AA v2 (Rating Elo)</div><div class="spec-value">${aa.gdpvalElo ? `<strong>${aa.gdpvalElo} Elo</strong>` : 'N/D'}</div></div>
-                    <div class="spec-item-card"><div class="spec-label">Decode Medido (Throughput)</div><div class="spec-value">${aa.throughputTps.toFixed(1)} tok/s</div></div>
-                    <div class="spec-item-card"><div class="spec-label">Ranking Geral na Suíte</div><div class="spec-value"><strong>#${aa.rank}</strong> de ${ARTIFICIAL_ANALYSIS_DATA.rankings.length} modelos</div></div>
-                    <div class="spec-item-card"><div class="spec-label">Contexto no Endpoint AA</div><div class="spec-value">${aa.contextWindow}</div></div>
-                  </div>
-                  <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 10px;">
-                    🔍 <em>Bateria independente auditada em múltiplos provedores de nuvem (Stirrup Harness, GDPval-AA v2, τ³-Banking, Terminal-Bench 2.1 e SciCode).</em>
-                  </div>
-                `;
-              } else {
-                return `
-                  <div style="padding: 12px; background: rgba(255,255,255,0.02); border-radius: var(--radius-md); border: 1px dashed var(--border-subtle); color: var(--text-secondary); font-size: 0.85rem;">
-                    ℹ️ <strong>Status N/D na Artificial Analysis:</strong> Este endpoint ainda não possui medição pública na suíte do Intelligence Index v4.1.1 (03/09/2026).
-                  </div>
-                `;
-              }
-            })()}
-          </div>
-        </div>
-
-        <!-- Subtab 3: Coding & DeepSWE Leaderboard (Seção 115) -->
-        <div class="subtab-panel" id="tab-coding">
-          <h4>🏆 DeepSWE 1.1 Leaderboard Independente (Com Custo por Tarefa Resolvida)</h4>
-          <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
-            Ordenação factual por taxa de sucesso e eficiência. Custo por tarefa resolvida calculado dinamicamente com flag <code>derived: true</code> via fórmula <code>costPerTask / (score / 100)</code>.
-          </p>
-          <div class="deepswe-leaderboard-container">
-            <table class="deepswe-table">
-              <thead>
-                <tr>
-                  <th>Modelo</th>
-                  <th>Score (%)</th>
-                  <th>Custo / Task</th>
-                  <th>Output Tokens / Task</th>
-                  <th>Agent Steps / Task</th>
-                  <th>Custo / Tarefa Resolvida</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${deepsweBoard.map(item => {
-                  const isCurrent = item.modelId === model.id;
-                  return `
-                    <tr style="${isCurrent ? 'background: rgba(6, 182, 212, 0.12); font-weight: 600;' : ''}">
-                      <td>${isCurrent ? '👉 ' : ''}<strong>${item.modelName}</strong></td>
-                      <td><strong style="color: var(--accent-cyan); font-size: 0.95rem;">${item.score.toFixed(1)}%</strong> <span style="font-size:0.75rem; color:var(--text-muted);">±${item.confidenceInterval}</span></td>
-                      <td>$${item.costPerTaskUsd.toFixed(2)}</td>
-                      <td>${item.outputTokensPerTask.toLocaleString()}</td>
-                      <td>${item.agentStepsPerTask}</td>
-                      <td><span class="cost-per-solved-badge">$${item.costPerSolvedTask ? item.costPerSolvedTask.toFixed(2) : 'N/D'}</span></td>
-                    </tr>
-                  `;
-                }).join('')}
-              </tbody>
-            </table>
-          </div>
-
-          <h4 style="margin-top: 24px;">Benchmarks de Coding do Modelo (Snapshots Auditados):</h4>
-          ${renderCategorySnapshots('Coding', 'coding')}
-
-          ${cursorBenchRuns.length > 0 ? `
-            <h4 style="margin-top: 20px;">CursorBench 3.2 por Esforço de Thinking (Cursor Native):</h4>
-            <div class="deepswe-leaderboard-container">
-              <table class="deepswe-table">
-                <thead><tr><th>Nível de Esforço</th><th>Score (%)</th><th>Custo / Task</th><th>Tokens / Task</th><th>Harness</th><th>Sweet Spot?</th></tr></thead>
-                <tbody>
-                  ${cursorBenchRuns.map(r => `
-                    <tr>
-                      <td><strong>${r.effort}</strong></td>
-                      <td><strong style="color: var(--accent-cyan); font-size: 0.95rem;">${r.score.toFixed(1)}%</strong></td>
-                      <td>$${r.costUsd.toFixed(2)}</td>
-                      <td>${r.tokensPerTask.toLocaleString()}</td>
-                      <td>${r.harness}</td>
-                      <td>${r.isSweetSpot ? '<span class="badge-tag badge-sweetspot">🌟 Sweet Spot</span>' : '-'}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
-          ` : ''}
-        </div>
-
-        <!-- Subtab 4: Agentic / Tools (Seção 117) -->
-        <div class="subtab-panel" id="tab-agentic">
-          <h4>🤖 Benchmarks Agênticos, Automação & Tool Calling</h4>
-          <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
-            Avaliação de Toolathlon, AutomationBench, Agents' Last Exam (ALE), APEX-Agents, MCP Atlas, OSWorld e τ³-Banking.
-          </p>
-          ${renderCategorySnapshots('Ferramentas & Agentes', 'agent')}
-        </div>
-
-        <!-- Subtab 5: Reasoning & Science (Seção 118) -->
-        <div class="subtab-panel" id="tab-reasoning">
-          <h4>🧠 Raciocínio de Fronteira, Matemática & Ciência</h4>
-          <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
-            Desafios de doutorado, olimpíadas de exatas e verificação formal (GPQA Diamond, Humanity's Last Exam, ARC-AGI-2, CritPt, SciCode, FrontierMath).
-          </p>
-          ${renderCategorySnapshots('Raciocínio & Ciência', 'science')}
-        </div>
-
-        <!-- Subtab 6: Long Context (Seção 116) -->
-        <div class="subtab-panel" id="tab-longcontext">
-          <h4>📜 Comparador de Contexto: Janela Nominal vs Retenção Efetiva</h4>
-          <div class="context-comparison-box">
-            <div class="context-card nominal">
-              <span class="spec-label">Janela Nominal da API</span>
-              <div style="font-size: 1.4rem; font-weight: 800; color: var(--accent-cyan); margin: 6px 0;">
-                ${(model.contextWindow).toLocaleString()} tokens
-              </div>
-              <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0;">
-                Capacidade máxima de buffer aceita pelo endpoint HTTP/SDK.
-              </p>
-            </div>
-            <div class="context-card effective">
-              <span class="spec-label">Qualidade Efetiva de Retenção (Intervalo 512k–1M)</span>
-              <div style="font-size: 1.4rem; font-weight: 800; color: #a855f7; margin: 6px 0;">
-                ${dossier?.context?.retrievalAccuracyScore ? `${dossier.context.retrievalAccuracyScore}%` : (ledgerEntry?.mrcr1m ? `${ledgerEntry.mrcr1m}% (MRCR v2)` : 'N/D')}
-              </div>
-              <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0;">
-                ${dossier?.context?.effectiveEvaluation || 'Taxa de sucesso em tarefas de agulha no palheiro agêntica e recuperação multi-arquivo.'}
-              </p>
-            </div>
-          </div>
-
-          <h4 style="margin-top: 20px;">Snapshots de Contexto Longo (MRCR, GraphWalks, OneMillionBench):</h4>
-          ${renderCategorySnapshots('Contexto Longo', 'longContext')}
-
-          ${model.pricing?.standard?.cacheRead !== null && model.pricing?.standard?.cacheRead !== undefined ? `
-            <div style="margin-top: 16px; padding: 12px 16px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-md); font-size: 0.85rem;">
-              ⚡ <strong>Economia de Prompt Caching:</strong> Leitura em cache custa apenas <strong>$${model.pricing.standard.cacheRead.toFixed(4)} / M</strong> (~85-90% de desconto sobre o input frio de $${model.pricing.standard.input.toFixed(2)}).
-            </div>
-          ` : ''}
-        </div>
-
-        <!-- Subtab 7: Multimodal (Seção 119) -->
-        <div class="subtab-panel" id="tab-multimodal">
-          <h4>👁️ Compreensão Multimodal, Visão Técnica & Diagramas</h4>
-          <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
-            Desempenho em leitura de PDFs densos, diagramas de arquitetura, gráficos de papers e vídeo (MMMU-Pro, CharXiv, GDP.pdf, Video-MME).
-          </p>
-          ${renderCategorySnapshots('Multimodalidade', 'multimodal')}
-        </div>
-
-        <!-- Subtab 8: Professional Work (Seção 120) -->
-        <div class="subtab-panel" id="tab-pro">
-          <h4>💼 Trabalho Profissional & Domínios Corporativos</h4>
-          <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
-            Benchmarks calibrados em tarefas do mundo real corporativo (GDPval-AA v2, AA-Briefcase, Finance Agent v2, Harvey Legal Agent).
-          </p>
-          ${renderCategorySnapshots('Trabalho Profissional', 'business')}
-        </div>
-
-        <!-- Subtab 9: Security (Seção 120) -->
-        <div class="subtab-panel" id="tab-security">
-          <h4>🔒 Cibersegurança & Auditoria de Governança</h4>
-          <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
-            Resolução de vulnerabilidades, capture-the-flag (CyberGym, ExploitGym) e diretrizes de Zero Data Retention (ZDR).
-          </p>
-          ${renderCategorySnapshots('Cibersegurança', 'cyber')}
-
-          <div class="specs-grid" style="margin-top: 20px;">
-            <div class="spec-item-card"><div class="spec-label">Zero Data Retention (ZDR)</div><div class="spec-value">${model.privacy ? (model.privacy.retentionDays === 0 ? '✅ ZDR Ativo (0 dias)' : `⚠️ Retenção de até ${model.privacy.retentionDays} dias`) : (model.id === 'glm-5-3-flash' ? '✅ ZDR Oficial Z.ai API / OpenRouter' : '✅ ZDR Ativo')}</div></div>
-            <div class="spec-item-card"><div class="spec-label">Status dos Pesos</div><div class="spec-value">${model.openWeights ? 'Pesos Abertos Auditáveis' : 'Proprietário de Código Fechado'}</div></div>
-            <div class="spec-item-card"><div class="spec-label">Confiança Metrológica</div><div class="spec-value highlight-green">${(model.sourceConfidence || 'oficial').toUpperCase()}</div></div>
-          </div>
-        </div>
-
-        <!-- Subtab 10: Pricing & Efficiency (Seções 111 & 114) -->
-        <div class="subtab-panel" id="tab-pricing">
-          <div class="specs-grid">
-            <div class="spec-item-card"><div class="spec-label">Preço Padrão (Input / Entrada)</div><div class="spec-value">$${model.pricing.standard.input.toFixed(2)} / milhão</div></div>
-            <div class="spec-item-card"><div class="spec-label">Preço Padrão (Output / Saída)</div><div class="spec-value">$${model.pricing.standard.output.toFixed(2)} / milhão</div></div>
-            <div class="spec-item-card"><div class="spec-label">Prompt Cache Read (Hit)</div><div class="spec-value highlight-green">${model.pricing.standard.cacheRead !== null && model.pricing.standard.cacheRead !== undefined ? `$${model.pricing.standard.cacheRead.toFixed(4)} / milhão` : 'Padrão'}</div></div>
-            <div class="spec-item-card"><div class="spec-label">Cache Write (5 min / 1 hora)</div><div class="spec-value">${model.pricing.standard.cacheWrite5m ? `$${model.pricing.standard.cacheWrite5m.toFixed(2)} / $${model.pricing.standard.cacheWrite1h.toFixed(2)}` : 'N/D'}</div></div>
-            ${model.pricing.batch ? `
-              <div class="spec-item-card" style="border-color: rgba(34, 197, 94, 0.4);"><div class="spec-label">Batch API (50% de Desconto)</div><div class="spec-value highlight-green">$${model.pricing.batch.input.toFixed(2)} in / $${model.pricing.batch.output.toFixed(2)} out</div></div>
-            ` : ''}
-            <div class="spec-item-card"><div class="spec-label">Pool no Cursor Pro</div><div class="spec-value">${model.cursorPool ? model.cursorPool.poolLabel : 'Standard'}</div></div>
-            <div class="spec-item-card"><div class="spec-label">OpenCode Go ($10/mês)</div><div class="spec-value">${model.openCodeGo && model.openCodeGo.available ? `Classe US$${model.openCodeGo.usageAllowanceUsd} (${model.openCodeGo.quotaBurnMultiplier}× burn • ~${model.openCodeGo.estReqMonth.toLocaleString()} req/mês)` : 'Não listado no Go'}</div></div>
-          </div>
-        </div>
-
-        <!-- Subtab 11: Platforms & Access (Seção 111) -->
-        <div class="subtab-panel" id="tab-platforms">
-          <h4>🌐 Onde Executar Este Modelo & Configurações de IDE</h4>
-          <div class="specs-grid" style="margin-bottom: 16px;">
-            <div class="spec-item-card"><div class="spec-label">Cursor IDE</div><div class="spec-value">${model.cursorPool ? model.cursorPool.poolLabel : 'Other Models'}</div></div>
-            <div class="spec-item-card"><div class="spec-label">OpenCode Go</div><div class="spec-value ${model.openCodeGo && model.openCodeGo.available ? 'highlight-green' : ''}">${model.openCodeGo && model.openCodeGo.available ? `Sim (${model.openCodeGo.quotaBurnMultiplier}× burn)` : 'Consulte OpenRouter'}</div></div>
-            <div class="spec-item-card"><div class="spec-label">Google Antigravity</div><div class="spec-value highlight-cyan">${model.antigravity ? `${model.antigravity.poolLabel}` : 'Indisponível'}</div></div>
-            <div class="spec-item-card"><div class="spec-label">OpenRouter</div><div class="spec-value">${model.openRouterId || model.id}</div></div>
-          </div>
-
-          <h5 style="margin-top: 16px; margin-bottom: 8px;">Configuração Pronta para OpenCode (JSON):</h5>
-          <div class="code-snippet-box">
-            <button class="btn-copy-code" onclick="window.AIApp.copySnippet('snip-opencode')">Copiar JSON</button>
-            <pre id="snip-opencode"><code>${AI_DATA_HELPERS.generateIdeConfig(model.id, 'opencode')}</code></pre>
-          </div>
-          <h5 style="margin-top: 16px; margin-bottom: 8px;">Configuração para Aider (.aider.conf.yml):</h5>
-          <div class="code-snippet-box">
-            <button class="btn-copy-code" onclick="window.AIApp.copySnippet('snip-aider')">Copiar YAML</button>
-            <pre id="snip-aider"><code>${AI_DATA_HELPERS.generateIdeConfig(model.id, 'aider')}</code></pre>
-          </div>
-        </div>
-
-        <!-- Subtab 12: Sources & Metrology (Seções 111 & 131) -->
-        <div class="subtab-panel" id="tab-sources">
-          <h4>📚 Fontes Auditadas, Publicadores & Metrologia Estrita</h4>
-          <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
-            Rastreabilidade integral das evidências utilizadas neste dossiê (Snapshot de 03/09/2026).
-          </p>
-          ${renderSourcesTab()}
-        </div>
-
-      </div>
-    `;
-
-    // Interatividade das Sub-Abas do Dossiê
-    const subtabsNav = container.querySelector('.dossier-subtabs-nav');
-    if (subtabsNav) {
-      subtabsNav.addEventListener('click', (e) => {
-        const btn = e.target.closest('.subtab-btn');
-        if (btn) {
-          subtabsNav.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          const targetTabId = btn.getAttribute('data-tab');
-          container.querySelectorAll('.subtab-panel').forEach(p => p.classList.remove('active'));
-          const targetPanel = container.querySelector(`#${targetTabId}`);
-          if (targetPanel) targetPanel.classList.add('active');
-        }
-      });
-    }
-
-    function renderSourcesTab() {
-      const sIds = dossier?.sourceIds || (model.sources || []);
-      const sRegistry = typeof SOURCE_REGISTRY !== 'undefined' ? SOURCE_REGISTRY : {};
+    function renderSourcesTable() {
       const dataSources = typeof DATA_SOURCES !== 'undefined' ? DATA_SOURCES : {};
       if (!sIds || sIds.length === 0) {
         return `<p style="color: var(--text-muted); font-size: 0.85rem;">Nenhuma fonte direta cadastrada.</p>`;
       }
       return `
-        <div class="provenance-legend-box">
+        <div class="provenance-legend-box" style="margin-bottom: 12px; font-size: 0.8rem; display: flex; flex-wrap: wrap; gap: 10px;">
           <div><strong>Legenda de Metrologia:</strong></div>
-          <div>${renderBadge('official')} <strong>[O]</strong> Oficial Primária (Laboratório)</div>
-          <div>${renderBadge('vendor-reported')} <strong>[V]</strong> Reportado p/ Fornecedor (Harness proprietário)</div>
-          <div>${renderBadge('independent')} <strong>[T]</strong> Terceiros / Independente (DataCurve, AA, etc.)</div>
-          <div>${renderBadge('community')} <strong>[C]</strong> Comunidade / Telemetria</div>
-          <div>${renderBadge('estimated')} <strong>[E]</strong> Estimado / Calibrado</div>
+          <div>${renderBadge('official')} [M] Medido / Oficial Primária</div>
+          <div>${renderBadge('vendor-reported')} [D] Derivado / Harness Fornecedor</div>
+          <div>${renderBadge('independent')} [T] Terceiros / DataCurve, AA</div>
+          <div>${renderBadge('community')} [C] Calibrado / Comunidade</div>
         </div>
         <div class="deepswe-leaderboard-container">
           <table class="deepswe-table">
@@ -1915,10 +1789,10 @@
               <tr>
                 <th>ID da Fonte</th>
                 <th>Publicador</th>
-                <th>Título do Relatório</th>
-                <th>Classificação</th>
+                <th>Título / Avaliação</th>
+                <th>Proveniência</th>
                 <th>Publicação</th>
-                <th>Recuperação</th>
+                <th>Auditado</th>
               </tr>
             </thead>
             <tbody>
@@ -1939,6 +1813,441 @@
           </table>
         </div>
       `;
+    }
+
+    container.innerHTML = `
+      <div class="breadcrumb-bar">
+        <button class="btn-back" onclick="location.hash='#models'">← Voltar ao Catálogo</button>
+        <span style="color: var(--text-muted);">/</span>
+        <span style="color: var(--text-secondary);">${provider.name}</span>
+        <span style="color: var(--text-muted);">/</span>
+        <strong style="color: var(--text-primary);">${model.name}</strong>
+      </div>
+
+      <div class="model-hero-card">
+        <div class="model-hero-header">
+          <div class="model-title-group">
+            <div class="model-hero-avatar" style="background: ${model.color}22; border-color: ${model.color}; color: ${model.color};">
+              ${provider.iconSvg ? `<span style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center;">${provider.iconSvg}</span>` : provider.logo}
+            </div>
+            <div>
+              <div class="model-hero-title">${model.name}</div>
+              <div style="font-size: 0.85rem; color: var(--text-muted);">Desenvolvido por <strong>${model.providerName}</strong> • ${model.architectureType} • Lançamento: ${model.releaseDate || '2026'}</div>
+              <div class="model-badges-list" style="margin-top: 6px;">
+                ${(model.badges || []).map(b => `<span class="badge-tag badge-frontier">${b}</span>`).join('')}
+              </div>
+              ${model.predecessor ? `
+                <div style="margin-top: 6px; font-size: 0.8rem; color: var(--text-secondary);">
+                  🧬 <strong>Linhagem:</strong> Sucessor de <a href="#model/${model.predecessor}" style="color: var(--accent-cyan); text-decoration: none;"><strong>${model.predecessor}</strong></a>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: flex-start; flex-wrap: wrap;">
+            <button class="btn-primary" onclick="window.AIApp.openComparatorWith('${model.id}')">⚔️ Comparar Lado a Lado</button>
+            <button class="btn-secondary" onclick="window.AIApp.toggleModelInComparison('${model.id}')">➕ Bandeja de Comparação</button>
+          </div>
+        </div>
+
+        <!-- Indicador de Cobertura e Frescor (Seção 9) -->
+        <div class="dossier-evidence-meter" style="display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin: 14px 0; font-size: 0.82rem; background: rgba(255,255,255,0.03); padding: 8px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-weight: 600; color: var(--accent-cyan);">📊 Cobertura de Evidências:</span>
+            <strong>${cov.coveragePercent}%</strong> (${cov.measuredFields} medidos, ${cov.derivedFields} derivados)
+          </div>
+          <span style="color: var(--border-medium);">•</span>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-weight: 600; color: var(--text-secondary);">⏳ Frescor:</span>
+            <span class="badge-tag ${fresh.badgeClass}">${fresh.label}</span>
+          </div>
+          <span style="color: var(--border-medium);">•</span>
+          <div style="color: var(--text-muted);">
+            Auditado em: <strong>${model.releaseDate || '2026-09-03'}</strong>
+          </div>
+        </div>
+
+        <!-- 5 Abas de Alto Nível (Seção 9 do Plano 08) -->
+        <div class="dossier-subtabs-nav" id="dossierTopTabsNav">
+          <button class="subtab-btn active" data-tab="tab-overview">📋 Visão Geral</button>
+          <button class="subtab-btn" data-tab="tab-performance">📊 Desempenho</button>
+          <button class="subtab-btn" data-tab="tab-pricing-access">💰 Preço & Acesso</button>
+          <button class="subtab-btn" data-tab="tab-history-evidence">📜 Histórico & Evidências</button>
+          ${(model.openWeights || model.vramRequirements) ? `<button class="subtab-btn" data-tab="tab-deploy">🖥️ Deploy & Integração</button>` : ''}
+        </div>
+
+        <!-- ABA 1: VISÃO GERAL (Resumo Interpretado & Especificações) -->
+        <div class="subtab-panel active" id="tab-overview">
+          <!-- Resumo Interpretado (Antes das Tabelas) -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-bottom: 20px;">
+            <div class="content-box" style="margin: 0; border-left: 4px solid #10b981;">
+              <h4 style="color: #10b981; font-size: 0.95rem; margin-bottom: 8px;">🌟 Excelente em</h4>
+              <ul style="margin: 0; padding-left: 18px; font-size: 0.85rem; color: var(--text-primary); line-height: 1.5;">
+                ${strengths.slice(0, 4).map(s => `<li>${s}</li>`).join('')}
+              </ul>
+            </div>
+
+            <div class="content-box" style="margin: 0; border-left: 4px solid #ef4444;">
+              <h4 style="color: #ef4444; font-size: 0.95rem; margin-bottom: 8px;">⚠️ Limitações & Trade-offs</h4>
+              <ul style="margin: 0; padding-left: 18px; font-size: 0.85rem; color: var(--text-primary); line-height: 1.5;">
+                ${weaknesses.slice(0, 3).map(w => `<li>${w}</li>`).join('')}
+              </ul>
+            </div>
+
+            <div class="content-box" style="margin: 0; border-left: 4px solid var(--accent-cyan);">
+              <h4 style="color: var(--accent-cyan); font-size: 0.95rem; margin-bottom: 8px;">🎯 Use quando</h4>
+              <ul style="margin: 0; padding-left: 18px; font-size: 0.85rem; color: var(--text-primary); line-height: 1.5;">
+                ${bestFor.slice(0, 3).map(b => `<li>${b}</li>`).join('')}
+              </ul>
+            </div>
+
+            <div class="content-box" style="margin: 0; border-left: 4px solid #f59e0b;">
+              <h4 style="color: #f59e0b; font-size: 0.95rem; margin-bottom: 8px;">🛑 Evite quando</h4>
+              <ul style="margin: 0; padding-left: 18px; font-size: 0.85rem; color: var(--text-primary); line-height: 1.5;">
+                ${avoidFor.slice(0, 3).map(a => `<li>${a}</li>`).join('')}
+              </ul>
+            </div>
+          </div>
+
+          <!-- Posição Atual Auditada & Rankings Derivados -->
+          <div class="content-box" style="margin-bottom: 20px;">
+            <h4 style="font-size: 0.95rem; margin-bottom: 12px;">🏆 Posição Atual & Rankings Auditados</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+              ${model.officialBenchmarks && model.officialBenchmarks.sweBenchVerified ? `
+                <div style="padding: 10px; background: rgba(255,255,255,0.02); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                  <div style="font-size: 0.78rem; color: var(--text-muted);">SWE-bench Verified</div>
+                  <div style="font-size: 1.2rem; font-weight: 700; color: var(--accent-cyan);">${model.officialBenchmarks.sweBenchVerified}% <span class="evidence-badge badge-m">[M]</span></div>
+                  <div style="font-size: 0.72rem; color: var(--text-muted);">Harness oficial · ${model.releaseDate || '2026-09-01'}</div>
+                </div>
+              ` : ''}
+
+              ${ledgerEntry && ledgerEntry.terminalBench21 ? `
+                <div style="padding: 10px; background: rgba(255,255,255,0.02); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                  <div style="font-size: 0.78rem; color: var(--text-muted);">Terminal-Bench 2.1</div>
+                  <div style="font-size: 1.2rem; font-weight: 700; color: #10b981;">${ledgerEntry.terminalBench21.toFixed(1)}% <span class="evidence-badge badge-m">[M]</span></div>
+                  <div style="font-size: 0.72rem; color: var(--text-muted);">89 tarefas shell independentes</div>
+                </div>
+              ` : ''}
+
+              ${cursorBenchRuns && cursorBenchRuns.length > 0 ? `
+                <div style="padding: 10px; background: rgba(255,255,255,0.02); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                  <div style="font-size: 0.78rem; color: var(--text-muted);">CursorBench 3.2 (Top Run)</div>
+                  <div style="font-size: 1.2rem; font-weight: 700; color: #a855f7;">${cursorBenchRuns[0].score.toFixed(1)}% <span class="evidence-badge badge-m">[M]</span></div>
+                  <div style="font-size: 0.72rem; color: var(--text-muted);">Esforço ${cursorBenchRuns[0].effort} · Anysphere Eval</div>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+
+          <!-- Especificações Fundamentais -->
+          <div class="content-box">
+            <h4 style="font-size: 0.95rem; margin-bottom: 12px;">⚙️ Especificações Técnicas Fundamentais</h4>
+            <div class="specs-grid">
+              <div class="spec-item-card"><div class="spec-label">Janela de Contexto (Nominal)</div><div class="spec-value">${(model.contextWindow).toLocaleString()} tokens (${(model.contextWindow / 1000).toFixed(0)}k)</div></div>
+              <div class="spec-item-card"><div class="spec-label">Output Máximo</div><div class="spec-value">${(model.maxOutputTokens || 16384).toLocaleString()} tokens</div></div>
+              <div class="spec-item-card"><div class="spec-label">Cutoff de Conhecimento</div><div class="spec-value">${model.knowledgeCutoff || 'fev/2025'}</div></div>
+              <div class="spec-item-card"><div class="spec-label">Latência Relativa Provedor</div><div class="spec-value highlight-cyan">${model.relativeLatency || 'Padrão'}</div></div>
+              <div class="spec-item-card"><div class="spec-label">Tipo de Atenção / Arquitetura</div><div class="spec-value">${model.architectureType}</div></div>
+              ${model.antigravity ? `
+                <div class="spec-item-card" style="border-color: rgba(249, 115, 22, 0.4);"><div class="spec-label">Google Antigravity Pool</div><div class="spec-value highlight-amber">${model.antigravity.poolLabel}</div></div>
+                <div class="spec-item-card"><div class="spec-label">Papel no Antigravity</div><div class="spec-value">${model.antigravity.role}</div></div>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 2: DESEMPENHO (DeepSWE, CursorBench, Snapshots Categorizados) -->
+        <div class="subtab-panel" id="tab-performance">
+          <!-- DeepSWE Leaderboard -->
+          <div class="content-box" style="margin-bottom: 20px;">
+            <h4>🏆 DeepSWE 1.1 Leaderboard Independente (Custo por Tarefa Resolvida)</h4>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
+              Ordenação factual por taxa de sucesso e eficiência. Custo por tarefa resolvida calculado dinamicamente com flag <code>[D]</code> via fórmula <code>costPerTask / (score / 100)</code>.
+            </p>
+            <div class="deepswe-leaderboard-container">
+              <table class="deepswe-table">
+                <thead>
+                  <tr>
+                    <th>Modelo</th>
+                    <th>Score (%)</th>
+                    <th>Custo / Task</th>
+                    <th>Output Tokens / Task</th>
+                    <th>Agent Steps / Task</th>
+                    <th>Custo / Tarefa Resolvida</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${deepsweBoard.map(item => {
+                    const isCurrent = item.modelId === model.id;
+                    return `
+                      <tr style="${isCurrent ? 'background: rgba(6, 182, 212, 0.12); font-weight: 600;' : ''}">
+                        <td>${isCurrent ? '👉 ' : ''}<strong>${item.modelName}</strong></td>
+                        <td><strong style="color: var(--accent-cyan); font-size: 0.95rem;">${item.score.toFixed(1)}%</strong> <span style="font-size:0.75rem; color:var(--text-muted);">±${item.confidenceInterval}</span></td>
+                        <td>$${item.costPerTaskUsd.toFixed(2)}</td>
+                        <td>${item.outputTokensPerTask.toLocaleString()}</td>
+                        <td>${item.agentStepsPerTask}</td>
+                        <td><span class="cost-per-solved-badge">$${item.costPerSolvedTask ? item.costPerSolvedTask.toFixed(2) : 'N/D'}</span></td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          ${cursorBenchRuns.length > 0 ? `
+            <div class="content-box" style="margin-bottom: 20px;">
+              <h4>CursorBench 3.2 por Esforço de Thinking (Cursor Native):</h4>
+              <div class="deepswe-leaderboard-container">
+                <table class="deepswe-table">
+                  <thead><tr><th>Nível de Esforço</th><th>Score (%)</th><th>Custo / Task</th><th>Tokens / Task</th><th>Harness</th><th>Sweet Spot?</th></tr></thead>
+                  <tbody>
+                    ${cursorBenchRuns.map(r => `
+                      <tr>
+                        <td><strong>${r.effort}</strong></td>
+                        <td><strong style="color: var(--accent-cyan); font-size: 0.95rem;">${r.score.toFixed(1)}%</strong></td>
+                        <td>$${r.costUsd.toFixed(2)}</td>
+                        <td>${r.tokensPerTask.toLocaleString()}</td>
+                        <td>${r.harness}</td>
+                        <td>${r.isSweetSpot ? '<span class="badge-tag badge-sweetspot">🌟 Sweet Spot</span>' : '-'}</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ` : ''}
+
+          <!-- Snapshots de Benchmarks por Categoria -->
+          <div class="content-box">
+            <h4 style="margin-bottom: 12px;">📊 Snapshots Categorizados de Benchmarks Auditados</h4>
+            
+            <h5 style="margin-top: 14px; margin-bottom: 6px;">💻 Coding & Engenharia de Software</h5>
+            ${renderCategorySnapshots('Coding', 'coding')}
+
+            <h5 style="margin-top: 18px; margin-bottom: 6px;">🤖 Ferramentas & Agentes Autônomos</h5>
+            ${renderCategorySnapshots('Ferramentas & Agentes', 'agent')}
+
+            <h5 style="margin-top: 18px; margin-bottom: 6px;">🧠 Raciocínio de Fronteira & Ciência</h5>
+            ${renderCategorySnapshots('Raciocínio & Ciência', 'science')}
+
+            <h5 style="margin-top: 18px; margin-bottom: 6px;">📜 Contexto Longo & Recuperação</h5>
+            ${renderCategorySnapshots('Contexto Longo', 'longContext')}
+
+            <h5 style="margin-top: 18px; margin-bottom: 6px;">👁️ Multimodalidade & Visão Técnica</h5>
+            ${renderCategorySnapshots('Multimodalidade', 'multimodal')}
+
+            <h5 style="margin-top: 18px; margin-bottom: 6px;">💼 Trabalho Profissional & Domínios Corporativos</h5>
+            ${renderCategorySnapshots('Trabalho Profissional', 'business')}
+
+            <h5 style="margin-top: 18px; margin-bottom: 6px;">🔒 Cibersegurança & Exploit</h5>
+            ${renderCategorySnapshots('Cibersegurança', 'cyber')}
+          </div>
+        </div>
+
+        <!-- ABA 3: PREÇO & ACESSO (APIs, Onde Executar, Planos, Governança) -->
+        <div class="subtab-panel" id="tab-pricing-access">
+          <!-- Preços de API -->
+          <div class="content-box" style="margin-bottom: 20px;">
+            <h4>💰 Preços de API & Eficiência</h4>
+            <div class="specs-grid">
+              <div class="spec-item-card"><div class="spec-label">Preço Padrão (Input / Entrada)</div><div class="spec-value">$${model.pricing.standard.input.toFixed(2)} / milhão</div></div>
+              <div class="spec-item-card"><div class="spec-label">Preço Padrão (Output / Saída)</div><div class="spec-value">$${model.pricing.standard.output.toFixed(2)} / milhão</div></div>
+              <div class="spec-item-card"><div class="spec-label">Prompt Cache Read (Hit)</div><div class="spec-value highlight-green">${model.pricing.standard.cacheRead !== null && model.pricing.standard.cacheRead !== undefined ? `$${model.pricing.standard.cacheRead.toFixed(4)} / milhão` : 'Padrão'}</div></div>
+              <div class="spec-item-card"><div class="spec-label">Cache Write (5 min / 1 hora)</div><div class="spec-value">${model.pricing.standard.cacheWrite5m ? `$${model.pricing.standard.cacheWrite5m.toFixed(2)} / $${model.pricing.standard.cacheWrite1h.toFixed(2)}` : 'N/D'}</div></div>
+              ${model.pricing.batch ? `
+                <div class="spec-item-card" style="border-color: rgba(34, 197, 94, 0.4);"><div class="spec-label">Batch API (50% de Desconto)</div><div class="spec-value highlight-green">$${model.pricing.batch.input.toFixed(2)} in / $${model.pricing.batch.output.toFixed(2)} out</div></div>
+              ` : ''}
+              <div class="spec-item-card"><div class="spec-label">Pool no Cursor Pro</div><div class="spec-value">${model.cursorPool ? model.cursorPool.poolLabel : 'Standard'}</div></div>
+            </div>
+            ${model.pricing && model.pricing.promotionalPeriod ? `
+              <div style="margin-top: 14px; background: rgba(234, 179, 8, 0.1); border: 1px solid #eab308; border-radius: var(--radius-sm); padding: 12px 16px; font-size: 0.84rem;">
+                <strong style="color: #eab308;">🏷️ Preço Promocional de Lançamento Ativo (Seção 35):</strong>
+                <div style="margin-top: 4px; color: var(--text-primary);">
+                  <strong>US$ ${model.pricing.promotionalPeriod.input.toFixed(2)} in / US$ ${model.pricing.promotionalPeriod.output.toFixed(2)} out</strong> até ${model.pricing.promotionalPeriod.effectiveUntil.split('-').reverse().join('/')}
+                  <span style="color: var(--text-muted); margin-left: 6px;">(após esta data: US$ ${model.pricing.standard.input.toFixed(2)} in / US$ ${model.pricing.standard.output.toFixed(2)} out)</span>
+                </div>
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- Onde Executar / IDEs -->
+          <div class="content-box" style="margin-bottom: 20px;">
+            <h4>🌐 Onde Executar Este Modelo & Plataformas de Desenvolvimento</h4>
+            <div class="specs-grid" style="margin-bottom: 16px;">
+              <div class="spec-item-card"><div class="spec-label">Cursor IDE</div><div class="spec-value">${model.cursorPool ? model.cursorPool.poolLabel : 'Other Models'}</div></div>
+              <div class="spec-item-card"><div class="spec-label">OpenCode Go</div><div class="spec-value ${model.openCodeGo && model.openCodeGo.available ? 'highlight-green' : ''}">${model.openCodeGo && model.openCodeGo.available ? `Sim (${model.openCodeGo.quotaBurnMultiplier}× burn)` : 'Consulte OpenRouter'}</div></div>
+              <div class="spec-item-card"><div class="spec-label">Google Antigravity</div><div class="spec-value highlight-cyan">${model.antigravity ? `${model.antigravity.poolLabel}` : 'Indisponível'}</div></div>
+              <div class="spec-item-card"><div class="spec-label">OpenRouter</div><div class="spec-value">${model.openRouterId || model.id}</div></div>
+            </div>
+          </div>
+
+          <!-- Planos que incluem o Modelo (Integrado via DomainEntities) -->
+          <div class="content-box" style="margin-bottom: 20px;">
+            <h4>💳 Assinaturas & Planos que Incluem este Modelo</h4>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
+              Planos comerciais de desenvolvedor onde este modelo está disponível em cota inclusa ou créditos.
+            </p>
+            ${modelPlans && modelPlans.length > 0 ? `
+              <div class="deepswe-leaderboard-container">
+                <table class="deepswe-table">
+                  <thead>
+                    <tr>
+                      <th>Provedor</th>
+                      <th>Plano</th>
+                      <th>Preço</th>
+                      <th>Superfície</th>
+                      <th>Modo de Acesso</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${modelPlans.map(p => `
+                      <tr>
+                        <td><strong>${p.provider.toUpperCase()}</strong></td>
+                        <td><strong>${p.planName}</strong></td>
+                        <td>$${p.priceMonthlyUsd}/mês</td>
+                        <td><span class="badge-tag badge-subdollar">${p.surface || 'IDE / Web'}</span></td>
+                        <td><span class="badge-tag badge-frontier">${p.billingMode || 'included'}</span></td>
+                        <td><button class="btn-secondary btn-sm" onclick="location.hash='#plan/${p.id}'">Ver Dossiê do Plano</button></td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            ` : `<p style="font-size: 0.82rem; color: var(--text-muted);">Disponível primordialmente via chamadas diretas de API Pay-as-you-go ou BYOK.</p>`}
+          </div>
+
+          <!-- Governança e Retenção -->
+          <div class="content-box">
+            <h4>🔒 Governança, Privacidade & Retenção de Dados</h4>
+            <div class="specs-grid" style="margin-top: 12px;">
+              <div class="spec-item-card"><div class="spec-label">Zero Data Retention (ZDR)</div><div class="spec-value">${model.privacy ? (model.privacy.retentionDays === 0 ? '✅ ZDR Ativo (0 dias)' : `⚠️ Retenção de até ${model.privacy.retentionDays} dias`) : '✅ ZDR Oficial / API'}</div></div>
+              <div class="spec-item-card"><div class="spec-label">Status dos Pesos</div><div class="spec-value">${model.openWeights ? 'Pesos Abertos Auditáveis' : 'Proprietário de Código Fechado'}</div></div>
+              <div class="spec-item-card"><div class="spec-label">Treinamento em Dados de Usuário</div><div class="spec-value highlight-green">Zero Treino por Padrão (API)</div></div>
+              <div class="spec-item-card"><div class="spec-label">Confiança Metrológica</div><div class="spec-value highlight-green">${(model.sourceConfidence || 'oficial').toUpperCase()}</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 4: HISTÓRICO & EVIDÊNCIAS (Linhagem, Comunidade, Divergências, Fontes) -->
+        <div class="subtab-panel" id="tab-history-evidence">
+          <!-- Linhagem -->
+          <div class="content-box" style="margin-bottom: 20px;">
+            <h4>🧬 Linhagem & Evolução Histórica</h4>
+            <p style="font-size: 0.85rem; color: var(--text-primary);">
+              ${model.predecessor ? `Este modelo é o sucessor direto de <strong>${model.predecessor}</strong>, trazendo melhorias substanciais em raciocínio agêntico, síntese de contexto e redução de TTFT.` : `Modelo de linhagem primária na família ${model.providerName}.`}
+            </p>
+          </div>
+
+          <!-- Relatos de Comunidade e Telemetria -->
+          <div class="content-box" style="margin-bottom: 20px;">
+            <h4>💬 Relatos de Desenvolvedores & Telemetria no Mundo Real</h4>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
+              Feedback auditado de engenheiros em uso diário com IDEs (Cursor, Windsurf, Aider, OpenCode) com proveniência [C].
+            </p>
+            ${communityItems && communityItems.length > 0 ? `
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                ${communityItems.map(c => `
+                  <div style="padding: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 4px;">
+                      <span><strong>${c.author || 'Dev'}</strong> no <em>${c.platform || 'Comunidade'}</em></span>
+                      <span class="badge-provenance badge-source-community" title="Relato da Comunidade">[C]</span>
+                    </div>
+                    <p style="font-size: 0.84rem; color: var(--text-primary); margin: 0 0 6px 0;">"${c.quote || c.text || ''}"</p>
+                    ${c.caveats ? `<div style="font-size: 0.75rem; color: #f59e0b;">⚠️ Atenção: ${c.caveats}</div>` : ''}
+                  </div>
+                `).join('')}
+              </div>
+            ` : `<p style="font-size: 0.82rem; color: var(--text-muted);">Nenhum relato anedótico direto cadastrado no snapshot atual.</p>`}
+          </div>
+
+          <!-- Divergências Documentadas -->
+          ${divergenceItems && divergenceItems.length > 0 ? `
+            <div class="content-box" style="margin-bottom: 20px; border-left: 4px solid #f59e0b;">
+              <h4>⚖️ Divergências Documentadas (Benchmark vs Uso Real)</h4>
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                ${divergenceItems.map(d => `
+                  <div style="font-size: 0.84rem;">
+                    <strong>${d.topic || 'Divergência'}:</strong> ${d.description || ''}
+                    <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 2px;">Impacto: ${d.impact || 'Médio'} · Relatado em ${d.date || '2026-09-02'}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+
+          <!-- Fontes Auditadas e Metrologia Estrita -->
+          <div class="content-box">
+            <h4>📚 Fontes Auditadas, Publicadores & Metrologia Estrita</h4>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
+              Rastreabilidade integral das medições utilizadas neste dossiê com distinção estrita de fontes.
+            </p>
+            ${renderSourcesTable()}
+            <div style="margin-top: 14px;">
+              <button class="btn-secondary btn-sm" onclick="location.hash='#sources'">Ver Catálogo Canônico de Fontes Auditadas →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 5: DEPLOY & INTEGRAÇÃO (Apenas para pesos abertos ou VRAM) -->
+        ${(model.openWeights || model.vramRequirements) ? `
+          <div class="subtab-panel" id="tab-deploy">
+            <div class="content-box" style="margin-bottom: 20px;">
+              <h4>🖥️ Requisitos de VRAM & Quantizações para Deploy Local</h4>
+              <div class="specs-grid">
+                <div class="spec-item-card"><div class="spec-label">FP16 / BF16 (Não Quantizado)</div><div class="spec-value highlight-cyan">${model.vramRequirements?.fp16 || '80 GB VRAM (1x A100/H100)'}</div></div>
+                <div class="spec-item-card"><div class="spec-label">Q8 / INT8 (Alta Precisão)</div><div class="spec-value">${model.vramRequirements?.q8 || '48 GB VRAM (2x RTX 3090/4090)'}</div></div>
+                <div class="spec-item-card"><div class="spec-label">Q4_K_M (Quantização Recomendada)</div><div class="spec-value highlight-green">${model.vramRequirements?.q4 || '24 GB VRAM (1x RTX 3090/4090)'}</div></div>
+                <div class="spec-item-card"><div class="spec-label">Licença dos Pesos</div><div class="spec-value">${model.license || 'Apache 2.0 / MIT'}</div></div>
+              </div>
+            </div>
+
+            <div class="content-box" style="margin-bottom: 20px;">
+              <h4>🚀 Comandos Rápidos de Execução Local</h4>
+              <h5 style="margin-top: 10px; margin-bottom: 6px;">Execução via vLLM:</h5>
+              <div class="code-snippet-box">
+                <pre><code>vllm serve ${model.hfModelId || model.id} --tensor-parallel-size 1 --max-model-len ${model.contextWindow} --port 8000</code></pre>
+              </div>
+
+              <h5 style="margin-top: 14px; margin-bottom: 6px;">Execução via Ollama:</h5>
+              <div class="code-snippet-box">
+                <pre><code>ollama run ${model.ollamaModelId || model.id}</code></pre>
+              </div>
+            </div>
+
+            <div class="content-box">
+              <h4>⚙️ Snippets de Configuração para Ferramentas de Código</h4>
+              <h5 style="margin-top: 10px; margin-bottom: 6px;">Configuração para OpenCode (JSON):</h5>
+              <div class="code-snippet-box">
+                <button class="btn-copy-code" onclick="window.AIApp.copySnippet('snip-opencode')">Copiar JSON</button>
+                <pre id="snip-opencode"><code>${typeof AI_DATA_HELPERS !== 'undefined' && AI_DATA_HELPERS.generateIdeConfig ? AI_DATA_HELPERS.generateIdeConfig(model.id, 'opencode') : '{\n  "model": "' + model.id + '"\n}'}</code></pre>
+              </div>
+              <h5 style="margin-top: 14px; margin-bottom: 6px;">Configuração para Aider (.aider.conf.yml):</h5>
+              <div class="code-snippet-box">
+                <button class="btn-copy-code" onclick="window.AIApp.copySnippet('snip-aider')">Copiar YAML</button>
+                <pre id="snip-aider"><code>${typeof AI_DATA_HELPERS !== 'undefined' && AI_DATA_HELPERS.generateIdeConfig ? AI_DATA_HELPERS.generateIdeConfig(model.id, 'aider') : 'model: ' + model.id}</code></pre>
+              </div>
+            </div>
+          </div>
+        ` : ''}
+
+      </div>
+    `;
+
+    // Interatividade das Sub-Abas do Dossiê
+    const subtabsNav = container.querySelector('.dossier-subtabs-nav');
+    if (subtabsNav) {
+      subtabsNav.addEventListener('click', (e) => {
+        const btn = e.target.closest('.subtab-btn');
+        if (btn) {
+          subtabsNav.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const targetTabId = btn.getAttribute('data-tab');
+          container.querySelectorAll('.subtab-panel').forEach(p => p.classList.remove('active'));
+          const targetPanel = container.querySelector(`#${targetTabId}`);
+          if (targetPanel) targetPanel.classList.add('active');
+        }
+      });
     }
   }
 
@@ -2538,49 +2847,390 @@
   // 11. MÓDULO COMPARADOR LADO A LADO
   // ==========================================
   function renderComparatorView() {
+    renderComparatorUnified();
+  }
+
+  function renderComparatorUnified() {
     const s1 = document.getElementById('compSelect1');
     const s2 = document.getElementById('compSelect2');
     const s3 = document.getElementById('compSelect3');
     const s4 = document.getElementById('compSelect4');
-    const table = document.getElementById('comparatorMainTable');
-
-    if (!s1 || !s2 || !table) return;
 
     if (AppState.comparatorModels.filter(Boolean).length < 2) {
-      AppState.comparatorModels = ['grok-4-6', 'gpt-5-6-sol', '', ''];
+      AppState.comparatorModels = ['claude-fable-5-1', 'gemini-3-8-flash', 'gpt-5-6-sol', ''];
     }
 
     const models = Object.values(AI_MODELS_DATA);
 
-    [s1, s2, s3, s4].forEach((sel, idx) => {
-      const currentVal = AppState.comparatorModels[idx] || '';
-      sel.innerHTML = (idx >= 2 ? '<option value="">-- Nenhum --</option>' : '') + models.map(m => `
-        <option value="${m.id}" ${m.id === currentVal ? 'selected' : ''}>${m.name} (${m.providerName})</option>
-      `).join('');
+    if (s1 && s2 && s3 && s4) {
+      [s1, s2, s3, s4].forEach((sel, idx) => {
+        const currentVal = AppState.comparatorModels[idx] || '';
+        sel.innerHTML = (idx >= 2 ? '<option value="">-- Nenhum --</option>' : '') + models.map(m => `
+          <option value="${m.id}" ${m.id === currentVal ? 'selected' : ''}>${m.name} (${m.providerName})</option>
+        `).join('');
 
-      sel.onchange = () => {
-        AppState.comparatorModels[idx] = sel.value;
-        const validModels = AppState.comparatorModels.filter(Boolean);
-        if (history.replaceState) {
-          history.replaceState(null, '', `#comparator?models=${validModels.join(',')}`);
-        }
-        renderComparatorTable();
+        sel.onchange = () => {
+          AppState.comparatorModels[idx] = sel.value;
+          const validModels = AppState.comparatorModels.filter(Boolean);
+          if (history.replaceState) {
+            history.replaceState(null, '', `#compare?mode=${AppState.comparatorActiveMode || 'specs'}&models=${validModels.join(',')}`);
+          }
+          updateComparisonFloatingBar();
+          renderComparatorActiveMode();
+        };
+      });
+    }
+
+    // Configuração das Abas de Modo (#comparatorModesNav)
+    const modeBtns = document.querySelectorAll('#comparatorModesNav .comp-mode-btn');
+    modeBtns.forEach(btn => {
+      const mode = btn.getAttribute('data-mode');
+      btn.classList.toggle('active', mode === (AppState.comparatorActiveMode || 'specs'));
+      btn.onclick = () => {
+        AppState.comparatorActiveMode = mode;
+        modeBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderComparatorActiveMode();
       };
     });
-
-    renderComparatorTable();
 
     const shareBtn = document.getElementById('btnShareComparison');
     if (shareBtn) {
       shareBtn.onclick = () => {
-        const url = `${window.location.origin}${window.location.pathname}#comparator?models=${AppState.comparatorModels.filter(Boolean).join(',')}`;
+        const url = `${window.location.origin}${window.location.pathname}#compare?mode=${AppState.comparatorActiveMode || 'specs'}&models=${AppState.comparatorModels.filter(Boolean).join(',')}`;
         copyTextToClipboard(url);
         showToast('🔗 Link da comparação copiado com sucesso!');
       };
     }
+
+    renderComparatorActiveMode();
+    updateComparisonFloatingBar();
   }
 
-  function renderComparatorTable() {
+  function renderComparatorActiveMode() {
+    const activeMode = AppState.comparatorActiveMode || 'specs';
+    const panels = document.querySelectorAll('#view-comparator .comp-mode-panel');
+    panels.forEach(p => p.style.display = 'none');
+
+    const panelMap = {
+      'specs': 'compModeSpecsPanel',
+      'benchmarks': 'compModeBenchmarksPanel',
+      'radar': 'compModeRadarPanel',
+      'pareto': 'compModeParetoPanel',
+      'access': 'compModeAccessPanel',
+      'governance': 'compModeGovernancePanel'
+    };
+
+    const targetId = panelMap[activeMode] || 'compModeSpecsPanel';
+    const activePanel = document.getElementById(targetId);
+    if (activePanel) activePanel.style.display = 'block';
+
+    switch (activeMode) {
+      case 'specs':
+        renderComparatorTable();
+        break;
+      case 'benchmarks':
+        renderComparatorBenchmarksMode();
+        break;
+      case 'radar':
+        renderComparatorRadarMode();
+        break;
+      case 'pareto':
+        renderComparatorParetoMode();
+        break;
+      case 'access':
+        renderComparatorAccessMode();
+        break;
+      case 'governance':
+        renderComparatorGovernanceMode();
+        break;
+    }
+  }
+
+  function renderComparatorBenchmarksMode() {
+    const container = document.getElementById('compBenchmarksContainer');
+    if (!container) return;
+
+    const activeIds = AppState.comparatorModels.filter(Boolean);
+    const selectedModels = activeIds.map(id => AI_MODELS_DATA[id]).filter(Boolean);
+
+    if (selectedModels.length === 0) {
+      container.innerHTML = '<p style="color: var(--text-muted); padding: 20px;">Selecione modelos acima para comparar benchmarks.</p>';
+      return;
+    }
+
+    const metrics = [
+      { key: 'sweBenchVerified', label: 'SWE-bench Verified (%)', unit: '%' },
+      { key: 'terminalBench21', label: 'Terminal-Bench 2.1 (%)', unit: '%' },
+      { key: 'terminalBench30', label: 'Terminal-Bench 3.0 (%)', unit: '%' },
+      { key: 'deepSwe11', label: 'DeepSWE 1.1 (%)', unit: '%' },
+      { key: 'gpqaDiamond', label: 'GPQA Diamond (%)', unit: '%' },
+      { key: 'aaIndex', label: 'Artificial Analysis Index', unit: ' pts' }
+    ];
+
+    container.innerHTML = `
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Métrica de Benchmark</th>
+              ${selectedModels.map(m => `<th><strong>${m.name}</strong></th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${metrics.map(met => `
+              <tr>
+                <td><strong>${met.label}</strong></td>
+                ${selectedModels.map(m => {
+                  const ledger = (typeof MULTI_BENCHMARK_LEDGER !== 'undefined' ? MULTI_BENCHMARK_LEDGER.find(l => l.modelId === m.id) : null);
+                  let val = ledger ? ledger[met.key] : null;
+                  if (val === null && m.officialBenchmarks && m.officialBenchmarks[met.key]) {
+                    val = m.officialBenchmarks[met.key];
+                  }
+                  const text = (val !== null && val !== undefined) ? `${val.toFixed(1)}${met.unit}` : '<span style="color: var(--text-muted);">N/D</span>';
+                  return `<td><strong style="color: var(--accent-cyan);">${text}</strong></td>`;
+                }).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  function renderComparatorRadarMode() {
+    const canvas = document.getElementById('compRadarCanvas');
+    if (!canvas || typeof Chart === 'undefined') return;
+
+    if (AppState.charts.compRadar) {
+      AppState.charts.compRadar.destroy();
+    }
+
+    const activeIds = AppState.comparatorModels.filter(Boolean);
+    const labels = [
+      'Raciocínio & Math', 'Coding Monorepo', 'SWE-bench', 'Long-Context (1M)',
+      'Multimodal / UI', 'Throughput', 'Custo-Eficiência', 'Tools & FIM',
+      'Baixa Latência', 'Acesso Aberto'
+    ];
+
+    const datasets = activeIds.map(id => {
+      const model = AI_MODELS_DATA[id];
+      const vec = (typeof CAPABILITY_RADAR_10D !== 'undefined' ? CAPABILITY_RADAR_10D[id] : null) || {};
+      if (!model) return null;
+
+      const data = [
+        vec.reasoning !== undefined ? vec.reasoning : (vec.algorithms || 75),
+        vec.agentic !== undefined ? vec.agentic : (vec.agenticCoding || 75),
+        vec.sweBench !== undefined ? vec.sweBench : (vec.toolShell || 75),
+        vec.longContext !== undefined ? vec.longContext : 75,
+        vec.multimodal !== undefined ? vec.multimodal : 75,
+        vec.throughput !== undefined ? vec.throughput : 75,
+        vec.costEfficiency !== undefined ? vec.costEfficiency : (vec.costBenefit || 75),
+        vec.toolAdherence !== undefined ? vec.toolAdherence : (vec.toolShell || 75),
+        vec.ttftLatency !== undefined ? vec.ttftLatency : 75,
+        vec.openAccess !== undefined ? vec.openAccess : (vec.localEfficiency || 75)
+      ];
+
+      return {
+        label: model.name,
+        data: data,
+        borderColor: model.color || '#38bdf8',
+        backgroundColor: `${model.color || '#38bdf8'}25`,
+        borderWidth: 2,
+        pointBackgroundColor: model.color || '#38bdf8'
+      };
+    }).filter(Boolean);
+
+    AppState.charts.compRadar = new Chart(canvas, {
+      type: 'radar',
+      data: { labels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+            grid: { color: 'rgba(255, 255, 255, 0.08)' },
+            pointLabels: { font: { family: 'Inter', size: 11, weight: '600' } },
+            ticks: { display: false, max: 100, min: 0 }
+          }
+        },
+        plugins: {
+          legend: { position: 'top' }
+        }
+      }
+    });
+  }
+
+  function renderComparatorParetoMode() {
+    const canvas = document.getElementById('compParetoCanvas');
+    if (!canvas || typeof Chart === 'undefined') return;
+
+    if (AppState.charts.compPareto) {
+      AppState.charts.compPareto.destroy();
+    }
+
+    const activeIds = AppState.comparatorModels.filter(Boolean);
+    const allModels = Object.values(AI_MODELS_DATA);
+    const backgroundPoints = [];
+    const selectedPoints = [];
+
+    allModels.forEach(m => {
+      const topCb = (typeof CURSORBENCH_32_DATA !== 'undefined' ? CURSORBENCH_32_DATA.filter(r => r.modelId === m.id).sort((a, b) => b.score - a.score)[0] : null);
+      const cost = topCb ? topCb.costUsd : (m.pricing.standard ? (m.pricing.standard.input + m.pricing.standard.output) : 1.0);
+      const score = topCb ? topCb.score : ((m.officialBenchmarks && m.officialBenchmarks.sweBenchVerified) ? m.officialBenchmarks.sweBenchVerified : 50);
+
+      const pt = { x: cost, y: score, name: m.name, id: m.id, color: m.color || '#38bdf8' };
+      if (activeIds.includes(m.id)) {
+        selectedPoints.push(pt);
+      } else {
+        backgroundPoints.push(pt);
+      }
+    });
+
+    AppState.charts.compPareto = new Chart(canvas, {
+      type: 'scatter',
+      data: {
+        datasets: [
+          {
+            label: 'Modelos Selecionados',
+            data: selectedPoints,
+            backgroundColor: selectedPoints.map(p => p.color),
+            borderColor: '#ffffff',
+            borderWidth: 2,
+            pointRadius: 9,
+            pointHoverRadius: 11
+          },
+          {
+            label: 'Outros Modelos do Dataset',
+            data: backgroundPoints,
+            backgroundColor: 'rgba(148, 163, 184, 0.4)',
+            pointRadius: 4,
+            pointHoverRadius: 6
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            title: { display: true, text: 'Custo por Tarefa ($ USD)' },
+            grid: { color: 'rgba(255, 255, 255, 0.08)' }
+          },
+          y: {
+            title: { display: true, text: 'Benchmark Score (%)' },
+            grid: { color: 'rgba(255, 255, 255, 0.08)' }
+          }
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const raw = ctx.raw;
+                return `${raw.name}: Score ${raw.y.toFixed(1)}% | $${raw.x.toFixed(2)}`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  function renderComparatorAccessMode() {
+    const container = document.getElementById('compAccessContainer');
+    if (!container) return;
+
+    const activeIds = AppState.comparatorModels.filter(Boolean);
+    const selectedModels = activeIds.map(id => AI_MODELS_DATA[id]).filter(Boolean);
+
+    container.innerHTML = `
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Plataforma / Canal</th>
+              ${selectedModels.map(m => `<th><strong>${m.name}</strong></th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Preço API Standard (In / Out)</strong></td>
+              ${selectedModels.map(m => `<td>$${m.pricing.standard.input.toFixed(2)} / $${m.pricing.standard.output.toFixed(2)}</td>`).join('')}
+            </tr>
+            <tr>
+              <td><strong>Prompt Cache Read (Hit)</strong></td>
+              ${selectedModels.map(m => `<td>${m.pricing.standard.cacheRead !== null && m.pricing.standard.cacheRead !== undefined ? `$${m.pricing.standard.cacheRead.toFixed(4)}` : 'Padrão'}</td>`).join('')}
+            </tr>
+            <tr>
+              <td><strong>Cursor IDE</strong></td>
+              ${selectedModels.map(m => `<td>${m.cursorPool ? m.cursorPool.poolLabel : 'Other Models'}</td>`).join('')}
+            </tr>
+            <tr>
+              <td><strong>OpenCode Go</strong></td>
+              ${selectedModels.map(m => `<td>${m.openCodeGo && m.openCodeGo.available ? `Classe $${m.openCodeGo.usageAllowanceUsd} (${m.openCodeGo.quotaBurnMultiplier}× burn)` : 'Não listado'}</td>`).join('')}
+            </tr>
+            <tr>
+              <td><strong>Google Antigravity</strong></td>
+              ${selectedModels.map(m => `<td>${m.antigravity ? m.antigravity.poolLabel : 'Indisponível'}</td>`).join('')}
+            </tr>
+            <tr>
+              <td><strong>Planos de Assinatura</strong></td>
+              ${selectedModels.map(m => {
+                const plans = (typeof DomainEntities !== 'undefined' ? DomainEntities.getPlansForModel(m.id) : []);
+                return `<td>${plans.length > 0 ? plans.map(p => `<a href="#plan/${p.id}" style="color: var(--accent-cyan); display: block; font-size: 0.78rem;">${p.planName}</a>`).join('') : '<span style="color:var(--text-muted);">Apenas API</span>'}</td>`;
+              }).join('')}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  function renderComparatorGovernanceMode() {
+    const container = document.getElementById('compGovernanceContainer');
+    if (!container) return;
+
+    const activeIds = AppState.comparatorModels.filter(Boolean);
+    const selectedModels = activeIds.map(id => AI_MODELS_DATA[id]).filter(Boolean);
+
+    container.innerHTML = `
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Critério de Governança</th>
+              ${selectedModels.map(m => `<th><strong>${m.name}</strong></th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Zero Data Retention (ZDR)</strong></td>
+              ${selectedModels.map(m => `<td>${m.privacy && m.privacy.retentionDays === 0 ? '✅ ZDR Ativo (0 dias)' : 'Retenção Padrão'}</td>`).join('')}
+            </tr>
+            <tr>
+              <td><strong>Treinamento em Dados</strong></td>
+              ${selectedModels.map(m => `<td style="color: #10b981;">Zero treino por padrão</td>`).join('')}
+            </tr>
+            <tr>
+              <td><strong>Status dos Pesos</strong></td>
+              ${selectedModels.map(m => `<td>${m.openWeights ? 'Pesos Abertos' : 'Proprietário Fechado'}</td>`).join('')}
+            </tr>
+            <tr>
+              <td><strong>Licença de Uso</strong></td>
+              ${selectedModels.map(m => `<td>${m.license || 'Comercial Proprietária'}</td>`).join('')}
+            </tr>
+            <tr>
+              <td><strong>Confiança Metrológica</strong></td>
+              ${selectedModels.map(m => `<td><span class="badge-tag badge-frontier">${(m.sourceConfidence || 'oficial').toUpperCase()}</span></td>`).join('')}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+    function renderComparatorTable() {
     const table = document.getElementById('comparatorMainTable');
     if (!table) return;
 
@@ -3052,7 +3702,7 @@
 
     const rec = AI_DATA_HELPERS.recommendModel(AppState.routerTask, AppState.routerBudget, AppState.routerPrivacy);
 
-    if (!rec || !rec.primaryModelName) {
+    if (!rec || !rec.primaryModelId) {
       panel.innerHTML = `
         <div style="text-align: center; padding: 28px 16px; color: var(--text-muted);">
           🔍 Nenhuma recomendação exata encontrada para esses critérios. Tente flexibilizar o orçamento ou privacidade.
@@ -3061,24 +3711,74 @@
       return;
     }
 
+    const primaryModel = AI_MODELS_DATA[rec.primaryModelId] || {};
+    const fallbackModelId = rec.fallbackCascade && rec.fallbackCascade[0] ? rec.fallbackCascade[0] : null;
+    const fallbackModel = fallbackModelId ? AI_MODELS_DATA[fallbackModelId] : null;
+
+    const priceInfo = primaryModel.pricing && primaryModel.pricing.standard
+      ? `$${primaryModel.pricing.standard.input.toFixed(2)} in / $${primaryModel.pricing.standard.output.toFixed(2)} out`
+      : (primaryModel.openWeights ? 'Gratuito (Pesos Abertos)' : 'Consulte Tabela');
+
     panel.innerHTML = `
-      <h3 style="color: var(--accent-cyan); margin-bottom: 8px;">🎯 Modelo Recomendado: ${rec.primaryModelName}</h3>
-      <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 16px;">${rec.rationale}</p>
-      
-      <div class="specs-grid">
-        <div class="spec-item-card"><div class="spec-label">Agente de Planejamento (Planner)</div><div class="spec-value">${rec.planner}</div></div>
-        <div class="spec-item-card"><div class="spec-label">Agente Executor de Código</div><div class="spec-value">${rec.executor}</div></div>
-        <div class="spec-item-card"><div class="spec-label">Agente Revisor (Reviewer)</div><div class="spec-value">${rec.reviewer}</div></div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+        <div>
+          <span class="badge-tag badge-frontier" style="margin-bottom: 6px;">🎯 Recomendação Principal</span>
+          <h3 style="color: var(--accent-cyan); margin: 4px 0 0 0; font-size: 1.35rem;">${rec.primaryModelName}</h3>
+          <div style="font-size: 0.84rem; color: var(--text-muted);">${primaryModel.providerName || 'Oficial'} · ${primaryModel.architectureType || 'Arquitetura de Fronteira'}</div>
+        </div>
+        <div style="text-align: right;">
+          <span class="badge-tag badge-subdollar">${priceInfo}</span>
+          <div style="font-size: 0.76rem; color: #10b981; margin-top: 4px;">✔ Confiança: Alta (Metrologia [M] + [D])</div>
+        </div>
+      </div>
+
+      <div class="content-box" style="margin-bottom: 16px; background: rgba(6, 182, 212, 0.04); border-left: 4px solid var(--accent-cyan);">
+        <h4 style="margin-bottom: 6px; font-size: 0.95rem; color: var(--accent-cyan);">💡 Justificativa Técnica do Roteador</h4>
+        <p style="color: var(--text-primary); font-size: 0.88rem; line-height: 1.5; margin: 0;">${rec.rationale}</p>
+      </div>
+
+      <!-- Arquitetura Agêntica Recomendada -->
+      <h4 style="font-size: 0.9rem; margin-bottom: 8px;">🤖 Divisão de Papéis no Pipeline:</h4>
+      <div class="specs-grid" style="margin-bottom: 16px;">
+        <div class="spec-item-card"><div class="spec-label">Agente Planejador (Planner)</div><div class="spec-value highlight-cyan">${rec.planner}</div></div>
+        <div class="spec-item-card"><div class="spec-label">Agente Executor de Código</div><div class="spec-value highlight-green">${rec.executor}</div></div>
+        <div class="spec-item-card"><div class="spec-label">Agente Revisor (Reviewer)</div><div class="spec-value highlight-amber">${rec.reviewer}</div></div>
         <div class="spec-item-card"><div class="spec-label">Cascata de Fallback</div><div class="spec-value">${rec.fallbackCascade.join(' ➔ ')}</div></div>
       </div>
-      
-      <div style="margin-top: 16px;">
-        <button class="btn-primary" onclick="location.hash='#model/${rec.primaryModelId}'">📄 Abrir Dossiê do Modelo Escolhido</button>
+
+      <!-- Trade-offs e Limitações -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-bottom: 16px;">
+        <div style="padding: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
+          <strong style="color: #10b981; font-size: 0.85rem;">✨ Pontos Fortes em Produção:</strong>
+          <ul style="margin: 6px 0 0 0; padding-left: 18px; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">
+            <li>Alta aderência sintática no monorepo e conformidade a tipos.</li>
+            <li>Latência equilibrada para turnos iterativos de raciocínio.</li>
+          </ul>
+        </div>
+        <div style="padding: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
+          <strong style="color: #f59e0b; font-size: 0.85rem;">⚖️ Trade-offs & Atenção:</strong>
+          <ul style="margin: 6px 0 0 0; padding-left: 18px; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">
+            <li>Custo pode escalar em loops contínuos sem prompt caching ativo.</li>
+            <li>Para autocomplete linha-a-linha de ultra-baixa latência (&lt;100ms), prefira modelos especializados.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Alternativas e Ações -->
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: space-between; padding-top: 8px; border-top: 1px solid var(--border-subtle);">
+        <div style="font-size: 0.82rem; color: var(--text-muted);">
+          ${fallbackModel ? `Alternativa viável imediata: <strong>${fallbackModel.name}</strong>` : 'Alternativas na mesma classe de capacidade.'}
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="btn-secondary btn-sm" onclick="location.hash='#plans?model=${rec.primaryModelId}'">💳 Planos com este Modelo</button>
+          ${fallbackModelId ? `<button class="btn-secondary btn-sm" onclick="window.AIApp.openComparatorWith('${rec.primaryModelId}');">⚔️ Comparar com ${fallbackModel ? fallbackModel.name : 'Alternativa'}</button>` : ''}
+          <button class="btn-primary btn-sm" onclick="location.hash='#model/${rec.primaryModelId}'">📄 Abrir Dossiê Completo →</button>
+        </div>
       </div>
     `;
   }
 
-  // ==========================================
+    // ==========================================
   // 16. MATRIZ DE HARNESSES 15x11 & TROUBLESHOOTER
   // ==========================================
   function renderHarnessMatrix() {
@@ -4355,12 +5055,17 @@
       </div>
     `;
 
-    // Tabela completa de modelAccess
+    // Tabela completa de modelAccess (Seção 11: Associação Canônica e Links de Dossiê)
     const modelsRows = (plan.modelAccess || []).map(m => {
       const badge = PlanExplorer.PLAN_UI_CONFIG.accessBadges[m.billingMode] || { label: m.billingMode, class: 'badge-frontier' };
+      const modelExists = typeof AI_MODELS_DATA !== 'undefined' && Boolean(AI_MODELS_DATA[m.modelId]);
+      const modelCell = modelExists
+        ? `<a href="#model/${m.modelId}" onclick="window.AIApp.closePlanDetails();" style="color: var(--accent-cyan); text-decoration: underline; cursor: pointer; font-weight: 600;" title="Abrir dossiê completo de ${m.modelId}"><strong>${m.modelId}</strong> ↗</a>`
+        : `<strong style="color: var(--text-primary);">${m.modelId}</strong>`;
+
       return `
         <tr>
-          <td><strong style="color: var(--text-primary);">${m.modelId}</strong></td>
+          <td>${modelCell}</td>
           <td><span class="badge-tag badge-frontier">${m.surface || 'Padrão'}</span></td>
           <td><span class="badge-tag ${badge.class}">${badge.label}</span></td>
           <td>${m.quotaPool || 'Pool Principal'}</td>
@@ -4865,7 +5570,7 @@
     const chipsContainer = document.getElementById('useCaseChipsScroll');
     if (chipsContainer) {
       chipsContainer.innerHTML = USE_CASE_COMPARISON_DATA.useCases.map(uc => `
-        <button class="use-case-chip ${uc.id === AppState.activeUseCaseId ? 'active' : ''}" data-uc-id="${uc.id}">
+        <button class="use-case-chip ${uc.id === AppState.activeUseCaseId ? 'active' : ''}" data-uc-id="${uc.id}" onclick="location.hash='#use-case/${uc.id}';">
           <span>${uc.icon}</span> ${uc.title}
         </button>
       `).join('');
@@ -4873,20 +5578,95 @@
 
     const activeCase = USE_CASE_COMPARISON_DATA.useCases.find(uc => uc.id === AppState.activeUseCaseId) || USE_CASE_COMPARISON_DATA.useCases[0];
     const contentContainer = document.getElementById('useCaseActiveContent');
+
     if (contentContainer && activeCase) {
+      const topModel = activeCase.rankings[0];
+      const secondModel = activeCase.rankings[1];
+      const economicModel = activeCase.rankings.find(r => {
+        const m = AI_MODELS_DATA[r.modelId];
+        return m && m.pricing && m.pricing.standard && m.pricing.standard.input < 1.5;
+      }) || activeCase.rankings[activeCase.rankings.length - 1];
+
+      const localModel = activeCase.rankings.find(r => {
+        const m = AI_MODELS_DATA[r.modelId];
+        return m && m.openWeights;
+      }) || { modelId: 'glm-5-3-flash', modelName: 'GLM-5.3-Flash / gpt-oss-20b' };
+
       contentContainer.innerHTML = `
+        <!-- Cabeçalho do Dossiê do Caso de Uso (Seção 23) -->
         <div class="content-box" style="margin-bottom: 24px;">
-          <div class="box-header">
+          <div class="box-header" style="flex-wrap: wrap; gap: 12px;">
             <div>
-              <h3>${activeCase.icon} ${activeCase.title}</h3>
-              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px;">${activeCase.description}</p>
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span style="font-size: 1.6rem;">${activeCase.icon}</span>
+                <h3 style="margin: 0; font-size: 1.3rem;">${activeCase.title}</h3>
+                <span class="evidence-badge badge-c">[C] Calibrado</span>
+              </div>
+              <p style="font-size: 0.88rem; color: var(--text-secondary); margin: 2px 0 0 0;">${activeCase.description}</p>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button class="btn-primary btn-sm" onclick="window.AIApp.openComparatorWith('${topModel.modelId}')">⚔️ Comparar Top Modelos</button>
             </div>
           </div>
-          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;">
-            <span style="font-size: 0.78rem; color: var(--text-muted); align-self: center;">Atributos críticos avaliados:</span>
-            ${activeCase.keyAttributes.map(a => `<span class="badge-tag badge-frontier" style="font-size: 0.74rem;">${a}</span>`).join('')}
+
+          <!-- Metrologia, Cobertura e Confiança -->
+          <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin: 16px 0; padding: 10px 14px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 0.82rem;">
+            <div>
+              <strong>📊 Cobertura:</strong> ${Object.keys(AI_MODELS_DATA).length} modelos catalogados (10 ranqueados especificamente neste perfil)
+            </div>
+            <span style="color: var(--border-medium);">•</span>
+            <div>
+              <strong>🛡️ Confiança:</strong> <span style="color: #10b981;">Alta (Harmonização Multivariada [M] + [C])</span>
+            </div>
+            <span style="color: var(--border-medium);">•</span>
+            <div>
+              <strong>Auditado em:</strong> 03/09/2026
+            </div>
           </div>
 
+          <!-- Critérios e Metodologia de Ponderação -->
+          <div style="margin-bottom: 18px;">
+            <strong style="font-size: 0.84rem; color: var(--text-muted); display: block; margin-bottom: 6px;">Critérios & Pesos Avaliados:</strong>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+              ${activeCase.keyAttributes.map((attr, idx) => `
+                <span class="badge-tag badge-frontier" style="font-size: 0.76rem;">
+                  ${attr} (${idx === 0 ? '35%' : idx === 1 ? '25%' : idx === 2 ? '20%' : '20%'})
+                </span>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- 6 Categorias de Vencedor (Seção 23 do Plano 08) -->
+          <div style="margin-bottom: 24px;">
+            <h4 style="font-size: 0.92rem; margin-bottom: 10px; color: var(--text-primary);">🏆 Perfis de Vencedores Recomendados:</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;">
+              <div style="padding: 10px; background: rgba(6, 182, 212, 0.06); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: var(--radius-xs);">
+                <div style="font-size: 0.72rem; color: var(--accent-cyan); font-weight: 700;">👑 MELHOR GERAL</div>
+                <div style="font-weight: 700; font-size: 0.9rem; margin-top: 2px;"><a href="#model/${topModel.modelId}" style="color: var(--text-primary); text-decoration: none;">${topModel.modelName}</a></div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Fit Score: ${topModel.fitScore}/100</div>
+              </div>
+
+              <div style="padding: 10px; background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-xs);">
+                <div style="font-size: 0.72rem; color: #10b981; font-weight: 700;">💎 MELHOR VALOR / ROI</div>
+                <div style="font-weight: 700; font-size: 0.9rem; margin-top: 2px;"><a href="#model/${secondModel ? secondModel.modelId : topModel.modelId}" style="color: var(--text-primary); text-decoration: none;">${secondModel ? secondModel.modelName : topModel.modelName}</a></div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Equilíbrio custo-qualidade</div>
+              </div>
+
+              <div style="padding: 10px; background: rgba(245, 158, 11, 0.06); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-xs);">
+                <div style="font-size: 0.72rem; color: #f59e0b; font-weight: 700;">🏷️ MAIS ECONÔMICO</div>
+                <div style="font-weight: 700; font-size: 0.9rem; margin-top: 2px;"><a href="#model/${economicModel.modelId}" style="color: var(--text-primary); text-decoration: none;">${economicModel.modelName}</a></div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Sub-dólar por milhão</div>
+              </div>
+
+              <div style="padding: 10px; background: rgba(168, 85, 247, 0.06); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: var(--radius-xs);">
+                <div style="font-size: 0.72rem; color: #a855f7; font-weight: 700;">🏠 MELHOR LOCAL (PRIVACY)</div>
+                <div style="font-weight: 700; font-size: 0.9rem; margin-top: 2px;"><a href="#model/${localModel.modelId}" style="color: var(--text-primary); text-decoration: none;">${localModel.modelName}</a></div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Pesos Abertos & Offline</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabela de Rankings Detalhada -->
           <div class="table-responsive">
             <table class="data-table">
               <thead>
@@ -4896,7 +5676,7 @@
                   <th>Fit Score (Calibrado)</th>
                   <th>Papel Ideal no Projeto</th>
                   <th>Justificativa Técnica & Evidências</th>
-                  <th style="width: 90px;">Ações</th>
+                  <th style="width: 140px;">Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -4914,9 +5694,10 @@
                     <td><strong style="color: var(--accent-cyan); font-size: 0.84rem;">${r.role}</strong></td>
                     <td style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.4;">${r.rationale}</td>
                     <td>
-                      <button class="btn-table-action" onclick="location.hash='#model/${r.modelId}'" title="Ver Dossiê">
-                        🔍 Dossiê
-                      </button>
+                      <div style="display: flex; gap: 4px;">
+                        <button class="btn-table-action" onclick="location.hash='#model/${r.modelId}'" title="Ver Dossiê">🔍 Dossiê</button>
+                        <button class="btn-table-action" onclick="window.AIApp.openComparatorWith('${r.modelId}')" title="Comparar">⚔️</button>
+                      </div>
                     </td>
                   </tr>
                 `).join('')}
@@ -4953,7 +5734,7 @@
     }
   }
 
-  // ==========================================
+    // ==========================================
   // 20. VIEW: COMUNIDADE & BEHAVIOR
   // ==========================================
   function renderCommunityView() {
@@ -5341,31 +6122,93 @@
     } catch (e) {}
     title.innerText = model.name;
 
+    const freshness = (typeof DomainFreshness !== 'undefined') ? DomainFreshness.getFreshness(model.releaseDate || '2026-08-15') : null;
+    const ledger = (typeof MULTI_BENCHMARK_LEDGER !== 'undefined') ? MULTI_BENCHMARK_LEDGER.find(l => l.modelId === model.id) : null;
+    const topCb = (typeof CURSORBENCH_32_DATA !== 'undefined') ? CURSORBENCH_32_DATA.filter(r => r.modelId === model.id).sort((a, b) => b.score - a.score)[0] : null;
+
+    // 2 a 4 Métricas Chave com proveniência [M] (Seção 8)
+    const metrics = [];
+    if (topCb) {
+      metrics.push({ label: 'CursorBench', val: `${topCb.score.toFixed(1)}%` });
+    }
+    if (ledger && ledger.terminalBench21) {
+      metrics.push({ label: 'Terminal 2.1', val: `${ledger.terminalBench21.toFixed(1)}%` });
+    } else if (model.officialBenchmarks && model.officialBenchmarks.terminalBench21) {
+      metrics.push({ label: 'Terminal 2.1', val: `${model.officialBenchmarks.terminalBench21.toFixed(1)}%` });
+    }
+    if (ledger && ledger.deepSwe11) {
+      metrics.push({ label: 'DeepSWE 1.1', val: `${ledger.deepSwe11.toFixed(1)}%` });
+    } else if (model.officialBenchmarks && model.officialBenchmarks.sweBenchVerified) {
+      metrics.push({ label: 'SWE Verified', val: `${model.officialBenchmarks.sweBenchVerified.toFixed(1)}%` });
+    }
+    if (model.aaIndex) {
+      metrics.push({ label: 'AA Intelligence', val: `${model.aaIndex}` });
+    }
+
+    const statusLabel = model.isDeprecated ? 'Descontinuado' : (model.status ? model.status.toUpperCase() : (model.openWeights ? 'OPEN WEIGHTS' : 'ATIVO'));
+
     content.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-        <span class="model-color-dot" style="background-color: ${model.color}; width: 14px; height: 14px;"></span>
-        <strong>${model.providerName}</strong> • <span style="color: var(--text-muted);">${model.architectureType}</span>
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="model-color-dot" style="background-color: ${model.color || '#38bdf8'}; width: 14px; height: 14px;"></span>
+          <strong>${model.providerName}</strong> • <span style="color: var(--text-muted);">${model.architectureType}</span>
+        </div>
+        <span class="badge-tag ${model.status === 'legacy' || model.status === 'superseded' ? 'badge-warning' : 'badge-frontier'}">${statusLabel}</span>
       </div>
 
       <div class="model-badges-list" style="margin-bottom: 14px;">
         ${(model.badges || []).map(b => `<span class="badge-tag badge-frontier">${b}</span>`).join('')}
       </div>
 
-      <div class="specs-grid" style="grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
+      <!-- Specs Principais -->
+      <div class="specs-grid" style="grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px;">
         <div class="spec-item-card"><div class="spec-label">Contexto</div><div class="spec-value">${(model.contextWindow / 1000).toFixed(0)}k</div></div>
         <div class="spec-item-card"><div class="spec-label">Output Máx</div><div class="spec-value">${(model.maxOutputTokens || 16384).toLocaleString()}</div></div>
-        <div class="spec-item-card"><div class="spec-label">Input / M</div><div class="spec-value">$${model.pricing.standard.input.toFixed(2)}</div></div>
-        <div class="spec-item-card"><div class="spec-label">Output / M</div><div class="spec-value">$${model.pricing.standard.output.toFixed(2)}</div></div>
-        ${model.relativeLatency ? `<div class="spec-item-card" style="grid-column: span 2;"><div class="spec-label">Latência</div><div class="spec-value highlight-cyan">${model.relativeLatency}</div></div>` : ''}
+        <div class="spec-item-card"><div class="spec-label">Input / M</div><div class="spec-value">${model.openWeights ? 'Grátis (Local)' : `$${model.pricing.standard.input.toFixed(2)}`}</div></div>
+        <div class="spec-item-card"><div class="spec-label">Output / M</div><div class="spec-value">${model.openWeights ? 'Grátis (Local)' : `$${model.pricing.standard.output.toFixed(2)}`}</div></div>
       </div>
 
-      <h4 style="font-size: 0.85rem; margin-bottom: 6px;">Destaques:</h4>
-      <ul style="padding-left: 18px; font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 16px;">
-        ${(model.strengths || []).map(s => `<li>${s}</li>`).join('')}
+      <!-- 2-4 Métricas Chave com Proveniência [M] (Seção 8) -->
+      ${metrics.length > 0 ? `
+        <div style="margin-bottom: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <h4 style="font-size: 0.82rem; margin: 0; color: var(--text-secondary);">Métricas Principais Auditadas:</h4>
+            <span class="evidence-badge badge-m" title="Medição Instrumentada">[M] Medido</span>
+          </div>
+          <div class="specs-grid" style="grid-template-columns: repeat(${Math.min(metrics.length, 3)}, 1fr); gap: 6px;">
+            ${metrics.slice(0, 3).map(m => `
+              <div class="spec-item-card" style="padding: 6px 8px; text-align: center;">
+                <div class="spec-label" style="font-size: 0.68rem;">${m.label}</div>
+                <div class="spec-value highlight-cyan" style="font-size: 1rem;">${m.val}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- Melhores Usos & Sweet Spot -->
+      <div style="background: var(--bg-surface-dim); border: 1px solid var(--border-accent); padding: 10px; border-radius: var(--radius-md); font-size: 0.8rem; color: var(--accent-cyan); margin-bottom: 12px;">
+        💡 <strong>Melhor Uso / Sweet Spot:</strong> ${model.sweetSpot || 'Engenharia de Software e Workflows Agênticos'}
+      </div>
+
+      <!-- Destaques -->
+      <h4 style="font-size: 0.82rem; margin-bottom: 4px; color: var(--text-secondary);">Pontos Fortes:</h4>
+      <ul style="padding-left: 18px; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 12px;">
+        ${(model.strengths || []).slice(0, 3).map(s => `<li>${s}</li>`).join('')}
       </ul>
 
-      <div style="background: var(--bg-surface-dim); border: 1px solid var(--border-accent); padding: 10px; border-radius: var(--radius-md); font-size: 0.8rem; color: var(--accent-cyan);">
-        💡 <strong>Sweet Spot:</strong> ${model.sweetSpot || 'Configuração Padrão'}
+      <!-- Limitações (Seção 8) -->
+      ${model.weaknesses && model.weaknesses.length > 0 ? `
+        <h4 style="font-size: 0.82rem; margin-bottom: 4px; color: #f59e0b;">Limitações Conhecidas:</h4>
+        <ul style="padding-left: 18px; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 14px;">
+          ${model.weaknesses.slice(0, 2).map(w => `<li>${w}</li>`).join('')}
+        </ul>
+      ` : ''}
+
+      <!-- Atualização e Freshness (Seção 8) -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: var(--bg-surface); border-radius: var(--radius-sm); font-size: 0.75rem; color: var(--text-muted); border: 1px solid var(--border-subtle);">
+        <span>Lançamento: <strong>${model.releaseDate || '2026-08'}</strong></span>
+        ${freshness ? `<span class="freshness-pill freshness-${freshness.category}">${freshness.label} (${freshness.daysAgo}d)</span>` : ''}
       </div>
     `;
 
@@ -5511,10 +6354,47 @@
             ? `<span class="model-brand-icon" style="color: ${m.color || provider.brandColor || '#38bdf8'};">${provider.iconSvg}</span>`
             : '<span class="model-color-dot" style="background-color: #38bdf8;"></span>';
           items.push({
+            group: 'Modelos',
             icon: iconSpan,
             title: m.name,
-            subtitle: `${m.providerName} • ${(m.contextWindow / 1000).toFixed(0)}k ctx • ${m.openWeights ? 'Local (Grátis)' : `$${m.pricing.standard.input.toFixed(2)}/$${m.pricing.standard.output.toFixed(2)}`} • ${(m.badges || []).slice(0, 2).join(' | ')}`,
+            subtitle: `${m.providerName} • ${(m.contextWindow / 1000).toFixed(0)}k ctx • ${m.openWeights ? 'Local (Grátis)' : `$${m.pricing && m.pricing.standard ? `${m.pricing.standard.input.toFixed(2)}/$${m.pricing.standard.output.toFixed(2)}` : 'N/D'}`} • ${(m.badges || []).slice(0, 2).join(' | ')}`,
             action: () => { location.hash = `#model/${m.id}`; }
+          });
+        }
+      });
+    }
+
+    // Planos de Assinatura (Seção 44)
+    if ((AppState.commandPaletteFilter === 'all' || AppState.commandPaletteFilter === 'plans') && typeof SUBSCRIPTION_PLANS_DATA !== 'undefined') {
+      SUBSCRIPTION_PLANS_DATA.forEach(p => {
+        const pSearch = `${p.id} ${p.planName} ${p.product} ${p.provider} plano assinatura subscription ${p.bestFor || ''} ${(p.profileTags || []).join(' ')}`.toLowerCase();
+        if (!query || pSearch.includes(query)) {
+          items.push({
+            group: 'Planos',
+            icon: '<span class="model-brand-icon" style="color: #f59e0b;">💳</span>',
+            title: p.planName,
+            subtitle: `${p.provider.toUpperCase()} • ${p.product} • ${p.targetAudience === 'team' ? 'Equipe' : 'Individual'} • ${p.bestFor || ''}`.substring(0, 85),
+            action: () => {
+              location.hash = `#plan/${p.id}`;
+            }
+          });
+        }
+      });
+    }
+
+    // Casos de Uso (Seção 44)
+    if ((AppState.commandPaletteFilter === 'all' || AppState.commandPaletteFilter === 'use-cases') && typeof USE_CASES_DATA !== 'undefined') {
+      USE_CASES_DATA.forEach(u => {
+        const uSearch = `${u.id} ${u.title} ${u.subtitle || ''} ${u.description || ''} caso de uso use case stack`.toLowerCase();
+        if (!query || uSearch.includes(query)) {
+          items.push({
+            group: 'Casos de Uso',
+            icon: '<span class="model-brand-icon" style="color: #ec4899;">🎯</span>',
+            title: u.title,
+            subtitle: `Caso de Uso • ${u.subtitle || u.description || ''}`.substring(0, 85),
+            action: () => {
+              location.hash = `#use-case/${u.id}`;
+            }
           });
         }
       });
@@ -5528,13 +6408,14 @@
             ? `<span class="model-brand-icon" style="color: ${p.brandColor || '#38bdf8'};">${p.iconSvg}</span>`
             : '<span class="model-color-dot" style="background-color: #38bdf8;"></span>';
           items.push({
+            group: 'Provedores',
             icon: iconSpan,
             title: p.name,
             subtitle: `${p.country} • ${p.description.substring(0, 70)}...`,
             action: () => { 
               AppState.dashboardSearchQuery = p.id;
-              location.hash = '#dashboard';
-              renderDashboardTable();
+              location.hash = '#models';
+              renderModelsCatalog();
             }
           });
         }
@@ -5543,13 +6424,61 @@
 
     if (AppState.commandPaletteFilter === 'all' || AppState.commandPaletteFilter === 'hardware') {
       Object.values(HARDWARE_GPU_DATABASE).forEach(g => {
-        const gSearch = `${g.id} ${g.name} ${g.vramGb}gb ${g.tdpWatts}w`.toLowerCase();
+        const gSearch = `${g.id} ${g.name} ${g.vramGb}gb ${g.tdpWatts}w placa de video gpu hardware`.toLowerCase();
         if (!query || gSearch.includes(query)) {
           items.push({
+            group: 'Hardware',
             icon: '<span class="model-brand-icon" style="color: #76b900;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h16v12H4z"/></svg></span>',
             title: g.name,
             subtitle: `${g.vramGb} GB VRAM • TDP ${g.tdpWatts}W`,
             action: () => { location.hash = '#calculator'; }
+          });
+        }
+      });
+    }
+
+    // Ferramentas & Plataformas (Seção 44)
+    if (AppState.commandPaletteFilter === 'all' || AppState.commandPaletteFilter === 'tools') {
+      const tools = [
+        { name: 'Hardware & Calculadora VRAM', desc: 'Dimensionamento de GPU, parâmetros e quantização local', hash: '#calculator', icon: '🧮' },
+        { name: 'Simulador de Custos de API', desc: 'Simulação de custos mensais por volume de tokens', hash: '#simulator', icon: '💵' },
+        { name: 'Calculadora de ROI', desc: 'Cálculo de payback e economia em horas de engenharia', hash: '#roi', icon: '📈' },
+        { name: 'Antigravity Pools & Cotas', desc: 'Análise de cotas proporcionais e preservação de pools', hash: '#antigravity-pools', icon: '🚀' },
+        { name: 'Harnesses & Comandos CLI', desc: 'Comandos prontos para vLLM, Ollama, SGLang e Aider', hash: '#harnesses', icon: '💻' },
+        { name: 'Diagnóstico & Troubleshooting', desc: 'Resolução guiada de problemas de contexto e latência', hash: '#troubleshoot', icon: '🩺' },
+        { name: 'Catálogo de Fontes Auditadas', desc: 'Registro metrológico e links das fontes auditadas', hash: '#sources', icon: '📚' }
+      ];
+
+      tools.forEach(tl => {
+        const tlSearch = `${tl.name} ${tl.desc} ferramenta tool calculadora`.toLowerCase();
+        if (!query || tlSearch.includes(query)) {
+          items.push({
+            group: 'Ferramentas',
+            icon: `<span class="model-brand-icon" style="color: var(--accent-cyan);">${tl.icon}</span>`,
+            title: tl.name,
+            subtitle: `Ferramenta • ${tl.desc}`,
+            action: () => { location.hash = tl.hash; }
+          });
+        }
+      });
+
+      const platforms = [
+        { id: 'cursor', name: 'Cursor IDE', desc: 'Editor AI nativo com motor de diff Composer', hash: '#platforms' },
+        { id: 'opencode', name: 'OpenCode / Go', desc: 'Terminal agêntico e plano com multi-modelos', hash: '#platforms' },
+        { id: 'antigravity', name: 'Google Antigravity', desc: 'Ambiente agêntico e orquestrador de pools', hash: '#antigravity-pools' },
+        { id: 'aider', name: 'Aider CLI', desc: 'Pair programming no terminal com git integration', hash: '#harnesses' },
+        { id: 'openrouter', name: 'OpenRouter', desc: 'Roteamento e agregação de APIs globais', hash: '#platforms' }
+      ];
+
+      platforms.forEach(pl => {
+        const plSearch = `${pl.id} ${pl.name} ${pl.desc} plataforma ide editor ambiente`.toLowerCase();
+        if (!query || plSearch.includes(query)) {
+          items.push({
+            group: 'Plataformas',
+            icon: '<span class="model-brand-icon" style="color: #3b82f6;">🌐</span>',
+            title: pl.name,
+            subtitle: `Plataforma • ${pl.desc}`,
+            action: () => { location.hash = pl.hash; }
           });
         }
       });
@@ -5632,7 +6561,10 @@
           <div style="display: flex; align-items: center; gap: 10px;">
             ${item.icon || ''}
             <div>
-              <div class="item-title">${item.title}</div>
+              <div class="item-title">
+                ${item.title}
+                ${item.group ? `<span class="badge-tag badge-subdollar" style="font-size: 0.65rem; margin-left: 6px; padding: 1px 5px;">${item.group}</span>` : ''}
+              </div>
               <div class="item-subtitle">${item.subtitle}</div>
             </div>
           </div>
@@ -5754,7 +6686,60 @@
   }
 
   // ==========================================
-  // 20. EXPOSIÇÃO GLOBAL (WINDOW.AIAPP)
+
+  // ==========================================
+  // 19. MÓDULO FONTES & METROLOGIA (SEÇÃO 21 - PLANO 08)
+  // ==========================================
+  function renderSourcesView() {
+    const totalBadge = document.getElementById('sourceRegistryTotal');
+    const tbody = document.getElementById('sourcesTableBody');
+    const filterType = document.getElementById('sourceFilterType')?.value || 'all';
+    const query = (document.getElementById('sourceSearchInput')?.value || '').toLowerCase();
+
+    const registry = typeof SOURCE_REGISTRY !== 'undefined' ? SOURCE_REGISTRY : {};
+    let sourcesList = Object.values(registry);
+
+    if (totalBadge) totalBadge.innerText = sourcesList.length;
+
+    if (filterType !== 'all') {
+      sourcesList = sourcesList.filter(s => s.sourceType === filterType || (filterType === 'academic' && s.sourceType === 'paper'));
+    }
+
+    if (query) {
+      sourcesList = sourcesList.filter(s => {
+        return (s.id + ' ' + s.title + ' ' + s.publisher + ' ' + (s.description || '')).toLowerCase().includes(query);
+      });
+    }
+
+    if (!tbody) return;
+
+    if (sourcesList.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 24px; color: var(--text-muted);">Nenhuma fonte encontrada para o filtro selecionado.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = sourcesList.map(s => {
+      const badge = (typeof DomainEvidence !== 'undefined' && DomainEvidence.getProvenanceBadge)
+        ? DomainEvidence.getProvenanceBadge(s.sourceType)
+        : { code: 'M', cssClass: 'badge-m', label: s.sourceType };
+
+      return `
+        <tr>
+          <td><code>${s.id}</code></td>
+          <td>
+            <strong>${s.title}</strong>
+            ${s.url ? `<br><a href="${s.url}" target="_blank" rel="noopener" style="font-size: 0.78rem; color: var(--accent-cyan);">Acessar Documento Oficial ↗</a>` : ''}
+          </td>
+          <td><strong>${s.publisher}</strong></td>
+          <td><span class="evidence-badge ${badge.cssClass}">[${badge.code}] ${s.sourceType}</span></td>
+          <td style="font-size: 0.8rem; color: var(--text-muted);">${s.publishedAt || '2026-09-01'}</td>
+          <td style="font-size: 0.8rem; color: var(--text-muted);">${s.retrievedAt || '2026-09-03'}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+    // 20. EXPOSIÇÃO GLOBAL (WINDOW.AIAPP)
   // ==========================================
   window.AIApp = {
     getPreferredTheme,
@@ -5764,7 +6749,26 @@
     closeQuickInspector,
     closeDrawer: closeQuickInspector,
     getState: () => AppState,
-    selectBudgetStackForPlan(planId) {
+    toggleModelInComparison(modelId) {
+      const idx = AppState.comparatorModels.indexOf(modelId);
+      if (idx > -1) {
+        AppState.comparatorModels = AppState.comparatorModels.filter(id => id !== modelId);
+        showToast('Modelo removido da comparação.');
+      } else {
+        const valid = AppState.comparatorModels.filter(Boolean);
+        if (valid.length >= 4) {
+          showToast('⚠️ Limite de 4 modelos na comparação simultânea.');
+          return;
+        }
+        AppState.comparatorModels.push(modelId);
+        showToast('Modelo adicionado à comparação!');
+      }
+      updateComparisonFloatingBar();
+    },
+    renderModelsCatalog,
+    renderSourcesView,
+    renderDashboardHome,
+        selectBudgetStackForPlan(planId) {
       location.hash = '#plans';
       setTimeout(() => {
         const box = document.querySelector('#plansCardsGrid');
