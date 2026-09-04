@@ -117,7 +117,7 @@
               <a href="#models" class="nav-link" data-route="models">
                 <span class="nav-icon">🤖</span>
                 <span class="nav-label">Modelos</span>
-                <span class="nav-counter" id="hdrModelCountBadge">47</span>
+                <span class="nav-counter" id="hdrModelCountBadge">—</span>
               </a>
             </li>
             <li>
@@ -131,7 +131,7 @@
               <a href="#use-cases" class="nav-link" data-route="use-cases">
                 <span class="nav-icon">🎯</span>
                 <span class="nav-label">Casos de Uso</span>
-                <span class="nav-badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; font-size: 0.65rem; padding: 2px 5px; border-radius: 4px;">12 CASOS</span>
+                <span class="nav-badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; font-size: 0.65rem; padding: 2px 5px; border-radius: 4px;"><span id="navUseCasesBadgeCount">—</span> CASOS</span>
               </a>
             </li>
             <li>
@@ -233,6 +233,12 @@
                 <span class="nav-label">Ecossistema & Plataformas</span>
               </a>
             </li>
+            <li>
+              <a href="#data-health" class="nav-link" data-route="data-health">
+                <span class="nav-icon">🩺</span>
+                <span class="nav-label">Data Health & Auditoria</span>
+              </a>
+            </li>
           </ul>
         </details>
 
@@ -242,7 +248,7 @@
       <div class="sidebar-footer">
         <div class="sidebar-stats">
           <div style="font-size: 0.76rem; color: var(--text-muted); line-height: 1.4;">
-            Dados: set/2026 · <span id="hdrModelCount">44</span> modelos catalogados · <span id="hdrRunCount">58</span> runs
+            Dados: set/2026 · <span id="hdrModelCount">—</span> modelos catalogados · <span id="hdrRunCount">—</span> runs
           </div>
         </div>
       </div>
@@ -372,7 +378,7 @@
               </p>
             </div>
             <a href="#models" class="btn-primary btn-sm" style="text-decoration: none;">
-              Ver Todos os <span id="homeCatCount">47</span> Modelos →
+              Ver Todos os <span id="homeCatCount">—</span> Modelos →
             </a>
           </div>
           <div class="home-catalog-preview" id="homeCatalogPreview">
@@ -417,7 +423,7 @@
         <div class="view-header">
           <div class="view-title-group">
             <h2>🤖 Catálogo de Modelos de IA</h2>
-            <p class="view-subtitle">Explore os <span id="catTotalCount">47</span> modelos catalogados com filtros de provedor, arquitetura, contexto, status e qualidade de evidência.</p>
+            <p class="view-subtitle">Explore os <span id="catTotalCount">—</span> modelos catalogados com filtros de provedor, arquitetura, contexto, status e qualidade de evidência.</p>
           </div>
           <div class="view-actions">
             <!-- Alternador de Visualização: Cards vs Tabela Densa -->
@@ -446,7 +452,7 @@
           <!-- Filter Controls: Segmented Axis + More Filters Details -->
           <div class="catalog-filters-wrapper">
             <div class="catalog-filter-tabs" id="dashboardFilterChips" role="tablist" aria-label="Eixos de Filtro do Catálogo">
-              <button type="button" class="chip-btn active" data-filter="all" role="tab" aria-selected="true">Todos (<span id="chipAllCount">47</span>)</button>
+              <button type="button" class="chip-btn active" data-filter="all" role="tab" aria-selected="true">Todos (<span id="chipAllCount">—</span>)</button>
               <button type="button" class="chip-btn" data-filter="frontier" role="tab" aria-selected="false">Frontier</button>
               <button type="button" class="chip-btn" data-filter="subagents" role="tab" aria-selected="false">Worker</button>
               <button type="button" class="chip-btn" data-filter="open-weights" role="tab" aria-selected="false">Open Weights (Local)</button>
@@ -523,6 +529,81 @@
             <div class="spinner"></div>
             <p>Carregando dossiê do modelo...</p>
           </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW: DOSSIÊ COMPLETO DE PLANO (Seção 35) -->
+      <!-- ========================================== -->
+      <section class="spa-view" id="view-plan-detail">
+        <div class="model-detail-wrapper" id="planDetailContainer">
+          <div class="loading-spinner-box">
+            <div class="spinner"></div>
+            <p>Carregando dossiê do plano...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW: DOSSIÊ COMPLETO DE PROVEDOR (Seção 38) -->
+      <!-- ========================================== -->
+      <section class="spa-view" id="view-provider-detail">
+        <div class="model-detail-wrapper" id="providerDetailContainer">
+          <div class="loading-spinner-box">
+            <div class="spinner"></div>
+            <p>Carregando dossiê do provedor...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW: DOSSIÊ COMPLETO DE PLATAFORMA (Seção 39) -->
+      <!-- ========================================== -->
+      <section class="spa-view" id="view-platform-detail">
+        <div class="model-detail-wrapper" id="platformDetailContainer">
+          <div class="loading-spinner-box">
+            <div class="spinner"></div>
+            <p>Carregando dossiê da plataforma...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW: DOSSIÊ COMPLETO DE BENCHMARK (Seção 41) -->
+      <!-- ========================================== -->
+      <section class="spa-view" id="view-benchmark-detail">
+        <div class="model-detail-wrapper" id="benchmarkDetailContainer">
+          <div class="loading-spinner-box">
+            <div class="spinner"></div>
+            <p>Carregando dossiê do benchmark...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW: DOSSIÊ DE CASO DE USO (Seção 40) -->
+      <!-- ========================================== -->
+      <section class="spa-view" id="view-use-case-detail">
+        <div class="model-detail-wrapper" id="useCaseDetailContainer">
+          <div class="loading-spinner-box">
+            <div class="spinner"></div>
+            <p>Carregando dossiê do caso de uso...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW: DATA HEALTH & REVIEW QUEUE (Seção 43) -->
+      <!-- ========================================== -->
+      <section class="spa-view" id="view-data-health">
+        <div class="view-header">
+          <div class="view-title">
+            <h2>🩺 Integridade & Auditoria Contínua (Data Health)</h2>
+            <p class="view-subtitle">Monitoramento determinístico de frescor temporal por domínio, referências órfãs, claims competitivos e fila de revisão.</p>
+          </div>
+        </div>
+        <div id="dataHealthContainer">
+          <!-- Renderizado via JS -->
         </div>
       </section>
 
@@ -870,9 +951,21 @@
           <button type="button" class="comp-mode-btn" data-mode="governance">🛡️ Governança & Privacidade</button>
         </div>
 
+        <!-- Painel de Inteligência Comparativa (Seções 25, 26, 27, 28, 29) -->
+        <div class="comparator-intelligence-box" id="comparatorIntelligenceBox" style="margin-bottom: 16px;"></div>
+
         <!-- Painel Modo 1: Specs / Tabela Principal -->
         <div class="comp-mode-panel active" id="compModeSpecsPanel">
           <div class="content-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+              <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                Matriz comparativa de especificações técnicas, arquitetura e custos.
+              </div>
+              <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; cursor: pointer; color: var(--text-primary); user-select: none; background: rgba(255,255,255,0.04); padding: 4px 10px; border-radius: var(--radius-xs); border: 1px solid var(--border-subtle);">
+                <input type="checkbox" id="chkComparatorOnlyDiffs" onchange="window.AIApp.toggleOnlyDiffs(this.checked)" style="accent-color: var(--accent-cyan); cursor: pointer;">
+                <span>Mostrar apenas diferenças</span>
+              </label>
+            </div>
             <div class="table-responsive">
               <table class="comparator-table" id="comparatorMainTable">
                 <!-- Renderizado dinamicamente via JS -->
@@ -895,7 +988,7 @@
               <h3 style="margin: 0; font-size: 1.05rem; color: var(--accent-cyan);">🕸️ Radar Multidimensional dos Modelos Selecionados</h3>
               <span style="font-size: 0.8rem; color: var(--text-secondary);">Escala normalizada [0 - 100]</span>
             </div>
-            <div class="radar-container" style="max-width: 700px; margin: 0 auto; height: 480px; position: relative;">
+            <div class="radar-container" style="max-width: 700px; margin: 0 auto; height: 460px; position: relative;">
               <canvas id="compRadarCanvas"></canvas>
             </div>
           </div>
@@ -911,6 +1004,7 @@
             <div class="chart-container" style="height: 480px; position: relative;">
               <canvas id="compParetoCanvas"></canvas>
             </div>
+            <div id="compParetoExplanationBox" style="margin-top: 16px;"></div>
           </div>
         </div>
 
@@ -930,12 +1024,12 @@
       </section>
 
       <!-- ========================================== -->
-      <!-- VIEW 9: CALCULADORA DE HARDWARE & VRAM -->
+      <!-- VIEW 9: CALCULADORA DE HARDWARE & ESTIMADOR DE VRAM -->
       <!-- ========================================== -->
       <section class="spa-view" id="view-calculator">
         <div class="view-header">
           <div class="view-title">
-            <h2>🖥️ Calculadora de Hardware Local & VRAM Real</h2>
+            <h2>🖥️ Calculadora de Hardware Local & Estimador de VRAM</h2>
             <p>Simule a ocupação de memória considerando pesos quantizados, KV Cache comprimido (MLA/DSA/DeltaNet) e buffers CUDA.</p>
           </div>
         </div>
@@ -984,7 +1078,7 @@
 
           <!-- Painel de Resultados & Veredito -->
           <div class="content-box calculator-results-box">
-            <h3>📊 Estimativa de Alocação de Memória</h3>
+            <h3>📊 Estimativa de Alocação de Memória <span class="badge-tag badge-subdollar" style="font-size: 0.72rem; vertical-align: middle; margin-left: 6px;">E · Estimado</span></h3>
             
             <div class="vram-breakdown-container">
               <div class="vram-meter-bar">
@@ -1000,7 +1094,7 @@
             </div>
 
             <div class="vram-total-card">
-              <div class="vram-total-label">VRAM MÍNIMA RECOMENDADA</div>
+              <div class="vram-total-label">ESTIMATIVA DE VRAM RECOMENDADA (E · Estimado)</div>
               <div class="vram-total-value" id="valTotalVramGb">0.0 GB</div>
               <div class="vram-total-sub" id="valGpuVerdict">Calculando compatibilidade de hardware...</div>
             </div>
@@ -1470,7 +1564,7 @@
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
               <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                 <h2>💳 Explorador de Assinaturas, Modelos e Orçamento</h2>
-                <span class="badge-tag badge-frontier" id="planCountersBadge">9 empresas · 49 planos · 44 modelos</span>
+                <span class="badge-tag badge-frontier" id="planCountersBadge">—</span>
               </div>
               <button class="btn-primary btn-sm" id="btnOpenPlanWizard" style="display: flex; align-items: center; gap: 6px;">
                 <span>🎯</span>
@@ -2011,11 +2105,11 @@
           </div>
         </div>
 
-        <!-- Seção 2: Matriz Geral de Disponibilidade dos 44 Modelos -->
+        <!-- Seção 2: Matriz Geral de Disponibilidade dos Modelos -->
         <div class="content-box">
           <div class="box-header">
             <div>
-              <h3>Matriz Geral de Disponibilidade dos 44 Modelos</h3>
+              <h3>Matriz Geral de Disponibilidade (<span id="matrixModelCount">—</span> Modelos)</h3>
               <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 2px;">
                 Mapeamento completo de canais de acesso para cada modelo do catálogo.
               </p>
@@ -2457,6 +2551,9 @@
   <script src="data/use-cases.js"></script>
   <script src="data/pricing-history.js"></script>
   <script src="data/dossiers.js"></script>
+  <script src="data/plan-dossier.js"></script>
+  <script src="data/entity-views.js"></script>
+  <script src="data/data-health-view.js"></script>
   <script src="data.js"></script>
   <script src="app.js"></script>
 </body>

@@ -6,9 +6,24 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "test": "node scripts/audit-data.js"
+    "test": "node scripts/audit-data.js && node scripts/smoke-test.js && node scripts/test-links.js",
+    "test:data": "node scripts/audit-data.js",
+    "test:domain": "node -e \"require('./data/domain.js'); console.log('Domain v2 OK');\"",
+    "test:routes": "node scripts/smoke-test.js",
+    "test:links": "node scripts/test-links.js",
+    "test:smoke": "node scripts/smoke-test.js",
+    "test:impact": "node -e \"const d = require('./data/domain.js'); const res = d.DomainImpact.simulateNewModel({ id: 'test', name: 'Test' }, [{ benchmarkKey: 'cursorBench', score: 99 }]); console.log('Impact Engine OK:', res.isNewOverallLeader);\"",
+    "lint:data": "node scripts/audit-data.js"
   },
-  "keywords": ["ai", "benchmark", "cursorbench", "deepseek", "grok", "gpt-5.6", "claude"],
+  "keywords": [
+    "ai",
+    "benchmark",
+    "cursorbench",
+    "deepseek",
+    "grok",
+    "gpt-5.6",
+    "claude"
+  ],
   "author": "",
   "license": "MIT"
 }

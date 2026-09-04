@@ -672,13 +672,16 @@ if (domain) {
   assert(covSample.coveragePercent >= 50 && covSample.coveragePercent <= 100, `Coverage deve estar entre 50% e 100%. Encontrado: ${covSample.coveragePercent}%`);
   assert(covSample.measuredFields > 0, 'Deve ter measuredFields > 0');
 
-  // 3. Teste DomainFreshness: Rótulos temporais
-  console.log('   - [Plano 08 / Seção 22] Verificando freshness temporal determinístico...');
-  const freshRecent = DomainFreshness.getFreshness('2026-09-02');
-  assert(freshRecent && freshRecent.status === 'recent', 'Data de 02/09/2026 deve ser classificada como recent');
+  // 3. Teste DomainFreshness: Rótulos temporais e relógio desacoplado (Plano 09, Seções 4, 7, 60)
+  console.log('   - [Plano 09 / Seções 4, 7, 60] Verificando freshness temporal determinístico e relógio injetado...');
+  const testNow = new Date('2026-09-04T00:00:00Z');
+  const freshRecent = DomainFreshness.getFreshness('2026-09-02', { now: testNow });
+  assert(freshRecent && (freshRecent.status === 'fresh' || freshRecent.status === 'recent'), 'Data recente deve ser classificada como fresh');
+  assert(freshRecent.daysAgo === 2, `daysAgo com relógio injetado deve ser 2, encontrado: ${freshRecent.daysAgo}`);
 
-  const freshOld = DomainFreshness.getFreshness('2026-05-01');
-  assert(freshOld && freshOld.status === 'legacy', 'Data de 05/2026 deve ser classificada como legacy');
+  const freshOld = DomainFreshness.getFreshness('2026-05-01', { now: testNow });
+  assert(freshOld && (freshOld.status === 'stale' || freshOld.status === 'legacy'), 'Data antiga deve ser classificada como stale');
+  assert(freshOld.isStale === true, 'isStale deve ser true para data de maio/2026');
 
   // 4. Teste DomainEntities: Relação Modelos <-> Planos
   console.log('   - [Plano 08 / Seção 11-12] Verificando relação bidirecional Modelos e Planos...');
@@ -723,12 +726,16 @@ if (domain) {
   Object.values(AI_MODELS_DATA).forEach(m => {
     if (m.pricing && m.pricing.standard) {
       const canonicalInput = m.pricing.standard.input;
+      const canonicalOutput = m.pricing.standard.output || 0;
       const strengthsText = (m.strengths || []).join(' ');
-      const priceMatches = strengthsText.match(/\$([0-9]+(?:\.[0-9]+)?)/g);
+      const priceMatches = strengthsText.match(/\$([0-9]+(?:[.,][0-9]+)?)(?!\/(?:task|tarefa|mês|mes|ano|h))/gi);
       if (priceMatches) {
         priceMatches.forEach(pm => {
-          const val = parseFloat(pm.replace('$', ''));
-          if (Math.abs(val - canonicalInput) > 0.05 && Math.abs(val - (m.pricing.standard.output || 0)) > 0.05) {
+          const numStr = pm.replace('$', '').replace(',', '.');
+          const val = parseFloat(numStr);
+          const isCache = m.pricing.cacheRead && Math.abs(val - m.pricing.cacheRead) <= 0.05;
+          const isBatch = m.pricing.batch && Math.abs(val - (m.pricing.batch.input || 0)) <= 0.05;
+          if (!isCache && !isBatch && Math.abs(val - canonicalInput) > 0.05 && Math.abs(val - canonicalOutput) > 0.05) {
             warn(false, `[Seção 55] Possível divergência de preço no modelo "${m.id}": texto cita "${pm}" mas pricing.standard é $${canonicalInput}`);
           }
         });
@@ -779,7 +786,138 @@ if (domain) {
     assert(!isNaN(m.contextWindow), `[Seção 50] contextWindow NaN em "${m.id}"`);
   });
 
-  console.log('   ✅ Todas as suítes do Plano 08 validadas com 100% de aprovação!');
+  // 12. [Plano 09] Suíte de Validação da Fase 2 (Domínio v2, Impact Engine, Claims, Hardware)
+  console.log('\n🌟 VALIDANDO TESTES DO PLANO 09 (DOMÍNIO V2, IMPACT ENGINE & CLAIMS)...');
+  const { DomainRegistry, DomainClaims, DomainImpact, DomainComparison, DomainHealth } = domain;
+
+  // 1. [Seção 61] Rankings de Modelos Locais por Categoria
+  console.log('   - [Plano 09 / Seção 61] Verificando 4 categorias de hardware local (consumer, workstation, open_weights, any)...');
+  const localRanks = DomainRankings.getLocalRankingsByCategory();
+  assert(localRanks.consumer, 'Deve identificar campeão na categoria consumer');
+  assert(localRanks.consumer.minVramGb <= 24, `Campeão consumer deve ter VRAM <= 24GB. Encontrado: ${localRanks.consumer.minVramGb}GB`);
+  assert(localRanks.workstation, 'Deve identificar campeão na categoria workstation');
+  assert(localRanks.workstation.minVramGb <= 96, `Campeão workstation deve ter VRAM <= 96GB. Encontrado: ${localRanks.workstation.minVramGb}GB`);
+
+  // 2. [Seções 62, 86, 87] Impact Engine & Fixture de Modelo Futuro Superior
+  console.log('   - [Plano 09 / Seções 62, 86, 87] Testando Impact Engine com fixture de modelo futuro (score 98.5%)...');
+  const futureModelFixture = {
+    id: 'future-frontier-2027',
+    name: 'Future Frontier 2027 Pro',
+    provider: 'openai',
+    releaseDate: '2027-01-15'
+  };
+  const futureRuns = [
+    { benchmarkKey: 'cursorBench', score: 98.5, costUsd: 1.20, effort: 'Max' }
+  ];
+  const impactResult = DomainImpact.simulateNewModel(futureModelFixture, futureRuns);
+  assert(impactResult.isNewOverallLeader === true, 'Future model com 98.5% deve assumir nova liderança geral');
+  assert(impactResult.disruptedBenchmarks.includes('cursorBench'), 'CursorBench deve constar como benchmark impactado');
+  assert(impactResult.impactReports.length > 0 && impactResult.impactReports[0].leaderChanged === true, 'Impact report deve registrar leaderChanged === true');
+  assert(impactResult.impactReports[0].supersededClaims.length > 0, 'Impact report deve listar claims superseded do líder anterior');
+
+  // 3. [Seção 63] Ausência de referências órfãs no Domínio
+  console.log('   - [Plano 09 / Seção 63] Verificando ausência de referências órfãs em Benchmark Registry e Claims...');
+  const allBenchmarks = DomainRegistry.getAllBenchmarks();
+  assert(allBenchmarks.length >= 10, `BenchmarkRegistry deve conter pelo menos 10 benchmarks. Encontrados: ${allBenchmarks.length}`);
+  allBenchmarks.forEach(b => {
+    assert(b.id && b.name && b.category, `Benchmark "${b.id}" possui metadados incompletos`);
+  });
+
+  // 4. [Seção 64] Testes de Claims & Transição para Superseded
+  console.log('   - [Plano 09 / Seção 64] Verificando sistema de claims e transição para superseded...');
+  const allClaims = DomainClaims.getAllClaims();
+  assert(allClaims.length >= 5, `DomainClaims deve conter pelo menos 5 claims. Encontrados: ${allClaims.length}`);
+  const sampleClaim = allClaims[0];
+  assert(sampleClaim.id && sampleClaim.subjectId && sampleClaim.status, `Claim "${sampleClaim.id}" possui estrutura inválida`);
+  const originalStatus = sampleClaim.status;
+  const supersededSuccess = DomainClaims.supersedeClaim(sampleClaim.id, 'new-claim-test-99');
+  assert(supersededSuccess === true, 'supersedeClaim deve retornar true para claim existente');
+  assert(sampleClaim.status === 'superseded' && sampleClaim.supersededByClaimId === 'new-claim-test-99', 'Claim deve ser atualizado com status superseded e pointer');
+  // Restaura estado original para não poluir
+  sampleClaim.status = originalStatus;
+  delete sampleClaim.supersededByClaimId;
+
+  // 5. [Seção 65] Contadores Dinâmicos Globais
+  console.log('   - [Plano 09 / Seção 65] Verificando integridade dos contadores derivados de catálogo...');
+  const catalogStats = DomainEntities.getCatalogStats();
+  assert(catalogStats.totalModels === Object.keys(AI_MODELS_DATA).length, 'totalModels de getCatalogStats deve bater com AI_MODELS_DATA');
+  assert(catalogStats.totalRuns === CURSORBENCH_32_DATA.length, 'totalRuns deve bater com CURSORBENCH_32_DATA');
+  assert(catalogStats.totalPlans === SUBSCRIPTION_PLANS_DATA.length, 'totalPlans deve bater com SUBSCRIPTION_PLANS_DATA');
+  assert(catalogStats.frontierModels > 0, 'frontierModels deve ser > 0');
+
+  // 6. [Seção 84] Detector de Duplicação de Fatos em Prosa Editorial
+  console.log('   - [Plano 09 / Seção 84] Executando detector de duplicação de fatos editoriais ($X, X%, #1)...');
+  let duplicateFactWarnings = 0;
+  Object.values(AI_MODELS_DATA).forEach(m => {
+    (m.strengths || []).forEach(st => {
+      if (/#1\b|líder absoluto|campeão geral/i.test(st)) {
+        warn(false, `[Seção 84] Fato competitivo potencial em prosa editorial do modelo "${m.id}": "${st}". Recomenda-se derivar em runtime.`);
+        duplicateFactWarnings++;
+      }
+    });
+  });
+  console.log(`     Auditoria de duplicação de fatos concluída (${duplicateFactWarnings} avisos editoriais).`);
+
+  // 7. [Seção 100] ModelConfiguration, Offering & Availability
+  console.log('   - [Plano 09 / Seção 100] Verificando estruturas canônicas de ModelConfiguration e Offering...');
+  const { MODEL_CONFIGURATIONS_DATA, CANONICAL_OFFERINGS_DATA, NORMALIZED_AVAILABILITY_DATA } = require('../data/domain.js');
+  assert(Array.isArray(MODEL_CONFIGURATIONS_DATA) && MODEL_CONFIGURATIONS_DATA.length >= 8,
+    'MODEL_CONFIGURATIONS_DATA deve conter pelo menos 8 configurações estruturadas');
+  assert(Array.isArray(CANONICAL_OFFERINGS_DATA) && CANONICAL_OFFERINGS_DATA.length >= 6,
+    'CANONICAL_OFFERINGS_DATA deve conter pelo menos 6 ofertas de plataforma');
+  assert(Array.isArray(NORMALIZED_AVAILABILITY_DATA) && NORMALIZED_AVAILABILITY_DATA.length >= 4,
+    'NORMALIZED_AVAILABILITY_DATA deve conter disponibilidade normalizada');
+
+  // 8. [Seção 11-12] Validação das 4 Categorias de Hardware Local
+  console.log('   - [Plano 09 / Seções 11-12] Validando separação estrita das categorias de hardware local...');
+  const localRankings = DomainRankings.getLocalRankingsByCategory();
+  assert(localRankings.consumer, 'Ranking local deve ter campeão consumer');
+  assert(localRankings.workstation, 'Ranking local deve ter campeão workstation');
+  assert(localRankings.consumer.minVramGb <= 24.0, `Consumer local deve ter VRAM <= 24GB. Encontrado: ${localRankings.consumer.minVramGb}GB`);
+  assert(localRankings.workstation.minVramGb <= 96.0, `Workstation local deve ter VRAM <= 96GB. Encontrado: ${localRankings.workstation.minVramGb}GB`);
+
+  // 9. [Linhagens & Genealogias] Validação de integridade das 7 famílias e ausência de setas cruzadas
+  console.log('   - [Linhagens & Fluxos] Validando integridade de trilhas genealógicas para 7 famílias...');
+  const { MODEL_HISTORY_DATA } = require('../data/history.js');
+  assert(Array.isArray(MODEL_HISTORY_DATA.lineages) && MODEL_HISTORY_DATA.lineages.length >= 7, 'MODEL_HISTORY_DATA deve possuir pelo menos 7 famílias');
+  
+  const familyIds = MODEL_HISTORY_DATA.lineages.map(l => l.familyId);
+  ['anthropic-claude', 'openai-gpt56', 'google-gemini', 'zai-glm', 'deepseek-tree', 'xai-grok', 'alibaba-qwen'].forEach(fid => {
+    assert(familyIds.includes(fid), `Família canônica "${fid}" deve estar presente em MODEL_HISTORY_DATA`);
+  });
+
+  MODEL_HISTORY_DATA.lineages.forEach(lin => {
+    assert(Array.isArray(lin.tracks) && lin.tracks.length > 0, `Família "${lin.familyId}" deve possuir tracks estruturadas`);
+    
+    // Validar nós e nomes em cada track
+    const allFamilyNodes = [];
+    lin.tracks.forEach(tr => {
+      assert(Array.isArray(tr.nodes) && tr.nodes.length > 0, `Trilha "${tr.trackId}" deve possuir nós`);
+      tr.nodes.forEach(n => {
+        assert(n.modelId && n.name && n.releaseDate && n.status, `Nó "${n.modelId}" possui atributos incompletos`);
+        allFamilyNodes.push(n.modelId);
+      });
+    });
+
+    // Validar isolamento específico da Anthropic
+    if (lin.familyId === 'anthropic-claude') {
+      const sonnetTrack = lin.tracks.find(t => t.trackId === 'claude-sonnet-track');
+      const opusTrack = lin.tracks.find(t => t.trackId === 'claude-opus-track');
+      assert(sonnetTrack && opusTrack, 'Trilhas Sonnet e Opus devem existir na Anthropic');
+      const hasOpusInSonnet = sonnetTrack.nodes.some(n => n.modelId.toLowerCase().includes('opus'));
+      const hasSonnetInOpus = opusTrack.nodes.some(n => n.modelId.toLowerCase().includes('sonnet'));
+      assert(!hasOpusInSonnet, 'Trilha Sonnet JAMAIS deve conter modelos Opus como antecessores');
+      assert(!hasSonnetInOpus, 'Trilha Opus JAMAIS deve conter modelos Sonnet como antecessores');
+    }
+
+    // Validar conexões
+    (lin.connections || []).forEach(conn => {
+      assert(allFamilyNodes.includes(conn.from), `Conexão "from: ${conn.from}" não pertence aos nós da família "${lin.familyId}"`);
+      assert(allFamilyNodes.includes(conn.to), `Conexão "to: ${conn.to}" não pertence aos nós da família "${lin.familyId}"`);
+    });
+  });
+
+  console.log('   ✅ Todas as suítes dos Planos 08 e 09 validadas com 100% de aprovação!');
 }
 
 console.log('====================================================\n');

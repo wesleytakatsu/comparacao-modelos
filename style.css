@@ -3755,6 +3755,43 @@ input[type="range"]::-webkit-slider-thumb:hover {
   font-size: 1.4rem;
   font-weight: bold;
 }
+.lineage-tracks-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+.lineage-track-lane {
+  background: var(--bg-surface-elevated);
+  padding: 16px 20px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--accent-cyan);
+}
+.lineage-track-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.lineage-track-title {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--accent-cyan);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.lineage-track-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.lineage-node-historical {
+  border-style: dashed;
+  background: var(--bg-surface);
+}
 
 /* Timeline */
 .timeline-filters {

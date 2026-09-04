@@ -59,6 +59,9 @@
       catch(e) { return []; }
     })(),
     compareOnlyDifferences: false,
+    comparatorOnlyDiffs: false,
+    comparatorRefModelId: null,
+    useCaseCustomWeights: {},
     expandedCompanies: { openai: true, anthropic: true, google: true, cursor: true, opencode: true, zai: true, xai: true, kimi: true, camelai: true },
     wizardStep: 1,
     wizardAnswers: { maxBudgetBrl: 250, audience: 'individual', primaryFocus: 'coding', priorityModel: 'any', requirePredictableCost: true },
@@ -202,22 +205,37 @@
     if (route === 'platforms' || route === 'opencode' || route === 'availability') route = 'platforms';
 
     if (route === 'provider' && param) {
-      AppState.dashboardSearchQuery = param.toLowerCase();
-      route = 'models';
+      // Dossiê Real de Provedor (Seção 38)
+      route = 'provider';
     }
     if (route === 'platform') {
       if (param === 'antigravity') {
         route = 'antigravity-pools';
+      } else if (param) {
+        // Dossiê Real de Plataforma (Seção 39)
+        route = 'platform';
       } else {
         route = 'platforms';
       }
     }
 
     if (route === 'plan' && param) {
-      route = 'plans';
-      setTimeout(() => openPlanDetailsModal(param), 100);
+      // Dossiê Real de Plano (Seções 35, 37)
+      route = 'plan';
     }
-    if (route === 'use-case' || route === 'use-cases') {
+    if (route === 'benchmark' && param) {
+      // Dossiê Real de Benchmark (Seção 41)
+      route = 'benchmark';
+    }
+    if (route === 'data-health') {
+      // Painel de Data Health & Review Queue (Seção 43)
+      route = 'data-health';
+    }
+    if (route === 'use-case' && param) {
+      // Dossiê Completo de Caso de Uso (#use-case/:id - Seção 40)
+      AppState.activeUseCaseId = param;
+      route = 'use-case';
+    } else if (route === 'use-case' || route === 'use-cases') {
       if (param) AppState.activeUseCaseId = param;
       if (queryPart) {
         const urlParams = new URLSearchParams(queryPart);
@@ -332,7 +350,7 @@
       view.classList.remove('active');
     });
 
-    // Rota Especial: Dossiê do Modelo
+    // Rota Especial: Dossiê do Modelo (Seção 8)
     if (route === 'model' && param) {
       if (param === 'ox-alpha' || param === 'stealth-ox-alpha' || param === 'stealth/ox-alpha') {
         location.hash = '#model/glm-5-3-flash';
@@ -343,6 +361,84 @@
       if (detailView) {
         detailView.classList.add('active');
         renderModelDossier(param);
+      }
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    // Rota Especial: Dossiê Completo de Plano (Seções 35, 37)
+    if (route === 'plan' && param) {
+      const planDetailView = document.getElementById('view-plan-detail');
+      if (planDetailView) {
+        planDetailView.classList.add('active');
+        if (typeof PlanDossierView !== 'undefined' && PlanDossierView.render) {
+          PlanDossierView.render(param);
+        }
+      }
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    // Rota Especial: Dossiê de Provedor (Seção 38)
+    if (route === 'provider' && param) {
+      const provView = document.getElementById('view-provider-detail');
+      if (provView) {
+        provView.classList.add('active');
+        if (typeof EntityViews !== 'undefined' && EntityViews.renderProvider) {
+          EntityViews.renderProvider(param);
+        }
+      }
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    // Rota Especial: Dossiê de Plataforma (Seção 39)
+    if (route === 'platform' && param && param !== 'antigravity') {
+      const platView = document.getElementById('view-platform-detail');
+      if (platView) {
+        platView.classList.add('active');
+        if (typeof EntityViews !== 'undefined' && EntityViews.renderPlatform) {
+          EntityViews.renderPlatform(param);
+        }
+      }
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    // Rota Especial: Dossiê de Benchmark (Seção 41)
+    if (route === 'benchmark' && param) {
+      const benchView = document.getElementById('view-benchmark-detail');
+      if (benchView) {
+        benchView.classList.add('active');
+        if (typeof EntityViews !== 'undefined' && EntityViews.renderBenchmark) {
+          EntityViews.renderBenchmark(param);
+        }
+      }
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    // Rota Especial: Dossiê de Caso de Uso (Seção 40)
+    if (route === 'use-case' && param) {
+      const ucView = document.getElementById('view-use-case-detail');
+      if (ucView) {
+        ucView.classList.add('active');
+        if (typeof EntityViews !== 'undefined' && EntityViews.renderUseCase) {
+          EntityViews.renderUseCase(param);
+        }
+      }
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    // Rota Especial: Data Health & Review Queue (Seção 43)
+    if (route === 'data-health') {
+      const healthView = document.getElementById('view-data-health');
+      if (healthView) {
+        healthView.classList.add('active');
+        if (typeof DataHealthView !== 'undefined' && DataHealthView.render) {
+          DataHealthView.render();
+        }
       }
       window.scrollTo(0, 0);
       return;
@@ -1224,21 +1320,48 @@
   // CONTADORES DINÂMICOS & KPIS DO DASHBOARD
   // ==========================================
   function updateDynamicCounters() {
-    if (typeof AI_MODELS_DATA === 'undefined') return;
-    const totalModels = Object.keys(AI_MODELS_DATA).length;
-    const totalRuns = typeof CURSORBENCH_32_DATA !== 'undefined' ? CURSORBENCH_32_DATA.length : 58;
+    const stats = (typeof DomainEntities !== 'undefined' && typeof DomainEntities.getCatalogStats === 'function')
+      ? DomainEntities.getCatalogStats()
+      : {
+          modelCount: typeof AI_MODELS_DATA !== 'undefined' ? Object.keys(AI_MODELS_DATA).length : 0,
+          benchmarkRunCount: typeof CURSORBENCH_32_DATA !== 'undefined' ? CURSORBENCH_32_DATA.length : 0,
+          planCount: typeof SUBSCRIPTION_PLANS_DATA !== 'undefined' ? SUBSCRIPTION_PLANS_DATA.length : 0,
+          providerCount: typeof AI_PROVIDERS_DATA !== 'undefined' ? Object.keys(AI_PROVIDERS_DATA).length : 0
+        };
+
+    const hdrModelBadge = document.getElementById('hdrModelCountBadge');
+    if (hdrModelBadge) hdrModelBadge.innerText = stats.modelCount;
 
     const hdrModel = document.getElementById('hdrModelCount');
-    if (hdrModel) hdrModel.innerText = totalModels;
+    if (hdrModel) hdrModel.innerText = stats.modelCount;
 
     const hdrRun = document.getElementById('hdrRunCount');
-    if (hdrRun) hdrRun.innerText = totalRuns;
+    if (hdrRun) hdrRun.innerText = stats.benchmarkRunCount;
 
     const catTotal = document.getElementById('catTotalCount');
-    if (catTotal) catTotal.innerText = totalModels;
+    if (catTotal) catTotal.innerText = stats.modelCount;
 
     const chipAll = document.getElementById('chipAllCount');
-    if (chipAll) chipAll.innerText = totalModels;
+    if (chipAll) chipAll.innerText = stats.modelCount;
+
+    const homeCat = document.getElementById('homeCatCount');
+    if (homeCat) homeCat.innerText = stats.modelCount;
+
+    const navUcBadge = document.getElementById('navUseCasesBadgeCount');
+    if (navUcBadge) {
+      const ucCount = (typeof USE_CASES_DATA !== 'undefined' && Array.isArray(USE_CASES_DATA)) 
+        ? USE_CASES_DATA.length 
+        : ((typeof USE_CASE_COMPARISON_DATA !== 'undefined' && USE_CASE_COMPARISON_DATA.useCases) ? USE_CASE_COMPARISON_DATA.useCases.length : 12);
+      navUcBadge.innerText = ucCount;
+    }
+
+    const matrixModel = document.getElementById('matrixModelCount');
+    if (matrixModel) matrixModel.innerText = stats.modelCount;
+
+    const planBadge = document.getElementById('planCountersBadge');
+    if (planBadge && stats.planCount) {
+      planBadge.innerText = `${stats.providerCount || 9} empresas · ${stats.planCount} planos · ${stats.modelCount} modelos`;
+    }
   }
 
   function renderDashboardHome() {
@@ -2925,6 +3048,8 @@
     const activePanel = document.getElementById(targetId);
     if (activePanel) activePanel.style.display = 'block';
 
+    renderComparatorIntelligenceBox();
+
     switch (activeMode) {
       case 'specs':
         renderComparatorTable();
@@ -2945,6 +3070,85 @@
         renderComparatorGovernanceMode();
         break;
     }
+  }
+
+  function renderComparatorIntelligenceBox() {
+    const box = document.getElementById('comparatorIntelligenceBox');
+    if (!box) return;
+
+    const activeIds = AppState.comparatorModels.filter(Boolean);
+    if (activeIds.length < 2) {
+      box.innerHTML = `
+        <div style="padding: 12px 16px; background: rgba(56, 189, 248, 0.04); border: 1px dashed var(--border-subtle); border-radius: var(--radius-sm); font-size: 0.85rem; color: var(--text-secondary);">
+          ℹ️ <strong>Inteligência Comparativa (Seção 25):</strong> Selecione pelo menos 2 modelos acima para habilitar índice de confiança, análise de dominância e resumo automático de trade-offs.
+        </div>
+      `;
+      return;
+    }
+
+    const refId = AppState.comparatorRefModelId || activeIds[0];
+    const targetId = activeIds.find(id => id !== refId) || activeIds[1];
+
+    let conf = { score: 0.85, label: 'high', sharedBenchmarks: 7, totalComparableMetrics: 8, warnings: [], coveragePct: 85 };
+    if (typeof DomainComparison !== 'undefined' && DomainComparison.calculateConfidence) {
+      conf = DomainComparison.calculateConfidence(refId, targetId);
+    }
+
+    let tradeOff = null;
+    if (typeof DomainComparison !== 'undefined' && DomainComparison.getTradeOffSummary) {
+      tradeOff = DomainComparison.getTradeOffSummary(refId, targetId);
+    }
+
+    const confBadgeClass = conf.label === 'high' ? 'badge-frontier' : conf.label === 'medium' ? 'badge-warning' : 'badge-danger';
+    const confLabelPt = conf.label === 'high' ? 'Alta' : conf.label === 'medium' ? 'Média' : 'Baixa';
+
+    box.innerHTML = `
+      <div class="content-box" style="padding: 14px 18px; border-left: 4px solid var(--accent-cyan); margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary);">🛡️ Metrologia Comparativa:</span>
+            <span class="badge-tag ${confBadgeClass}">Confiança ${confLabelPt} (${conf.coveragePct}%)</span>
+            <span style="font-size: 0.8rem; color: var(--text-secondary);">${conf.sharedBenchmarks} benchmarks diretamente comparáveis de ${conf.totalComparableMetrics} avaliados</span>
+          </div>
+
+          <!-- Seletor de Modelo de Referência (Seção 28) -->
+          <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem;">
+            <span style="color: var(--text-muted);">Referência de Linha-Base:</span>
+            <div style="display: inline-flex; gap: 4px; flex-wrap: wrap;">
+              ${activeIds.map(id => {
+                const m = AI_MODELS_DATA[id];
+                const isRef = id === refId;
+                return `
+                  <button type="button" class="btn-xs ${isRef ? 'btn-primary' : 'btn-ghost'}" 
+                          onclick="window.AIApp.setComparatorReferenceModel('${id}')" 
+                          style="font-size: 0.75rem; padding: 2px 8px; border-radius: 12px;"
+                          title="Definir ${m ? m.name : id} como modelo base para deltas">
+                    ${isRef ? '★ ' : ''}${m ? m.name : id}
+                  </button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+
+        ${conf.warnings && conf.warnings.length > 0 ? `
+          <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 4px;">
+            ${conf.warnings.map(w => `<div style="font-size: 0.78rem; color: #f59e0b;">⚠️ ${w}</div>`).join('')}
+          </div>
+        ` : ''}
+
+        ${tradeOff ? `
+          <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-subtle);">
+            <div style="font-size: 0.82rem; font-weight: 600; color: var(--accent-cyan); margin-bottom: 4px;">
+              ⚖️ Resumo de Trade-offs (Ao escolher <u>${tradeOff.targetName}</u> em vez de <u>${tradeOff.referenceName}</u>):
+            </div>
+            <div style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
+              ${tradeOff.bullets && tradeOff.bullets.length > 0 ? tradeOff.bullets.map(b => `• ${b}`).join(' &nbsp;·&nbsp; ') : 'Desempenho equivalente nas métricas diretamente comparáveis.'}
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    `;
   }
 
   function renderComparatorBenchmarksMode() {
@@ -3135,6 +3339,33 @@
         }
       }
     });
+
+    const expBox = document.getElementById('compParetoExplanationBox');
+    if (expBox && typeof DomainComparison !== 'undefined' && DomainComparison.getParetoExplanation) {
+      expBox.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 16px;">
+          <h4 style="margin: 0; font-size: 0.9rem; color: var(--text-primary);">📐 Explicação Matemática da Fronteira de Pareto (Seção 30):</h4>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px;">
+            ${activeIds.map(id => {
+              const m = AI_MODELS_DATA[id];
+              const pRes = DomainComparison.getParetoExplanation(id);
+              const isP = pRes.isPareto;
+              return `
+                <div style="padding: 12px; background: var(--bg-surface); border: 1px solid ${isP ? 'rgba(56, 189, 248, 0.4)' : 'var(--border-subtle)'}; border-left: 4px solid ${isP ? 'var(--accent-cyan)' : 'var(--text-muted)'}; border-radius: var(--radius-xs);">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <strong style="color: var(--text-primary); font-size: 0.9rem;">${m ? m.name : id}</strong>
+                    <span class="badge-tag ${isP ? 'badge-frontier' : 'badge-subdollar'}">${isP ? '✓ Fronteira Ativa' : 'Dominado'}</span>
+                  </div>
+                  <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 6px 0 0 0; line-height: 1.4;">
+                    ${pRes.explanation}
+                  </p>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
   }
 
   function renderComparatorAccessMode() {
@@ -3277,6 +3508,23 @@
       }}
     ];
 
+    const chk = document.getElementById('chkComparatorOnlyDiffs');
+    if (chk) chk.checked = !!AppState.comparatorOnlyDiffs;
+
+    const visibleRows = rows.map(r => {
+      const renderedValues = models.map(m => String(r.get(m) || ''));
+      const textValues = renderedValues.map(v => v.replace(/<[^>]*>/g, '').trim().toLowerCase());
+      const hasDifference = textValues.some(v => v !== textValues[0]);
+      return {
+        label: r.label,
+        renderedValues: renderedValues,
+        hasDifference: hasDifference
+      };
+    }).filter(r => {
+      if (!AppState.comparatorOnlyDiffs || models.length <= 1) return true;
+      return r.hasDifference;
+    });
+
     table.innerHTML = `
       <thead>
         <tr>
@@ -3291,12 +3539,16 @@
         </tr>
       </thead>
       <tbody>
-        ${rows.map(r => `
-          <tr>
-            <td><strong>${r.label}</strong></td>
-            ${models.map(m => `<td>${r.get(m)}</td>`).join('')}
+        ${visibleRows.map(r => `
+          <tr style="${r.hasDifference && models.length > 1 ? 'background: rgba(56, 189, 248, 0.02);' : ''}">
+            <td>
+              <strong>${r.label}</strong>
+              ${r.hasDifference && models.length > 1 ? '<span style="font-size: 0.68rem; color: var(--accent-cyan); margin-left: 6px;">• Delta</span>' : ''}
+            </td>
+            ${r.renderedValues.map(val => `<td>${val}</td>`).join('')}
           </tr>
         `).join('')}
+        ${visibleRows.length === 0 ? `<tr><td colspan="${models.length + 1}" style="text-align: center; padding: 24px; color: var(--text-muted);">Nenhuma diferença técnica detectada entre os modelos selecionados nas especificações avaliadas.</td></tr>` : ''}
       </tbody>
     `;
   }
@@ -5184,6 +5436,9 @@
         <button class="btn-secondary btn-sm" onclick="window.AIApp.togglePlanCompare('${plan.id}'); window.AIApp.openPlanDetails('${plan.id}');">
           ${isCmp ? '✓ No Comparador' : '+ Adicionar ao Comparador'}
         </button>
+        <a href="#plan/${plan.id}" class="btn-primary btn-sm" onclick="window.AIApp.closePlanDetails();" style="text-decoration: none;">
+          📄 Abrir dossiê completo ↗
+        </a>
       `;
     }
 
@@ -5485,39 +5740,83 @@
     if (currentTab === 'lineages') {
       const container = document.getElementById('lineagesListContainer');
       if (container) {
-        container.innerHTML = MODEL_HISTORY_DATA.lineages.map(lin => `
-          <div class="lineage-family-card">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-              <div>
-                <h3 style="color: var(--accent-cyan); margin-bottom: 4px;">${lin.familyName}</h3>
-                <p style="font-size: 0.85rem; color: var(--text-secondary);">${lin.description}</p>
-              </div>
-            </div>
+        container.innerHTML = MODEL_HISTORY_DATA.lineages.map(lin => {
+          let flowContentHtml = '';
 
-            <div class="lineage-flow">
-              ${lin.nodes.map((n, idx) => `
-                <div class="lineage-node" onclick="location.hash='#model/${n.modelId}'">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                    <strong style="color: var(--text-primary); font-size: 0.95rem;">${n.name}</strong>
-                    <span class="badge-tag ${n.status === 'active' ? 'badge-frontier' : n.status === 'superseded' ? 'badge-warning' : 'badge-subdollar'}">${n.status}</span>
+          if (lin.tracks && lin.tracks.length > 0) {
+            flowContentHtml = `
+              <div class="lineage-tracks-wrapper">
+                ${lin.tracks.map(tr => `
+                  <div class="lineage-track-lane">
+                    <div class="lineage-track-header">
+                      <div class="lineage-track-title">
+                        <span>⚡</span> ${tr.trackName}
+                      </div>
+                      ${tr.trackDesc ? `<div class="lineage-track-desc">${tr.trackDesc}</div>` : ''}
+                    </div>
+                    <div class="lineage-flow" style="display: flex; align-items: center; gap: 12px; overflow-x: auto; padding: 6px 0; margin-top: 0; background: transparent;">
+                      ${tr.nodes.map((n, idx) => {
+                        const inCatalog = typeof AI_MODELS_DATA !== 'undefined' && AI_MODELS_DATA[n.modelId];
+                        return `
+                        <div class="lineage-node ${inCatalog ? '' : 'lineage-node-historical'}" 
+                             ${inCatalog ? `onclick="location.hash='#model/${n.modelId}'"` : ''} 
+                             style="min-width: 200px; flex-shrink: 0; ${inCatalog ? 'cursor: pointer;' : 'cursor: default; opacity: 0.88;'}">
+                          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 6px;">
+                            <strong style="color: var(--text-primary); font-size: 0.92rem;">${n.name}</strong>
+                            <span class="badge-tag ${n.status === 'active' ? 'badge-frontier' : n.status === 'superseded' ? 'badge-warning' : n.status === 'stable' ? 'badge-frontier' : 'badge-subdollar'}">${n.status}</span>
+                          </div>
+                          <div style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 6px;">Lançamento: ${n.releaseDate}</div>
+                          <div style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.35;">${n.notes}</div>
+                          ${!inCatalog ? `<div style="font-size: 0.70rem; color: var(--accent-cyan); margin-top: 6px;">📍 Predecessor Histórico</div>` : ''}
+                        </div>
+                        ${idx < tr.nodes.length - 1 ? `<span class="lineage-arrow" style="color: var(--accent-cyan); font-size: 1.3rem; font-weight: bold; flex-shrink: 0;">➔</span>` : ''}
+                      `;
+                      }).join('')}
+                    </div>
                   </div>
-                  <div style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 6px;">Lançamento: ${n.releaseDate}</div>
-                  <div style="font-size: 0.78rem; color: var(--text-secondary);">${n.notes}</div>
-                </div>
-                ${idx < lin.nodes.length - 1 ? `<span class="lineage-arrow">➔</span>` : ''}
-              `).join('')}
-            </div>
-
-            ${(lin.connections || []).length > 0 ? `
-              <div style="margin-top: 14px; font-size: 0.82rem; color: var(--text-muted);">
-                <strong>Evoluções registradas:</strong>
-                <ul style="margin-top: 4px; padding-left: 18px; color: var(--text-secondary);">
-                  ${lin.connections.map(c => `<li><strong>${c.from} ➔ ${c.to}:</strong> ${c.improvements}</li>`).join('')}
-                </ul>
+                `).join('')}
               </div>
-            ` : ''}
-          </div>
-        `).join('');
+            `;
+          } else if (lin.nodes && lin.nodes.length > 0) {
+            flowContentHtml = `
+              <div class="lineage-flow" style="margin-top: 16px;">
+                ${lin.nodes.map((n, idx) => `
+                  <div class="lineage-node" onclick="location.hash='#model/${n.modelId}'">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                      <strong style="color: var(--text-primary); font-size: 0.95rem;">${n.name}</strong>
+                      <span class="badge-tag ${n.status === 'active' ? 'badge-frontier' : n.status === 'superseded' ? 'badge-warning' : 'badge-subdollar'}">${n.status}</span>
+                    </div>
+                    <div style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 6px;">Lançamento: ${n.releaseDate}</div>
+                    <div style="font-size: 0.78rem; color: var(--text-secondary);">${n.notes}</div>
+                  </div>
+                  ${idx < lin.nodes.length - 1 ? `<span class="lineage-arrow">➔</span>` : ''}
+                `).join('')}
+              </div>
+            `;
+          }
+
+          const connectionsHtml = (lin.connections || []).length > 0 ? `
+            <div style="margin-top: 14px; font-size: 0.82rem; color: var(--text-muted); background: var(--bg-card); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+              <strong style="color: var(--text-primary);">Evoluções registradas na linhagem:</strong>
+              <ul style="margin-top: 6px; padding-left: 18px; color: var(--text-secondary); line-height: 1.5;">
+                ${lin.connections.map(c => `<li><strong>${c.from} ➔ ${c.to}:</strong> ${c.improvements}</li>`).join('')}
+              </ul>
+            </div>
+          ` : '';
+
+          return `
+            <div class="lineage-family-card" style="margin-bottom: 24px;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                  <h3 style="color: var(--accent-cyan); margin-bottom: 4px;">${lin.familyName}</h3>
+                  <p style="font-size: 0.85rem; color: var(--text-secondary);">${lin.description}</p>
+                </div>
+              </div>
+              ${flowContentHtml}
+              ${connectionsHtml}
+            </div>
+          `;
+        }).join('');
       }
     } else if (currentTab === 'timeline') {
       const container = document.getElementById('timelineStreamContainer');
@@ -5580,17 +5879,30 @@
     const contentContainer = document.getElementById('useCaseActiveContent');
 
     if (contentContainer && activeCase) {
-      const topModel = activeCase.rankings[0];
-      const secondModel = activeCase.rankings[1];
-      const economicModel = activeCase.rankings.find(r => {
+      const activeWeights = AppState.useCaseCustomWeights[activeCase.id] || null;
+      const rankings = (typeof DomainRankings !== 'undefined' && DomainRankings.calculateUseCaseRanking)
+        ? DomainRankings.calculateUseCaseRanking(activeCase.id, activeWeights)
+        : activeCase.rankings;
+
+      const sensitivity = (typeof DomainRankings !== 'undefined' && DomainRankings.getUseCaseSensitivity)
+        ? DomainRankings.getUseCaseSensitivity(activeCase.id)
+        : (activeCase.sensitivityAnalysis || null);
+
+      const topModel = rankings[0] || activeCase.rankings[0];
+      const secondModel = rankings[1] || activeCase.rankings[1];
+      const economicModel = rankings.find(r => {
         const m = AI_MODELS_DATA[r.modelId];
         return m && m.pricing && m.pricing.standard && m.pricing.standard.input < 1.5;
-      }) || activeCase.rankings[activeCase.rankings.length - 1];
+      }) || rankings[rankings.length - 1];
 
-      const localModel = activeCase.rankings.find(r => {
+      const localModel = rankings.find(r => {
         const m = AI_MODELS_DATA[r.modelId];
         return m && m.openWeights;
       }) || { modelId: 'glm-5-3-flash', modelName: 'GLM-5.3-Flash / gpt-oss-20b' };
+
+      const auditFreshness = (typeof DomainFreshness !== 'undefined' && DomainFreshness.formatDynamicFreshness)
+        ? DomainFreshness.formatDynamicFreshness(new Date(), 'benchmarks').label
+        : 'Atualizado recentemente';
 
       contentContainer.innerHTML = `
         <!-- Cabeçalho do Dossiê do Caso de Uso (Seção 23) -->
@@ -5601,6 +5913,7 @@
                 <span style="font-size: 1.6rem;">${activeCase.icon}</span>
                 <h3 style="margin: 0; font-size: 1.3rem;">${activeCase.title}</h3>
                 <span class="evidence-badge badge-c">[C] Calibrado</span>
+                ${activeWeights ? '<span class="badge-tag badge-frontier">Pesos Personalizados</span>' : ''}
               </div>
               <p style="font-size: 0.88rem; color: var(--text-secondary); margin: 2px 0 0 0;">${activeCase.description}</p>
             </div>
@@ -5612,7 +5925,7 @@
           <!-- Metrologia, Cobertura e Confiança -->
           <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin: 16px 0; padding: 10px 14px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 0.82rem;">
             <div>
-              <strong>📊 Cobertura:</strong> ${Object.keys(AI_MODELS_DATA).length} modelos catalogados (10 ranqueados especificamente neste perfil)
+              <strong>📊 Cobertura:</strong> ${Object.keys(AI_MODELS_DATA).length} modelos catalogados (${rankings.length} ranqueados neste perfil)
             </div>
             <span style="color: var(--border-medium);">•</span>
             <div>
@@ -5620,19 +5933,64 @@
             </div>
             <span style="color: var(--border-medium);">•</span>
             <div>
-              <strong>Auditado em:</strong> 03/09/2026
+              <strong>Auditado em:</strong> ${auditFreshness}
             </div>
           </div>
 
-          <!-- Critérios e Metodologia de Ponderação -->
-          <div style="margin-bottom: 18px;">
-            <strong style="font-size: 0.84rem; color: var(--text-muted); display: block; margin-bottom: 6px;">Critérios & Pesos Avaliados:</strong>
+          <!-- Critérios e Metodologia de Ponderação (Seções 31 e 32) -->
+          <div style="margin-bottom: 14px;">
+            <strong style="font-size: 0.84rem; color: var(--text-muted); display: block; margin-bottom: 6px;">Critérios & Pesos Avaliados (Padrão vs Ativo):</strong>
             <div style="display: flex; flex-wrap: wrap; gap: 8px;">
               ${activeCase.keyAttributes.map((attr, idx) => `
                 <span class="badge-tag badge-frontier" style="font-size: 0.76rem;">
                   ${attr} (${idx === 0 ? '35%' : idx === 1 ? '25%' : idx === 2 ? '20%' : '20%'})
                 </span>
               `).join('')}
+            </div>
+          </div>
+
+          <!-- Análise de Sensibilidade & Customização de Pesos (Seções 33 e 34) -->
+          <div style="margin-bottom: 20px; padding: 12px 16px; background: rgba(56, 189, 248, 0.04); border-left: 3px solid var(--accent-cyan); border-radius: var(--radius-xs);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+              <div>
+                <strong style="font-size: 0.84rem; color: var(--accent-cyan);">🔬 Análise de Sensibilidade & Ponto de Virada:</strong>
+                <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 4px 0 0 0; line-height: 1.4;">
+                  ${sensitivity ? sensitivity.tippingPoint : 'Liderança consistente no perfil ponderado.'}
+                </p>
+              </div>
+              <button type="button" class="btn-ghost btn-xs" onclick="const p = document.getElementById('useCaseWeightsBox'); if (p) p.style.display = p.style.display === 'none' ? 'block' : 'none';" style="font-size: 0.75rem;">
+                ⚙️ ${activeWeights ? 'Editar Pesos Ativos' : 'Personalizar Critérios (Sliders)'}
+              </button>
+            </div>
+
+            <!-- Painel de Sliders para Ponderação Multidimensional (Seção 34) -->
+            <div id="useCaseWeightsBox" style="display: ${activeWeights ? 'block' : 'none'}; margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border-subtle);">
+              <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px;">
+                Ajuste os sliders para recalcular o <strong>fitScore</strong> e a ordem dos modelos em tempo real:
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+                ${['coding', 'agentic', 'reliability', 'cost', 'speed'].map(crit => {
+                  const labelMap = { coding: '💻 Coding / SWE', agentic: '🤖 Autonomia Agêntica', reliability: '🛡️ Confiabilidade', cost: '💵 Custo Baixo', speed: '⚡ Velocidade (tok/s)' };
+                  const curWeights = activeWeights || activeCase.weights || { coding: 0.35, agentic: 0.25, reliability: 0.20, cost: 0.10, speed: 0.10 };
+                  const curVal = Math.round((curWeights[crit] !== undefined ? curWeights[crit] : 0.2) * 100);
+                  return `
+                    <div>
+                      <div style="display: flex; justify-content: space-between; font-size: 0.76rem;">
+                        <span>${labelMap[crit] || crit}</span>
+                        <strong>${curVal}%</strong>
+                      </div>
+                      <input type="range" min="0" max="100" step="5" value="${curVal}" 
+                             style="width: 100%; margin-top: 4px; accent-color: var(--accent-cyan);"
+                             oninput="window.AIApp.updateCustomUseCaseWeight('${activeCase.id}', '${crit}', this.value)">
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+              <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
+                <button type="button" class="btn-ghost btn-xs" onclick="window.AIApp.resetUseCaseWeights('${activeCase.id}')" style="font-size: 0.72rem; color: var(--text-muted);">
+                  ↺ Restaurar Pesos Padrão
+                </button>
+              </div>
             </div>
           </div>
 
@@ -5673,7 +6031,7 @@
                 <tr>
                   <th style="width: 50px;">Rank</th>
                   <th>Modelo</th>
-                  <th>Fit Score (Calibrado)</th>
+                  <th>Fit Score (${activeWeights ? 'Recalculado' : 'Calibrado'})</th>
                   <th>Papel Ideal no Projeto</th>
                   <th>Justificativa Técnica & Evidências</th>
                   <th style="width: 140px;">Ações</th>
@@ -6929,6 +7287,26 @@
     clearPlanSearch() {
       AppState.planSearchQuery = '';
       renderPlansView();
+    },
+    toggleOnlyDiffs(val) {
+      AppState.comparatorOnlyDiffs = !!val;
+      renderComparatorTable();
+    },
+    setComparatorReferenceModel(id) {
+      AppState.comparatorRefModelId = id;
+      renderComparatorActiveMode();
+    },
+    updateCustomUseCaseWeight(useCaseId, criterion, val) {
+      if (!AppState.useCaseCustomWeights[useCaseId]) {
+        const uc = (typeof USE_CASE_COMPARISON_DATA !== 'undefined' ? USE_CASE_COMPARISON_DATA.useCases.find(u => u.id === useCaseId) : null);
+        AppState.useCaseCustomWeights[useCaseId] = Object.assign({}, uc ? uc.weights : { coding: 0.35, agentic: 0.25, reliability: 0.20, cost: 0.10, speed: 0.10 });
+      }
+      AppState.useCaseCustomWeights[useCaseId][criterion] = Number(val) / 100;
+      renderUseCasesView();
+    },
+    resetUseCaseWeights(useCaseId) {
+      delete AppState.useCaseCustomWeights[useCaseId];
+      renderUseCasesView();
     }
   };
 

@@ -1,0 +1,41 @@
+name: CI Quality Gate
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [ 18.x, 20.x ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies (if any)
+        run: npm install || true
+
+      - name: Run Domain v2 and Data Integrity Tests
+        run: npm run test:data
+
+      - name: Run Canonical Routes Smoke Tests
+        run: npm run test:smoke
+
+      - name: Run Link & Referential Integrity Tests
+        run: npm run test:links
+
+      - name: Run Domain Impact Engine Simulation
+        run: npm run test:impact
+
+      - name: Full Test Suite
+        run: npm test

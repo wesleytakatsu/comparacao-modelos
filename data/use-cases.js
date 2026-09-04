@@ -20,6 +20,14 @@ const USE_CASE_COMPARISON_DATA = {
       icon: '🏛️',
       description: 'Definição de microsserviços, modelagem de banco de dados, APIs REST/gRPC e padrões modulares desacoplados.',
       keyAttributes: ['Visão holística', 'Disciplina de escopo', 'Padrões de design', 'Mapeamento de dependências'],
+      criteria: ["coding", "agentic", "reliability", "cost", "speed"],
+      weights: {"coding": 0.35, "agentic": 0.25, "reliability": 0.2, "cost": 0.1, "speed": 0.1},
+      coverage: 10,
+      confidence: 'high',
+      rankingMethod: 'multi-attribute-utility',
+      evidenceIds: ["swe-bench-verified", "cursorbench-32", "terminalbench-21"],
+      editorialOverrides: [],
+      sensitivityAnalysis: {"defaultWinner": "Claude Fable 5.1", "tippingPoint": "Fable 5.1 lidera no perfil padrão (99 pts). Se Custo receber peso > 28%, Gemini 3.8 Flash assume o #1 lugar pelo custo sub-dólar com 1M de janela."},
       rankings: [
         { rank: 1, modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1', fitScore: 99, role: 'Lead System Architect & Planner', rationale: 'Visão de longo prazo perfeita, planejamento de múltiplos arquivos sem ruído e menor risco de arquiteturas infladas.' },
         { rank: 2, modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol', fitScore: 97, role: 'Backend Architect & Hard Debugging', rationale: 'Rigor extremo em contratos de API, isolamento de domínios e tratamento preventivo de falhas de rede.' },
@@ -39,6 +47,14 @@ const USE_CASE_COMPARISON_DATA = {
       icon: '🛡️',
       description: 'Sistemas com tolerância zero a falhas: transações financeiras, processamento assíncrono concorrente, race conditions e criptografia.',
       keyAttributes: ['Corretude absoluta', 'Proteção contra race conditions', 'Cobertura de testes', 'Prevenção de deadlock'],
+      criteria: ["coding", "agentic", "reliability", "cost", "speed"],
+      weights: {"coding": 0.4, "agentic": 0.2, "reliability": 0.3, "cost": 0.05, "speed": 0.05},
+      coverage: 10,
+      confidence: 'high',
+      rankingMethod: 'multi-attribute-utility',
+      evidenceIds: ["terminalbench-21", "swe-bench-verified", "gpqa-diamond"],
+      editorialOverrides: [],
+      sensitivityAnalysis: {"defaultWinner": "GPT-5.6 Sol", "tippingPoint": "GPT-5.6 Sol é dominante em confiabilidade (100 pts). Apenas se Velocidade e Custo somarem > 60% há troca de liderança."},
       rankings: [
         { rank: 1, modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol', fitScore: 100, role: 'Core Logic Implementer & Auditor', rationale: 'O campeão indiscutível da comunidade e benchmarks para edge cases financeiros, idempotência e testes de concorrência.' },
         { rank: 2, modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1', fitScore: 96, role: 'Formal Verification & Architecture', rationale: 'Modelagem rigorosa de estados e verificação de regras de negócio complexas.' },
@@ -58,6 +74,14 @@ const USE_CASE_COMPARISON_DATA = {
       icon: '🎨',
       description: 'Interfaces ricas em React, Vue, Svelte, Tailwind CSS, animações fluidas, acessibilidade WCAG e respeito milimétrico ao design system.',
       keyAttributes: ['Fidelidade de design', 'Zero CSS drift', 'Responsividade', 'Componentização limpa'],
+      criteria: ["coding", "agentic", "reliability", "cost", "speed"],
+      weights: {"coding": 0.3, "agentic": 0.25, "reliability": 0.15, "cost": 0.15, "speed": 0.15},
+      coverage: 10,
+      confidence: 'high',
+      rankingMethod: 'multi-attribute-utility',
+      evidenceIds: ["swe-bench-verified", "artificial-analysis"],
+      editorialOverrides: [],
+      sensitivityAnalysis: {"defaultWinner": "Claude Fable 5.1", "tippingPoint": "GLM-5.3 empata tecnicamente se fidelidade CSS for isolada; Grok 4.6 vence se velocidade pura tiver peso > 40%."},
       rankings: [
         { rank: 1, modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1', fitScore: 97, role: 'Lead UI Architect & Layout Designer', rationale: 'Gosto estético refinado, proporções visuais harmônicas e estrutura de componentes limpa sem código desnecessário.' },
         { rank: 2, modelId: 'glm-5-3', modelName: 'GLM-5.3', fitScore: 96, role: 'Design System Guardian', rationale: 'Aderência metódica excepcional ao CSS existente: zero design drift e testes em múltiplas resoluções.' },
@@ -77,6 +101,14 @@ const USE_CASE_COMPARISON_DATA = {
       icon: '🎮',
       description: 'Desenvolvimento iterativo de jogos na Unity Engine: arquitetura de sistemas de gameplay, shaders, física, ECS e integração com MCP.',
       keyAttributes: ['Compreensão de C# & GameObjects', 'Suporte a MCP do Unity Editor', 'Raciocínio espacial', 'Ciclo iterativo de teste'],
+      criteria: ["coding", "agentic", "reliability", "cost", "speed"],
+      weights: {"coding": 0.35, "agentic": 0.3, "reliability": 0.15, "cost": 0.1, "speed": 0.1},
+      coverage: 10,
+      confidence: 'high',
+      rankingMethod: 'multi-attribute-utility',
+      evidenceIds: ["cursorbench-32", "terminalbench-21"],
+      editorialOverrides: [],
+      sensitivityAnalysis: {"defaultWinner": "Claude Fable 5.1", "tippingPoint": "Fable 5.1 lidera por integração com Unity MCP. GPT-5.6 Sol assume liderança para tarefas puras de matemática vetorial e física."},
       rankings: [
         { rank: 1, modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1', fitScore: 98, role: 'Game Systems Architect & Narrative Lead', rationale: 'Líder em raciocínio de mecânicas de gameplay iterativas; evidência prática robusta com Claude Code + Unity MCP.' },
         { rank: 2, modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol', fitScore: 96, role: 'Physics, Math & Optimization Specialist', rationale: 'Cálculos de vetores, quaternions, algoritmos de pathfinding e otimização de GC/alocação de memória.' },
@@ -96,6 +128,14 @@ const USE_CASE_COMPARISON_DATA = {
       icon: '🔥',
       description: 'Projetos AAA e de médio porte na Unreal Engine 5: C++ moderno, gerenciamento de memória, Blueprints nativos, UObject, Chaos Physics e builds demorados.',
       keyAttributes: ['C++ avançado', 'Gestão de ponteiros (TSharedPtr/UPROPERTY)', 'Compilação de monorepos Unreal', 'Debugging de crash'],
+      criteria: ["coding", "agentic", "reliability", "cost", "speed"],
+      weights: {"coding": 0.45, "agentic": 0.2, "reliability": 0.2, "cost": 0.05, "speed": 0.1},
+      coverage: 10,
+      confidence: 'high',
+      rankingMethod: 'multi-attribute-utility',
+      evidenceIds: ["swe-bench-verified", "terminalbench-21"],
+      editorialOverrides: [],
+      sensitivityAnalysis: {"defaultWinner": "GPT-5.6 Sol", "tippingPoint": "GPT-5.6 Sol é referência em ponteiros C++ e UObject. Fable 5.1 empata se o escopo for arquitetura de Gameplay Ability System."},
       rankings: [
         { rank: 1, modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol', fitScore: 99, role: 'Unreal C++ Core Engineer', rationale: 'Domínio irretocável de ponteiros, alocação de memória C++, convenções do UObject e depuração de memory leaks.' },
         { rank: 2, modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1', fitScore: 97, role: 'Unreal Systems & Gameplay Architect', rationale: 'Desenho de arquitetura de Gameplay Ability System (GAS) e interfaces entre C++ e Blueprints.' },
@@ -115,6 +155,14 @@ const USE_CASE_COMPARISON_DATA = {
       icon: '🌐',
       description: 'Prototipagem ágil e desenvolvimento de jogos no browser: Three.js, Babylon.js, WebGPU, shaders GLSL e física 3D leve no cliente.',
       keyAttributes: ['Prototipagem rápida', 'Orquestração multi-agente', 'Gráficos 3D web', 'Performance no navegador'],
+      criteria: ["coding", "agentic", "reliability", "cost", "speed"],
+      weights: {"coding": 0.3, "agentic": 0.3, "reliability": 0.15, "cost": 0.1, "speed": 0.15},
+      coverage: 10,
+      confidence: 'high',
+      rankingMethod: 'multi-attribute-utility',
+      evidenceIds: ["cursorbench-32", "artificial-analysis"],
+      editorialOverrides: [],
+      sensitivityAnalysis: {"defaultWinner": "Claude Fable 5.1", "tippingPoint": "Grok 4.6 e Gemini 3.8 Flash superam em velocidade de iteração visual de shaders WebGL."},
       rankings: [
         { rank: 1, modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1', fitScore: 99, role: 'Multi-Agent World Builder & Architect', rationale: 'Evidência definitiva: prototipou simulação 3D estilo Cities: Skylines em 1 hora orquestrando 14 subagentes paralelos.' },
         { rank: 2, modelId: 'grok-4-6', modelName: 'Grok 4.6', fitScore: 93, role: 'Real-time Scene & Shader Coder', rationale: 'Excelente intuição matemática para animações procedurais e shaders GLSL gerados sob demanda.' },
@@ -134,6 +182,14 @@ const USE_CASE_COMPARISON_DATA = {
       icon: '🔍',
       description: 'Navegação por milhões de linhas de código em repositórios complexos, reprodução de bugs intermitentes e refatorações amplas.',
       keyAttributes: ['Janela de contexto efetiva', 'Retenção needle-in-haystack', 'Persistência agêntica', 'Rigor em git diffs'],
+      criteria: ["coding", "agentic", "reliability", "cost", "speed"],
+      weights: {"coding": 0.35, "agentic": 0.35, "reliability": 0.15, "cost": 0.05, "speed": 0.1},
+      coverage: 10,
+      confidence: 'high',
+      rankingMethod: 'multi-attribute-utility',
+      evidenceIds: ["deepswe-leaderboard", "terminalbench-21", "swe-bench-verified"],
+      editorialOverrides: [],
+      sensitivityAnalysis: {"defaultWinner": "Claude Fable 5.1", "tippingPoint": "Gemini 3.8 Flash High (90,8% Terminal-Bench) se torna #1 se o tempo de varredura do repo e custo de contexto 1M forem priorizados."},
       rankings: [
         { rank: 1, modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1', fitScore: 99, role: 'Chief Diagnostician & Root Cause Finder', rationale: 'Capacidade cognitiva incomparável para rastrear fluxo de execução através de dezenas de pacotes sem se perder.' },
         { rank: 2, modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol', fitScore: 98, role: 'Deep Debugger & Regression Preventer', rationale: 'Persistência teimosa: investiga cada caminho de exceção até isolar a causa exata do problema.' },
@@ -153,6 +209,14 @@ const USE_CASE_COMPARISON_DATA = {
       icon: '⚡',
       description: 'Criar MVPs funcionais em poucas horas: máxima velocidade de geração, autonomia sem travas, multimodalidade e baixo custo unitário.',
       keyAttributes: ['Throughput (tok/s)', 'Custo por requisição', 'Autonomia', 'Pronto para usar'],
+      criteria: ["coding", "agentic", "reliability", "cost", "speed"],
+      weights: {"coding": 0.25, "agentic": 0.25, "reliability": 0.1, "cost": 0.2, "speed": 0.2},
+      coverage: 10,
+      confidence: 'high',
+      rankingMethod: 'multi-attribute-utility',
+      evidenceIds: ["artificial-analysis", "cursorbench-32"],
+      editorialOverrides: [],
+      sensitivityAnalysis: {"defaultWinner": "Gemini 3.8 Flash", "tippingPoint": "Gemini lidera por throughput (305 tok/s) e custo sub-dólar. Se orçamento for zero, GPT-5.6 Luna assume."},
       rankings: [
         { rank: 1, modelId: 'gemini-3-8-flash', modelName: 'Gemini 3.8 Flash', fitScore: 98, role: 'MVP Rapid Builder', rationale: 'A combinação definitiva de 305 tok/s, multimodalidade total, 1M de contexto e custo promocional de $0,75/$3,75.' },
         { rank: 2, modelId: 'grok-4-6', modelName: 'Grok 4.6', fitScore: 95, role: 'Instant Feature Generator', rationale: 'Entrega aplicações inteiras em minutos diretamente no pool generoso do Cursor.' },
@@ -172,6 +236,14 @@ const USE_CASE_COMPARISON_DATA = {
       icon: '💰',
       description: 'Modelos de baixo custo e alta velocidade desenhados para rodar milhares de chamadas repetitivas como subagentes, linter, testes e indexação.',
       keyAttributes: ['Custo por milhão de tokens', 'Throughput', 'Consumo de VRAM', 'Aderência a ferramentas'],
+      criteria: ["coding", "agentic", "reliability", "cost", "speed"],
+      weights: {"coding": 0.2, "agentic": 0.2, "reliability": 0.15, "cost": 0.3, "speed": 0.15},
+      coverage: 10,
+      confidence: 'high',
+      rankingMethod: 'multi-attribute-utility',
+      evidenceIds: ["artificial-analysis", "opencode-go"],
+      editorialOverrides: [],
+      sensitivityAnalysis: {"defaultWinner": "GPT-5.6 Luna", "tippingPoint": "Luna vence a $0,20/$1,20. Se privacidade total (on-prem) tiver peso, gpt-oss-20b assume o #1 lugar."},
       rankings: [
         { rank: 1, modelId: 'gpt-5-6-luna', modelName: 'GPT-5.6 Luna', fitScore: 98, role: 'Cloud Worker #1', rationale: 'Apenas $0,20 in / $1,20 out com contexto de 1M e capacidade de raciocínio leve.' },
         { rank: 2, modelId: 'gemini-3-8-flash', modelName: 'Gemini 3.8 Flash (Low/Med)', fitScore: 97, role: 'Multimodal High-Speed Worker', rationale: '313 tok/s a $0,75/$3,75 (com 90% desconto em cache: $0,075/M).' },
@@ -191,6 +263,14 @@ const USE_CASE_COMPARISON_DATA = {
       icon: '📱',
       description: 'Desenvolvimento mobile multiplataforma e nativo: ciclo de vida de apps, permissões, navegação nativa, performance de renderização e offline-first.',
       keyAttributes: ['Conhecimento de mobile SDKs', 'Responsividade em telas pequenas', 'Gerenciamento de permissões', 'Arquitetura Clean Mobile'],
+      criteria: ["coding", "agentic", "reliability", "cost", "speed"],
+      weights: {"coding": 0.35, "agentic": 0.25, "reliability": 0.2, "cost": 0.1, "speed": 0.1},
+      coverage: 10,
+      confidence: 'high',
+      rankingMethod: 'multi-attribute-utility',
+      evidenceIds: ["swe-bench-verified", "cursorbench-32"],
+      editorialOverrides: [],
+      sensitivityAnalysis: {"defaultWinner": "Claude Sonnet 5", "tippingPoint": "Sonnet 5 vence em Clean Architecture Mobile. Fable 5.1 assume liderança se sincronização offline e persistência local forem centrais."},
       rankings: [
         { rank: 1, modelId: 'claude-sonnet-5', modelName: 'Claude Sonnet 5', fitScore: 96, role: 'Clean Architecture Mobile Lead', rationale: 'Excelente em padrões MVVM/Clean em Swift e Kotlin, e tipagem impecável em TypeScript para React Native.' },
         { rank: 2, modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1', fitScore: 95, role: 'Cross-Platform System Architect', rationale: 'Design de APIs offline-first e sincronização local via SQLite/WatermelonDB.' },
@@ -210,6 +290,14 @@ const USE_CASE_COMPARISON_DATA = {
       icon: '⚙️',
       description: 'Programação de sistemas operacionais, drivers, microcontroladores, Rust com borrow checker e código de alta performance.',
       keyAttributes: ['Borrow checker Rust', 'Gerenciamento de memória manual', 'Registradores e protocolos de hardware', 'Zero warnings'],
+      criteria: ["coding", "agentic", "reliability", "cost", "speed"],
+      weights: {"coding": 0.4, "agentic": 0.2, "reliability": 0.3, "cost": 0.05, "speed": 0.05},
+      coverage: 10,
+      confidence: 'high',
+      rankingMethod: 'multi-attribute-utility',
+      evidenceIds: ["terminalbench-21", "swe-bench-verified"],
+      editorialOverrides: [],
+      sensitivityAnalysis: {"defaultWinner": "GPT-5.6 Sol", "tippingPoint": "GPT-5.6 Sol domina borrow checker e memory leaks. Claude Opus 5 empata em protocolos binários de telecom."},
       rankings: [
         { rank: 1, modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol', fitScore: 99, role: 'Systems & Memory Safety Auditor', rationale: 'Resolução imbatível de erros complexos de lifetimes no Rust e mitigação de buffer overflows em C/C++.' },
         { rank: 2, modelId: 'claude-opus-5', modelName: 'Claude Opus 5', fitScore: 96, role: 'Low-Level Protocol Specialist', rationale: 'Implementação de protocolos binários de rede e arquiteturas de drivers de dispositivo.' },
@@ -229,6 +317,14 @@ const USE_CASE_COMPARISON_DATA = {
       icon: '☁️',
       description: 'Automação com Terraform, Kubernetes, Helm, pipelines de CI/CD (GitHub Actions), Dockerfiles otimizados e observabilidade.',
       keyAttributes: ['Sintaxe de Terraform/HCL', 'Manifestos de Kubernetes', 'Segurança de pipelines', 'Eficiência de build'],
+      criteria: ["coding", "agentic", "reliability", "cost", "speed"],
+      weights: {"coding": 0.3, "agentic": 0.35, "reliability": 0.15, "cost": 0.1, "speed": 0.1},
+      coverage: 10,
+      confidence: 'high',
+      rankingMethod: 'multi-attribute-utility',
+      evidenceIds: ["terminalbench-21", "artificial-analysis"],
+      editorialOverrides: [],
+      sensitivityAnalysis: {"defaultWinner": "Gemini 3.8 Flash High", "tippingPoint": "Gemini vence pelo índice de 90,8% no Terminal-Bench 2.1 e baixa latência. GPT-5.6 Sol assume para IAM e segurança zero-trust."},
       rankings: [
         { rank: 1, modelId: 'gemini-3-8-flash', modelName: 'Gemini 3.8 Flash High', fitScore: 97, role: 'DevOps & Pipeline Automation Lead', rationale: '90,8% Terminal-Bench 2.1; execução impecável de comandos shell, scripts de deploy e validação de manifestos.' },
         { rank: 2, modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol', fitScore: 96, role: 'Infrastructure Security & IAM Auditor', rationale: 'Configuração rigorosa de políticas IAM, redes VPC seguras e zero-trust architecture no Terraform.' },
@@ -282,7 +378,15 @@ const USE_CASE_COMPARISON_DATA = {
   ]
 };
 
+
+const USE_CASES_DATA = USE_CASE_COMPARISON_DATA.useCases;
+
+if (typeof window !== 'undefined') {
+  window.USE_CASE_COMPARISON_DATA = USE_CASE_COMPARISON_DATA;
+  window.USE_CASES_DATA = USE_CASES_DATA;
+}
+
 // Exportação universal (Browser + Node.js)
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { USE_CASE_COMPARISON_DATA };
+  module.exports = { USE_CASE_COMPARISON_DATA, USE_CASES_DATA };
 }
