@@ -1169,10 +1169,14 @@ const PLATFORM_MODEL_CATALOG = {
         name: 'Other Models (Usage-Based / API Price)',
         pricingModel: 'metered-api-price',
         description: 'Franquia base no Pro, ~3x no Pro+, ~20x no Ultra. Demais requisições consumidas à taxa de API do modelo.',
-        models: ['gemini-3-8-flash', 'claude-fable-5-1', 'claude-opus-5', 'claude-sonnet-5', 'gpt-5-6-sol', 'gpt-5-6-terra', 'kimi-k3', 'glm-5-3']
+        models: ['gpt-6-astra', 'gemini-3-8-flash', 'claude-fable-5-1', 'claude-opus-5', 'claude-sonnet-5', 'gpt-5-6-sol', 'gpt-5-6-terra', 'kimi-k3', 'glm-5-3']
       }
     },
     pricing: {
+      gpt6Astra: {
+        standard: { input: 10.00, cacheRead: 1.00, cacheWrite: 12.50, output: 50.00 },
+        fast: { input: 20.00, cacheRead: 2.00, cacheWrite: 25.00, output: 100.00 }
+      },
       grok46: {
         standard: { input: 2.00, cacheRead: 0.50, output: 6.00 },
         fast: { input: 4.00, cacheRead: 1.00, output: 12.00 }
@@ -1361,6 +1365,17 @@ const PLATFORM_MODEL_CATALOG = {
         antigravity: { available: true, pool: 'pool1', notes: 'Multimodal Pro' },
         openrouter: { available: true, status: 'stable', notes: 'Sim' },
         local: { supported: false, requirements: 'N/A', type: 'cloud-only' }
+      }
+    },
+    {
+      modelId: 'gpt-6-astra', name: 'GPT-6 Astra',
+      platforms: {
+        directApi: { available: true, accessMode: 'direct', pricingRef: 'standard', status: 'stable', priceDesc: '$10/$50' },
+        cursor: { available: true, pool: 'other-models', multiplier: 2.0, notes: '2.0x (Other Models)' },
+        opencode: { available: false, tier: null, burnRate: null, reqEstimate: null, notes: 'Indisponível' },
+        antigravity: { available: false, pool: 'none', notes: 'Indisponível' },
+        openrouter: { available: true, status: 'stable', notes: 'Sim' },
+        local: { supported: false, requirements: 'N/A', type: 'proprietary' }
       }
     },
     {

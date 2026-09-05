@@ -360,6 +360,10 @@
         location.hash = '#model/glm-5-3-flash';
         return;
       }
+      if (param === 'gpt-6-pro' || param === 'astra' || param === 'gpt6-astra' || param === 'gpt-6') {
+        location.hash = '#model/gpt-6-astra';
+        return;
+      }
       AppState.activeModelId = param;
       const detailView = document.getElementById('view-model-detail');
       if (detailView) {
@@ -1507,7 +1511,7 @@
     // Filtro por Busca de Texto
     if (AppState.dashboardSearchQuery) {
       filtered = filtered.filter(m => {
-        const aliases = (m.historicalAliases || []).join(' ');
+        const aliases = [...(m.historicalAliases || []), ...(m.aliases || [])].join(' ');
         const fullText = `${m.id} ${m.name} ${aliases} ${m.providerName} ${m.family} ${m.architectureType || ''} ${m.sweetSpot || ''} ${(m.badges || []).join(' ')} ${m.antigravity ? m.antigravity.poolLabel + ' ' + m.antigravity.role : ''} ${m.openWeights ? 'local open weights gratuito open-source' : 'api cloud pay-as-you-go'}`.toLowerCase();
         return fullText.includes(AppState.dashboardSearchQuery);
       });
@@ -1951,6 +1955,90 @@
       `;
     }
 
+    function renderReasoningEffortExplorer(matrix) {
+      if (!matrix || !matrix.data) return '';
+      const efforts = matrix.efforts || ['low', 'medium', 'high', 'xhigh', 'max'];
+      const sweetSpots = (matrix.paretoAnalysis && matrix.paretoAnalysis.sweetSpot) ? matrix.paretoAnalysis.sweetSpot.map(s => s.toLowerCase()) : ['high', 'xhigh'];
+      
+      return `
+        <div class="content-box reasoning-effort-explorer" style="margin-bottom: 20px; border: 1px solid rgba(6, 182, 212, 0.35);">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+            <div>
+              <h4 style="margin: 0; color: var(--accent-cyan); display: flex; align-items: center; gap: 8px;">
+                🧭 Reasoning Effort Explorer <span class="badge-tag badge-frontier" style="font-size: 0.72rem;">5 Níveis de Esforço</span>
+              </h4>
+              <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 4px 0 0 0;">
+                Trade-offs instrumentados de acurácia, latência, consumo de tokens e custo por tarefa para o ${model.name}.
+              </p>
+            </div>
+            <div class="effort-selector-tabs" style="display: flex; gap: 6px; flex-wrap: wrap;">
+              <button class="btn-secondary btn-sm effort-tab-btn active" data-effort="all">Todos</button>
+              ${efforts.map(eff => `
+                <button class="btn-secondary btn-sm effort-tab-btn" data-effort="${eff.toLowerCase()}">${eff.toUpperCase()}</button>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Análise da Fronteira de Pareto -->
+          <div style="background: rgba(6, 182, 212, 0.08); border-left: 3px solid var(--accent-cyan); padding: 10px 14px; border-radius: var(--radius-sm); margin-bottom: 14px; font-size: 0.83rem;">
+            <strong style="color: var(--accent-cyan);">🌟 Fronteira de Pareto (Sweet Spot):</strong>
+            <span style="color: var(--text-primary); margin-left: 6px;">
+              ${matrix.paretoAnalysis ? matrix.paretoAnalysis.notes : 'Os níveis <strong>High</strong> e <strong>XHigh</strong> representam o sweet spot operacional ideal. Max para problemas matemáticos/científicos extremos.'}
+            </span>
+          </div>
+
+          <!-- Tabela Comparativa de Métricas por Esforço -->
+          <div class="deepswe-leaderboard-container" style="margin-bottom: 14px;">
+            <table class="deepswe-table" id="reasoningEffortTable">
+              <thead>
+                <tr>
+                  <th>Nível de Esforço</th>
+                  <th>Pass@1</th>
+                  <th>Terminal-Bench 4.0</th>
+                  <th>TB Science 0.1</th>
+                  <th>Custo / Task</th>
+                  <th>Tokens Raciocínio</th>
+                  <th>Fronteira de Pareto</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${matrix.data.map(row => {
+                  const effKey = (row.effort || '').toLowerCase();
+                  const isSweet = sweetSpots.includes(effKey);
+                  const isMax = effKey === 'max';
+                  const isNonReasoning = row.evaluationOnly === true || effKey === 'non-reasoning';
+                  return `
+                    <tr class="effort-row effort-row-${effKey}" data-effort="${effKey}" style="${isSweet ? 'background: rgba(6, 182, 212, 0.08); font-weight: 600;' : ''}">
+                      <td>
+                        <strong>${row.effort}</strong>
+                        ${isNonReasoning ? '<span style="font-size:0.7rem; color:var(--text-muted); display:block;">(Modo Avaliação)</span>' : ''}
+                      </td>
+                      <td><strong style="color: var(--accent-cyan); font-size: 0.95rem;">${row.passAt1 !== null && row.passAt1 !== undefined ? `${row.passAt1.toFixed(1)}%` : 'N/D'}</strong></td>
+                      <td>${row.terminalBench4 !== null && row.terminalBench4 !== undefined ? `${row.terminalBench4.toFixed(1)}%` : 'N/D'}</td>
+                      <td>${row.terminalBenchScience !== null && row.terminalBenchScience !== undefined ? `${row.terminalBenchScience.toFixed(1)}%` : 'N/D'}</td>
+                      <td>${row.costPerTaskUsd !== null && row.costPerTaskUsd !== undefined ? `$${row.costPerTaskUsd.toFixed(2)}` : 'N/D'}</td>
+                      <td>${row.avgReasoningTokens !== null && row.avgReasoningTokens !== undefined ? row.avgReasoningTokens.toLocaleString() : (row.tokensPerTask ? row.tokensPerTask.toLocaleString() : 'N/D')}</td>
+                      <td>
+                        ${isSweet ? '<span class="badge-tag badge-sweetspot">🌟 Sweet Spot (Pareto)</span>' : (isMax ? '<span class="badge-tag badge-frontier">⚡ Raciocínio Extremo</span>' : '<span style="color:var(--text-muted); font-size:0.8rem;">Trade-off Linear</span>')}
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Detalhes do Esforço Selecionado -->
+          <div id="effortDetailBox" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-subtle); padding: 12px 14px; border-radius: var(--radius-sm); font-size: 0.83rem;">
+            <div id="effortDetailTitle" style="font-weight: 600; color: var(--accent-cyan); margin-bottom: 4px;">Visão Geral dos 5 Níveis de Esforço</div>
+            <div id="effortDetailDesc" style="color: var(--text-secondary);">
+              Utilize os botões acima para filtrar por nível de esforço e inspecionar a recomendação operacional para desenvolvimento de software, auditoria e agentes de terminal.
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     container.innerHTML = `
       <div class="breadcrumb-bar">
         <button class="btn-back" onclick="location.hash='#models'">← Voltar ao Catálogo</button>
@@ -1969,6 +2057,12 @@
             <div>
               <div class="model-hero-title">${model.name}</div>
               <div style="font-size: 0.85rem; color: var(--text-muted);">Desenvolvido por <strong>${model.providerName}</strong> • ${model.architectureType} • Lançamento: ${model.releaseDate || '2026'}</div>
+              ${model.aliases && model.aliases.length > 0 ? `
+                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">
+                  🏷️ <em>Aliases de interface:</em> ${model.aliases.map(a => `<code style="font-size: 0.75rem; background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 3px; margin-right: 4px;">${a}</code>`).join('')}
+                  ${model.id === 'gpt-6-astra' ? '<span style="color: var(--accent-cyan); font-size: 0.76rem;">(GPT-6 Pro é a denominação comercial na interface ChatGPT)</span>' : ''}
+                </div>
+              ` : ''}
               <div class="model-badges-list" style="margin-top: 6px;">
                 ${(model.badges || []).map(b => `<span class="badge-tag badge-frontier">${b}</span>`).join('')}
               </div>
@@ -2093,6 +2187,8 @@
 
         <!-- ABA 2: DESEMPENHO (DeepSWE, CursorBench, Snapshots Categorizados) -->
         <div class="subtab-panel" id="tab-performance">
+          ${dossier.reasoningEffortMatrix ? renderReasoningEffortExplorer(dossier.reasoningEffortMatrix) : ''}
+
           <!-- DeepSWE Leaderboard -->
           <div class="content-box" style="margin-bottom: 20px;">
             <h4>🏆 DeepSWE 1.1 Leaderboard Independente (Custo por Tarefa Resolvida)</h4>
@@ -2382,6 +2478,40 @@
           container.querySelectorAll('.subtab-panel').forEach(p => p.classList.remove('active'));
           const targetPanel = container.querySelector(`#${targetTabId}`);
           if (targetPanel) targetPanel.classList.add('active');
+        }
+      });
+    }
+
+    // Interatividade do Reasoning Effort Explorer (Seletor de Esforço)
+    const effortNav = container.querySelector('.effort-selector-tabs');
+    if (effortNav && dossier.reasoningEffortMatrix) {
+      effortNav.addEventListener('click', (e) => {
+        const btn = e.target.closest('.effort-tab-btn');
+        if (!btn) return;
+        effortNav.querySelectorAll('.effort-tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const effort = btn.getAttribute('data-effort');
+        const rows = container.querySelectorAll('.effort-row');
+        rows.forEach(r => {
+          if (effort === 'all' || r.getAttribute('data-effort') === effort) {
+            r.style.display = '';
+          } else {
+            r.style.display = 'none';
+          }
+        });
+
+        const titleEl = container.querySelector('#effortDetailTitle');
+        const descEl = container.querySelector('#effortDetailDesc');
+        if (titleEl && descEl) {
+          if (effort === 'all') {
+            titleEl.innerText = 'Visão Geral dos 5 Níveis de Esforço';
+            descEl.innerHTML = 'Utilize os botões acima para filtrar por nível de esforço e inspecionar a recomendação operacional para desenvolvimento de software, auditoria e agentes de terminal.';
+          } else {
+            const cap = effort.toUpperCase();
+            titleEl.innerText = `Nível de Esforço: ${cap}`;
+            const desc = (dossier.reasoningEffortMatrix.descriptions && dossier.reasoningEffortMatrix.descriptions[effort]) || '';
+            descEl.innerHTML = desc || `Configuração de raciocínio ${cap}.`;
+          }
         }
       });
     }
@@ -6505,10 +6635,15 @@
     if (topCb) {
       metrics.push({ label: 'CursorBench', val: `${topCb.score.toFixed(1)}%` });
     }
-    if (ledger && ledger.terminalBench21) {
+    if (ledger && ledger.terminalBench40) {
+      metrics.push({ label: 'Terminal 4.0', val: `${ledger.terminalBench40.toFixed(1)}%` });
+    } else if (ledger && ledger.terminalBench21) {
       metrics.push({ label: 'Terminal 2.1', val: `${ledger.terminalBench21.toFixed(1)}%` });
     } else if (model.officialBenchmarks && model.officialBenchmarks.terminalBench21) {
       metrics.push({ label: 'Terminal 2.1', val: `${model.officialBenchmarks.terminalBench21.toFixed(1)}%` });
+    }
+    if (ledger && ledger.terminalBenchScience01) {
+      metrics.push({ label: 'TB Science', val: `${ledger.terminalBenchScience01.toFixed(1)}%` });
     }
     if (ledger && ledger.deepSwe11) {
       metrics.push({ label: 'DeepSWE 1.1', val: `${ledger.deepSwe11.toFixed(1)}%` });
@@ -6549,8 +6684,8 @@
             <h4 style="font-size: 0.82rem; margin: 0; color: var(--text-secondary);">Métricas Principais Auditadas:</h4>
             <span class="evidence-badge badge-m" title="Medição Instrumentada">[M] Medido</span>
           </div>
-          <div class="specs-grid" style="grid-template-columns: repeat(${Math.min(metrics.length, 3)}, 1fr); gap: 6px;">
-            ${metrics.slice(0, 3).map(m => `
+          <div class="specs-grid" style="grid-template-columns: repeat(${Math.min(metrics.length, 4)}, 1fr); gap: 6px;">
+            ${metrics.slice(0, 4).map(m => `
               <div class="spec-item-card" style="padding: 6px 8px; text-align: center;">
                 <div class="spec-label" style="font-size: 0.68rem;">${m.label}</div>
                 <div class="spec-value highlight-cyan" style="font-size: 1rem;">${m.val}</div>
@@ -6722,7 +6857,8 @@
     if (AppState.commandPaletteFilter === 'all' || AppState.commandPaletteFilter === 'models') {
       models.forEach(m => {
         const provider = AI_PROVIDERS_DATA[m.provider] || {};
-        const searchCorpus = `${m.id} ${m.name} ${m.providerName} ${m.family} ${m.architectureType || ''} ${m.sweetSpot || ''} ${(m.badges || []).join(' ')} ${m.antigravity ? m.antigravity.poolLabel + ' ' + m.antigravity.role : ''} ${m.openWeights ? 'local open weights gratuito open-source' : 'api cloud pay-as-you-go'}`.toLowerCase();
+        const aliases = [...(m.historicalAliases || []), ...(m.aliases || [])].join(' ');
+        const searchCorpus = `${m.id} ${m.name} ${aliases} ${m.providerName} ${m.family} ${m.architectureType || ''} ${m.sweetSpot || ''} ${(m.badges || []).join(' ')} ${m.antigravity ? m.antigravity.poolLabel + ' ' + m.antigravity.role : ''} ${m.openWeights ? 'local open weights gratuito open-source' : 'api cloud pay-as-you-go'}`.toLowerCase();
         if (!query || searchCorpus.includes(query)) {
           const iconSpan = provider.iconSvg 
             ? `<span class="model-brand-icon" style="color: ${m.color || provider.brandColor || '#38bdf8'};">${provider.iconSvg}</span>`

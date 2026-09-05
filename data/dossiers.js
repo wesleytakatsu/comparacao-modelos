@@ -147,6 +147,20 @@
     'biomystery': { id: 'biomystery', name: 'BioMystery', category: 'other', version: '1.0', unit: 'percent', higherIsBetter: true },
     'horizonmath': { id: 'horizonmath', name: 'HorizonMath', category: 'other', version: '1.0', unit: 'percent', higherIsBetter: true },
 
+    'arc-agi-1': { id: 'arc-agi-1', name: 'ARC-AGI-1', category: 'other', version: '1.0', unit: 'percent', higherIsBetter: true },
+    'arc-agi-3-standard': { id: 'arc-agi-3-standard', name: 'ARC-AGI-3 (Standard)', category: 'other', version: '3.0', unit: 'percent', higherIsBetter: true },
+    'arc-agi-3-provider-adapter': { id: 'arc-agi-3-provider-adapter', name: 'ARC-AGI-3 (Provider Adapter)', category: 'other', version: '3.0', unit: 'percent', higherIsBetter: true },
+    'frontiercode-1-1-main': { id: 'frontiercode-1-1-main', name: 'FrontierCode 1.1 Main', category: 'coding', version: '1.1', unit: 'percent', higherIsBetter: true },
+    'frontiercode-1-1-extended': { id: 'frontiercode-1-1-extended', name: 'FrontierCode 1.1 Extended', category: 'coding', version: '1.1', unit: 'percent', higherIsBetter: true },
+    'osworld-2-offline-partial': { id: 'osworld-2-offline-partial', name: 'OSWorld 2 (Offline Partial)', category: 'agent', version: '2.0', unit: 'percent', higherIsBetter: true },
+    'screenspot-pro': { id: 'screenspot-pro', name: 'ScreenSpot Pro', category: 'agent', version: '1.0', unit: 'percent', higherIsBetter: true },
+    'benchcad': { id: 'benchcad', name: 'BenchCAD', category: 'agent', version: '1.0', unit: 'percent', higherIsBetter: true },
+    'healthbench-professional': { id: 'healthbench-professional', name: 'HealthBench Professional', category: 'other', version: '1.0', unit: 'percent', higherIsBetter: true },
+    'sre-bench': { id: 'sre-bench', name: 'SRE-bench', category: 'cyber', version: '1.0', unit: 'percent', higherIsBetter: true },
+    'sec-bench-pro': { id: 'sec-bench-pro', name: 'SecBench Pro', category: 'cyber', version: '1.0', unit: 'percent', higherIsBetter: true },
+    'artificial-analysis-index-v4-1-1': { id: 'artificial-analysis-index-v4-1-1', name: 'Artificial Analysis Intelligence Index v4.1.1', category: 'aa-composite', version: '4.1.1', unit: 'index', higherIsBetter: true },
+    'artificial-analysis-index-v4-2': { id: 'artificial-analysis-index-v4-2', name: 'Artificial Analysis Intelligence Index v4.2', category: 'aa-composite', version: '4.2', unit: 'index', higherIsBetter: true },
+
     // --- Artificial Analysis Composite Index ---
     'aa-intelligence-index': { id: 'aa-intelligence-index', name: 'Artificial Analysis Intelligence Index', category: 'aa-composite', version: '4.1.1', unit: 'index', higherIsBetter: true }
   };
@@ -478,6 +492,159 @@
       publishedAt: '2026-08-15',
       retrievedAt: '2026-09-03',
       sourceUrl: null
+    },
+    'openai-gpt6-astra-launch': {
+      id: 'openai-gpt6-astra-launch',
+      publisher: 'OpenAI',
+      title: 'Introducing GPT-6 Astra: Frontier Reasoning Flagship',
+      sourceType: 'official',
+      publishedAt: '2026-09-03',
+      retrievedAt: '2026-09-04',
+      sourceUrl: 'https://openai.com/index/gpt-6-astra/'
+    },
+    'openai-gpt6-astra-api': {
+      id: 'openai-gpt6-astra-api',
+      publisher: 'OpenAI Developers',
+      title: 'OpenAI API Model Card: GPT-6 Astra',
+      sourceType: 'official',
+      publishedAt: '2026-09-03',
+      retrievedAt: '2026-09-04',
+      sourceUrl: 'https://developers.openai.com/api/docs/models/gpt-6-astra'
+    },
+    'openai-gpt6-astra-system-card': {
+      id: 'openai-gpt6-astra-system-card',
+      publisher: 'OpenAI Safety',
+      title: 'GPT-6 Astra System Card & Safety Overview',
+      sourceType: 'official',
+      publishedAt: '2026-09-03',
+      retrievedAt: '2026-09-04',
+      sourceUrl: 'https://deploymentsafety.openai.com/gpt-6-astra/vision'
+    },
+    'openai-chatgpt-pro-pricing': {
+      id: 'openai-chatgpt-pro-pricing',
+      publisher: 'OpenAI',
+      title: 'ChatGPT Pro Plan Specifications & Model Access',
+      sourceType: 'official',
+      publishedAt: '2026-09-03',
+      retrievedAt: '2026-09-04',
+      sourceUrl: 'https://openai.com/chatgpt/pricing/'
+    },
+    'openai-business-plans': {
+      id: 'openai-business-plans',
+      publisher: 'OpenAI',
+      title: 'ChatGPT Business & Enterprise Plan Limits',
+      sourceType: 'official',
+      publishedAt: '2026-09-03',
+      retrievedAt: '2026-09-04',
+      sourceUrl: 'https://openai.com/business/'
+    },
+    'openai-rate-limits-tier': {
+      id: 'openai-rate-limits-tier',
+      publisher: 'OpenAI API',
+      title: 'Usage Tiers & Rate Limits for GPT-6 Models',
+      sourceType: 'official',
+      publishedAt: '2026-09-03',
+      retrievedAt: '2026-09-04',
+      sourceUrl: 'https://platform.openai.com/docs/guides/rate-limits'
+    },
+    'deep-swe-v11-20260903': {
+      id: 'deep-swe-v11-20260903',
+      publisher: 'DataCurve',
+      title: 'DeepSWE Benchmark v1.1 Live Leaderboard - Astra Matrix',
+      sourceType: 'independent',
+      publishedAt: '2026-09-03',
+      retrievedAt: '2026-09-04',
+      sourceUrl: 'https://deepswe.datacurve.ai/'
+    },
+    'snorkel-terminal-bench-science-01': {
+      id: 'snorkel-terminal-bench-science-01',
+      publisher: 'Snorkel AI',
+      title: 'Terminal-Bench Science 0.1 Leaderboard',
+      sourceType: 'independent',
+      publishedAt: '2026-09-03',
+      retrievedAt: '2026-09-04',
+      sourceUrl: 'https://snorkel.ai/leaderboard/terminal-bench-science/'
+    },
+    'terminal-bench-40-official': {
+      id: 'terminal-bench-40-official',
+      publisher: 'Terminal-Bench Team',
+      title: 'Terminal-Bench 4.0 Suite & Results',
+      sourceType: 'independent',
+      publishedAt: '2026-09-03',
+      retrievedAt: '2026-09-04',
+      sourceUrl: 'https://terminalbench.org/4.0/'
+    },
+    'arcprize-gpt6-astra-20260902': {
+      id: 'arcprize-gpt6-astra-20260902',
+      publisher: 'ARC Prize Foundation',
+      title: 'GPT-6 Astra Evaluation on ARC-AGI-3',
+      sourceType: 'independent',
+      publishedAt: '2026-09-02',
+      retrievedAt: '2026-09-04',
+      sourceUrl: 'https://arcprize.org/blog/gpt-6-astra-results'
+    },
+    'aa-gpt6-astra-v411': {
+      id: 'aa-gpt6-astra-v411',
+      publisher: 'Artificial Analysis',
+      title: 'GPT-6 Astra Intelligence Index v4.1.1 Evaluation by Effort',
+      sourceType: 'independent',
+      publishedAt: '2026-09-03',
+      retrievedAt: '2026-09-04',
+      sourceUrl: 'https://artificialanalysis.ai/models/releases/gpt-6-astra'
+    },
+    'aa-index-v42-20260904': {
+      id: 'aa-index-v42-20260904',
+      publisher: 'Artificial Analysis',
+      title: 'Artificial Analysis Intelligence Index v4.2 Release',
+      sourceType: 'independent',
+      publishedAt: '2026-09-04',
+      retrievedAt: '2026-09-04',
+      sourceUrl: 'https://artificialanalysis.ai/articles/artificial-analysis-intelligence-index-v4-2'
+    },
+    'aa-gdp-pdf-leaderboard': {
+      id: 'aa-gdp-pdf-leaderboard',
+      publisher: 'Artificial Analysis',
+      title: 'Surge GDP.pdf Multimodal Evaluation Leaderboard',
+      sourceType: 'independent',
+      publishedAt: '2026-09-04',
+      retrievedAt: '2026-09-04',
+      sourceUrl: 'https://artificialanalysis.ai/benchmarks/gdp-pdf'
+    },
+    'cursor-pricing-astra-2026': {
+      id: 'cursor-pricing-astra-2026',
+      publisher: 'Cursor IDE',
+      title: 'Cursor Models & Other Models Pool Updates',
+      sourceType: 'official',
+      publishedAt: '2026-09-03',
+      retrievedAt: '2026-09-04',
+      sourceUrl: 'https://cursor.com/pricing'
+    },
+    'opencode-go-catalog-2026': {
+      id: 'opencode-go-catalog-2026',
+      publisher: 'OpenCode',
+      title: 'OpenCode Go Catalog & Model Access',
+      sourceType: 'official',
+      publishedAt: '2026-09-03',
+      retrievedAt: '2026-09-04',
+      sourceUrl: 'https://opencode.ai/go'
+    },
+    'openai-responses-api-docs': {
+      id: 'openai-responses-api-docs',
+      publisher: 'OpenAI Developers',
+      title: 'Responses API: Async Tool Calling & Mid-Turn Steering',
+      sourceType: 'official',
+      publishedAt: '2026-09-03',
+      retrievedAt: '2026-09-04',
+      sourceUrl: 'https://platform.openai.com/docs/api-reference/responses'
+    },
+    'openai-preparedness-framework-v3': {
+      id: 'openai-preparedness-framework-v3',
+      publisher: 'OpenAI Preparedness',
+      title: 'OpenAI Preparedness Framework Frontier Tracking',
+      sourceType: 'official',
+      publishedAt: '2026-09-03',
+      retrievedAt: '2026-09-04',
+      sourceUrl: 'https://openai.com/safety/preparedness-framework/'
     }
   };
 
@@ -485,6 +652,202 @@
   // 3. DOSSIÊS TÉCNICOS DETALHADOS (Seções 5 a 9, 20 a 110)
   // ==========================================
   var MODEL_DOSSIERS_DATA = {
+    // ------------------------------------------------------------------------
+    // 0. GPT-6 ASTRA (Prompt 10 / Lançamento 03/09/2026)
+    // ------------------------------------------------------------------------
+    'gpt-6-astra': {
+      modelId: 'gpt-6-astra',
+      identity: {
+        canonicalName: 'GPT-6 Astra',
+        family: 'openai-gpt',
+        provider: 'openai',
+        providerName: 'OpenAI',
+        releaseDate: '2026-09-03',
+        status: 'production',
+        openWeights: false,
+        license: 'Proprietary OpenAI',
+        aliases: ['GPT 6 Astra', 'GPT-6 Astra', 'Astra', 'GPT6 Astra', 'gpt-6-astra', 'GPT-6 Pro (product alias)']
+      },
+      architecture: {
+        architectureType: 'MoE Proprietário Frontier Reasoning com CoT Adaptativo',
+        paramsTotal: 'N/D',
+        paramsActive: 'N/D',
+        contextNativeTokens: 1050000,
+        maxOutputTokens: 128000,
+        attentionType: 'Multi-Head Latent Sparse Attention com CoT Adaptativo'
+      },
+      context: {
+        nominalTokens: 1050000,
+        effectiveEvaluation: 'Retenção quase perfeita em contexto longo verdadeiro: 100% no MRCR v2 (256k–512k) e 96.3% (512k–1M). Cliff de precificação em >272k tokens.',
+        retrievalAccuracyScore: 98.2,
+        longContextThreshold: 272000
+      },
+      modalities: {
+        input: ['text', 'image'],
+        output: ['text']
+      },
+      pricing: {
+        inputPerMillion: 10.00,
+        outputPerMillion: 50.00,
+        cacheReadPerMillion: 1.00,
+        cacheWritePerMillion: 12.50,
+        currency: 'USD',
+        longContextMultiplier: { input: 2.0, cacheRead: 2.0, cacheWrite: 2.0, output: 1.5 },
+        batchDiscount: 50,
+        fastMultiplier: 2.0
+      },
+      availability: {
+        surfaces: ['api', 'chatgpt:gpt-6-pro', 'cursor', 'codex'],
+        freeTierAvailable: false,
+        proSubscriptionId: 'openai-chatgpt-pro-5x',
+        note: 'ChatGPT Plus NÃO inclui GPT-6 Pro Chat (disponível apenas Work/Codex com limite). Acesso via Pro ($100 / $200), Business e API direta.'
+      },
+      reasoningEffortMatrix: {
+        efforts: ['low', 'medium', 'high', 'xhigh', 'max'],
+        paretoAnalysis: {
+          sweetSpot: ['high', 'xhigh'],
+          notes: 'Os níveis High (melhor equilíbrio a $0.96/task) e XHigh (74.1% DeepSWE a $1.20/task) formam a fronteira de Pareto ideal. Max traz ganhos em TB Science e ARC-AGI-3, mas com salto de custo.'
+        },
+        descriptions: {
+          low: 'Esforço rápido e econômico ($0.46/task no AA), indicado para tarefas simples de código e triagem.',
+          medium: 'Excelente custo-benefício em tarefas de raciocínio intermediário e automação padrão.',
+          high: 'Sweet spot operacional para coding e terminal autônomo (57.9% TB4, 99.95% ARC-AGI-3 Provider Adapter).',
+          xhigh: 'Líder absoluto no DeepSWE 1.1 independente (74.1% pass@1 com metade dos tokens de Sol).',
+          max: 'Líder em TB Science (65.4%) e ARC-AGI-3 Standard (62.71%). Recomendado para problemas extremos onde custo não é restrição.'
+        },
+        data: [
+          { effort: 'Low', passAt1: 67.0, terminalBench4: 49.3, terminalBenchScience: 55.4, costPerTaskUsd: 0.46, avgReasoningTokens: 12000 },
+          { effort: 'Medium', passAt1: 72.8, terminalBench4: 55.2, terminalBenchScience: 57.4, costPerTaskUsd: 0.75, avgReasoningTokens: 18500 },
+          { effort: 'High', passAt1: 73.2, terminalBench4: 57.9, terminalBenchScience: 62.0, costPerTaskUsd: 0.96, avgReasoningTokens: 27000 },
+          { effort: 'XHigh', passAt1: 74.1, terminalBench4: 56.4, terminalBenchScience: 60.9, costPerTaskUsd: 1.20, avgReasoningTokens: 38000 },
+          { effort: 'Max', passAt1: 73.2, terminalBench4: 57.1, terminalBenchScience: 65.4, costPerTaskUsd: 1.67, avgReasoningTokens: 64000 },
+          { effort: 'Non-Reasoning', passAt1: 55.0, terminalBench4: null, terminalBenchScience: null, costPerTaskUsd: 0.93, avgReasoningTokens: 0, evaluationOnly: true }
+        ],
+        low: { effort: 'low', aaIndex: 57, costPerTaskUsd: 0.46, deepSwePass1: 67.0, terminalBench40: 49.3, terminalBenchScience01: 55.4, notes: 'Esforço rápido e econômico ($0.46/task no AA).' },
+        medium: { effort: 'medium', aaIndex: 59, costPerTaskUsd: 0.75, deepSwePass1: 72.8, terminalBench40: 55.2, terminalBenchScience01: 57.4, notes: 'Excelente custo-benefício em tarefas de raciocínio intermediário.' },
+        high: { effort: 'high', aaIndex: 60, costPerTaskUsd: 0.96, deepSwePass1: 73.2, terminalBench40: 57.9, terminalBenchScience01: 62.0, arcAgi3ProviderAdapter: 99.95, notes: 'Sweet spot para coding e terminal autônomo (57.88% TB4 e 99.95% ARC-AGI-3 Provider Adapter).' },
+        xhigh: { effort: 'xhigh', aaIndex: 61, costPerTaskUsd: 1.20, deepSwePass1: 74.1, terminalBench40: 56.4, terminalBenchScience01: 60.9, notes: 'Líder em DeepSWE 1.1 (74.1% pass@1 com metade dos tokens de Sol) e AA Index 61.' },
+        max: { effort: 'max', aaIndex: 61, costPerTaskUsd: 1.67, deepSwePass1: 73.2, terminalBench40: 57.1, terminalBenchScience01: 65.4, arcAgi3Standard: 62.71, notes: 'Líder em TB Science (65.4%) e ARC-AGI-3 Standard (62.71%). Retornos decrescentes em DeepSWE (+89.7% custo).' },
+        nonReasoning: { effort: 'none', aaIndex: 55, costPerTaskUsd: 0.93, evaluationOnly: true, notes: 'Run de avaliação exclusivo da Artificial Analysis; não disponível como esforço público na API.' }
+      },
+      artificialAnalysis: {
+        verifiedAt: '2026-09-04',
+        efforts: {
+          low: { aaIndex: 57, costPerTaskUsd: 0.46, outputSpeedTokS: null, ttftSeconds: null },
+          medium: { aaIndex: 59, costPerTaskUsd: 0.75, outputSpeedTokS: null, ttftSeconds: null },
+          high: { aaIndex: 60, costPerTaskUsd: 0.96, outputSpeedTokS: null, ttftSeconds: null },
+          xhigh: { aaIndex: 61, costPerTaskUsd: 1.20, outputSpeedTokS: null, ttftSeconds: null },
+          max: { aaIndex: 61, costPerTaskUsd: 1.67, outputSpeedTokS: null, ttftSeconds: null },
+          nonReasoning: { aaIndex: 55, costPerTaskUsd: 0.93, evaluationOnly: true, outputSpeedTokS: null, ttftSeconds: null }
+        },
+        v42Insights: {
+          rank: 2,
+          deltaVsSolEloBriefcase: 85,
+          gdpPdfPassRate: 33.2,
+          note: 'Confirmado #2 geral no índice v4.2; lidera o GDP.pdf com 33.2% e domina a fronteira de eficiência de output-tokens.'
+        },
+        interpretation: 'Frontier absoluto em raciocínio, coding e terminal, com liderança em tarefas densas e velocidade/throughput independente não divulgada (N/D).'
+      },
+      safetyAndPreparedness: {
+        cybersecurity: 'CRITICAL (Primeiro modelo frontier sob Preparedness Framework; 100% no ExploitBench)',
+        cbrn: 'HIGH (Biológico / Químico)',
+        aiSelfImprovement: 'BELOW HIGH',
+        indirectPromptInjection: 99.79,
+        instructionHierarchy: 99.99,
+        cotMonitorabilityCaveat: 'Regressão de monitorabilidade de cadeia de pensamento (CoT) frente a avaliações adversariais em comparação aos modelos anteriores.'
+      },
+      developerCapabilities: {
+        asyncToolCalling: true,
+        midTurnSteering: true,
+        responsesApiTools: ['web_search', 'file_search', 'image_generation_tool', 'code_interpreter', 'hosted_shell', 'apply_patch', 'skills', 'computer_use', 'mcp', 'tool_search']
+      },
+      benchmarkSnapshots: [
+        // Coding & Terminal (Launch & Independent)
+        { benchmarkId: 'terminal-bench-4-0', benchmarkVersion: '4.0', score: 57.9, unit: 'percent', sourceType: 'official', sourceId: 'openai-gpt6-astra-launch', harness: 'OpenAI Shell Environment', effort: 'high', toolsEnabled: true, snapshotDate: '2026-09-03', notes: '57.88% oficial no Terminal-Bench 4.0; novo recorde da categoria.' },
+        { benchmarkId: 'deep-swe-1-1', benchmarkVersion: '1.1', score: 74.1, unit: 'percent', sourceType: 'official', sourceId: 'openai-gpt6-astra-launch', harness: 'OpenAI SWE Runner', effort: 'xhigh', toolsEnabled: true, snapshotDate: '2026-09-03', notes: '74.1% pass@1 oficial no DeepSWE 1.1 sob esforço XHigh.' },
+        { benchmarkId: 'deep-swe-1-1', benchmarkVersion: '1.1', score: 74.1, unit: 'percent', sourceType: 'independent', sourceId: 'deep-swe-v11-20260903', harness: 'mini-SWE-agent', effort: 'xhigh', toolsEnabled: true, snapshotDate: '2026-09-03', confidenceInterval: 2.9, costPerTaskUsd: 6.52, outputTokensPerTask: 30000, agentStepsPerTask: 55, notes: 'Avaliação independente DataCurve DeepSWE v1.1: 74.1% [71.2-77.0], $6.52/task, 30k tokens.' },
+        { benchmarkId: 'frontiercode-1-1-extended', benchmarkVersion: '1.1', score: 64.5, unit: 'percent', sourceType: 'official', sourceId: 'openai-gpt6-astra-launch', harness: 'FrontierCode Extended Runner', effort: null, toolsEnabled: true, snapshotDate: '2026-09-03', notes: 'Launch table maximum-at-any-effort.' },
+        { benchmarkId: 'frontiercode-1-1-main', benchmarkVersion: '1.1', score: 53.3, unit: 'percent', sourceType: 'official', sourceId: 'openai-gpt6-astra-launch', harness: 'FrontierCode Main Runner', effort: null, toolsEnabled: true, snapshotDate: '2026-09-03', notes: 'Launch table maximum-at-any-effort.' },
+        // Terminal Science (Oficial e Independente Snorkel)
+        { benchmarkId: 'terminal-bench-science-0-1', benchmarkVersion: '0.1', score: 64.6, unit: 'percent', sourceType: 'official', sourceId: 'openai-gpt6-astra-launch', harness: 'Science Terminal Runner', effort: null, toolsEnabled: true, snapshotDate: '2026-09-03', notes: 'Launch table maximum-at-any-effort.' },
+        { benchmarkId: 'terminal-bench-science-0-1', benchmarkVersion: '0.1', score: 65.4, unit: 'percent', sourceType: 'independent', sourceId: 'snorkel-terminal-bench-science-01', harness: 'Snorkel AI Testbed', effort: 'max', toolsEnabled: true, snapshotDate: '2026-09-03', confidenceInterval: 2.5, notes: 'Avaliação independente Snorkel AI (70 tarefas em 5 domínios): 65.4% ±2.5 sob Max.' },
+        // Matemática & Raciocínio Acadêmico
+        { benchmarkId: 'frontiermath-t4-v2', benchmarkVersion: '2.0', score: 97.6, unit: 'percent', sourceType: 'official', sourceId: 'openai-gpt6-astra-launch', harness: 'FrontierMath Tier 4', effort: null, toolsEnabled: true, snapshotDate: '2026-09-03', notes: 'Launch table maximum-at-any-effort.' },
+        { benchmarkId: 'gpqa-diamond', benchmarkVersion: '1.0', score: 96.0, unit: 'percent', sourceType: 'official', sourceId: 'openai-gpt6-astra-launch', harness: 'Standard GPQA', effort: null, toolsEnabled: false, snapshotDate: '2026-09-03', notes: 'Launch table maximum-at-any-effort.' },
+        { benchmarkId: 'hle-with-tools', benchmarkVersion: '1.0', score: 57.2, unit: 'percent', sourceType: 'official', sourceId: 'openai-gpt6-astra-launch', harness: 'HLE Tools Suite', effort: null, toolsEnabled: true, snapshotDate: '2026-09-03', notes: 'Launch table maximum-at-any-effort.' },
+        // Long Context & Retenção
+        { benchmarkId: 'mrcr-v2-256k-512k', benchmarkVersion: '2.0', score: 100.0, unit: 'percent', sourceType: 'official', sourceId: 'openai-gpt6-astra-launch', harness: 'MRCR v2 Suite', effort: null, toolsEnabled: false, snapshotDate: '2026-09-03', notes: '100% de acurácia perfeita na janela 256k-512k.' },
+        { benchmarkId: 'mrcr-v2-512k-1m', benchmarkVersion: '2.0', score: 96.3, unit: 'percent', sourceType: 'official', sourceId: 'openai-gpt6-astra-launch', harness: 'MRCR v2 Suite', effort: null, toolsEnabled: false, snapshotDate: '2026-09-03', notes: '96.3% de retenção factual na janela máxima 512k-1M.' },
+        // Autonomia, Ferramentas & Computer Use
+        { benchmarkId: 'agents-last-exam', benchmarkVersion: '1.0', score: 59.3, unit: 'percent', sourceType: 'official', sourceId: 'openai-gpt6-astra-launch', harness: 'ALE Runner', effort: null, toolsEnabled: true, snapshotDate: '2026-09-03', notes: 'Launch table maximum-at-any-effort.' },
+        { benchmarkId: 'osworld-2-offline-partial', benchmarkVersion: '2.0', score: 72.6, unit: 'percent', sourceType: 'official', sourceId: 'openai-gpt6-astra-launch', harness: 'OSWorld 2 Offline Partial Runner', effort: null, toolsEnabled: true, snapshotDate: '2026-09-03', notes: 'Launch table maximum-at-any-effort.' },
+        { benchmarkId: 'screenspot-pro', benchmarkVersion: '1.0', score: 92.7, unit: 'percent', sourceType: 'official', sourceId: 'openai-gpt6-astra-launch', harness: 'ScreenSpot Pro GUI Grounding', effort: null, toolsEnabled: true, snapshotDate: '2026-09-03', notes: 'Localização precisa de elementos de UI.' },
+        { benchmarkId: 'automationbench', benchmarkVersion: '1.0', score: 41.4, unit: 'percent', sourceType: 'official', sourceId: 'openai-gpt6-astra-launch', harness: 'Automation Platform', effort: null, toolsEnabled: true, snapshotDate: '2026-09-03', notes: 'Launch table maximum-at-any-effort.' },
+        { benchmarkId: 'benchcad', benchmarkVersion: '1.0', score: 95.9, unit: 'percent', sourceType: 'official', sourceId: 'openai-gpt6-astra-launch', harness: 'BenchCAD Harness', effort: null, toolsEnabled: true, snapshotDate: '2026-09-03', notes: 'Modelagem 3D e parametrização CAD.' },
+        { benchmarkId: 'browsecomp', benchmarkVersion: '1.0', score: 91.5, unit: 'percent', sourceType: 'official', sourceId: 'openai-gpt6-astra-launch', harness: 'BrowseComp Suite', effort: null, toolsEnabled: true, snapshotDate: '2026-09-03', notes: 'Navegação web e síntese competitiva.' },
+        // Ciências Biomédicas & Saúde
+        { benchmarkId: 'genebench-pro', benchmarkVersion: '1.0', score: 37.8, unit: 'percent', sourceType: 'official', sourceId: 'openai-gpt6-astra-launch', harness: 'Genomics Science Suite', effort: null, toolsEnabled: true, snapshotDate: '2026-09-03', notes: 'Launch table maximum-at-any-effort.' },
+        { benchmarkId: 'medchembench', benchmarkVersion: '1.0', score: 49.3, unit: 'percent', sourceType: 'official', sourceId: 'openai-gpt6-astra-launch', harness: 'Medicinal Chemistry Suite', effort: null, toolsEnabled: true, snapshotDate: '2026-09-03', notes: 'Launch table maximum-at-any-effort.' },
+        { benchmarkId: 'lifescibench', benchmarkVersion: '1.0', score: 60.3, unit: 'percent', sourceType: 'official', sourceId: 'openai-gpt6-astra-launch', harness: 'Life Science Suite', effort: null, toolsEnabled: true, snapshotDate: '2026-09-03', notes: 'Launch table maximum-at-any-effort.' },
+        { benchmarkId: 'healthbench-professional', benchmarkVersion: '1.0', score: 63.4, unit: 'percent', sourceType: 'official', sourceId: 'openai-gpt6-astra-launch', harness: 'Health Professional Suite', effort: null, toolsEnabled: true, snapshotDate: '2026-09-03', notes: 'Raciocínio clínico profissional ajustado por tamanho.' },
+        // Cibersegurança & Preparedness
+        { benchmarkId: 'exploitbench', benchmarkVersion: '1.0', score: 100.0, unit: 'percent', sourceType: 'official', sourceId: 'openai-gpt6-astra-launch', harness: 'ExploitBench Suite', effort: null, toolsEnabled: true, snapshotDate: '2026-09-03', notes: '100% de resolução de exploits; fundamenta classificação Critical.' },
+        { benchmarkId: 'exploitgym', benchmarkVersion: '1.0', score: 42.4, unit: 'tasks', sourceType: 'official', sourceId: 'openai-gpt6-astra-launch', harness: 'ExploitGym CTF Runner', effort: null, toolsEnabled: true, snapshotDate: '2026-09-03', notes: 'Desafios autônomos de exploração cibernética.' },
+        { benchmarkId: 'sre-bench', benchmarkVersion: '1.0', score: 88.0, unit: 'percent', sourceType: 'official', sourceId: 'openai-gpt6-astra-launch', harness: 'SRE Incident Remediation', effort: null, toolsEnabled: true, snapshotDate: '2026-09-03', notes: 'Resolução autônoma de incidentes de infraestrutura.' },
+        { benchmarkId: 'sec-bench-pro', benchmarkVersion: '1.0', score: 85.4, unit: 'percent', sourceType: 'official', sourceId: 'openai-gpt6-astra-launch', harness: 'SecBench Pro Suite', effort: null, toolsEnabled: true, snapshotDate: '2026-09-03', notes: 'Análise de postura e conformidade de segurança.' },
+        // Metrologia Estrita ARC-AGI-3 (Standard vs Provider Adapter)
+        { benchmarkId: 'arc-agi-3-standard', benchmarkVersion: '3.0', score: 62.71, unit: 'percent', sourceType: 'independent', sourceId: 'arcprize-gpt6-astra-20260902', harness: 'Standard ARC Prize evaluation', effort: 'max', toolsEnabled: true, snapshotDate: '2026-09-02', costPerTaskUsd: 26000, notes: 'Metrologia estrita sem adapter proprietário. Custo de computação ~$26.000.' },
+        { benchmarkId: 'arc-agi-3-provider-adapter', benchmarkVersion: '3.0', score: 99.95, unit: 'percent', sourceType: 'independent', sourceId: 'arcprize-gpt6-astra-20260902', harness: 'Provider Adapter (OpenAI)', effort: 'high', toolsEnabled: true, snapshotDate: '2026-09-02', costPerTaskUsd: 18800, notes: 'Exige label Provider Adapter explicitamente. Nunca exibir 99.9% sem o sufixo Provider Adapter. Custo ~$18.800.' },
+        // Documentos Massivos (Surge GDP.pdf)
+        { benchmarkId: 'gdp-pdf', benchmarkVersion: '1.0', score: 33.2, unit: 'percent', sourceType: 'independent', sourceId: 'aa-index-v42-20260904', harness: 'Surge GDP.pdf Suite', effort: null, toolsEnabled: true, snapshotDate: '2026-09-04', notes: 'Líder geral no teste de 100 PDFs e 4.592 páginas com 33.2% All-pass Rate.' }
+      ],
+      performanceProfile: {
+        scientificReasoning: 'elite',
+        softwareEngineering: 'elite',
+        terminal: 'elite',
+        longContext: 'elite',
+        computerUse: 'elite',
+        throughput: 'unverified',
+        costEfficiency: 'balanced'
+      },
+      strengths: [
+        'Líder global em autonomia de terminal: 57.88% no Terminal-Bench 4.0 e 65.4% no TB Science',
+        'Alta eficiência de tokens de saída no DeepSWE (74.1% pass@1 consumindo metade dos tokens de Sol)',
+        'Retenção factual perfeita no MRCR v2 (100% em 256k-512k e 96.3% em 512k-1M)',
+        'Capacidade de Cibersegurança de nível crítico (100% no ExploitBench e 88% no SRE-bench)',
+        'Suporte nativo a Async Tool Calling e Mid-Turn Steering na Responses API',
+        'Líder em compreensão documental massiva com 33.2% no Surge GDP.pdf'
+      ],
+      weaknesses: [
+        'Throughput independente e velocidade de geração ainda não divulgados (N/D)',
+        'Tarifa de saída elevada ($50/M) com cliff adicional de 2x/1.5x em contexto >272k',
+        'Esforço Max apresenta retornos decrescentes (+89.7% de custo no DeepSWE para ganho nulo ou negativo)',
+        'GPT-6 Pro Chat não disponível no plano ChatGPT Plus',
+        'Regressão de monitorabilidade de CoT em avaliações adversariais em relação ao Sol'
+      ],
+      bestFor: [
+        'Engenharia de software de ponta, monorepos densos e agentes de terminal',
+        'Investigação científica autônoma e bioinformática',
+        'Operações de ciberdefesa autorizada e mitigação de incidentes SRE',
+        'Interpretação e extração sobre bibliotecas massivas de documentação (>272k)'
+      ],
+      avoidFor: [
+        'Aplicações sensíveis a custo estrito por requisição onde $50/M em output é proibitivo',
+        'Tarefas mecânicas simples onde GPT-5.6 Terra ou Luna oferecem custo até 50x menor',
+        'Default cego no esforço Max (preferir High para coding e XHigh para SWE)'
+      ],
+      sourceIds: [
+        'openai-gpt6-astra-launch',
+        'openai-gpt6-astra-api',
+        'openai-gpt6-astra-system-card',
+        'deep-swe-v11-20260903',
+        'snorkel-terminal-bench-science-01',
+        'arcprize-gpt6-astra-20260902',
+        'aa-index-v42-20260904'
+      ],
+      verifiedAt: '2026-09-04'
+    },
+
     // ------------------------------------------------------------------------
     // 1. GEMINI 3.8 FLASH (Seções 20 a 28)
     // ------------------------------------------------------------------------
@@ -2170,7 +2533,10 @@
   // Snapshot Oficial: 02/09/2026
   // ==========================================
   var DEEPSWE_INDEPENDENT_LEADERBOARD = [
+    { modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra (XHigh)', score: 74.1, confidenceInterval: 2.9, costPerTaskUsd: 6.52, outputTokensPerTask: 30000, agentStepsPerTask: 55 },
     { modelId: 'gemini-3-8-flash', modelName: 'Gemini 3.8 Flash (High)', score: 74.0, confidenceInterval: 1.0, costPerTaskUsd: 2.36, outputTokensPerTask: 143000, agentStepsPerTask: 166 },
+    { modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra (High)', score: 73.2, confidenceInterval: 3.5, costPerTaskUsd: 5.72, outputTokensPerTask: 27000, agentStepsPerTask: 52 },
+    { modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra (Max)', score: 73.2, confidenceInterval: 0.9, costPerTaskUsd: 12.37, outputTokensPerTask: 61000, agentStepsPerTask: 95 },
     { modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol (Max)', score: 73.0, confidenceInterval: 3.0, costPerTaskUsd: 6.46, outputTokensPerTask: 60000, agentStepsPerTask: 61 },
     { modelId: 'glm-5-3', modelName: 'GLM-5.3 (Max)', score: 69.0, confidenceInterval: 3.0, costPerTaskUsd: 3.99, outputTokensPerTask: 80000, agentStepsPerTask: 124 },
     { modelId: 'kimi-k3', modelName: 'Kimi K3 (Max)', score: 69.0, confidenceInterval: 5.0, costPerTaskUsd: 4.65, outputTokensPerTask: 81000, agentStepsPerTask: 98 },

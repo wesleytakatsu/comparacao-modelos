@@ -76,7 +76,8 @@ const MODEL_HISTORY_DATA = {
             { modelId: 'openai-o1', name: 'OpenAI o1', releaseDate: '2024-09-12', status: 'superseded', notes: 'Pioneiro em chain-of-thought oculta e raciocínio deliberativo em código.' },
             { modelId: 'openai-o3', name: 'OpenAI o3', releaseDate: '2025-01-31', status: 'superseded', notes: 'Salto massivo em programação competitiva e ARC-AGI.' },
             { modelId: 'gpt-5-5-preview', name: 'GPT-5.5 Preview', releaseDate: '2025-11-10', status: 'superseded', notes: 'Snapshot preliminar do protocolo responses.' },
-            { modelId: 'gpt-5-6-sol', name: 'GPT-5.6 Sol', releaseDate: '2026-02-16', status: 'active', notes: 'Frontier de extrema precisão lógica e edge cases financeiros.' }
+            { modelId: 'gpt-5-6-sol', name: 'GPT-5.6 Sol', releaseDate: '2026-02-16', status: 'predecessor', notes: 'Frontier de extrema precisão lógica e edge cases financeiros.' },
+            { modelId: 'gpt-6-astra', name: 'GPT-6 Astra', releaseDate: '2026-09-03', status: 'active', notes: 'Frontier reasoning flagship, 1.05M contexto, líder em SWE e agentic benchmarks.' }
           ]
         },
         {
@@ -114,6 +115,7 @@ const MODEL_HISTORY_DATA = {
         { from: 'openai-o1', to: 'openai-o3', changeType: 'reasoning-boost', improvements: 'Avanço significativo em raciocínio matemático e código formal.' },
         { from: 'openai-o3', to: 'gpt-5-5-preview', changeType: 'protocol-unification', improvements: 'Unificação sob protocolo responses.' },
         { from: 'gpt-5-5-preview', to: 'gpt-5-6-sol', changeType: 'full-release', improvements: 'Raciocínio XHigh/Max com MRCR v2.' },
+        { from: 'gpt-5-6-sol', to: 'gpt-6-astra', changeType: 'generational-upgrade', improvements: 'Novo paradigma de raciocínio profundo, 1.05M tokens de contexto, Responses API v2, async tool calling e mid-turn steering.' },
         { from: 'gpt-4o', to: 'gpt-4-5', changeType: 'density-scaling', improvements: 'Expansão de parâmetros e redução de alucinações.' },
         { from: 'gpt-4-5', to: 'gpt-5-5-preview', changeType: 'protocol-unification', improvements: 'Migração para responses API.' },
         { from: 'gpt-5-5-preview', to: 'gpt-5-6-terra', changeType: 'full-release', improvements: 'Daily driver com melhor relação custo/performance.' },
@@ -311,6 +313,22 @@ const MODEL_HISTORY_DATA = {
 
   events: [
     {
+      date: '2026-09-04',
+      modelId: 'gpt-6-astra',
+      type: 'benchmark-update',
+      title: 'Artificial Analysis atualiza Index para v4.2',
+      description: 'GPT-6 Astra assume liderança do AA Index com 61.0 pontos, superando Claude Fable 5.1 (59.6) no benchmark v4.2 ponderado.',
+      sourceId: 'artificial-analysis-v42'
+    },
+    {
+      date: '2026-09-03',
+      modelId: 'gpt-6-astra',
+      type: 'release',
+      title: 'OpenAI lança GPT-6 Astra',
+      description: 'OpenAI oficializa GPT-6 Astra com 1.05M de contexto nativo, 5 níveis de reasoning effort, async tool calling e liderança em benchmarks agênticos.',
+      sourceId: 'openai-gpt6-astra-launch'
+    },
+    {
       date: '2026-09-02',
       modelId: 'gemini-3-8-flash',
       type: 'release',
@@ -434,6 +452,48 @@ const MODEL_HISTORY_DATA = {
 };
 
 const BENCHMARK_HISTORY_DATA = [
+  {
+    modelId: 'gpt-6-astra',
+    benchmark: 'DeepSWE',
+    benchmarkVersion: '1.1',
+    date: '2026-09-04',
+    score: 74.1,
+    confidenceInterval: 0.9,
+    costPerTaskUsd: 5.72,
+    tokensPerTask: 96000,
+    agentSteps: 88,
+    sourceId: 'deepswe-datacurve-v11',
+    sourceType: 'independent',
+    notes: 'Avaliação independente DataCurve v1.1 no esforço XHigh: 74.1% de taxa de resolução superando Gemini 3.8 Flash (74.0%) e Claude Fable 5.1.'
+  },
+  {
+    modelId: 'gpt-6-astra',
+    benchmark: 'Terminal-Bench',
+    benchmarkVersion: '4.0',
+    date: '2026-09-03',
+    score: 57.9,
+    confidenceInterval: null,
+    costPerTaskUsd: null,
+    tokensPerTask: null,
+    agentSteps: null,
+    sourceId: 'openai-gpt6-astra-launch',
+    sourceType: 'official',
+    notes: 'Avaliação oficial no novo Terminal-Bench 4.0: 57.9% de sucesso em ambiente CLI/terminal agêntico.'
+  },
+  {
+    modelId: 'gpt-6-astra',
+    benchmark: 'Terminal-Bench Science',
+    benchmarkVersion: '0.1',
+    date: '2026-09-04',
+    score: 65.4,
+    confidenceInterval: null,
+    costPerTaskUsd: null,
+    tokensPerTask: null,
+    agentSteps: null,
+    sourceId: 'snorkel-terminal-bench-science',
+    sourceType: 'independent',
+    notes: 'Auditoria independente Snorkel AI no Terminal-Bench Science 0.1: 65.4% de acurácia em tarefas científicas complexas via terminal.'
+  },
   {
     modelId: 'gemini-3-8-flash',
     benchmark: 'DeepSWE',

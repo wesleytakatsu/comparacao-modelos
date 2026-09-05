@@ -48,6 +48,22 @@ const ENGINEERING_BEHAVIOR_DATA = {
       destructiveEditSafety: 91,
       profileSummary: 'O arquiteto supremo: visão holística perfeita e liderança agêntica autônoma, porém com alta demanda de cota em sessões longas.'
     },
+    'gpt-6-astra': {
+      modelName: 'GPT-6 Astra',
+      scopeDiscipline: 85,
+      architecture: 99,
+      autonomy: 99,
+      persistence: 99,
+      firstPassSuccess: 98,
+      testDiscipline: 99,
+      instructionFollowing: 97,
+      visualTaste: 88,
+      humanReviewEase: 74,
+      quotaEfficiency: 52,
+      overengineeringRisk: 68,
+      destructiveEditSafety: 93,
+      profileSummary: 'O oráculo de raciocínio profundo: máxima visão arquitetural e persistência agêntica extrema, com suporte nativo a mid-turn steering e async tool calling, mas alta demanda de cota em esforços elevados.'
+    },
     'gpt-5-6-sol': {
       modelName: 'GPT-5.6 Sol',
       scopeDiscipline: 82,

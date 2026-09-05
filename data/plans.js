@@ -233,7 +233,10 @@ const SUBSCRIPTION_PLANS_DATA = [
       { modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol', surface: 'chatgpt-chat', available: true, included: true, billingMode: 'included', efforts: ['instant', 'medium', 'high'], notes: 'Acesso primário com esforços Instant, Medium e High no chat cotidiano' },
       { modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol', surface: 'chatgpt-work', available: true, included: true, billingMode: 'included', efforts: ['medium', 'high'], notes: 'Workflows colaborativos no Work' },
       { modelId: 'gpt-5-6-terra', modelName: 'GPT-5.6 Terra', surface: 'chatgpt-work', available: true, included: false, billingMode: 'included', efforts: ['high'], notes: 'Disponível em chatgpt-work e codex (não selecionável no picker padrão de chat)' },
-      { modelId: 'gpt-5-6-luna', modelName: 'GPT-5.6 Luna', surface: 'codex', available: true, included: false, billingMode: 'included', efforts: ['low'], notes: 'Disponível em codex e background (não selecionável no picker padrão de chat)' }
+      { modelId: 'gpt-5-6-luna', modelName: 'GPT-5.6 Luna', surface: 'codex', available: true, included: false, billingMode: 'included', efforts: ['low'], notes: 'Disponível em codex e background (não selecionável no picker padrão de chat)' },
+      { modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra (GPT-6 Pro)', surface: 'chatgpt-chat', available: false, included: false, billingMode: 'none', efforts: [], notes: 'GPT-6 Pro Chat não incluído na assinatura Plus' },
+      { modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra', surface: 'chatgpt-work', available: true, included: false, billingMode: 'included', efforts: ['high'], notes: 'Rollout limitado de Astra dentro da allowance de Work/Codex; créditos adicionais podem ser adquiridos' },
+      { modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra', surface: 'codex', available: true, included: false, billingMode: 'included', efforts: ['high'], notes: 'Rollout limitado de Astra no Codex' }
     ],
     features: ['Canvas', 'Deep Research', 'ChatGPT Work', 'Codex', 'Voice Mode Avançado', 'Custom GPTs'],
     storage: { cloudStorageGb: 100, cloudStorageTb: null, localizedBenefits: null },
@@ -242,7 +245,7 @@ const SUBSCRIPTION_PLANS_DATA = [
     surfaces: ['chatgpt-chat', 'chatgpt-work', 'codex'],
     privacy: { profileType: 'consumer', modelTrainingControl: true, noTrainingByDefault: false, zdr: false, retentionPolicy: 'standard-opt-out', retentionDays: 30, notes: 'Configurável pelo usuário (opt-out); não possui ZDR corporativo.' },
     pools: ['Plus Tier'],
-    quotaDescription: 'Cota padrão de GPT-5.6 Sol (Instant, Medium, High) e acesso completo a Work e Codex.',
+    quotaDescription: 'GPT-6 Pro Chat NÃO incluído no Plus (Work/Codex possui rollout limitado). Cota padrão de GPT-5.6 Sol (Instant, Medium, High) e acesso a Work e Codex.',
     overageAllowed: false,
     apiIncluded: false,
     bestFor: 'Desenvolvedores e profissionais com necessidade diária de raciocínio frontier e Deep Research.'
@@ -267,6 +270,9 @@ const SUBSCRIPTION_PLANS_DATA = [
     modelAccess: [
       { modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol', surface: 'chatgpt-chat', available: true, included: true, billingMode: 'included', efforts: ['medium', 'high', 'xhigh'], notes: '5x uso de raciocínio profundo Sol vs Plus' },
       { modelId: 'gpt-5-6-pro', modelName: 'GPT-5.6 Sol Pro', surface: 'chatgpt-chat', available: true, included: true, billingMode: 'included', efforts: ['high', 'max'], notes: 'Acesso exclusivo de produto ao Sol Pro para investigações críticas' },
+      { modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra (GPT-6 Pro)', surface: 'chatgpt-chat', available: true, included: false, billingMode: 'included', efforts: ['high', 'xhigh'], notes: '50 msgs/semana compartilhadas entre GPT-6 Pro e Sol Pro' },
+      { modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra', surface: 'chatgpt-work', available: true, included: false, billingMode: 'included', efforts: ['high', 'xhigh'], notes: 'Full existing allowance de Work/Codex sob rollout' },
+      { modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra', surface: 'codex', available: true, included: false, billingMode: 'included', efforts: ['high', 'xhigh'], notes: 'Full existing allowance de Codex' },
       { modelId: 'gpt-5-6-terra', modelName: 'GPT-5.6 Terra', surface: 'chatgpt-work', available: true, included: false, billingMode: 'included', efforts: ['high'], notes: 'Trabalho pesado com contexto amplo em Work' },
       { modelId: 'gpt-5-6-luna', modelName: 'GPT-5.6 Luna', surface: 'codex', available: true, included: false, billingMode: 'included', efforts: ['max'], notes: 'Workers de execução rápida no Codex' }
     ],
@@ -277,10 +283,10 @@ const SUBSCRIPTION_PLANS_DATA = [
     surfaces: ['chatgpt-chat', 'chatgpt-work', 'codex'],
     privacy: { profileType: 'consumer', modelTrainingControl: true, noTrainingByDefault: false, zdr: false, retentionPolicy: 'standard-opt-out', retentionDays: 30, notes: 'Plano pessoal; opt-out manual disponível; sem ZDR corporativo.' },
     pools: ['Pro 5x Pool'],
-    quotaDescription: '5x cota do Plus em GPT-5.6 Sol e acesso a Sol Pro para tarefas ultra-complexas.',
+    quotaDescription: '50 msgs/semana compartilhadas entre GPT-6 Pro e Sol Pro; full allowance existente em Work/Codex.',
     overageAllowed: false,
     apiIncluded: false,
-    bestFor: 'Engenheiros de software e pesquisadores que excedem a cota padrão do Plus.'
+    bestFor: 'Engenheiros de software e pesquisadores que necessitam de raciocínio de fronteira (GPT-6 Pro) e alto volume de coding.'
   }),
 
   createPlanRecord({
@@ -301,7 +307,10 @@ const SUBSCRIPTION_PLANS_DATA = [
     },
     modelAccess: [
       { modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol', surface: 'chatgpt-chat', available: true, included: true, billingMode: 'included', efforts: ['medium', 'high', 'xhigh'], notes: '20x cota de raciocínio Sol vs Plus' },
-      { modelId: 'gpt-5-6-pro', modelName: 'GPT-5.6 Sol Pro', surface: 'chatgpt-chat', available: true, included: true, billingMode: 'included', efforts: ['high', 'max'], notes: 'Cota ampliada de Sol Pro para workflows persistentes' },
+      { modelId: 'gpt-5-6-pro', modelName: 'GPT-5.6 Sol Pro', surface: 'chatgpt-chat', available: true, included: true, billingMode: 'included', efforts: ['high', 'max'], notes: 'Cota de 170 msgs/dia de Sol Pro para workflows persistentes' },
+      { modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra (GPT-6 Pro)', surface: 'chatgpt-chat', available: true, included: false, billingMode: 'included', efforts: ['high', 'xhigh', 'max'], notes: '200 msgs/semana GPT-6 Pro Chat (fallback para Sol Thinking Medium ao expirar); cap combinado de 200 msgs/dia' },
+      { modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra', surface: 'chatgpt-work', available: true, included: false, billingMode: 'included', efforts: ['high', 'xhigh'], notes: 'Full existing allowance de Work/Codex' },
+      { modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra', surface: 'codex', available: true, included: false, billingMode: 'included', efforts: ['high', 'xhigh'], notes: 'Full existing allowance de Codex' },
       { modelId: 'gpt-5-6-terra', modelName: 'GPT-5.6 Terra', surface: 'chatgpt-work', available: true, included: false, billingMode: 'included', efforts: ['high'], notes: 'Workflows densos em Work' },
       { modelId: 'gpt-5-6-luna', modelName: 'GPT-5.6 Luna', surface: 'codex', available: true, included: false, billingMode: 'included', efforts: ['max'], notes: 'Execuções mecânicas em massa no Codex' }
     ],
@@ -312,7 +321,7 @@ const SUBSCRIPTION_PLANS_DATA = [
     surfaces: ['chatgpt-chat', 'chatgpt-work', 'codex'],
     privacy: { profileType: 'consumer', modelTrainingControl: true, noTrainingByDefault: false, zdr: false, retentionPolicy: 'standard-opt-out', retentionDays: 30, notes: 'Sem ZDR corporativo automático; controle via configurações de usuário.' },
     pools: ['Pro 20x Pool'],
-    quotaDescription: '20x a cota do Plus com computação de maior prioridade na infraestrutura OpenAI.',
+    quotaDescription: '200 msgs/semana GPT-6 Pro Chat (fallback para Sol Thinking Medium), cap diário combinado de 200 msgs/dia e full allowance em Work/Codex.',
     overageAllowed: false,
     apiIncluded: false,
     bestFor: 'Pesquisadores de IA e desenvolvedores independentes em regime intensivo de computação frontier.'
@@ -336,6 +345,8 @@ const SUBSCRIPTION_PLANS_DATA = [
     },
     modelAccess: [
       { modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol', surface: 'chatgpt-chat', available: true, included: true, billingMode: 'included', efforts: ['instant', 'medium', 'high'], notes: 'Cota de equipe compartilhada/gerenciada' },
+      { modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra (GPT-6 Pro)', surface: 'chatgpt-chat', available: true, included: false, billingMode: 'included', efforts: ['high'], notes: '15 msgs/mês Pro compartilhadas entre GPT-6 Pro e Sol Pro' },
+      { modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra', surface: 'chatgpt-work', available: true, included: false, billingMode: 'included', efforts: ['high'], notes: 'Range estimado de 3–30 msgs locais / janela de 5h em Work/Codex' },
       { modelId: 'gpt-5-6-terra', modelName: 'GPT-5.6 Terra', surface: 'chatgpt-work', available: true, included: false, billingMode: 'included', efforts: ['high'], notes: 'Espaços de trabalho corporativos' },
       { modelId: 'gpt-5-6-luna', modelName: 'GPT-5.6 Luna', surface: 'codex', available: true, included: false, billingMode: 'included', efforts: ['low', 'medium'], notes: 'Coding colaborativo' }
     ],
@@ -346,7 +357,7 @@ const SUBSCRIPTION_PLANS_DATA = [
     surfaces: ['chatgpt-chat', 'chatgpt-work', 'codex'],
     privacy: { profileType: 'business', modelTrainingControl: true, noTrainingByDefault: true, zdr: false, retentionPolicy: 'business-standard', retentionDays: 90, notes: 'Dados excluídos de treino por padrão; ZDR exige contrato corporativo customizado.' },
     pools: ['Business Standard Pool'],
-    quotaDescription: 'US$ 25/mês (ou US$ 20/mês no plano anual). Mínimo de 2 assentos.',
+    quotaDescription: 'US$ 25/mês (ou US$ 20/mês no plano anual). 15 msgs/mês Pro compartilhadas e 3–30 msgs locais de Astra / 5h em Work/Codex.',
     overageAllowed: false,
     apiIncluded: false,
     bestFor: 'Pequenas equipes que necessitam de governança e exclusão de treino por padrão.'
@@ -371,6 +382,8 @@ const SUBSCRIPTION_PLANS_DATA = [
     modelAccess: [
       { modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol', surface: 'chatgpt-chat', available: true, included: true, billingMode: 'included', efforts: ['medium', 'high', 'xhigh'], notes: '5x uso do Standard sem a janela móvel rígida de 5 horas' },
       { modelId: 'gpt-5-6-pro', modelName: 'GPT-5.6 Sol Pro', surface: 'chatgpt-chat', available: true, included: true, billingMode: 'included', efforts: ['high', 'max'], notes: 'Escalonamento corporativo para resolução de incidentes' },
+      { modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra (GPT-6 Pro)', surface: 'chatgpt-chat', available: true, included: false, billingMode: 'included', efforts: ['high', 'xhigh'], notes: '50 msgs/semana Pro compartilhadas entre GPT-6 Pro e Sol Pro' },
+      { modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra', surface: 'chatgpt-work', available: true, included: false, billingMode: 'included', efforts: ['high', 'xhigh'], notes: '~5x uso do Standard sem a restrição da janela móvel de 5h' },
       { modelId: 'gpt-5-6-terra', modelName: 'GPT-5.6 Terra', surface: 'chatgpt-work', available: true, included: false, billingMode: 'included', efforts: ['high'], notes: 'Workspaces intensivos' }
     ],
     features: ['Canvas', 'Deep Research Prioritário', 'Workspaces Ilimitados', 'Admin Console Avançado', 'SSO/SCIM', 'Audit Logs', 'Suporte Dedicado'],
@@ -380,7 +393,7 @@ const SUBSCRIPTION_PLANS_DATA = [
     surfaces: ['chatgpt-chat', 'chatgpt-work', 'codex'],
     privacy: { profileType: 'business', modelTrainingControl: true, noTrainingByDefault: true, zdr: false, retentionPolicy: 'business-extended', retentionDays: 180, notes: 'Sem treino por padrão; ZDR disponível mediante aditivo Enterprise.' },
     pools: ['Business Premium Pool'],
-    quotaDescription: 'US$ 125/mês (ou US$ 100/mês anual). 5x uso, sem janela móvel de 5 horas.',
+    quotaDescription: 'US$ 125/mês (ou US$ 100/mês anual). 50 msgs/semana Pro compartilhadas e ~5x capacidade de Work/Codex do Standard sem janela de 5h.',
     overageAllowed: false,
     apiIncluded: false,
     bestFor: 'Equipes técnicas com alta demanda contínua de raciocínio de código e auditoria.'
@@ -405,6 +418,9 @@ const SUBSCRIPTION_PLANS_DATA = [
     modelAccess: [
       { modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol', surface: 'chatgpt-chat', available: true, included: true, billingMode: 'included', efforts: ['instant', 'medium', 'high', 'xhigh'], notes: 'Sem janelas de 5h ou limites interativos' },
       { modelId: 'gpt-5-6-pro', modelName: 'GPT-5.6 Sol Pro', surface: 'chatgpt-chat', available: true, included: true, billingMode: 'included', efforts: ['high', 'max'], notes: 'Disponível conforme contrato' },
+      { modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra (GPT-6 Pro)', surface: 'chatgpt-chat', available: true, included: false, billingMode: 'included', efforts: ['high', 'xhigh', 'max'], notes: 'Acesso sujeito a controles administrativos corporativos e rollout' },
+      { modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra', surface: 'chatgpt-work', available: true, included: false, billingMode: 'included', efforts: ['high', 'xhigh'], notes: 'Workspaces corporativos Enterprise' },
+      { modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra', surface: 'codex', available: true, included: false, billingMode: 'included', efforts: ['high', 'xhigh'], notes: 'Codex corporativo Enterprise' },
       { modelId: 'gpt-5-6-terra', modelName: 'GPT-5.6 Terra', surface: 'chatgpt-work', available: true, included: false, billingMode: 'included', efforts: ['high'], notes: 'Workspaces corporativos' },
       { modelId: 'gpt-5-6-luna', modelName: 'GPT-5.6 Luna', surface: 'codex', available: true, included: false, billingMode: 'included', efforts: ['max'], notes: 'Codex corporativo' }
     ],
@@ -2119,13 +2135,22 @@ const ZAI_CREDIT_ACCOUNTING = {
   notes: 'Horário de pico consome 100% da fórmula de créditos; fora do pico (off-peak) consome 50% dos multiplicadores padrão.'
 };
 
+// Rate card de créditos OpenAI para Work/Codex por 1M tokens (Prompt 10 / Seção 75)
+const OPENAI_WORK_CODEX_CREDIT_RATES = {
+  'gpt-6-astra': { inputCredits: 250, cachedInputCredits: 25, outputCredits: 1250, fastCreditMultiplier: 2.5 },
+  'gpt-5-6-sol': { inputCredits: 100, cachedInputCredits: 10, outputCredits: 500, fastCreditMultiplier: 1.0 },
+  'gpt-5-6-terra': { inputCredits: 50, cachedInputCredits: 5, outputCredits: 300, fastCreditMultiplier: 1.0 },
+  'gpt-5-6-luna': { inputCredits: 5, cachedInputCredits: 0.5, outputCredits: 30, fastCreditMultiplier: 1.0 }
+};
+
 // Exportação universal (Browser + Node.js)
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { SUBSCRIPTION_PLANS_DATA, BUDGET_STACK_RECOMMENDER, createPlanRecord, ZAI_CREDIT_ACCOUNTING };
+  module.exports = { SUBSCRIPTION_PLANS_DATA, BUDGET_STACK_RECOMMENDER, createPlanRecord, ZAI_CREDIT_ACCOUNTING, OPENAI_WORK_CODEX_CREDIT_RATES };
 }
 
 if (typeof window !== 'undefined') {
   window.SUBSCRIPTION_PLANS_DATA = SUBSCRIPTION_PLANS_DATA;
   window.BUDGET_STACK_RECOMMENDER = BUDGET_STACK_RECOMMENDER;
   window.ZAI_CREDIT_ACCOUNTING = ZAI_CREDIT_ACCOUNTING;
+  window.OPENAI_WORK_CODEX_CREDIT_RATES = OPENAI_WORK_CODEX_CREDIT_RATES;
 }

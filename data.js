@@ -324,6 +324,193 @@ const DATA_SOURCES = {
     retrievedAt: '2026-09-03',
     official: true,
     notes: 'Mais de 50 integrações (Postgres, Redis, Mongo, BigQuery, Snowflake, Slack, Stripe). Credenciais criptografadas em repouso e injetadas server-side sem exposição em logs ou chats.'
+  },
+  'openai-gpt6-astra-launch': {
+    id: 'openai-gpt6-astra-launch',
+    publisher: 'OpenAI',
+    sourceType: 'official-model',
+    title: 'Introducing GPT-6 Astra: Frontier Reasoning Flagship',
+    sourceUrl: 'https://openai.com/index/gpt-6-astra/',
+    publishedAt: '2026-09-03',
+    retrievedAt: '2026-09-04',
+    official: true,
+    notes: 'Lançamento oficial OpenAI: 1.05M contexto, 128k max output, 5 níveis públicos de reasoning, Terminal-Bench 4.0 57.9%, Terminal-Bench Science 64.6% (65.4% Snorkel max), DeepSWE 74.1%, MRCR v2 100% (256k-512k) e 96.3% (512k-1M).'
+  },
+  'openai-gpt6-astra-api': {
+    id: 'openai-gpt6-astra-api',
+    publisher: 'OpenAI Developers',
+    sourceType: 'official-api',
+    title: 'OpenAI API Model Card: GPT-6 Astra',
+    sourceUrl: 'https://developers.openai.com/api/docs/models/gpt-6-astra',
+    publishedAt: '2026-09-03',
+    retrievedAt: '2026-09-04',
+    official: true,
+    notes: 'Documentação oficial de API: model ID gpt-6-astra, cutoff 2026-04-30, pricing $10 in / $50 out / $1.00 cached / $12.50 cache write, long context cliff >272k (2x input/cache, 1.5x output), async tool calling, mid-turn steering.'
+  },
+  'openai-gpt6-astra-system-card': {
+    id: 'openai-gpt6-astra-system-card',
+    publisher: 'OpenAI Safety',
+    sourceType: 'official-safety',
+    title: 'GPT-6 Astra System Card & Safety Overview',
+    sourceUrl: 'https://deploymentsafety.openai.com/gpt-6-astra/vision',
+    publishedAt: '2026-09-03',
+    retrievedAt: '2026-09-04',
+    official: true,
+    notes: 'Classificação Preparedness: Cibersegurança CRITICAL (primeiro modelo frontier), Bio/Chem HIGH, AI self-improvement below HIGH. 99.79% robustez contra prompt injection indireta, 99.99% instruction hierarchy. Regressão de monitorabilidade de CoT frente a avaliações adversariais.'
+  },
+  'deep-swe-v11-20260903': {
+    id: 'deep-swe-v11-20260903',
+    publisher: 'DataCurve',
+    sourceType: 'independent-benchmark',
+    title: 'DeepSWE Benchmark v1.1 Live Leaderboard - Astra Matrix',
+    sourceUrl: 'https://deepswe.datacurve.ai/',
+    publishedAt: '2026-09-03',
+    retrievedAt: '2026-09-04',
+    official: false,
+    notes: 'Avaliação independente de repositórios reais: GPT-6 Astra XHigh atinge 74.1% [71.2-77.0] ($6.52/task, 30k tokens), High 73.2% ($5.72), Max 73.2% ($12.37), Medium 72.8% ($4.38), Low 67.0% ($2.19).'
+  },
+  'snorkel-terminal-bench-science-01': {
+    id: 'snorkel-terminal-bench-science-01',
+    publisher: 'Snorkel AI',
+    sourceType: 'independent-benchmark',
+    title: 'Terminal-Bench Science 0.1 Leaderboard',
+    sourceUrl: 'https://snorkel.ai/leaderboard/terminal-bench-science/',
+    publishedAt: '2026-09-03',
+    retrievedAt: '2026-09-04',
+    official: false,
+    notes: 'Avaliação científica independente (70 tarefas em 5 domínios): Astra Max 65.4% ±2.5, High 62.0%, XHigh 60.9%, Medium 57.4%, Low 55.4%.'
+  },
+  'aa-gpt6-astra-v411': {
+    id: 'aa-gpt6-astra-v411',
+    publisher: 'Artificial Analysis',
+    sourceType: 'independent-benchmark',
+    title: 'GPT-6 Astra Intelligence Index v4.1.1 Evaluation by Effort',
+    sourceUrl: 'https://artificialanalysis.ai/models/releases/gpt-6-astra',
+    publishedAt: '2026-09-03',
+    retrievedAt: '2026-09-04',
+    official: false,
+    notes: 'Índice AA v4.1.1 por esforço: Low 57 ($0.46), Medium 59 ($0.75), High 60 ($0.96), XHigh 61 ($1.20), Max 61 ($1.67), Non-reasoning 55 ($0.93 evaluation-only). Throughput independente N/D no snapshot.'
+  },
+  'aa-index-v42-20260904': {
+    id: 'aa-index-v42-20260904',
+    publisher: 'Artificial Analysis',
+    sourceType: 'independent-benchmark',
+    title: 'Artificial Analysis Intelligence Index v4.2 Release',
+    sourceUrl: 'https://artificialanalysis.ai/articles/artificial-analysis-intelligence-index-v4-2',
+    publishedAt: '2026-09-04',
+    retrievedAt: '2026-09-04',
+    official: false,
+    notes: 'Nova metodologia v4.2: AA-Briefcase, GDP.pdf (+40% held-out). Astra confirma posição #2 geral atrás de Claude Fable 5.1 (+4 pts sobre Sol). Astra lidera GDP.pdf com 33.2% e ganho de ~85 Elo no AA-Briefcase.'
+  },
+  'openai-chatgpt-pro-pricing': {
+    id: 'openai-chatgpt-pro-pricing',
+    publisher: 'OpenAI',
+    sourceType: 'official-pricing',
+    title: 'ChatGPT Pro Plan Specifications & Model Access',
+    sourceUrl: 'https://openai.com/chatgpt/pricing/',
+    publishedAt: '2026-09-03',
+    retrievedAt: '2026-09-04',
+    official: true,
+    notes: 'Especificações oficiais de planos Pro: Pro $100 (50 msgs/semana GPT-6 Pro / Sol Pro), Pro $200 (200 msgs/semana GPT-6 Pro Chat, 200 msgs/dia cap geral), Plus (sem GPT-6 Pro Chat).'
+  },
+  'openai-business-plans': {
+    id: 'openai-business-plans',
+    publisher: 'OpenAI',
+    sourceType: 'official-pricing',
+    title: 'ChatGPT Business & Enterprise Plan Limits',
+    sourceUrl: 'https://openai.com/business/',
+    publishedAt: '2026-09-03',
+    retrievedAt: '2026-09-04',
+    official: true,
+    notes: 'Planos Business: Standard (15 msgs/mês Pro, Work limitado 3-30 msgs/5h), Premium (50 msgs/semana Pro, 5x Standard sem janela de 5h).'
+  },
+  'openai-rate-limits-tier': {
+    id: 'openai-rate-limits-tier',
+    publisher: 'OpenAI API',
+    sourceType: 'official-api',
+    title: 'Usage Tiers & Rate Limits for GPT-6 Models',
+    sourceUrl: 'https://platform.openai.com/docs/guides/rate-limits',
+    publishedAt: '2026-09-03',
+    retrievedAt: '2026-09-04',
+    official: true,
+    notes: 'Rate limits por tier para GPT-6 Astra: Tier 1 (500 RPM, 500k TPM), Tier 2 (5k RPM, 1M TPM), Tier 3 (5k RPM, 2M TPM), Tier 4 (10k RPM, 4M TPM), Tier 5 (15k RPM, 40M TPM).'
+  },
+  'terminal-bench-40-official': {
+    id: 'terminal-bench-40-official',
+    publisher: 'Terminal-Bench Team',
+    sourceType: 'independent-benchmark',
+    title: 'Terminal-Bench 4.0 Suite & Results',
+    sourceUrl: 'https://terminalbench.org/4.0/',
+    publishedAt: '2026-09-03',
+    retrievedAt: '2026-09-04',
+    official: false,
+    notes: 'Terminal-Bench 4.0: GPT-6 Astra atinge 57.88% (High), liderando o benchmark geral de terminal autônomo.'
+  },
+  'arcprize-gpt6-astra-20260902': {
+    id: 'arcprize-gpt6-astra-20260902',
+    publisher: 'ARC Prize Foundation',
+    sourceType: 'independent-benchmark',
+    title: 'GPT-6 Astra Evaluation on ARC-AGI-3',
+    sourceUrl: 'https://arcprize.org/blog/gpt-6-astra-results',
+    publishedAt: '2026-09-02',
+    retrievedAt: '2026-09-04',
+    official: false,
+    notes: 'Metrologia estrita ARC-AGI-3: Standard harness atinge 62.71% (Max, $26,000); Provider Adapter atinge 99.95% (High, $18,800). O claim 99.9% nunca deve ser citado sem o sufixo Provider Adapter.'
+  },
+  'aa-gdp-pdf-leaderboard': {
+    id: 'aa-gdp-pdf-leaderboard',
+    publisher: 'Artificial Analysis',
+    sourceType: 'independent-benchmark',
+    title: 'Surge GDP.pdf Multimodal Evaluation Leaderboard',
+    sourceUrl: 'https://artificialanalysis.ai/benchmarks/gdp-pdf',
+    publishedAt: '2026-09-04',
+    retrievedAt: '2026-09-04',
+    official: false,
+    notes: 'Avaliação Surge GDP.pdf: 100 PDFs, 4.592 páginas, 1.275 critérios. GPT-6 Astra lidera com 33.2% All-pass Rate.'
+  },
+  'cursor-pricing-astra-2026': {
+    id: 'cursor-pricing-astra-2026',
+    publisher: 'Cursor IDE',
+    sourceType: 'platform-pricing',
+    title: 'Cursor Models & Other Models Pool Updates',
+    sourceUrl: 'https://cursor.com/pricing',
+    publishedAt: '2026-09-03',
+    retrievedAt: '2026-09-04',
+    official: true,
+    notes: 'Cursor IDE aloca GPT-6 Astra no pool Other Models ($20 pool) com multiplicador fast 2.0x.'
+  },
+  'opencode-go-catalog-2026': {
+    id: 'opencode-go-catalog-2026',
+    publisher: 'OpenCode',
+    sourceType: 'platform-catalog',
+    title: 'OpenCode Go Catalog & Model Access',
+    sourceUrl: 'https://opencode.ai/go',
+    publishedAt: '2026-09-03',
+    retrievedAt: '2026-09-04',
+    official: true,
+    notes: 'Status no catálogo OpenCode Go para novos frontier flagships e políticas de burn rate.'
+  },
+  'openai-responses-api-docs': {
+    id: 'openai-responses-api-docs',
+    publisher: 'OpenAI Developers',
+    sourceType: 'official-api',
+    title: 'Responses API: Async Tool Calling & Mid-Turn Steering',
+    sourceUrl: 'https://platform.openai.com/docs/api-reference/responses',
+    publishedAt: '2026-09-03',
+    retrievedAt: '2026-09-04',
+    official: true,
+    notes: 'Documentação da Responses API: suporte nativo a async tool calling, mid-turn steering e ferramentas de sistema.'
+  },
+  'openai-preparedness-framework-v3': {
+    id: 'openai-preparedness-framework-v3',
+    publisher: 'OpenAI Preparedness',
+    sourceType: 'official-safety',
+    title: 'OpenAI Preparedness Framework Frontier Tracking',
+    sourceUrl: 'https://openai.com/safety/preparedness-framework/',
+    publishedAt: '2026-09-03',
+    retrievedAt: '2026-09-04',
+    official: true,
+    notes: 'Preparedness Framework: Primeiro modelo com risco de Cibersegurança classificado como CRITICAL. Bio/química HIGH.'
   }
 };
 
@@ -336,7 +523,7 @@ const AI_PROVIDERS_DATA = {
     brandColor: '#10a37f',
     iconUrl: 'https://cdn.simpleicons.org/openai/10a37f',
     iconSvg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.182a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.998-2.9 6.056 6.056 0 0 0-.748-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.142-.08 4.778-2.76a.795.795 0 0 0 .393-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.495 4.495zm-9.661-4.125a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.758a.771.771 0 0 0 .78 0l5.843-3.368v2.332a.08.08 0 0 1-.033.062L9.74 19.95a4.5 4.5 0 0 1-6.141-1.646zM2.341 7.896a4.485 4.485 0 0 1 2.365-1.973V11.6a.766.766 0 0 0 .388.676l5.814 3.355-2.02 1.168a.076.076 0 0 1-.071 0l-4.83-2.786a4.504 4.504 0 0 1-1.646-6.117zm16.1 3.856L12.597 8.383l2.02-1.164a.076.076 0 0 1 .071 0l4.83 2.791a4.494 4.494 0 0 1-.676 8.104v-5.677a.79.79 0 0 0-.402-.681zm2.01-3.023l-.142-.085-4.773-2.782a.776.776 0 0 0-.786 0L9.007 9.23V6.897a.066.066 0 0 1 .028-.061l4.83-2.787a4.5 4.5 0 0 1 6.68 4.66zM8.307 12.863l-2.02-1.164a.08.08 0 0 1-.038-.057V6.074a4.5 4.5 0 0 1 7.376-3.454l-.142.08L8.704 5.46a.795.795 0 0 0-.393.681v6.723zm1.145-1.973l2.553-1.474 2.553 1.474v2.949l-2.553 1.475-2.553-1.475v-2.949z"/></svg>',
-    description: 'Criadora da família GPT-5.6 (Sol, Terra, Luna, Pro) e dos modelos abertos gpt-oss-20b e 120b.',
+    description: 'Criadora do novo frontier flagship GPT-6 Astra, da família GPT-5.6 (Sol, Terra, Luna, Pro) e dos modelos abertos gpt-oss-20b e 120b.',
     website: 'https://openai.com'
   },
   'anthropic': {
@@ -722,6 +909,210 @@ const AI_MODELS_DATA = {
       ],
       "orchestrationFlow": "Modelo Frontier (Planejamento) → Grok 4.5 (Worker Rápido de Execução) → Frontier (Validação Final)"
     }
+  },
+  "gpt-6-astra": {
+    "id": "gpt-6-astra",
+    "name": "GPT-6 Astra",
+    "family": "openai",
+    "provider": "openai",
+    "providerName": "OpenAI",
+    "color": "#10a37f",
+    "status": "active",
+    "openWeights": false,
+    "license": "Proprietary OpenAI",
+    "apiModelId": "gpt-6-astra",
+    "chatgptProductName": "GPT-6 Pro",
+    "paramsTotal": "N/D",
+    "paramsActive": "N/D",
+    "architectureType": "MoE Proprietário Frontier Reasoning",
+    "attentionType": "Multi-Head Latent Sparse Attention com CoT Adaptativo",
+    "contextWindow": 1050000,
+    "maxOutputTokens": 128000,
+    "knowledgeCutoff": "2026-04-30",
+    "releaseDate": "2026-09-03",
+    "modalities": {
+      "input": [
+        "text",
+        "image"
+      ],
+      "output": [
+        "text"
+      ]
+    },
+    "reasoningEfforts": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+    ],
+    "reasoning": {
+      "mandatory": true,
+      "canDisable": false,
+      "supportedEfforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
+      "defaultEffort": "high"
+    },
+    "tools": {
+      "functionCalling": true,
+      "structuredOutput": "schema_guaranteed",
+      "asyncToolCalling": true,
+      "midTurnSteering": true,
+      "fim": true,
+      "responsesApiTools": [
+        "web_search",
+        "file_search",
+        "image_generation_tool",
+        "code_interpreter",
+        "hosted_shell",
+        "apply_patch",
+        "skills",
+        "computer_use",
+        "mcp",
+        "tool_search"
+      ]
+    },
+    "pricing": {
+      "standard": {
+        "input": 10.00,
+        "cacheRead": 1.00,
+        "cacheWrite": 12.50,
+        "output": 50.00
+      },
+      "longContextThreshold": 272000,
+      "longContextMultiplier": {
+        "input": 2,
+        "cacheRead": 2,
+        "cacheWrite": 2,
+        "output": 1.5
+      },
+      "cacheDiscount": 90,
+      "batch": {
+        "input": 5.00,
+        "cacheRead": 0.50,
+        "cacheWrite": 6.25,
+        "output": 25.00
+      },
+      "flex": {
+        "input": 5.00,
+        "cacheRead": 0.50,
+        "cacheWrite": 6.25,
+        "output": 25.00
+      },
+      "fastApi": {
+        "multiplier": 2.0,
+        "input": 20.00,
+        "cacheRead": 2.00,
+        "cacheWrite": 25.00,
+        "output": 100.00,
+        "caveat": "Fast mode não disponível sob configuração de residência de dados na União Europeia."
+      }
+    },
+    "rateLimits": {
+      "tier1": { "rpm": 500, "tpm": 500000, "batchQueue": 1500000 },
+      "tier2": { "rpm": 5000, "tpm": 1000000, "batchQueue": 3000000 },
+      "tier3": { "rpm": 5000, "tpm": 2000000, "batchQueue": 100000000 },
+      "tier4": { "rpm": 10000, "tpm": 4000000, "batchQueue": 200000000 },
+      "tier5": { "rpm": 15000, "tpm": 40000000, "batchQueue": 15000000000 }
+    },
+    "cursorPool": {
+      "pool": "other-models",
+      "poolLabel": "Other Models ($20 Pool)",
+      "fastDefault": true,
+      "fastMultiplier": 2
+    },
+    "sweetSpot": "High para coding geral e terminal (57,88% TB4 e 99,95% ARC3 Provider Adapter); XHigh para DeepSWE (74,1% pass@1)",
+    "strengths": [
+      "Líder em autonomia de terminal e ciência: 57,88% no Terminal-Bench 4.0 e 65,4% no Terminal-Bench Science 0.1",
+      "Eficiência de tarefas líder no DeepSWE 1.1 (74,1% pass@1 com metade dos tokens de Sol)",
+      "Retenção quase perfeita em contexto longo verdadeiro: 100% no MRCR v2 (256k-512k) e 96,3% (512k-1M)",
+      "Suporte nativo a Async Tool Calling, Mid-Turn Steering e Responses API tools avançadas",
+      "Primeiro modelo avaliado como Critical em Cibersegurança sob o Preparedness Framework (100% ExploitBench)",
+      "Excelente acurácia visual e interpretação de documentos massivos: 33,2% no GDP.pdf"
+    ],
+    "weaknesses": [
+      "Tarifa nominal premium por milhão de tokens ($10,00 in / $50,00 out / $12,50 cache write)",
+      "Esforço Max frequentemente apresenta retornos decrescentes (+89,7% custo no DeepSWE e +43,3% no TB4 para ganho nulo ou marginal)",
+      "Throughput independente ainda não divulgado (N/D) nos rankings oficiais de velocidade",
+      "Sem áudio ou vídeo nativos de entrada/saída no nível de modelo",
+      "GPT-6 Pro Chat não incluído na assinatura ChatGPT Plus (apenas Work/Codex com limite)",
+      "Regressão de monitorabilidade de CoT frente a avaliações adversariais em comparação ao Sol"
+    ],
+    "badges": [
+      "FRONTIER FLAGSHIP",
+      "1.05M CONTEXT",
+      "REASONING 5 LEVELS",
+      "ASYNC TOOL CALLING",
+      "MID-TURN STEERING",
+      "CRITICAL CYBER CAPABILITY"
+    ],
+    "aliases": [
+      "GPT 6 Astra",
+      "GPT-6 Astra",
+      "Astra",
+      "GPT6 Astra",
+      "gpt-6-astra",
+      "GPT-6 Pro (product alias)"
+    ],
+    "officialBenchmarks": {
+      "terminalBench40": 57.9,
+      "deepSwe11": 74.1,
+      "frontierCode11Extended": 64.5,
+      "frontierCode11Main": 53.3,
+      "internalDbMigration": 63.9,
+      "aaCodingAgentIndex14": 67.0,
+      "terminalBenchScience01": 64.6,
+      "frontierMathT4V2": 97.6,
+      "gpqaDiamond": 96.0,
+      "hleWithTools": 57.2,
+      "mrcrV2_256k_512k": 100.0,
+      "mrcrV2_512k_1m": 96.3,
+      "agentsLastExam": 59.3,
+      "osworld2OfflinePartial": 72.6,
+      "screenSpotPro": 92.7,
+      "automationBench": 41.4,
+      "benchCad": 95.9,
+      "browseComp": 91.5,
+      "geneBenchPro": 37.8,
+      "medChemBench": 49.3,
+      "lifeSciBench": 60.3,
+      "healthBenchProLengthAdjusted": 63.4,
+      "exploitBench": 100.0,
+      "exploitGym": 42.4,
+      "sreBenchPass1": 88.0,
+      "secBenchPro": 85.4,
+      "methodology": "OpenAI GPT-6 Astra Launch Evaluation Table (2026). Scores correspondem ao máximo entre esforços públicos (maximum-at-any-effort)."
+    },
+    "operationalGuidance": {
+      "idealFor": [
+        "Engenharia de software autônoma de altíssima complexidade e monorepos densos",
+        "Agentes persistentes de terminal e pesquisa científica automatizada",
+        "Workflows complexos de Computer Use e navegação web multi-passo",
+        "Análise e raciocínio profundo sobre documentos e livros técnicos em contexto longo (>272k)",
+        "Defesa e auditoria de vulnerabilidades em ambientes corporativos autorizados"
+      ],
+      "avoidFor": [
+        "Transformações mecânicas e pipelines de alto volume e baixo valor agregado onde Terra/Luna bastam",
+        "Aplicações com orçamento estrito por chamada onde $50/M em output é proibitivo",
+        "Default automático para o esforço Max sem avaliar retornos (preferir High/XHigh)",
+        "Aplicações que exigem modelos locais abertos ou modalidades de áudio/vídeo nativo"
+      ],
+      "orchestrationFlow": "GPT-6 Astra High/XHigh (Planejamento Arquitetural & Auditoria Crítica) → GPT-5.6 Terra / Luna (Workers Mecânicos de Execução) → GPT-6 Astra High (Revisão & Verificação Final)"
+    },
+    "sources": [
+      "openai-gpt6-astra-launch",
+      "openai-gpt6-astra-api",
+      "openai-gpt6-astra-system-card",
+      "aa-gpt6-astra-v411",
+      "deep-swe-v11-20260903",
+      "snorkel-terminal-bench-science-01",
+      "arcprize-gpt6-astra-20260902"
+    ]
   },
   "gpt-5-6-sol": {
     "id": "gpt-5-6-sol",
@@ -5092,6 +5483,7 @@ const MULTI_BENCHMARK_LEDGER = [
   { modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1 (Max)', terminalBench20: null, terminalBench21: 91.4, terminalBench30: null, terminalBench40: 55.8, terminalBenchScience01: 52.6, sweBenchVerified: null, sweBenchPro: 81.2, sweAtlas: null, deepSwe11: 71.5, cursorBench32: 73.4, hle: 59.1, hleVerified: null, hleWithTools: 65.0, hleWithoutTools: 60.9, osworldOriginal: null, osworldVerified: null, osworld2Partial: 77.9, osworld2Strict: 41.7, gpqaDiamond: 95.2, aime2025: null, aime2025Tools: null, arcAgi2Verified: 82.0, tau2Retail: null, tau2Airline: null, tau3Banking: null, financeAgentV2: null, harveyLegalAgent: null, sciCode: 62.0, mcpAtlas: null, browseComp: null, mmmuPro: null, charXiv: null, gdpPdf: null, gdpvalElo: 1853, automationBench: 31.4, aaIndex: 66.0, costPerTask: 9.64, outputTokensPerTask: 72060, agentStepsPerTask: 70, confidenceInterval: null, benchmarkSnapshotDate: '2026-09-02' },
   { modelId: 'gemini-3-8-flash', modelName: 'Gemini 3.8 Flash (High)', terminalBench20: null, terminalBench21: 90.8, terminalBench30: null, terminalBench40: null, terminalBenchScience01: null, sweBenchVerified: null, sweBenchPro: 61.6, sweAtlas: 51.9, deepSwe11: 74.0, cursorBench32: 69.2, hle: 45.4, hleVerified: 54.9, hleWithTools: null, hleWithoutTools: null, osworldOriginal: null, osworldVerified: null, osworld2Partial: null, osworld2Strict: null, gpqaDiamond: null, aime2025: null, aime2025Tools: null, arcAgi2Verified: null, tau2Retail: null, tau2Airline: null, tau3Banking: 38.1, financeAgentV2: 61.4, harveyLegalAgent: 10.0, sciCode: null, mcpAtlas: null, browseComp: null, mmmuPro: null, charXiv: 86.2, gdpPdf: 35.0, aaIndex: 59.0, costPerTask: 2.36, outputTokensPerTask: 143000, agentStepsPerTask: 166, confidenceInterval: 1.0, benchmarkSnapshotDate: '2026-09-02' },
 
+  { modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra (High)', terminalBench20: null, terminalBench21: null, terminalBench30: null, terminalBench40: 57.9, terminalBenchScience01: 65.4, sweBenchVerified: null, sweBenchPro: null, sweAtlas: null, deepSwe11: 74.1, cursorBench32: null, hle: null, hleVerified: null, hleWithTools: 57.2, hleWithoutTools: null, osworldOriginal: null, osworldVerified: null, osworld2Partial: 72.6, osworld2Strict: null, gpqaDiamond: 96.0, aime2025: null, aime2025Tools: null, arcAgi2Verified: 95.0, tau2Retail: null, tau2Airline: null, tau3Banking: null, financeAgentV2: null, harveyLegalAgent: null, sciCode: null, mcpAtlas: null, browseComp: 91.5, mmmuPro: null, charXiv: null, gdpPdf: 33.2, automationBench: 41.4, aaIndex: 61.0, mrcr1m: 96.3, mrcrV2: 96.3, costPerTask: 5.72, outputTokensPerTask: 27000, agentStepsPerTask: 52, confidenceInterval: 3.5, benchmarkSnapshotDate: '2026-09-03' },
   { modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol (Max)', terminalBench21: 88.8, terminalBench30: 34.6, deepSwe11: 72.7, sweBenchPro: 64.6, sweBenchVerified: null, mrcr1m: 73.8, gpqaDiamond: 94.6, osworld: 62.6, aaIndex: 61.0 },
   { modelId: 'claude-opus-5', modelName: 'Claude Opus 5 (Max)', terminalBench21: null, terminalBench30: null, deepSwe11: 73.6, sweBenchPro: null, sweBenchVerified: null, mrcr1m: null, gpqaDiamond: null, osworld: null, aaIndex: 63.0 },
   { modelId: 'claude-fable-5', modelName: 'Claude Fable 5 (Max)', terminalBench21: 83.1, terminalBench30: null, deepSwe11: 69.7, sweBenchPro: 80.0, sweBenchVerified: null, mrcr1m: null, gpqaDiamond: null, osworld: null, aaIndex: 62.0 },
@@ -5310,6 +5702,7 @@ const CAPABILITY_RADAR_10D = {
 
   'grok-4-6': { reasoning: 96, agentic: 95, sweBench: 91, longContext: 91, multimodal: 92, throughput: 78, costEfficiency: 82, toolAdherence: 94, ttftLatency: 73, openAccess: 35 },
   'grok-4-5': { reasoning: 92, agentic: 90, sweBench: 86, longContext: 87, multimodal: 90, throughput: 80, costEfficiency: 80, toolAdherence: 91, ttftLatency: 76, openAccess: 35 },
+  'gpt-6-astra': { reasoning: 100, agentic: 100, sweBench: 97, longContext: 100, multimodal: 96, throughput: 55, costEfficiency: 52, toolAdherence: 99, ttftLatency: 45, openAccess: 20 },
   'gpt-5-6-sol': { reasoning: 99, agentic: 99, sweBench: 94, longContext: 99, multimodal: 96, throughput: 76, costEfficiency: 85, toolAdherence: 98, ttftLatency: 68, openAccess: 30 },
   'gpt-5-6-terra': { reasoning: 96, agentic: 97, sweBench: 92, longContext: 98, multimodal: 94, throughput: 86, costEfficiency: 95, toolAdherence: 97, ttftLatency: 82, openAccess: 35 },
   'gpt-5-6-luna': { reasoning: 94, agentic: 94, sweBench: 89, longContext: 66, multimodal: 92, throughput: 98, costEfficiency: 100, toolAdherence: 95, ttftLatency: 96, openAccess: 45 },
@@ -5659,6 +6052,7 @@ const HARNESS_COMPATIBILITY_DATA = {
     { id: 'openhands', name: 'OpenHands (All-Hands)', agnosticScore: 9.0, subagents: true, mcp: true, neutral: true }
   ],
   matrix: {
+    'gpt-6-astra': { opencode: '🟢 First-class', cursor: '🟢 First-class (Pool)', qwenCode: '🟩 Compatible', grokBuild: '🟩 Compatible', codexCli: '🟢 First-class Nativo (Async Tools)', claudeCode: '🟡 Adapter', aider: '🟢 First-class (Architect)', rooCode: '🟢 First-class', cline: '🟢 First-class', kilo: '🟢 First-class', openhands: '🟢 First-class' },
     'grok-4-6': { opencode: '🟢 First-class', cursor: '🟢 First-class (Pool)', qwenCode: '🟩 Compatible', grokBuild: '🟢 First-class Nativo', codexCli: '🔴 Unsupported', claudeCode: '🟡 Adapter', aider: '🟩 Compatible (Architect)', rooCode: '🟩 Compatible', cline: '🟩 Compatible', kilo: '🟩 Compatible', openhands: '🟩 Compatible' },
     'grok-4-5': { opencode: '🟢 First-class', cursor: '🟢 First-class (Pool)', qwenCode: '🟩 Compatible', grokBuild: '🟢 First-class', codexCli: '🔴 Unsupported', claudeCode: '🟡 Adapter', aider: '🟩 Compatible', rooCode: '🟩 Compatible', cline: '🟩 Compatible', kilo: '🟩 Compatible', openhands: '🟩 Compatible' },
     'gpt-5-6-sol': { opencode: '🟢 First-class', cursor: '🟢 First-class', qwenCode: '🟩 Compatible', grokBuild: '🟩 Compatible', codexCli: '🟢 First-class Nativo', claudeCode: '🟡 Adapter', aider: '🟢 First-class', rooCode: '🟢 First-class', cline: '🟢 First-class', kilo: '🟢 First-class', openhands: '🟢 First-class' },
@@ -5857,18 +6251,34 @@ const AI_DATA_HELPERS = {
     }
 
     let multiplier = 1.0;
-    if (isFastMode && model.pricing.fastMultiplier) {
-      multiplier = model.pricing.fastMultiplier;
+    if (isFastMode) {
+      if (model.pricing.fastMultiplier) {
+        multiplier = model.pricing.fastMultiplier;
+      } else if (model.pricing.fastApi && model.pricing.fastApi.multiplier) {
+        multiplier = model.pricing.fastApi.multiplier;
+      }
     }
 
-    // Long context cliff legado
+    let cacheWritePrice = pricingTable.cacheWrite !== null && pricingTable.cacheWrite !== undefined ? pricingTable.cacheWrite : 0;
+
+    // Long context cliff (suporta multiplicador escalar ou composto por componente)
     if (model.pricing.longContextThreshold && totalInput > model.pricing.longContextThreshold) {
-      inputPrice *= (model.pricing.longContextMultiplier || 2.0);
+      if (typeof model.pricing.longContextMultiplier === 'object' && model.pricing.longContextMultiplier !== null) {
+        inputPrice *= (model.pricing.longContextMultiplier.input || 2.0);
+        cachePrice *= (model.pricing.longContextMultiplier.cacheRead || 2.0);
+        cacheWritePrice *= (model.pricing.longContextMultiplier.cacheWrite || 2.0);
+        outputPrice *= (model.pricing.longContextMultiplier.output || 1.5);
+      } else {
+        inputPrice *= (model.pricing.longContextMultiplier || 2.0);
+      }
     }
 
     let cost = ((inputTokens * inputPrice) + (cachedTokens * cachePrice) + (outputTokens * outputPrice)) / 1000000.0;
 
-    // Cache Write (5min vs 1 hora)
+    // Cache Write genérico ou específico (5min vs 1 hora)
+    if (options.cacheWriteTokens && cacheWritePrice) {
+      cost += (options.cacheWriteTokens * cacheWritePrice) / 1000000.0;
+    }
     if (options.cacheWrite5MinTokens && model.pricing.cacheWrite5Min) {
       cost += (options.cacheWrite5MinTokens * model.pricing.cacheWrite5Min) / 1000000.0;
     }
@@ -5883,7 +6293,7 @@ const AI_DATA_HELPERS = {
 
     const finalCost = cost * multiplier;
     if (options.detailed) {
-      return { cost: finalCost, pricingTableUsed: tableName, rateInput: inputPrice, rateOutput: outputPrice, rateCache: cachePrice };
+      return { cost: finalCost, pricingTableUsed: tableName, rateInput: inputPrice, rateOutput: outputPrice, rateCache: cachePrice, rateCacheWrite: cacheWritePrice };
     }
     return finalCost;
   },
@@ -6172,19 +6582,25 @@ const ARTIFICIAL_ANALYSIS_DATA = {
     { rank: 1, modelId: 'claude-opus-5', modelName: 'Claude Opus 5 (Max)', effort: 'Max', aaIndex: 63.0, costPerTask: 2.34, throughputTps: 55.0, contextWindow: '1M', gdpvalElo: 1845, openWeights: false, tier: 'frontier' },
     { rank: 2, modelId: 'claude-opus-5', modelName: 'Claude Opus 5 (XHigh)', effort: 'XHigh', aaIndex: 63.0, costPerTask: 1.80, throughputTps: 55.0, contextWindow: '1M', gdpvalElo: 1814, openWeights: false, tier: 'frontier' },
     { rank: 3, modelId: 'claude-fable-5', modelName: 'Claude Fable 5 (Max)', effort: 'Max', aaIndex: 62.0, costPerTask: 3.14, throughputTps: 71.0, contextWindow: '1M', gdpvalElo: 1738, openWeights: false, tier: 'frontier' },
-    { rank: 4, modelId: 'claude-opus-5', modelName: 'Claude Opus 5 (High)', effort: 'High', aaIndex: 61.0, costPerTask: 1.23, throughputTps: 54.0, contextWindow: '1M', gdpvalElo: 1733, openWeights: false, tier: 'frontier' },
-    { rank: 5, modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol (Max)', effort: 'Max', aaIndex: 61.0, costPerTask: 1.23, throughputTps: 68.0, contextWindow: '1M', gdpvalElo: 1723, openWeights: false, tier: 'frontier' },
-    { rank: 6, modelId: 'grok-4-6', modelName: 'Grok 4.6 (High)', effort: 'High', aaIndex: 61.0, costPerTask: 0.84, throughputTps: 58.0, contextWindow: '500k', gdpvalElo: 1747, openWeights: false, tier: 'frontier' },
-    { rank: 7, modelId: 'kimi-k3', modelName: 'Kimi K3 (Max)', effort: 'Max', aaIndex: 60.0, costPerTask: 0.84, throughputTps: 37.9, contextWindow: '1M', gdpvalElo: 1681, openWeights: true, tier: 'open-weights' },
-    { rank: 8, modelId: 'glm-5-3', modelName: 'GLM-5.3 (Max)', effort: 'Max', aaIndex: 60.0, costPerTask: 0.68, throughputTps: 93.0, contextWindow: '1M', gdpvalElo: 1769, openWeights: true, tier: 'open-weights' },
-    { rank: 9, modelId: 'gpt-5-6-pro', modelName: 'GPT-5.6 Sol Pro', effort: 'Max', aaIndex: 60.0, costPerTask: 1.80, throughputTps: 60.0, contextWindow: '1M', gdpvalElo: 1730, openWeights: false, tier: 'frontier' },
-    { rank: 10, modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol (XHigh)', effort: 'XHigh', aaIndex: 59.0, costPerTask: 0.81, throughputTps: 68.0, contextWindow: '1M', gdpvalElo: 1679, openWeights: false, tier: 'frontier' },
-    { rank: 11, modelId: 'claude-opus-5', modelName: 'Claude Opus 5 (Medium)', effort: 'Medium', aaIndex: 59.0, costPerTask: 0.72, throughputTps: 55.0, contextWindow: '1M', gdpvalElo: 1620, openWeights: false, tier: 'frontier' },
-    { rank: 12, modelId: 'qwen3-8-max', modelName: 'Qwen3.8 Max (Serviço)', effort: 'Max', aaIndex: 58.0, costPerTask: 1.13, throughputTps: 47.2, contextWindow: '1M', gdpvalElo: 1735, openWeights: false, tier: 'frontier' },
-    { rank: 13, modelId: 'qwen3-8-2-4t-a95b', modelName: 'Qwen3.8-2.4T-A95B (Raw)', effort: 'High', aaIndex: 58.0, costPerTask: 1.09, throughputTps: 44.8, contextWindow: '984k', gdpvalElo: 1720, openWeights: true, tier: 'open-weights' },
-    { rank: 14, modelId: 'gpt-5-6-terra', modelName: 'GPT-5.6 Terra (Max)', effort: 'Max', aaIndex: 57.0, costPerTask: 0.51, throughputTps: 110.0, contextWindow: '1M', gdpvalElo: 1576, openWeights: false, tier: 'balanced' },
-    { rank: 15, modelId: 'muse-spark-1-2', modelName: 'Muse Spark 1.2 (XHigh)', effort: 'XHigh', aaIndex: 57.0, costPerTask: 0.40, throughputTps: 75.0, contextWindow: '1M', gdpvalElo: 1628, openWeights: true, tier: 'open-weights' },
-    { rank: 16, modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol (High)', effort: 'High', aaIndex: 57.0, costPerTask: 0.55, throughputTps: 65.0, contextWindow: '1M', gdpvalElo: 1621, openWeights: false, tier: 'frontier' },
+    { rank: 4, modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra (XHigh)', effort: 'XHigh', aaIndex: 61.0, costPerTask: 1.20, throughputTps: null, contextWindow: '1.05M', gdpvalElo: 1770, openWeights: false, tier: 'frontier' },
+    { rank: 5, modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra (Max)', effort: 'Max', aaIndex: 61.0, costPerTask: 1.67, throughputTps: null, contextWindow: '1.05M', gdpvalElo: 1770, openWeights: false, tier: 'frontier' },
+    { rank: 6, modelId: 'claude-opus-5', modelName: 'Claude Opus 5 (High)', effort: 'High', aaIndex: 61.0, costPerTask: 1.23, throughputTps: 54.0, contextWindow: '1M', gdpvalElo: 1733, openWeights: false, tier: 'frontier' },
+    { rank: 7, modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol (Max)', effort: 'Max', aaIndex: 61.0, costPerTask: 1.23, throughputTps: 68.0, contextWindow: '1M', gdpvalElo: 1723, openWeights: false, tier: 'frontier' },
+    { rank: 8, modelId: 'grok-4-6', modelName: 'Grok 4.6 (High)', effort: 'High', aaIndex: 61.0, costPerTask: 0.84, throughputTps: 58.0, contextWindow: '500k', gdpvalElo: 1747, openWeights: false, tier: 'frontier' },
+    { rank: 9, modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra (High)', effort: 'High', aaIndex: 60.0, costPerTask: 0.96, throughputTps: null, contextWindow: '1.05M', gdpvalElo: 1750, openWeights: false, tier: 'frontier' },
+    { rank: 10, modelId: 'kimi-k3', modelName: 'Kimi K3 (Max)', effort: 'Max', aaIndex: 60.0, costPerTask: 0.84, throughputTps: 37.9, contextWindow: '1M', gdpvalElo: 1681, openWeights: true, tier: 'open-weights' },
+    { rank: 11, modelId: 'glm-5-3', modelName: 'GLM-5.3 (Max)', effort: 'Max', aaIndex: 60.0, costPerTask: 0.68, throughputTps: 93.0, contextWindow: '1M', gdpvalElo: 1769, openWeights: true, tier: 'open-weights' },
+    { rank: 12, modelId: 'gpt-5-6-pro', modelName: 'GPT-5.6 Sol Pro', effort: 'Max', aaIndex: 60.0, costPerTask: 1.80, throughputTps: 60.0, contextWindow: '1M', gdpvalElo: 1730, openWeights: false, tier: 'frontier' },
+    { rank: 13, modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra (Medium)', effort: 'Medium', aaIndex: 59.0, costPerTask: 0.75, throughputTps: null, contextWindow: '1.05M', gdpvalElo: 1710, openWeights: false, tier: 'frontier' },
+    { rank: 14, modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol (XHigh)', effort: 'XHigh', aaIndex: 59.0, costPerTask: 0.81, throughputTps: 68.0, contextWindow: '1M', gdpvalElo: 1679, openWeights: false, tier: 'frontier' },
+    { rank: 15, modelId: 'claude-opus-5', modelName: 'Claude Opus 5 (Medium)', effort: 'Medium', aaIndex: 59.0, costPerTask: 0.72, throughputTps: 55.0, contextWindow: '1M', gdpvalElo: 1620, openWeights: false, tier: 'frontier' },
+    { rank: 16, modelId: 'qwen3-8-max', modelName: 'Qwen3.8 Max (Serviço)', effort: 'Max', aaIndex: 58.0, costPerTask: 1.13, throughputTps: 47.2, contextWindow: '1M', gdpvalElo: 1735, openWeights: false, tier: 'frontier' },
+    { rank: 17, modelId: 'qwen3-8-2-4t-a95b', modelName: 'Qwen3.8-2.4T-A95B (Raw)', effort: 'High', aaIndex: 58.0, costPerTask: 1.09, throughputTps: 44.8, contextWindow: '984k', gdpvalElo: 1720, openWeights: true, tier: 'open-weights' },
+    { rank: 18, modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra (Low)', effort: 'Low', aaIndex: 57.0, costPerTask: 0.46, throughputTps: null, contextWindow: '1.05M', gdpvalElo: 1650, openWeights: false, tier: 'frontier' },
+    { rank: 19, modelId: 'gpt-5-6-terra', modelName: 'GPT-5.6 Terra (Max)', effort: 'Max', aaIndex: 57.0, costPerTask: 0.51, throughputTps: 110.0, contextWindow: '1M', gdpvalElo: 1576, openWeights: false, tier: 'balanced' },
+    { rank: 20, modelId: 'muse-spark-1-2', modelName: 'Muse Spark 1.2 (XHigh)', effort: 'XHigh', aaIndex: 57.0, costPerTask: 0.40, throughputTps: 75.0, contextWindow: '1M', gdpvalElo: 1628, openWeights: true, tier: 'open-weights' },
+    { rank: 21, modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol (High)', effort: 'High', aaIndex: 57.0, costPerTask: 0.55, throughputTps: 65.0, contextWindow: '1M', gdpvalElo: 1621, openWeights: false, tier: 'frontier' },
+    { rank: 22, modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra (Non-Reasoning)', effort: 'None', aaIndex: 55.0, costPerTask: 0.93, throughputTps: null, contextWindow: '1.05M', gdpvalElo: 1580, openWeights: false, tier: 'frontier', evaluationOnly: true, note: 'Evaluation-only run pela Artificial Analysis, não disponível como esforço público na API' },
     { rank: 17, modelId: 'gemini-3-7-flash', modelName: 'Gemini 3.7 Flash (High)', effort: 'High', aaIndex: 56.0, costPerTask: 0.40, throughputTps: 340.0, contextWindow: '1M', gdpvalElo: 1532, openWeights: false, tier: 'sub-dollar' },
     { rank: 18, modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol (Medium)', effort: 'Medium', aaIndex: 56.0, costPerTask: 0.37, throughputTps: 65.0, contextWindow: '1M', gdpvalElo: 1551, openWeights: false, tier: 'frontier' },
     { rank: 19, modelId: 'claude-sonnet-5', modelName: 'Claude Sonnet 5 (Max)', effort: 'Max', aaIndex: 55.0, costPerTask: 1.72, throughputTps: 83.0, contextWindow: '1M', gdpvalElo: 1595, openWeights: false, tier: 'balanced' },
@@ -6312,6 +6728,15 @@ const ARTIFICIAL_ANALYSIS_DATA = {
       { rank: 4, model: 'GPT-5.6 Sol (High)', scorePct: 94.1 },
       { rank: 5, model: 'Claude Opus 4.6', scorePct: 91.3 },
       { rank: 6, model: 'Claude Sonnet 4.6', scorePct: 89.9 }
+    ],
+    gdpPdf: [
+      { rank: 1, model: 'GPT-6 Astra', scorePct: 33.2, badge: '🥇 #1 All-pass Rate' },
+      { rank: 2, model: 'GPT-5.6 Sol', scorePct: 28.2, badge: 'Frontier' },
+      { rank: 3, model: 'Claude Fable 5.1', scorePct: 26.2, badge: 'Frontier' }
+    ],
+    aaBriefcase: [
+      { rank: 1, model: 'Claude Fable 5.1 / Claude Opus 5', note: 'Líderes conjuntos' },
+      { rank: 2, model: 'GPT-6 Astra', deltaVsSolElo: 85, note: '+85 Elo vs GPT-5.6 Sol' }
     ]
   }
 };

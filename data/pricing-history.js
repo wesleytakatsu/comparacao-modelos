@@ -118,6 +118,33 @@ const PRICE_HISTORY_DATA = {
       ]
     },
     {
+      id: 'price-gpt-6-astra',
+      modelId: 'gpt-6-astra',
+      modelName: 'GPT-6 Astra',
+      provider: 'openai',
+      currency: 'USD',
+      events: [
+        {
+          type: 'official-launch',
+          effectiveFrom: '2026-09-03',
+          effectiveUntil: null,
+          inputPerMillion: 10.00,
+          outputPerMillion: 50.00,
+          cacheReadPerMillion: 1.00,
+          cacheWritePerMillion: 12.50,
+          fastMultiplier: 2.0,
+          longContextCliff: {
+            thresholdTokens: 272000,
+            inputMultiplier: 2.0,
+            cacheMultiplier: 2.0,
+            outputMultiplier: 1.5
+          },
+          isPromotional: false,
+          notes: 'Preço canônico de lançamento: $10 in, $1 cache read, $12.50 cache write, $50 out por milhão. Long context cliff (>272k): 2x in/cache, 1.5x out. Fast API: multiplicador 2x ($20/$100).'
+        }
+      ]
+    },
+    {
       id: 'price-gpt-56-sol',
       modelId: 'gpt-5-6-sol',
       modelName: 'GPT-5.6 Sol',

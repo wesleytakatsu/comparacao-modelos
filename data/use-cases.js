@@ -29,16 +29,16 @@ const USE_CASE_COMPARISON_DATA = {
       editorialOverrides: [],
       sensitivityAnalysis: {"defaultWinner": "Claude Fable 5.1", "tippingPoint": "Fable 5.1 lidera no perfil padrão (99 pts). Se Custo receber peso > 28%, Gemini 3.8 Flash assume o #1 lugar pelo custo sub-dólar com 1M de janela."},
       rankings: [
-        { rank: 1, modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1', fitScore: 99, role: 'Lead System Architect & Planner', rationale: 'Visão de longo prazo perfeita, planejamento de múltiplos arquivos sem ruído e menor risco de arquiteturas infladas.' },
-        { rank: 2, modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol', fitScore: 97, role: 'Backend Architect & Hard Debugging', rationale: 'Rigor extremo em contratos de API, isolamento de domínios e tratamento preventivo de falhas de rede.' },
-        { rank: 3, modelId: 'claude-opus-5', modelName: 'Claude Opus 5', fitScore: 94, role: 'Senior Enterprise Architect', rationale: 'Compreensão enciclopédica de sistemas distribuídos legados e transições de arquitetura.' },
-        { rank: 4, modelId: 'gemini-3-8-flash', modelName: 'Gemini 3.8 Flash High', fitScore: 92, role: 'High-Volume Implementation Lead', rationale: 'Capacidade de ler diagramas e especificações em 1M de tokens com navegação ágil.' },
-        { rank: 5, modelId: 'glm-5-3', modelName: 'GLM-5.3', fitScore: 90, role: 'Open-Weight / Cloud Planner', rationale: 'Excelente decomposição lógica em 12+ fases ordenadas com disciplina exemplar.' },
-        { rank: 6, modelId: 'gpt-5-6-terra', modelName: 'GPT-5.6 Terra', fitScore: 88, role: 'Daily Driver Architect', rationale: 'Excelente relação custo-performance para arquiteturas de SaaS padrão.' },
-        { rank: 7, modelId: 'kimi-k3', modelName: 'Kimi K3', fitScore: 86, role: 'Large-Context Orchestrator', rationale: 'Excelente síntese de bases de código inteiras em 1 milhão de tokens.' },
-        { rank: 8, modelId: 'grok-4-6', modelName: 'Grok 4.6', fitScore: 84, role: 'Fast Feature Implementer', rationale: 'Muito rápido para prototipar serviços e validar hipóteses de arquitetura.' },
-        { rank: 9, modelId: 'claude-sonnet-5', modelName: 'Claude Sonnet 5', fitScore: 83, role: 'Module Designer', rationale: 'Design de módulos específicos com excelente clareza conceitual.' },
-        { rank: 10, modelId: 'qwen3-8-max', modelName: 'Qwen3.8 Max', fitScore: 81, role: 'Enterprise Cloud Specialist', rationale: 'Forte aderência a serviços de nuvem e arquiteturas globais.' }
+        { rank: 1, modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra', fitScore: 99, role: 'Lead System Architect & High-Complexity Planner', rationale: 'Raciocínio profundo de longo alcance, arquitetura modular e suporte a mid-turn steering para ajustes sem perda de contexto.' },
+        { rank: 2, modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1', fitScore: 99, role: 'Lead System Architect & Planner', rationale: 'Visão de longo prazo perfeita, planejamento de múltiplos arquivos sem ruído e menor risco de arquiteturas infladas.' },
+        { rank: 3, modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol', fitScore: 97, role: 'Backend Architect & Hard Debugging', rationale: 'Rigor extremo em contratos de API, isolamento de domínios e tratamento preventivo de falhas de rede.' },
+        { rank: 4, modelId: 'claude-opus-5', modelName: 'Claude Opus 5', fitScore: 94, role: 'Senior Enterprise Architect', rationale: 'Compreensão enciclopédica de sistemas distribuídos legados e transições de arquitetura.' },
+        { rank: 5, modelId: 'gemini-3-8-flash', modelName: 'Gemini 3.8 Flash High', fitScore: 92, role: 'High-Volume Implementation Lead', rationale: 'Capacidade de ler diagramas e especificações em 1M de tokens com navegação ágil.' },
+        { rank: 6, modelId: 'glm-5-3', modelName: 'GLM-5.3', fitScore: 90, role: 'Open-Weight / Cloud Planner', rationale: 'Excelente decomposição lógica em 12+ fases ordenadas com disciplina exemplar.' },
+        { rank: 7, modelId: 'gpt-5-6-terra', modelName: 'GPT-5.6 Terra', fitScore: 88, role: 'Daily Driver Architect', rationale: 'Excelente relação custo-performance para arquiteturas de SaaS padrão.' },
+        { rank: 8, modelId: 'kimi-k3', modelName: 'Kimi K3', fitScore: 86, role: 'Large-Context Orchestrator', rationale: 'Excelente síntese de bases de código inteiras em 1 milhão de tokens.' },
+        { rank: 9, modelId: 'grok-4-6', modelName: 'Grok 4.6', fitScore: 84, role: 'Fast Feature Implementer', rationale: 'Muito rápido para prototipar serviços e validar hipóteses de arquitetura.' },
+        { rank: 10, modelId: 'claude-sonnet-5', modelName: 'Claude Sonnet 5', fitScore: 83, role: 'Module Designer', rationale: 'Design de módulos específicos com excelente clareza conceitual.' }
       ]
     },
     {
@@ -56,16 +56,16 @@ const USE_CASE_COMPARISON_DATA = {
       editorialOverrides: [],
       sensitivityAnalysis: {"defaultWinner": "GPT-5.6 Sol", "tippingPoint": "GPT-5.6 Sol é dominante em confiabilidade (100 pts). Apenas se Velocidade e Custo somarem > 60% há troca de liderança."},
       rankings: [
-        { rank: 1, modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol', fitScore: 100, role: 'Core Logic Implementer & Auditor', rationale: 'O campeão indiscutível da comunidade e benchmarks para edge cases financeiros, idempotência e testes de concorrência.' },
-        { rank: 2, modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1', fitScore: 96, role: 'Formal Verification & Architecture', rationale: 'Modelagem rigorosa de estados e verificação de regras de negócio complexas.' },
-        { rank: 3, modelId: 'gpt-5-6-terra', modelName: 'GPT-5.6 Terra', fitScore: 92, role: 'Secondary Service Implementer', rationale: 'Herda a disciplina do Sol com 90% da robustez a uma fração do custo de tokens.' },
-        { rank: 4, modelId: 'gemini-3-8-flash', modelName: 'Gemini 3.8 Flash High', fitScore: 90, role: 'Load Testing & Pipeline Workers', rationale: 'Resolução massiva de suites de testes e validação cruzada de dados.' },
-        { rank: 5, modelId: 'glm-5-3', modelName: 'GLM-5.3', fitScore: 89, role: 'Deterministic Logic Reviewer', rationale: 'Fidelidade absoluta ao contrato de dados sem invenção de parâmetros.' },
-        { rank: 6, modelId: 'claude-opus-5', modelName: 'Claude Opus 5', fitScore: 88, role: 'Cryptographic & Compliance Auditor', rationale: 'Análise aprofundada de requisitos PCI-DSS, LGPD e segurança bancária.' },
-        { rank: 7, modelId: 'claude-sonnet-5', modelName: 'Claude Sonnet 5', fitScore: 86, role: 'Service Integration Lead', rationale: 'Integrações seguras de SDKs de pagamento e webhooks.' },
-        { rank: 8, modelId: 'grok-4-6', modelName: 'Grok 4.6', fitScore: 83, role: 'High-Throughput Worker', rationale: 'Execução veloz sob supervisão estrita de testes.' },
-        { rank: 9, modelId: 'kimi-k3', modelName: 'Kimi K3', fitScore: 81, role: 'Audit Log Ingestion', rationale: 'Varredura e parsing de logs de auditoria gigantescos em 1M.' },
-        { rank: 10, modelId: 'qwen3-8-max', modelName: 'Qwen3.8 Max', fitScore: 80, role: 'Cloud Backend Specialist', rationale: 'Resiliência e tolerância a falhas em microsserviços.' }
+        { rank: 1, modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra', fitScore: 100, role: 'Zero-Defect Core Auditor & Concurrency Specialist', rationale: 'Rigor lógico absoluto com MRCR v2 (96,3%) e GPQA Diamond (96,0%), eliminando race conditions e edge cases complexos.' },
+        { rank: 2, modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol', fitScore: 100, role: 'Core Logic Implementer & Auditor', rationale: 'O campeão indiscutível da comunidade e benchmarks para edge cases financeiros, idempotência e testes de concorrência.' },
+        { rank: 3, modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1', fitScore: 96, role: 'Formal Verification & Architecture', rationale: 'Modelagem rigorosa de estados e verificação de regras de negócio complexas.' },
+        { rank: 4, modelId: 'gpt-5-6-terra', modelName: 'GPT-5.6 Terra', fitScore: 92, role: 'Secondary Service Implementer', rationale: 'Herda a disciplina do Sol com 90% da robustez a uma fração do custo de tokens.' },
+        { rank: 5, modelId: 'gemini-3-8-flash', modelName: 'Gemini 3.8 Flash High', fitScore: 90, role: 'Load Testing & Pipeline Workers', rationale: 'Resolução massiva de suites de testes e validação cruzada de dados.' },
+        { rank: 6, modelId: 'glm-5-3', modelName: 'GLM-5.3', fitScore: 89, role: 'Deterministic Logic Reviewer', rationale: 'Fidelidade absoluta ao contrato de dados sem invenção de parâmetros.' },
+        { rank: 7, modelId: 'claude-opus-5', modelName: 'Claude Opus 5', fitScore: 88, role: 'Cryptographic & Compliance Auditor', rationale: 'Análise aprofundada de requisitos PCI-DSS, LGPD e segurança bancária.' },
+        { rank: 8, modelId: 'claude-sonnet-5', modelName: 'Claude Sonnet 5', fitScore: 86, role: 'Service Integration Lead', rationale: 'Integrações seguras de SDKs de pagamento e webhooks.' },
+        { rank: 9, modelId: 'grok-4-6', modelName: 'Grok 4.6', fitScore: 83, role: 'High-Throughput Worker', rationale: 'Execução veloz sob supervisão estrita de testes.' },
+        { rank: 10, modelId: 'kimi-k3', modelName: 'Kimi K3', fitScore: 81, role: 'Audit Log Ingestion', rationale: 'Varredura e parsing de logs de auditoria gigantescos em 1M.' }
       ]
     },
     {
@@ -191,16 +191,16 @@ const USE_CASE_COMPARISON_DATA = {
       editorialOverrides: [],
       sensitivityAnalysis: {"defaultWinner": "Claude Fable 5.1", "tippingPoint": "Gemini 3.8 Flash High (90,8% Terminal-Bench) se torna #1 se o tempo de varredura do repo e custo de contexto 1M forem priorizados."},
       rankings: [
-        { rank: 1, modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1', fitScore: 99, role: 'Chief Diagnostician & Root Cause Finder', rationale: 'Capacidade cognitiva incomparável para rastrear fluxo de execução através de dezenas de pacotes sem se perder.' },
-        { rank: 2, modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol', fitScore: 98, role: 'Deep Debugger & Regression Preventer', rationale: 'Persistência teimosa: investiga cada caminho de exceção até isolar a causa exata do problema.' },
-        { rank: 3, modelId: 'gemini-3-8-flash', modelName: 'Gemini 3.8 Flash High', fitScore: 96, role: 'Monorepo Scanner & Mass Fixer', rationale: '90,8% no Terminal-Bench 2.1 e 74,0% no DeepSWE; engole 1 milhão de tokens e executa comandos de terminal com agilidade.' },
-        { rank: 4, modelId: 'claude-opus-5', modelName: 'Claude Opus 5', fitScore: 94, role: 'Legacy Spaghetti Unraveler', rationale: 'Excelente em decifrar monorepos de 10+ anos com camadas acumuladas de código.' },
-        { rank: 5, modelId: 'glm-5-3', modelName: 'GLM-5.3', fitScore: 92, role: 'Methodical Test-Driven Fixer', rationale: 'Abordagem metódica faseada com reprodução de teste unitário antes de aplicar o patch.' },
-        { rank: 6, modelId: 'kimi-k3', modelName: 'Kimi K3', fitScore: 90, role: 'Large-Context Trace Navigator', rationale: 'Retenção estável em 1M de tokens para correlacionar rastros de execução distantes.' },
-        { rank: 7, modelId: 'grok-4-6', modelName: 'Grok 4.6', fitScore: 88, role: 'Fast Issue Triager', rationale: 'Identificação rápida de inconsistências em tempo recorde.' },
-        { rank: 8, modelId: 'gpt-5-6-terra', modelName: 'GPT-5.6 Terra', fitScore: 87, role: 'Monorepo Feature Maintainer', rationale: 'Manutenção cotidiana de submódulos com custo equilibrado.' },
-        { rank: 9, modelId: 'claude-sonnet-5', modelName: 'Claude Sonnet 5', fitScore: 85, role: 'Codebase Refactorer', rationale: 'Refatoração consistente de módulos de tamanho intermediário.' },
-        { rank: 10, modelId: 'deepseek-v4-pro-0813', modelName: 'DeepSeek-V4-Pro', fitScore: 84, role: 'Open-Weight Monorepo Worker', rationale: 'Raciocínio robusto para codebases open-source.' }
+        { rank: 1, modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra', fitScore: 100, role: 'Autonomous Root-Cause Debugger & Codebase Surgeon', rationale: '74,1% no DeepSWE v1.1 independente e 96,3% no MRCR v2; retenção perfeita em 1.05M tokens e capacidade de resolver regressões intermitentes.' },
+        { rank: 2, modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1', fitScore: 99, role: 'Chief Diagnostician & Root Cause Finder', rationale: 'Capacidade cognitiva incomparável para rastrear fluxo de execução através de dezenas de pacotes sem se perder.' },
+        { rank: 3, modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol', fitScore: 98, role: 'Deep Debugger & Regression Preventer', rationale: 'Persistência teimosa: investiga cada caminho de exceção até isolar a causa exata do problema.' },
+        { rank: 4, modelId: 'gemini-3-8-flash', modelName: 'Gemini 3.8 Flash High', fitScore: 96, role: 'Monorepo Scanner & Mass Fixer', rationale: '90,8% no Terminal-Bench 2.1 e 74,0% no DeepSWE; engole 1 milhão de tokens e executa comandos de terminal com agilidade.' },
+        { rank: 5, modelId: 'claude-opus-5', modelName: 'Claude Opus 5', fitScore: 94, role: 'Legacy Spaghetti Unraveler', rationale: 'Excelente em decifrar monorepos de 10+ anos com camadas acumuladas de código.' },
+        { rank: 6, modelId: 'glm-5-3', modelName: 'GLM-5.3', fitScore: 92, role: 'Methodical Test-Driven Fixer', rationale: 'Abordagem metódica faseada com reprodução de teste unitário antes de aplicar o patch.' },
+        { rank: 7, modelId: 'kimi-k3', modelName: 'Kimi K3', fitScore: 90, role: 'Large-Context Trace Navigator', rationale: 'Retenção estável em 1M de tokens para correlacionar rastros de execução distantes.' },
+        { rank: 8, modelId: 'grok-4-6', modelName: 'Grok 4.6', fitScore: 88, role: 'Fast Issue Triager', rationale: 'Identificação rápida de inconsistências em tempo recorde.' },
+        { rank: 9, modelId: 'gpt-5-6-terra', modelName: 'GPT-5.6 Terra', fitScore: 87, role: 'Monorepo Feature Maintainer', rationale: 'Manutenção cotidiana de submódulos com custo equilibrado.' },
+        { rank: 10, modelId: 'claude-sonnet-5', modelName: 'Claude Sonnet 5', fitScore: 85, role: 'Codebase Refactorer', rationale: 'Refatoração consistente de módulos de tamanho intermediário.' }
       ]
     },
     {
@@ -326,21 +326,32 @@ const USE_CASE_COMPARISON_DATA = {
       editorialOverrides: [],
       sensitivityAnalysis: {"defaultWinner": "Gemini 3.8 Flash High", "tippingPoint": "Gemini vence pelo índice de 90,8% no Terminal-Bench 2.1 e baixa latência. GPT-5.6 Sol assume para IAM e segurança zero-trust."},
       rankings: [
-        { rank: 1, modelId: 'gemini-3-8-flash', modelName: 'Gemini 3.8 Flash High', fitScore: 97, role: 'DevOps & Pipeline Automation Lead', rationale: '90,8% Terminal-Bench 2.1; execução impecável de comandos shell, scripts de deploy e validação de manifestos.' },
-        { rank: 2, modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol', fitScore: 96, role: 'Infrastructure Security & IAM Auditor', rationale: 'Configuração rigorosa de políticas IAM, redes VPC seguras e zero-trust architecture no Terraform.' },
-        { rank: 3, modelId: 'glm-5-3', modelName: 'GLM-5.3', fitScore: 93, role: 'Disciplined Kubernetes Engineer', rationale: 'Criação metódica de charts do Helm e manifests K8s sem alucinação de APIs descontinuadas.' },
-        { rank: 4, modelId: 'gpt-5-6-terra', modelName: 'GPT-5.6 Terra', fitScore: 91, role: 'CI/CD Pipeline Builder', rationale: 'Construção ágil de workflows do GitHub Actions com caching inteligente.' },
-        { rank: 5, modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1', fitScore: 90, role: 'Cloud Infrastructure Architect', rationale: 'Modelagem de topologias de nuvem resilientes com multi-region failover.' },
-        { rank: 6, modelId: 'grok-4-6', modelName: 'Grok 4.6', fitScore: 89, role: 'Incident Triager & SRE Assistant', rationale: '88,6% no Terminal-Bench 2.1; diagnóstico rápido de logs em tempo real durante indisponibilidades.' },
-        { rank: 7, modelId: 'claude-sonnet-5', modelName: 'Claude Sonnet 5', fitScore: 88, role: 'IaC Refactoring Specialist', rationale: 'Modularização de código Terraform em módulos reutilizáveis e versionados.' },
-        { rank: 8, modelId: 'glm-5-3-flash', modelName: 'GLM-5.3-Flash', fitScore: 86, role: 'Log Parsing & Script Worker', rationale: 'Processamento eficiente de relatórios de vulnerabilidade (Trivy/SonarQube) e correções automáticas.' },
-        { rank: 9, modelId: 'claude-opus-5', modelName: 'Claude Opus 5', fitScore: 85, role: 'Compliance & Governance Auditor', rationale: 'Verificação de conformidade SOC2 e ISO27001 em configurações de nuvem AWS/GCP/Azure.' },
-        { rank: 10, modelId: 'gpt-5-6-luna', modelName: 'GPT-5.6 Luna', fitScore: 84, role: 'Economic Infrastructure Worker', rationale: 'Execução barata ($0,20/$1,20) de linters, validação de sintaxe e formatação de YAML.' }
+        { rank: 1, modelId: 'gpt-6-astra', modelName: 'GPT-6 Astra', fitScore: 98, role: 'Autonomous Terminal & Systems Engineer', rationale: 'Líder no Terminal-Bench 4.0 (57,9%) e Snorkel TB Science (65.4%), combinando raciocínio deliberativo com execução precisa de comandos bash e scripts IaC.' },
+        { rank: 2, modelId: 'gemini-3-8-flash', modelName: 'Gemini 3.8 Flash High', fitScore: 97, role: 'DevOps & Pipeline Automation Lead', rationale: '90,8% Terminal-Bench 2.1; execução impecável de comandos shell, scripts de deploy e validação de manifestos.' },
+        { rank: 3, modelId: 'gpt-5-6-sol', modelName: 'GPT-5.6 Sol', fitScore: 96, role: 'Infrastructure Security & IAM Auditor', rationale: 'Configuração rigorosa de políticas IAM, redes VPC seguras e zero-trust architecture no Terraform.' },
+        { rank: 4, modelId: 'glm-5-3', modelName: 'GLM-5.3', fitScore: 93, role: 'Disciplined Kubernetes Engineer', rationale: 'Criação metódica de charts do Helm e manifests K8s sem alucinação de APIs descontinuadas.' },
+        { rank: 5, modelId: 'gpt-5-6-terra', modelName: 'GPT-5.6 Terra', fitScore: 91, role: 'CI/CD Pipeline Builder', rationale: 'Construção ágil de workflows do GitHub Actions com caching inteligente.' },
+        { rank: 6, modelId: 'claude-fable-5-1', modelName: 'Claude Fable 5.1', fitScore: 90, role: 'Cloud Infrastructure Architect', rationale: 'Modelagem de topologias de nuvem resilientes com multi-region failover.' },
+        { rank: 7, modelId: 'grok-4-6', modelName: 'Grok 4.6', fitScore: 89, role: 'Incident Triager & SRE Assistant', rationale: '88,6% no Terminal-Bench 2.1; diagnóstico rápido de logs em tempo real durante indisponibilidades.' },
+        { rank: 8, modelId: 'claude-sonnet-5', modelName: 'Claude Sonnet 5', fitScore: 88, role: 'IaC Refactoring Specialist', rationale: 'Modularização de código Terraform em módulos reutilizáveis e versionados.' },
+        { rank: 9, modelId: 'glm-5-3-flash', modelName: 'GLM-5.3-Flash', fitScore: 86, role: 'Log Parsing & Script Worker', rationale: 'Processamento eficiente de relatórios de vulnerabilidade (Trivy/SonarQube) e correções automáticas.' },
+        { rank: 10, modelId: 'claude-opus-5', modelName: 'Claude Opus 5', fitScore: 85, role: 'Compliance & Governance Auditor', rationale: 'Verificação de conformidade SOC2 e ISO27001 em configurações de nuvem AWS/GCP/Azure.' }
       ]
     }
   ],
 
   orchestrationRecipes: [
+    {
+      id: 'recipe-enterprise-gpt6-astra-orchestration',
+      title: 'Pipeline Frontier: GPT-6 Astra + Workers de Alta Velocidade',
+      target: 'Grandes sistemas de missão crítica, refatoração de monorepos e agentes de terminal',
+      flow: [
+        { step: 1, role: 'Arquiteto & Raciocínio Profundo', model: 'GPT-6 Astra (XHigh/Max)', action: 'Planejamento formal, decomposição arquitetural e contratos de interface sob Responses API.' },
+        { step: 2, role: 'Workers Rápidos de Implementação', model: 'Gemini 3.8 Flash / Grok 4.6', action: 'Geração paralela de código repetitivo e componentes auxiliares em alto throughput.' },
+        { step: 3, role: 'Auditoria & Testes Críticos', model: 'GPT-6 Astra (High) / GPT-5.6 Sol', action: 'Verificação profunda de edge cases, concorrência e execução agêntica em ambiente de terminal.' }
+      ],
+      estimatedCostVsSingleModel: 'Economia de 55–65% vs executar todas as etapas exclusivamente em Astra Max, preservando a corretude de fronteira.'
+    },
     {
       id: 'recipe-large-system-max-quality',
       title: 'Pipeline Enterprise: Qualidade Máxima & Zero Regressão',

@@ -920,6 +920,143 @@ if (domain) {
   console.log('   ✅ Todas as suítes dos Planos 08 e 09 validadas com 100% de aprovação!');
 }
 
+// ==========================================
+// SUÍTE DE TESTES DO PLANO 10: GPT-6 ASTRA
+// ==========================================
+console.log('\n🚀 VALIDANDO TESTES DO PLANO 10 (INTEGRAÇÃO NORMATIVA DO GPT-6 ASTRA)...');
+
+// Asserção 128: gpt-6-astra existe em AI_MODELS_DATA com id canônico, name 'GPT-6 Astra', provider 'openai', status 'active', contextWindow >= 1000000
+const astraModel = AI_MODELS_DATA['gpt-6-astra'];
+assert(astraModel, 'Asserção 128: gpt-6-astra deve existir como chave canônica em AI_MODELS_DATA');
+if (astraModel) {
+  assert(astraModel.id === 'gpt-6-astra', `Asserção 128: id deve ser 'gpt-6-astra' (encontrado: ${astraModel.id})`);
+  assert(astraModel.name === 'GPT-6 Astra', `Asserção 128: name deve ser 'GPT-6 Astra' (encontrado: ${astraModel.name})`);
+  assert(astraModel.provider === 'openai', `Asserção 128: provider deve ser 'openai' (encontrado: ${astraModel.provider})`);
+  assert(astraModel.status === 'active', `Asserção 128: status deve ser 'active' (encontrado: ${astraModel.status})`);
+  assert(astraModel.contextWindow >= 1000000, `Asserção 128: contextWindow deve ser >= 1.000.000 (encontrado: ${astraModel.contextWindow})`);
+}
+console.log('   - [Prompt 10 / Asserção 128] Validando cadastro canônico de GPT-6 Astra em AI_MODELS_DATA...');
+
+// Asserção 129: gpt-6-pro NÃO existe como chave de modelo independente em AI_MODELS_DATA (regra canônica fundamental)
+assert(!AI_MODELS_DATA['gpt-6-pro'], 'Asserção 129: gpt-6-pro NÃO deve existir como entidade independente no catálogo de modelos (é alias ChatGPT)');
+console.log('   - [Prompt 10 / Asserção 129] Garantindo que gpt-6-pro NÃO é entidade independente no catálogo...');
+
+// Asserção 130: gpt-6-astra possui reasoningEfforts com 5 níveis ('low', 'medium', 'high', 'xhigh', 'max')
+if (astraModel) {
+  assert(Array.isArray(astraModel.reasoningEfforts), 'Asserção 130: reasoningEfforts deve ser um array');
+  const expectedEfforts = ['low', 'medium', 'high', 'xhigh', 'max'];
+  expectedEfforts.forEach(eff => {
+    assert(astraModel.reasoningEfforts.includes(eff), `Asserção 130: reasoningEfforts deve conter nível '${eff}'`);
+  });
+}
+console.log('   - [Prompt 10 / Asserção 130] Validando 5 níveis de reasoning effort configuráveis no Astra...');
+
+// Asserção 131: MULTI_BENCHMARK_LEDGER contém gpt-6-astra com terminalBench40 (57.9%), terminalBenchScience01 (65.4%), deepSwe11 (74.1%), mrcrV2 (96.3%)
+const astraLedger = MULTI_BENCHMARK_LEDGER.find(l => l.modelId === 'gpt-6-astra');
+assert(astraLedger, 'Asserção 131: gpt-6-astra deve existir em MULTI_BENCHMARK_LEDGER');
+if (astraLedger) {
+  assert(astraLedger.terminalBench40 === 57.9, `Asserção 131: terminalBench40 deve ser 57.9 (encontrado: ${astraLedger.terminalBench40})`);
+  assert(astraLedger.terminalBenchScience01 === 65.4, `Asserção 131: terminalBenchScience01 deve ser 65.4 (encontrado: ${astraLedger.terminalBenchScience01})`);
+  assert(astraLedger.deepSwe11 === 74.1, `Asserção 131: deepSwe11 deve ser 74.1 (encontrado: ${astraLedger.deepSwe11})`);
+  assert(astraLedger.mrcrV2 === 96.3, `Asserção 131: mrcrV2 deve ser 96.3 (encontrado: ${astraLedger.mrcrV2})`);
+}
+console.log('   - [Prompt 10 / Asserção 131] Validando métricas instrumentadas de GPT-6 Astra no Ledger...');
+
+// Asserção 132: MODEL_DOSSIERS_DATA['gpt-6-astra'] existe e possui reasoningEffortMatrix com os 5 níveis, safetyAndPreparedness e developerCapabilities
+const astraDossier = (typeof MODEL_DOSSIERS_DATA !== 'undefined' ? MODEL_DOSSIERS_DATA['gpt-6-astra'] : null);
+assert(astraDossier, "Asserção 132: MODEL_DOSSIERS_DATA['gpt-6-astra'] deve existir");
+if (astraDossier) {
+  assert(astraDossier.reasoningEffortMatrix, 'Asserção 132: dossiê deve conter reasoningEffortMatrix');
+  if (astraDossier.reasoningEffortMatrix) {
+    const dEfforts = astraDossier.reasoningEffortMatrix.efforts || [];
+    ['low', 'medium', 'high', 'xhigh', 'max'].forEach(e => {
+      assert(dEfforts.includes(e), `Asserção 132: reasoningEffortMatrix deve incluir '${e}'`);
+    });
+  }
+  assert(astraDossier.safetyAndPreparedness, 'Asserção 132: dossiê deve conter safetyAndPreparedness');
+  assert(astraDossier.developerCapabilities, 'Asserção 132: dossiê deve conter developerCapabilities');
+}
+console.log('   - [Prompt 10 / Asserção 132] Validando dossiê aprofundado, safety e matriz de esforço...');
+
+// Asserção 133: ARTIFICIAL_ANALYSIS_DATA.rankings contém entradas de gpt-6-astra para os esforços Max, XHigh, High, Medium, Low, e non-reasoning com throughputTps === null
+const astraRankings = (ARTIFICIAL_ANALYSIS_DATA && ARTIFICIAL_ANALYSIS_DATA.rankings) 
+  ? ARTIFICIAL_ANALYSIS_DATA.rankings.filter(r => r.modelId === 'gpt-6-astra')
+  : [];
+assert(astraRankings.length >= 5, `Asserção 133: ARTIFICIAL_ANALYSIS_DATA.rankings deve conter pelo menos 5 entradas de gpt-6-astra (encontrado: ${astraRankings.length})`);
+const nonReasoningRank = astraRankings.find(r => r.effort === 'Non-Reasoning' || r.modelName.includes('Non-Reasoning'));
+if (nonReasoningRank) {
+  assert(nonReasoningRank.throughputTps === null, `Asserção 133: non-reasoning não deve fabricar throughputTps (deve ser null)`);
+}
+console.log('   - [Prompt 10 / Asserção 133] Validando rankings de esforço e neutralidade de throughput no AA...');
+
+// Asserção 134: MODEL_CONFIGURATIONS_DATA contém pelo menos 5 configurações de gpt-6-astra (low, medium, high, xhigh, max)
+const domainModule = require('../data/domain.js');
+const astraConfigs = Object.values(domainModule.MODEL_CONFIGURATIONS_DATA || {}).filter(c => c.modelId === 'gpt-6-astra');
+assert(astraConfigs.length >= 5, `Asserção 134: MODEL_CONFIGURATIONS_DATA deve conter >= 5 configurações de gpt-6-astra (encontrado: ${astraConfigs.length})`);
+console.log('   - [Prompt 10 / Asserção 134] Validando configurações formais de domínio no MODEL_CONFIGURATIONS_DATA...');
+
+// Asserção 135: CANONICAL_OFFERINGS_DATA contém as ofertas canônicas de gpt-6-astra para openai-api, chatgpt, cursor e codex
+const astraOfferings = Object.values(domainModule.CANONICAL_OFFERINGS_DATA || {}).filter(o => o.modelId === 'gpt-6-astra');
+assert(astraOfferings.some(o => o.providerId === 'openai-api' || o.platformId === 'openai-api'), "Asserção 135: Oferta para provider/platform 'openai-api' ausente");
+assert(astraOfferings.some(o => o.platformId === 'chatgpt'), "Asserção 135: Oferta para plataforma 'chatgpt' ausente");
+assert(astraOfferings.some(o => o.platformId === 'cursor'), "Asserção 135: Oferta para plataforma 'cursor' ausente");
+assert(astraOfferings.some(o => o.platformId === 'codex'), "Asserção 135: Oferta para plataforma 'codex' ausente");
+console.log('   - [Prompt 10 / Asserção 135] Validando ofertas canônicas (openai-api, chatgpt, cursor, codex)...');
+
+// Asserção 136: Planos ChatGPT possuem acesso configurado para gpt-6-astra
+const plansModule = require('../data/plans.js');
+const targetPlans = ['openai-chatgpt-pro-5x', 'openai-chatgpt-pro-20x', 'openai-chatgpt-business-standard', 'openai-chatgpt-business-premium'];
+targetPlans.forEach(pid => {
+  const p = plansModule.SUBSCRIPTION_PLANS_DATA.find(plan => plan.id === pid);
+  assert(p, `Asserção 136: Plano '${pid}' deve existir`);
+  if (p) {
+    const astraAccess = p.modelAccess.find(m => m.modelId === 'gpt-6-astra');
+    assert(astraAccess && astraAccess.available === true, `Asserção 136: Plano '${pid}' deve conceder acesso disponível a gpt-6-astra`);
+  }
+});
+console.log('   - [Prompt 10 / Asserção 136] Validando acesso a GPT-6 Astra nos planos Pro e Business...');
+
+// Asserção 137: Plano openai-chatgpt-plus NÃO possui acesso a GPT-6 Astra/Pro no chat (available: false)
+const plusPlan = plansModule.SUBSCRIPTION_PLANS_DATA.find(p => p.id === 'openai-chatgpt-plus');
+assert(plusPlan, "Asserção 137: Plano 'openai-chatgpt-plus' deve existir");
+if (plusPlan) {
+  const plusChat = plusPlan.modelAccess.find(m => m.modelId === 'gpt-6-astra' && (m.surface === 'chatgpt-chat' || m.surfaceId === 'chatgpt-chat'));
+  assert(plusChat && plusChat.available === false, 'Asserção 137: Plano Plus NÃO deve liberar GPT-6 Astra na superfície de chat (available: false)');
+}
+console.log('   - [Prompt 10 / Asserção 137] Garantindo que Plus não possui acesso ao chat do GPT-6 Astra/Pro...');
+
+// Asserção 138: ARC-AGI-3 na documentação/dossiê nunca exibe 99.95% sem menção explícita ao harness 'Provider Adapter'
+if (astraDossier && Array.isArray(astraDossier.benchmarkSnapshots)) {
+  const arcSnapshots = astraDossier.benchmarkSnapshots.filter(s => s.benchmarkId && s.benchmarkId.includes('arc-agi-3'));
+  arcSnapshots.forEach(s => {
+    if (s.score > 90) {
+      const hasAdapter = (s.harness && s.harness.toLowerCase().includes('adapter')) || (s.notes && s.notes.toLowerCase().includes('adapter'));
+      assert(hasAdapter, `Asserção 138: Score ${s.score}% em ARC-AGI-3 deve carregar obrigatoriamente etiqueta 'Provider Adapter'`);
+    }
+  });
+}
+console.log('   - [Prompt 10 / Asserção 138] Validando rigor metrológico dual no ARC-AGI-3 (Provider Adapter)...');
+
+// Asserção 139: PLATFORM_MODEL_CATALOG.availabilityMatrix contém gpt-6-astra com Direct API e Cursor
+const platformsModule = require('../data/platforms.js');
+const astraAvail = platformsModule.PLATFORM_MODEL_CATALOG.availabilityMatrix.find(r => r.modelId === 'gpt-6-astra');
+assert(astraAvail, 'Asserção 139: gpt-6-astra deve constar na availabilityMatrix');
+if (astraAvail) {
+  assert(astraAvail.directApi.includes('$10/$50') || astraAvail.directApi.includes('$10 / $50'), `Asserção 139: directApi deve registrar '$10/$50' (encontrado: ${astraAvail.directApi})`);
+  assert(astraAvail.cursor.includes('Other Models') && (astraAvail.cursor.includes('2x') || astraAvail.cursor.includes('2.0x')), `Asserção 139: cursor deve registrar 'Other Models (2x)' (encontrado: ${astraAvail.cursor})`);
+}
+console.log('   - [Prompt 10 / Asserção 139] Validando matriz de disponibilidade de plataformas (API, Cursor)...');
+
+// Asserção 140: HARNESS_COMPATIBILITY_DATA.matrix contém gpt-6-astra com compatibilidade documentada
+const astraHarness = HARNESS_COMPATIBILITY_DATA.matrix['gpt-6-astra'];
+assert(astraHarness, 'Asserção 140: HARNESS_COMPATIBILITY_DATA.matrix deve mapear gpt-6-astra');
+if (astraHarness) {
+  assert(astraHarness.cursor && astraHarness.cline && astraHarness.aider, 'Asserção 140: gpt-6-astra deve ter suporte documentado nos principais harnesses (Cursor, Cline, Aider)');
+}
+console.log('   - [Prompt 10 / Asserção 140] Validando matriz de compatibilidade de harnesses para GPT-6 Astra...');
+console.log('   ✅ Todas as 13 asserções normativas do Plano 10 validadas com 100% de sucesso!');
+
+
 console.log('====================================================\n');
 
 if (warnings.length > 0) {

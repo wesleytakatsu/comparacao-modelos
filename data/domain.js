@@ -401,6 +401,96 @@
       description: 'Taxa média de geração contínua de saída sob carga de inferência em produção.',
       methodology: 'Medição da velocidade pura de saída após Time-to-First-Token em solicitações sequenciais.',
       verifiedAt: '2026-09-02'
+    },
+    'terminal-bench-4.0': {
+      id: 'terminal-bench-4.0',
+      name: 'Terminal-Bench 4.0',
+      category: 'coding-agentic',
+      direction: 'higher',
+      scoreScale: 'percentage',
+      provider: 'Terminal Bench Consortium',
+      harness: 'Advanced Docker Sandbox',
+      sourceType: 'independent',
+      primaryMetric: 'score',
+      unit: '%',
+      description: 'Execução autônoma em terminal para ambientes complexos e engenharia de software.',
+      methodology: 'Avalia a taxa de sucesso de agentes em resolver desafios avançados de sistema e automação.',
+      verifiedAt: '2026-09-03'
+    },
+    'terminal-bench-science-0.1': {
+      id: 'terminal-bench-science-0.1',
+      name: 'Terminal-Bench Science 0.1',
+      category: 'coding-agentic',
+      direction: 'higher',
+      scoreScale: 'percentage',
+      provider: 'Snorkel AI / Terminal Bench',
+      harness: 'Scientific Computing Sandbox',
+      sourceType: 'independent',
+      primaryMetric: 'score',
+      unit: '%',
+      description: '70 tarefas científicas em 5 domínios técnicos executadas em terminal.',
+      methodology: 'Resolução autônoma de pipelines científicos com validação estrita de resultados.',
+      verifiedAt: '2026-09-03'
+    },
+    'arc-agi-3-standard': {
+      id: 'arc-agi-3-standard',
+      name: 'ARC-AGI-3 (Standard)',
+      category: 'reasoning',
+      direction: 'higher',
+      scoreScale: 'percentage',
+      provider: 'ARC Prize Foundation',
+      harness: 'Standard Evaluation Suite',
+      sourceType: 'independent',
+      primaryMetric: 'score',
+      unit: '%',
+      description: 'Avaliação pura de generalização e síntese de programas conceituais sem adapter proprietário.',
+      methodology: 'Testa generalização out-of-distribution sob restrição estrita de metrologia.',
+      verifiedAt: '2026-09-02'
+    },
+    'arc-agi-3-provider-adapter': {
+      id: 'arc-agi-3-provider-adapter',
+      name: 'ARC-AGI-3 (Provider Adapter)',
+      category: 'reasoning',
+      direction: 'higher',
+      scoreScale: 'percentage',
+      provider: 'ARC Prize Foundation / OpenAI',
+      harness: 'Provider Adapter Evaluation',
+      sourceType: 'independent',
+      primaryMetric: 'score',
+      unit: '%',
+      description: 'Avaliação de raciocínio visual e simbólico auxiliada por adapter proprietário de fornecedor.',
+      methodology: 'Sempre requer exibição do sufixo Provider Adapter na citação do resultado.',
+      verifiedAt: '2026-09-02'
+    },
+    'gdp-pdf': {
+      id: 'gdp-pdf',
+      name: 'Surge GDP.pdf',
+      category: 'multimodal',
+      direction: 'higher',
+      scoreScale: 'percentage',
+      provider: 'Surge AI / Artificial Analysis',
+      harness: 'PDF Multi-domain Evaluation',
+      sourceType: 'independent',
+      primaryMetric: 'score',
+      unit: '%',
+      description: '100 relatórios PDF e 4.592 páginas avaliando All-pass Rate sobre 1.275 critérios atômicos.',
+      methodology: 'Exige atendimento integral a todos os critérios da tarefa para pontuação.',
+      verifiedAt: '2026-09-04'
+    },
+    'exploitbench': {
+      id: 'exploitbench',
+      name: 'ExploitBench',
+      category: 'cyber',
+      direction: 'higher',
+      scoreScale: 'percentage',
+      provider: 'OpenAI Safety / Preparedness',
+      harness: 'Automated Exploit Execution Environment',
+      sourceType: 'official',
+      primaryMetric: 'score',
+      unit: '%',
+      description: 'Avaliação de capacidades de exploração e resolução autônoma de vulnerabilidades.',
+      methodology: 'Ambiente controlado medindo capacidade de síntese e execução de exploits funcionais.',
+      verifiedAt: '2026-09-03'
     }
   };
 
@@ -1173,6 +1263,54 @@
       validUntil: null,
       status: 'verified',
       confidence: 'high'
+    },
+    {
+      id: 'claim-gpt6astra-launch-leader',
+      subjectType: 'model',
+      subjectId: 'gpt-6-astra',
+      predicate: 'benchmark-leader',
+      benchmarkId: 'terminal-bench-4.0',
+      value: 57.9,
+      unit: '%',
+      evidenceType: 'M',
+      provenanceType: 'O',
+      sourceIds: ['openai-gpt6-astra-launch'],
+      validFrom: '2026-09-03',
+      validUntil: null,
+      status: 'verified',
+      confidence: 'high'
+    },
+    {
+      id: 'claim-gpt6astra-cyber-critical',
+      subjectType: 'model',
+      subjectId: 'gpt-6-astra',
+      predicate: 'preparedness-tier',
+      benchmarkId: 'exploitbench',
+      value: 100.0,
+      unit: '%',
+      evidenceType: 'M',
+      provenanceType: 'O',
+      sourceIds: ['openai-gpt6-astra-system-card'],
+      validFrom: '2026-09-03',
+      validUntil: null,
+      status: 'verified',
+      confidence: 'high'
+    },
+    {
+      id: 'claim-gpt6astra-gdppdf-leader',
+      subjectType: 'model',
+      subjectId: 'gpt-6-astra',
+      predicate: 'benchmark-leader',
+      benchmarkId: 'gdp-pdf',
+      value: 33.2,
+      unit: '%',
+      evidenceType: 'M',
+      provenanceType: 'I',
+      sourceIds: ['aa-index-v42-20260904'],
+      validFrom: '2026-09-04',
+      validUntil: null,
+      status: 'verified',
+      confidence: 'high'
     }
   ];
 
@@ -1699,6 +1837,11 @@
   // 11. SCHEMAS FORMAIS: ModelConfiguration, Offering & Availability (Seções 16, 17, 18, 58)
   // =========================================================================
   var MODEL_CONFIGURATIONS_DATA = [
+    { id: 'gpt-6-astra:low', modelId: 'gpt-6-astra', reasoningMode: 'explicit', effort: 'low', contextWindow: 1050000, maxOutputTokens: 128000, temperature: null, tools: true, fallbackPolicy: 'default' },
+    { id: 'gpt-6-astra:medium', modelId: 'gpt-6-astra', reasoningMode: 'explicit', effort: 'medium', contextWindow: 1050000, maxOutputTokens: 128000, temperature: null, tools: true, fallbackPolicy: 'default' },
+    { id: 'gpt-6-astra:high', modelId: 'gpt-6-astra', reasoningMode: 'explicit', effort: 'high', contextWindow: 1050000, maxOutputTokens: 128000, temperature: null, tools: true, fallbackPolicy: 'default' },
+    { id: 'gpt-6-astra:xhigh', modelId: 'gpt-6-astra', reasoningMode: 'explicit', effort: 'xhigh', contextWindow: 1050000, maxOutputTokens: 128000, temperature: null, tools: true, fallbackPolicy: 'default' },
+    { id: 'gpt-6-astra:max', modelId: 'gpt-6-astra', reasoningMode: 'explicit', effort: 'max', contextWindow: 1050000, maxOutputTokens: 128000, temperature: null, tools: true, fallbackPolicy: 'default' },
     { id: 'claude-fable-5-1:max', modelId: 'claude-fable-5-1', reasoningMode: 'adaptive', effort: 'max', contextWindow: 1000000, maxOutputTokens: 128000, temperature: null, tools: true, fallbackPolicy: 'default' },
     { id: 'claude-fable-5-1:xhigh', modelId: 'claude-fable-5-1', reasoningMode: 'adaptive', effort: 'xhigh', contextWindow: 1000000, maxOutputTokens: 128000, temperature: null, tools: true, fallbackPolicy: 'default' },
     { id: 'claude-fable-5-1:high', modelId: 'claude-fable-5-1', reasoningMode: 'adaptive', effort: 'high', contextWindow: 1000000, maxOutputTokens: 64000, temperature: null, tools: true, fallbackPolicy: 'default' },
@@ -1714,6 +1857,10 @@
   ];
 
   var CANONICAL_OFFERINGS_DATA = [
+    { id: 'openai-api:gpt-6-astra', modelId: 'gpt-6-astra', providerId: 'openai', platformId: 'openai-api', apiModelId: 'gpt-6-astra', region: 'global', accessType: 'metered', availableFrom: '2026-09-03', availableUntil: null },
+    { id: 'chatgpt:gpt-6-pro', modelId: 'gpt-6-astra', providerId: 'openai', platformId: 'chatgpt', apiModelId: 'gpt-6-pro', region: 'global', accessType: 'subscription_quota', availableFrom: '2026-09-03', availableUntil: null },
+    { id: 'cursor:gpt-6-astra', modelId: 'gpt-6-astra', providerId: 'openai', platformId: 'cursor', apiModelId: 'gpt-6-astra', region: 'global', accessType: 'quota_burn', multiplier: 2, availableFrom: '2026-09-03', availableUntil: null },
+    { id: 'codex:gpt-6-astra', modelId: 'gpt-6-astra', providerId: 'openai', platformId: 'codex', apiModelId: 'gpt-6-astra', region: 'global', accessType: 'credit_allowance', availableFrom: '2026-09-03', availableUntil: null },
     { id: 'anthropic-api:claude-fable-5-1', modelId: 'claude-fable-5-1', providerId: 'anthropic', platformId: 'anthropic-api', apiModelId: 'claude-fable-5-1', region: 'global', accessType: 'metered', availableFrom: '2026-09-01', availableUntil: null },
     { id: 'cursor:claude-fable-5-1', modelId: 'claude-fable-5-1', providerId: 'anthropic', platformId: 'cursor', apiModelId: 'claude-fable-5.1', region: 'global', accessType: 'quota_burn', multiplier: 4, availableFrom: '2026-09-01', availableUntil: null },
     { id: 'opencode:claude-fable-5-1', modelId: 'claude-fable-5-1', providerId: 'anthropic', platformId: 'opencode', apiModelId: 'claude-fable-5-1', region: 'global', accessType: 'quota_burn', multiplier: 4, availableFrom: '2026-09-01', availableUntil: null },
@@ -1727,6 +1874,9 @@
   ];
 
   var NORMALIZED_AVAILABILITY_DATA = [
+    { modelId: 'gpt-6-astra', platformId: 'openai-api', status: 'active', region: 'global', availableFrom: '2026-09-03', offeringId: 'openai-api:gpt-6-astra', planIds: [], sourceId: 'openai-gpt6-astra-api', verifiedAt: '2026-09-03' },
+    { modelId: 'gpt-6-astra', platformId: 'chatgpt', status: 'active', region: 'global', availableFrom: '2026-09-03', offeringId: 'chatgpt:gpt-6-pro', planIds: ['openai-chatgpt-pro-5x', 'openai-chatgpt-pro-20x', 'openai-chatgpt-business-standard', 'openai-chatgpt-business-premium', 'openai-chatgpt-enterprise'], sourceId: 'openai-gpt6-astra-launch', verifiedAt: '2026-09-03' },
+    { modelId: 'gpt-6-astra', platformId: 'cursor', status: 'active', region: 'global', availableFrom: '2026-09-03', offeringId: 'cursor:gpt-6-astra', planIds: ['cursor-pro', 'cursor-business'], sourceId: 'cursor-pricing-astra-2026', verifiedAt: '2026-09-03' },
     { modelId: 'claude-fable-5-1', platformId: 'anthropic-api', status: 'active', region: 'global', availableFrom: '2026-09-01', offeringId: 'anthropic-api:claude-fable-5-1', planIds: [], sourceId: 'anthropic-claude-fable-51', verifiedAt: '2026-09-01' },
     { modelId: 'claude-fable-5-1', platformId: 'cursor', status: 'active', region: 'global', availableFrom: '2026-09-01', offeringId: 'cursor:claude-fable-5-1', planIds: ['cursor-pro', 'cursor-business'], sourceId: 'cursor-official', verifiedAt: '2026-09-01' },
     { modelId: 'gemini-3-8-flash', platformId: 'google-vertex', status: 'active', region: 'global', availableFrom: '2026-09-02', offeringId: 'google-api:gemini-3-8-flash', planIds: [], sourceId: 'google-deepmind-gemini-38', verifiedAt: '2026-09-02' },
