@@ -1829,7 +1829,61 @@
         <div class="view-header">
           <div class="view-title">
             <h2>📜 Linhagens de Modelos & Linha do Tempo da Indústria</h2>
-            <p>Evolução arquitetural dos modelos de IA, árvores geracionais de predecessores para sucessores e histórico auditado de eventos de mercado.</p>
+            <p>Evolução de tiers de produtos, linhagens arquiteturais documentadas e histórico metrológico de benchmarks.</p>
+          </div>
+        </div>
+
+        <!-- Historical Coverage KPI container (Prompt 11) -->
+        <div class="history-kpis-grid" id="historyKpiContainer">
+          <!-- Injetado dinamicamente via JS -->
+        </div>
+
+        <!-- Toolbar de Controles & Filtros Históricos (Prompt 11) -->
+        <div class="history-controls-toolbar">
+          <div class="history-search-box">
+            <input type="text" id="historySearchInput" placeholder="Buscar modelos, arquiteturas, tags ou eventos..." aria-label="Buscar no histórico">
+          </div>
+          <div class="history-filters-row">
+            <div class="history-filter-item">
+              <label for="historyProviderFilter">Provedor:</label>
+              <select id="historyProviderFilter" aria-label="Filtrar por provedor">
+                <option value="all">Todos os Provedores</option>
+                <option value="openai">OpenAI</option>
+                <option value="anthropic">Anthropic</option>
+                <option value="google">Google DeepMind</option>
+                <option value="deepseek">DeepSeek</option>
+                <option value="xai">xAI</option>
+                <option value="alibaba">Alibaba / Qwen</option>
+                <option value="zai">Zhipu / Z.ai</option>
+                <option value="moonshot">Moonshot AI</option>
+                <option value="minimax">MiniMax</option>
+                <option value="meta">Meta AI</option>
+                <option value="tencent">Tencent</option>
+              </select>
+            </div>
+            <div class="history-filter-item">
+              <label for="historyYearFilter">Ano:</label>
+              <select id="historyYearFilter" aria-label="Filtrar por ano">
+                <option value="all">Todos os Anos</option>
+                <option value="2026">2026</option>
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+                <option value="2023">2023</option>
+              </select>
+            </div>
+            <div class="history-filter-item">
+              <label for="historyEvidenceFilter">Conexões / Evidência:</label>
+              <select id="historyEvidenceFilter" aria-label="Filtrar por tipo de evidência">
+                <option value="all">Todas as Conexões</option>
+                <option value="verified">Apenas Verificadas (Sólidas)</option>
+                <option value="inferred">Apenas Inferidas (Tracejadas)</option>
+              </select>
+            </div>
+            <label class="history-checkbox-label">
+              <input type="checkbox" id="historyTogglePredecessors" checked>
+              <span>Mostrar nós históricos fora do catálogo</span>
+            </label>
+            <button type="button" class="btn-secondary" id="historyToggleExpandAllBtn">Recolher Todos</button>
           </div>
         </div>
 
@@ -1842,6 +1896,44 @@
 
         <!-- Painel 1: Linhagens Genealógicas -->
         <div class="htab-panel active" id="htab-lineages">
+          <!-- Legenda Visual de Conexões Genealógicas (Seção 9) -->
+          <div class="history-edge-legend" id="historyEdgeLegend">
+            <div class="edge-legend-header">
+              <strong>🧭 Legenda de Conexões Genealógicas &amp; Semântica de Arestas</strong>
+              <span class="edge-legend-sub">(Diferenciação estrita entre derivação comprovada e inferência arquitetural)</span>
+            </div>
+            <div class="edge-legend-grid">
+              <div class="edge-legend-item">
+                <span class="legend-symbol solid">➔</span>
+                <div class="legend-text">
+                  <strong>Sucessor Geracional / Verificado</strong>
+                  <p>Aresta sólida verde/ciano: derivação direta atestada por paper ou documentação oficial do provedor.</p>
+                </div>
+              </div>
+              <div class="edge-legend-item">
+                <span class="legend-symbol dashed">⇢</span>
+                <div class="legend-text">
+                  <strong>Relação Inferida / Documental</strong>
+                  <p>Aresta tracejada âmbar: linhagem plausível fundamentada em indícios de mercado, sem paper formal.</p>
+                </div>
+              </div>
+              <div class="edge-legend-item">
+                <span class="legend-symbol fork">↔</span>
+                <div class="legend-text">
+                  <strong>Variante Paralela / Fork</strong>
+                  <p>Ramificação simultânea: especialização de porte (Flash/Pro), destilação ou fork de pesos abertos.</p>
+                </div>
+              </div>
+              <div class="edge-legend-item">
+                <span class="legend-symbol rename">≡</span>
+                <div class="legend-text">
+                  <strong>Rename / Identidade Revelada</strong>
+                  <p>Codinome de teste ou stealth em arenas (ex: LMSYS) cuja identidade foi confirmada pelo laboratório.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="lineages-container" id="lineagesListContainer">
             <!-- Injetado dinamicamente via JS -->
           </div>
@@ -2529,6 +2621,27 @@
       <div class="modal-footer" id="planWizardModalFooter" style="display: flex; justify-content: space-between; align-items: center;">
         <button class="btn-secondary" id="btnWizardPrevStep" style="display: none;">← Voltar</button>
         <button class="btn-primary" id="btnWizardNextStep">Avançar →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 9. MODAL DE INSPEÇÃO HISTÓRICA & CONEXÕES (Prompt 11) -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="historyInspectModalOverlay" role="dialog" aria-modal="true" aria-label="Inspeção Histórica">
+    <div class="modal-card" style="max-width: 820px; width: 95%;">
+      <div class="modal-header">
+        <div id="historyInspectModalHeaderContent">
+          <h3 id="historyInspectModalTitle">Inspeção de Modelo Histórico</h3>
+          <p id="historyInspectModalSubtitle" style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 2px;">Metadados arquiteturais, datas primárias e histórico metrológico.</p>
+        </div>
+        <button class="modal-close-btn" id="historyInspectModalCloseBtn" aria-label="Fechar Modal">&times;</button>
+      </div>
+      <div class="modal-body" id="historyInspectModalBody" style="max-height: 70vh; overflow-y: auto;">
+        <!-- Injetado dinamicamente via JS -->
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button class="btn-secondary" id="historyInspectModalCloseBtnFooter">Fechar</button>
       </div>
     </div>
   </div>

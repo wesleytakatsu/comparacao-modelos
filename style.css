@@ -3715,7 +3715,133 @@ input[type="range"]::-webkit-slider-thumb:hover {
   margin-bottom: 2px;
 }
 
-/* --- 3. LINHAGENS & HISTÓRICO --- */
+/* --- 3. LINHAGENS & HISTÓRICO (Prompt 11) --- */
+.history-kpis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.history-kpi-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--transition-fast), border-color var(--transition-fast);
+}
+.history-kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-cyan);
+}
+.history-kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--accent-cyan);
+}
+.history-kpi-card.kpi-verified::before {
+  background: var(--accent-emerald, #10b981);
+}
+.history-kpi-card.kpi-inferred::before {
+  background: var(--accent-amber, #f59e0b);
+}
+.history-kpi-card.kpi-benchmarks::before {
+  background: var(--accent-purple, #a855f7);
+}
+.history-kpi-card.kpi-timeline::before {
+  background: var(--accent-blue, #3b82f6);
+}
+.history-kpi-label {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+.history-kpi-value {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.1;
+  margin-bottom: 4px;
+  font-family: var(--font-mono, monospace);
+}
+.history-kpi-sub {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+/* Toolbar de Controles e Filtros Históricos */
+.history-controls-toolbar {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.history-search-box input {
+  width: 100%;
+  padding: 10px 16px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.92rem;
+  transition: border-color var(--transition-fast);
+}
+.history-search-box input:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
+}
+.history-filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+.history-filter-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+.history-filter-item select {
+  padding: 6px 12px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.history-filter-item select:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
+}
+.history-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+.history-checkbox-label input {
+  cursor: pointer;
+}
+
+/* Árvores Genealógicas */
 .lineages-container {
   display: flex;
   flex-direction: column;
@@ -3726,13 +3852,46 @@ input[type="range"]::-webkit-slider-thumb:hover {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 24px;
+  transition: border-color var(--transition-fast);
+}
+.lineage-family-card:hover {
+  border-color: rgba(34, 211, 238, 0.4);
+}
+.lineage-family-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  gap: 12px;
+}
+.lineage-family-header h3 {
+  color: var(--accent-cyan);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.lineage-family-toggle-icon {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  transition: transform var(--transition-fast);
+}
+.lineage-family-card.is-collapsed .lineage-family-toggle-icon {
+  transform: rotate(-90deg);
+}
+.lineage-family-card.is-collapsed .lineage-family-body {
+  display: none;
+}
+.lineage-family-body {
+  margin-top: 16px;
 }
 .lineage-flow {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 16px;
-  margin-top: 18px;
+  margin-top: 14px;
   padding: 16px;
   background: var(--bg-surface-elevated);
   border-radius: var(--radius-md);
@@ -3742,13 +3901,23 @@ input[type="range"]::-webkit-slider-thumb:hover {
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-sm);
   padding: 12px 16px;
-  min-width: 170px;
+  min-width: 190px;
   cursor: pointer;
   transition: all var(--transition-fast);
+  position: relative;
 }
 .lineage-node:hover {
   border-color: var(--accent-cyan);
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+.lineage-node-historical {
+  border-style: dashed;
+  background: var(--bg-surface);
+  opacity: 0.92;
+}
+.lineage-node-historical:hover {
+  opacity: 1;
 }
 .lineage-arrow {
   color: var(--accent-cyan);
@@ -3788,9 +3957,122 @@ input[type="range"]::-webkit-slider-thumb:hover {
   font-size: 0.78rem;
   color: var(--text-muted);
 }
-.lineage-node-historical {
-  border-style: dashed;
-  background: var(--bg-surface);
+
+/* Legenda Visual de Conexões Genealógicas (Seção 9) */
+.history-edge-legend {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  margin-bottom: 20px;
+}
+.edge-legend-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  flex-wrap: wrap;
+}
+.edge-legend-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: normal;
+}
+.edge-legend-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+}
+.edge-legend-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--bg-secondary);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+}
+.legend-symbol {
+  font-size: 1.15rem;
+  line-height: 1;
+  font-weight: bold;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.legend-symbol.solid {
+  color: var(--accent-emerald, #10b981);
+}
+.legend-symbol.dashed {
+  color: var(--accent-amber, #f59e0b);
+}
+.legend-symbol.fork {
+  color: var(--accent-cyan, #06b6d4);
+}
+.legend-symbol.rename {
+  color: var(--accent-purple, #a855f7);
+}
+.edge-legend-item .legend-text strong {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+.edge-legend-item .legend-text p {
+  margin: 0;
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+  line-height: 1.35;
+}
+
+/* Conexões e Arestas com Diferenciação Sólida/Tracejada */
+.lineage-connections-box {
+  margin-top: 16px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  padding: 14px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+}
+.lineage-connection-item {
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  transition: background var(--transition-fast);
+  cursor: pointer;
+}
+.lineage-connection-item:hover {
+  background: var(--bg-hover);
+}
+.lineage-connection-item.edge-verified {
+  border-left: 3px solid var(--accent-emerald, #10b981);
+}
+.lineage-connection-item.edge-inferred {
+  border-left: 3px dashed var(--accent-amber, #f59e0b);
+}
+.badge-edge-verified {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  font-size: 0.70rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.badge-edge-inferred {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px dashed rgba(245, 158, 11, 0.5);
+  font-size: 0.70rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
 }
 
 /* Timeline */
@@ -3808,23 +4090,107 @@ input[type="range"]::-webkit-slider-thumb:hover {
   flex-direction: column;
   gap: 20px;
 }
+.timeline-period-header {
+  position: relative;
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--accent-cyan);
+  padding: 6px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  align-self: flex-start;
+  margin-top: 10px;
+  margin-bottom: -6px;
+}
+.timeline-period-header::before {
+  content: '';
+  position: absolute;
+  left: -35px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  border: 2px solid var(--bg-base);
+}
 .timeline-card {
   position: relative;
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 16px 20px;
+  transition: border-color var(--transition-fast);
+}
+.timeline-card:hover {
+  border-color: rgba(34, 211, 238, 0.5);
 }
 .timeline-card::before {
   content: '';
   position: absolute;
   left: -35px;
-  top: 18px;
+  top: 20px;
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: var(--accent-cyan);
+  background: var(--text-muted);
   border: 2px solid var(--bg-base);
+}
+.timeline-card.event-release::before { background: #10b981; }
+.timeline-card.event-preview::before { background: #3b82f6; }
+.timeline-card.event-weights::before { background: #a855f7; }
+.timeline-card.event-pricing::before { background: #f59e0b; }
+.timeline-card.event-audit::before { background: #ef4444; }
+
+.badge-source-official {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  font-size: 0.72rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.badge-source-independent {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  font-size: 0.72rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.badge-source-community {
+  background: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  font-size: 0.72rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Modal de Inspeção Histórica */
+.history-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.history-meta-item {
+  background: var(--bg-surface-elevated);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+}
+.history-meta-item label {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.history-meta-item strong {
+  font-size: 0.88rem;
+  color: var(--text-primary);
 }
 
 /* --- 4. CASOS DE USO --- */

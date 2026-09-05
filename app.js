@@ -68,6 +68,12 @@
     activeBudgetStack: 110,
     activeHistoryTab: 'lineages',
     activeTimelineFilter: 'all',
+    historySearchQuery: '',
+    historyProviderFilter: 'all',
+    historyYearFilter: 'all',
+    historyEvidenceFilter: 'all',
+    historyShowPredecessors: true,
+    historyCollapsedFamilies: {},
     activeUseCaseId: 'saas-system-architecture',
     activeCommunityTab: 'divergences',
     communitySearchQuery: '',
@@ -202,8 +208,24 @@
     if (route === 'aa-intelligence') route = 'artificial-analysis';
     if (route === 'troubleshooter') route = 'troubleshoot';
     if (route === 'antigravity') route = 'antigravity-pools';
-    if (route === 'plans' || route === 'subscriptions') route = 'plans';
-    if (route === 'history' || route === 'lineages' || route === 'timeline') route = 'history';
+    if (route === 'history' || route === 'lineages' || route === 'timeline' || route === 'benchmarks-history') {
+      if (route === 'lineages' || route === 'timeline') {
+        AppState.activeHistoryTab = route;
+      } else if (param && ['lineages', 'timeline', 'benchmarks'].includes(param)) {
+        AppState.activeHistoryTab = param;
+      }
+      if (queryPart) {
+        const urlParams = new URLSearchParams(queryPart);
+        if (urlParams.get('tab')) AppState.activeHistoryTab = urlParams.get('tab');
+        if (urlParams.get('search') || urlParams.get('q')) AppState.historySearchQuery = (urlParams.get('search') || urlParams.get('q')).toLowerCase().trim();
+        if (urlParams.get('provider')) AppState.historyProviderFilter = urlParams.get('provider');
+        if (urlParams.get('year')) AppState.historyYearFilter = urlParams.get('year');
+        if (urlParams.get('evidence')) AppState.historyEvidenceFilter = urlParams.get('evidence');
+        if (urlParams.get('predecessors') !== null) AppState.historyShowPredecessors = urlParams.get('predecessors') !== 'false';
+        if (urlParams.get('event')) AppState.activeTimelineFilter = urlParams.get('event');
+      }
+      route = 'history';
+    }
     if (route === 'use-cases' || route === 'projects' || route === 'stacks') route = 'use-cases';
     if (route === 'community' || route === 'behavior') route = 'community';
     if (route === 'platforms' || route === 'opencode' || route === 'availability') route = 'platforms';
@@ -877,17 +899,98 @@
       });
     }
 
-    // 6. Abas do Histórico (Lineages, Timeline, Benchmarks)
+    // 6. Abas e Controles do Histórico (Prompt 11)
     const historyTabsNav = document.querySelector('.history-tabs-nav');
     if (historyTabsNav) {
       historyTabsNav.addEventListener('click', (e) => {
         const btn = e.target.closest('.btn-toggle');
         if (btn) {
           AppState.activeHistoryTab = btn.getAttribute('data-htab');
+          updateHistoryUrl();
           renderHistoryView();
         }
       });
     }
+
+    const historySearchInput = document.getElementById('historySearchInput');
+    if (historySearchInput) {
+      historySearchInput.addEventListener('input', (e) => {
+        AppState.historySearchQuery = e.target.value.toLowerCase().trim();
+        updateHistoryUrl();
+        renderHistoryView();
+      });
+    }
+
+    const historyProviderFilter = document.getElementById('historyProviderFilter');
+    if (historyProviderFilter) {
+      historyProviderFilter.addEventListener('change', (e) => {
+        AppState.historyProviderFilter = e.target.value;
+        updateHistoryUrl();
+        renderHistoryView();
+      });
+    }
+
+    const historyYearFilter = document.getElementById('historyYearFilter');
+    if (historyYearFilter) {
+      historyYearFilter.addEventListener('change', (e) => {
+        AppState.historyYearFilter = e.target.value;
+        updateHistoryUrl();
+        renderHistoryView();
+      });
+    }
+
+    const historyEvidenceFilter = document.getElementById('historyEvidenceFilter');
+    if (historyEvidenceFilter) {
+      historyEvidenceFilter.addEventListener('change', (e) => {
+        AppState.historyEvidenceFilter = e.target.value;
+        updateHistoryUrl();
+        renderHistoryView();
+      });
+    }
+
+    const historyTogglePredecessors = document.getElementById('historyTogglePredecessors');
+    if (historyTogglePredecessors) {
+      historyTogglePredecessors.addEventListener('change', (e) => {
+        AppState.historyShowPredecessors = e.target.checked;
+        updateHistoryUrl();
+        renderHistoryView();
+      });
+    }
+
+    const historyToggleExpandAllBtn = document.getElementById('historyToggleExpandAllBtn');
+    if (historyToggleExpandAllBtn) {
+      historyToggleExpandAllBtn.addEventListener('click', () => {
+        const anyExpanded = Object.values(AppState.historyCollapsedFamilies).some(v => !v);
+        const collapseAll = anyExpanded || Object.keys(AppState.historyCollapsedFamilies).length === 0;
+        if (typeof MODEL_HISTORY_DATA !== 'undefined' && MODEL_HISTORY_DATA.lineages) {
+          MODEL_HISTORY_DATA.lineages.forEach(lin => {
+            AppState.historyCollapsedFamilies[lin.familyId] = collapseAll;
+          });
+        }
+        historyToggleExpandAllBtn.textContent = collapseAll ? 'Expandir Todos' : 'Recolher Todos';
+        renderHistoryView();
+      });
+    }
+
+    // Modal de Inspeção Histórica & Conexões
+    const historyInspectModalOverlay = document.getElementById('historyInspectModalOverlay');
+    const historyInspectCloseBtn = document.getElementById('historyInspectModalCloseBtn');
+    const historyInspectCloseFooter = document.getElementById('historyInspectModalCloseBtnFooter');
+    const closeHistoryModal = () => {
+      if (historyInspectModalOverlay) historyInspectModalOverlay.classList.remove('active');
+    };
+    if (historyInspectCloseBtn) historyInspectCloseBtn.addEventListener('click', closeHistoryModal);
+    if (historyInspectCloseFooter) historyInspectCloseFooter.addEventListener('click', closeHistoryModal);
+    if (historyInspectModalOverlay) {
+      historyInspectModalOverlay.addEventListener('click', (e) => {
+        if (e.target === historyInspectModalOverlay) closeHistoryModal();
+      });
+    }
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && historyInspectModalOverlay && historyInspectModalOverlay.classList.contains('active')) {
+        closeHistoryModal();
+      }
+    });
 
     // 7. Filtros da Timeline
     const timelineFilters = document.querySelector('.timeline-filters');
@@ -898,6 +1001,7 @@
           timelineFilters.querySelectorAll('.btn-toggle').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           AppState.activeTimelineFilter = btn.getAttribute('data-tfilter');
+          updateHistoryUrl();
           renderHistoryView();
         }
       });
@@ -5868,10 +5972,396 @@
   }
 
   // ==========================================
-  // 18. VIEW: HISTÓRICO, LINHAGENS & TIMELINE
+  // 18. VIEW: HISTÓRICO, LINHAGENS & TIMELINE (Prompt 11 Auditado)
   // ==========================================
+  function updateHistoryUrl() {
+    if (AppState.currentRoute !== 'history') return;
+    const params = new URLSearchParams();
+    if (AppState.activeHistoryTab && AppState.activeHistoryTab !== 'lineages') {
+      params.set('tab', AppState.activeHistoryTab);
+    }
+    if (AppState.historySearchQuery) params.set('search', AppState.historySearchQuery);
+    if (AppState.historyProviderFilter && AppState.historyProviderFilter !== 'all') {
+      params.set('provider', AppState.historyProviderFilter);
+    }
+    if (AppState.historyYearFilter && AppState.historyYearFilter !== 'all') {
+      params.set('year', AppState.historyYearFilter);
+    }
+    if (AppState.historyEvidenceFilter && AppState.historyEvidenceFilter !== 'all') {
+      params.set('evidence', AppState.historyEvidenceFilter);
+    }
+    if (AppState.historyShowPredecessors === false) {
+      params.set('predecessors', 'false');
+    }
+    if (AppState.activeTimelineFilter && AppState.activeTimelineFilter !== 'all') {
+      params.set('event', AppState.activeTimelineFilter);
+    }
+    const queryString = params.toString();
+    const newHash = queryString ? `#history?${queryString}` : '#history';
+    if (window.location.hash !== newHash) {
+      window.history.replaceState(null, '', newHash);
+    }
+  }
+
+  function openHistoryModelModal(modelId, familyId) {
+    const modalOverlay = document.getElementById('historyInspectModalOverlay');
+    const modalTitle = document.getElementById('historyInspectModalTitle');
+    const modalSubtitle = document.getElementById('historyInspectModalSubtitle');
+    const modalBody = document.getElementById('historyInspectModalBody');
+    if (!modalOverlay || !modalBody) return;
+
+    let foundNode = null;
+    let foundFamily = null;
+    if (typeof MODEL_HISTORY_DATA !== 'undefined' && MODEL_HISTORY_DATA.lineages) {
+      for (const lin of MODEL_HISTORY_DATA.lineages) {
+        if (familyId && lin.familyId !== familyId) continue;
+        if (lin.tracks) {
+          for (const tr of lin.tracks) {
+            const n = tr.nodes.find(node => node.modelId === modelId);
+            if (n) {
+              foundNode = n;
+              foundFamily = lin;
+              break;
+            }
+          }
+        } else if (lin.nodes) {
+          const n = lin.nodes.find(node => node.modelId === modelId);
+          if (n) {
+            foundNode = n;
+            foundFamily = lin;
+            break;
+          }
+        }
+        if (foundNode) break;
+      }
+      // Se não encontrou filtrando por familyId, faz busca global
+      if (!foundNode) {
+        for (const lin of MODEL_HISTORY_DATA.lineages) {
+          const allNodes = lin.tracks ? lin.tracks.flatMap(t => t.nodes) : (lin.nodes || []);
+          const n = allNodes.find(node => node.modelId === modelId);
+          if (n) {
+            foundNode = n;
+            foundFamily = lin;
+            break;
+          }
+        }
+      }
+    }
+
+    if (!foundNode) {
+      const catalogModel = typeof AI_MODELS_DATA !== 'undefined' ? AI_MODELS_DATA[modelId] : null;
+      if (catalogModel) {
+        location.hash = `#model/${modelId}`;
+        return;
+      }
+      return;
+    }
+
+    const inCatalog = typeof AI_MODELS_DATA !== 'undefined' && Boolean(AI_MODELS_DATA[modelId]);
+    if (modalTitle) modalTitle.textContent = `${foundNode.name} (${foundNode.modelId})`;
+    if (modalSubtitle) modalSubtitle.textContent = `Família: ${foundFamily ? foundFamily.familyName : 'Linhagem Histórica'} • Status: ${foundNode.status}`;
+
+    // Predecessores e Sucessores diretos
+    const predecessors = [];
+    const successors = [];
+    if (foundFamily && foundFamily.connections) {
+      for (const conn of foundFamily.connections) {
+        if (conn.to === modelId) predecessors.push(conn);
+        if (conn.from === modelId) successors.push(conn);
+      }
+    }
+
+    // Benchmarks registrados
+    const modelBenchmarks = (typeof BENCHMARK_HISTORY_DATA !== 'undefined')
+      ? BENCHMARK_HISTORY_DATA.filter(b => b.modelId === modelId)
+      : [];
+
+    // Fontes primárias
+    const sourceLinks = (foundNode.sourceIds || []).map(sId => {
+      const src = (typeof DATA_SOURCES !== 'undefined' && DATA_SOURCES[sId])
+        || (typeof MODEL_HISTORY_DATA !== 'undefined' && MODEL_HISTORY_DATA.sources && MODEL_HISTORY_DATA.sources[sId]);
+      if (src) {
+        return `<a href="${src.url}" target="_blank" rel="noopener noreferrer" style="color: var(--accent-cyan); text-decoration: underline;">${src.title}</a> <span style="color: var(--text-muted); font-size: 0.75rem;">(${src.date || 'Auditado'})</span>`;
+      }
+      return `<code>${sId}</code>`;
+    });
+
+    modalBody.innerHTML = `
+      <div class="history-meta-grid">
+        <div class="history-meta-item">
+          <label>Identificador Único</label>
+          <strong>${foundNode.modelId}</strong>
+        </div>
+        <div class="history-meta-item">
+          <label>Data de Lançamento / Preview</label>
+          <strong>${foundNode.releaseDate || '—'}</strong>
+        </div>
+        <div class="history-meta-item">
+          <label>Disponibilidade Geral (GA)</label>
+          <strong>${foundNode.gaAt || foundNode.releaseDate || '—'}</strong>
+        </div>
+        <div class="history-meta-item">
+          <label>Corte de Conhecimento</label>
+          <strong>${foundNode.knowledgeCutoff || '—'}</strong>
+        </div>
+        <div class="history-meta-item">
+          <label>Arquitetura / Base</label>
+          <strong>${foundNode.architecture || '—'}${foundNode.baseModel ? ` (Base: ${foundNode.baseModel})` : ''}</strong>
+        </div>
+        <div class="history-meta-item">
+          <label>Acervo do Portal</label>
+          <strong>${inCatalog ? '<span style="color: #34d399;">Ativo no Catálogo Contemporâneo</span>' : '<span style="color: #fbbf24;">Predecessor Histórico Auditado</span>'}</strong>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 16px;">
+        <h4 style="font-size: 0.88rem; color: var(--text-primary); margin-bottom: 6px;">Notas Arquiteturais e Metadados</h4>
+        <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5; background: var(--bg-surface-elevated); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+          ${foundNode.notes || 'Sem observações adicionais.'}
+        </p>
+      </div>
+
+      ${predecessors.length > 0 || successors.length > 0 ? `
+        <div style="margin-bottom: 16px;">
+          <h4 style="font-size: 0.88rem; color: var(--text-primary); margin-bottom: 6px;">Linhagem Genealógica Direta</h4>
+          <div style="font-size: 0.82rem; line-height: 1.6; background: var(--bg-surface-elevated); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+            ${predecessors.map(p => `
+              <div style="margin-bottom: 6px;">
+                <span class="badge-tag ${p.status === 'verified' ? 'badge-frontier' : 'badge-warning'}" style="font-size: 0.68rem;">${p.status === 'verified' ? 'Predecessor Verificado' : 'Predecessor Inferido'}</span>
+                <strong>${p.from}</strong> ➔ <em>${p.relationType || 'sucessor'}</em>: ${p.improvements}
+              </div>
+            `).join('')}
+            ${successors.map(s => `
+              <div style="margin-bottom: 6px;">
+                <span class="badge-tag ${s.status === 'verified' ? 'badge-frontier' : 'badge-warning'}" style="font-size: 0.68rem;">${s.status === 'verified' ? 'Sucessor Verificado' : 'Sucessor Inferido'}</span>
+                <strong>${s.to}</strong> ➔ <em>${s.relationType || 'sucessor'}</em>: ${s.improvements}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+
+      ${modelBenchmarks.length > 0 ? `
+        <div style="margin-bottom: 16px;">
+          <h4 style="font-size: 0.88rem; color: var(--text-primary); margin-bottom: 6px;">Histórico Metrológico de Benchmarks</h4>
+          <div class="table-responsive">
+            <table class="data-table" style="font-size: 0.80rem;">
+              <thead>
+                <tr><th>Data</th><th>Benchmark</th><th>Score</th><th>IC</th><th>Custo/Task</th><th>Fonte</th></tr>
+              </thead>
+              <tbody>
+                ${modelBenchmarks.map(b => `
+                  <tr>
+                    <td><code>${b.date}</code></td>
+                    <td><strong>${b.benchmark} ${b.benchmarkVersion}</strong></td>
+                    <td><strong class="highlight-green">${b.score.toFixed(1)}%</strong></td>
+                    <td>${b.confidenceInterval ? `±${b.confidenceInterval}pp` : '—'}</td>
+                    <td>${b.costPerTaskUsd ? `$${b.costPerTaskUsd.toFixed(2)}` : '—'}</td>
+                    <td><span class="badge-tag ${b.sourceType === 'official' ? 'badge-frontier' : 'badge-subdollar'}">${b.sourceType}</span></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ` : ''}
+
+      <div>
+        <h4 style="font-size: 0.88rem; color: var(--text-primary); margin-bottom: 6px;">Fontes Primárias & Evidências Comprobatórias</h4>
+        <ul style="padding-left: 20px; font-size: 0.82rem; line-height: 1.6;">
+          ${sourceLinks.length > 0 ? sourceLinks.map(s => `<li>${s}</li>`).join('') : '<li style="color: var(--text-muted);">Nenhuma fonte primária associada explicitamente.</li>'}
+        </ul>
+      </div>
+
+      ${inCatalog ? `
+        <div style="margin-top: 20px; text-align: right;">
+          <a href="#model/${modelId}" class="btn-primary" style="display: inline-block; padding: 8px 18px; font-size: 0.85rem;" onclick="document.getElementById('historyInspectModalOverlay').classList.remove('active');">
+            Ver Ficha Completa no Catálogo Contemporâneo →
+          </a>
+        </div>
+      ` : ''}
+    `;
+
+    modalOverlay.classList.add('active');
+  }
+
+  function openHistoryEdgeModal(familyId, fromId, toId) {
+    const modalOverlay = document.getElementById('historyInspectModalOverlay');
+    const modalTitle = document.getElementById('historyInspectModalTitle');
+    const modalSubtitle = document.getElementById('historyInspectModalSubtitle');
+    const modalBody = document.getElementById('historyInspectModalBody');
+    if (!modalOverlay || !modalBody) return;
+
+    let foundConn = null;
+    let foundFamily = null;
+    if (typeof MODEL_HISTORY_DATA !== 'undefined' && MODEL_HISTORY_DATA.lineages) {
+      foundFamily = MODEL_HISTORY_DATA.lineages.find(lin => lin.familyId === familyId);
+      if (foundFamily && foundFamily.connections) {
+        foundConn = foundFamily.connections.find(c => c.from === fromId && c.to === toId);
+      }
+    }
+
+    if (!foundConn) return;
+
+    const isVerified = foundConn.status === 'verified';
+    if (modalTitle) modalTitle.textContent = `Conexão Arquitetural: ${foundConn.from} ➔ ${foundConn.to}`;
+    if (modalSubtitle) modalSubtitle.textContent = `Família: ${foundFamily ? foundFamily.familyName : familyId} • Tipo: ${foundConn.relationType || 'sucessor_direto'}`;
+
+    const sourceLinks = (foundConn.sourceIds || []).map(sId => {
+      const src = (typeof DATA_SOURCES !== 'undefined' && DATA_SOURCES[sId])
+        || (typeof MODEL_HISTORY_DATA !== 'undefined' && MODEL_HISTORY_DATA.sources && MODEL_HISTORY_DATA.sources[sId]);
+      if (src) {
+        return `<a href="${src.url}" target="_blank" rel="noopener noreferrer" style="color: var(--accent-cyan); text-decoration: underline;">${src.title}</a> <span style="color: var(--text-muted); font-size: 0.75rem;">(${src.date || 'Auditado'})</span>`;
+      }
+      return `<code>${sId}</code>`;
+    });
+
+    modalBody.innerHTML = `
+      <div class="history-meta-grid">
+        <div class="history-meta-item">
+          <label>Origem (Predecessor)</label>
+          <strong>${foundConn.from}</strong>
+        </div>
+        <div class="history-meta-item">
+          <label>Destino (Sucessor)</label>
+          <strong>${foundConn.to}</strong>
+        </div>
+        <div class="history-meta-item">
+          <label>Status Metrológico da Aresta</label>
+          <strong style="color: ${isVerified ? '#34d399' : '#fbbf24'};">${isVerified ? '✓ Verificada (Aresta Sólida)' : '⚠️ Inferida (Aresta Tracejada)'}</strong>
+        </div>
+        <div class="history-meta-item">
+          <label>Grau de Confiança</label>
+          <strong>${foundConn.confidence || (isVerified ? 'high' : 'medium')}</strong>
+        </div>
+        <div class="history-meta-item">
+          <label>Tipo de Relação</label>
+          <strong><code>${foundConn.relationType || 'direct_successor'}</code></strong>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 16px;">
+        <h4 style="font-size: 0.88rem; color: var(--text-primary); margin-bottom: 6px;">Evoluções & Justificativa Técnica</h4>
+        <div style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5; background: var(--bg-surface-elevated); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+          <p style="margin-bottom: ${foundConn.notes ? '8px' : '0'};"><strong>Evoluções documentadas:</strong> ${foundConn.improvements}</p>
+          ${foundConn.notes ? `<p style="color: var(--text-muted); font-size: 0.80rem;"><em>Auditoria técnica:</em> ${foundConn.notes}</p>` : ''}
+        </div>
+      </div>
+
+      <div>
+        <h4 style="font-size: 0.88rem; color: var(--text-primary); margin-bottom: 6px;">Fontes Primárias & Evidências Comprobatórias</h4>
+        <ul style="padding-left: 20px; font-size: 0.82rem; line-height: 1.6;">
+          ${sourceLinks.length > 0 ? sourceLinks.map(s => `<li>${s}</li>`).join('') : '<li style="color: var(--text-muted);">Nenhuma fonte primária explicitada. Conexão classificada como relação inferida por compatibilidade temporal/arquitetural.</li>'}
+        </ul>
+      </div>
+    `;
+
+    modalOverlay.classList.add('active');
+  }
+
+  // Exposição global para interatividade inline
+  if (typeof window !== 'undefined') {
+    window.openHistoryModelModal = openHistoryModelModal;
+    window.openHistoryEdgeModal = openHistoryEdgeModal;
+  }
+
   function renderHistoryView() {
     if (typeof MODEL_HISTORY_DATA === 'undefined') return;
+
+    // Sincroniza controles de busca e filtros da UI
+    const searchInput = document.getElementById('historySearchInput');
+    if (searchInput && document.activeElement !== searchInput) {
+      searchInput.value = AppState.historySearchQuery || '';
+    }
+    const providerFilter = document.getElementById('historyProviderFilter');
+    if (providerFilter) providerFilter.value = AppState.historyProviderFilter || 'all';
+    const yearFilter = document.getElementById('historyYearFilter');
+    if (yearFilter) yearFilter.value = AppState.historyYearFilter || 'all';
+    const evidenceFilter = document.getElementById('historyEvidenceFilter');
+    if (evidenceFilter) evidenceFilter.value = AppState.historyEvidenceFilter || 'all';
+    const togglePredecessors = document.getElementById('historyTogglePredecessors');
+    if (togglePredecessors) togglePredecessors.checked = AppState.historyShowPredecessors !== false;
+
+    // Renderiza KPIs de Cobertura Histórica (Prompt 11 / Seção 70)
+    const kpiContainer = document.getElementById('historyKpiContainer');
+    if (kpiContainer) {
+      const catalogCount = typeof AI_MODELS_DATA !== 'undefined' ? Object.keys(AI_MODELS_DATA).length : 0;
+      const historyModelIds = new Set();
+      let historicalOnlyCount = 0;
+      let verifiedEdges = 0;
+      let inferredEdges = 0;
+
+      if (MODEL_HISTORY_DATA.lineages) {
+        MODEL_HISTORY_DATA.lineages.forEach(lin => {
+          const allNodes = lin.tracks ? lin.tracks.flatMap(t => t.nodes) : (lin.nodes || []);
+          allNodes.forEach(n => {
+            historyModelIds.add(n.modelId);
+            if (!AI_MODELS_DATA || !AI_MODELS_DATA[n.modelId]) {
+              historicalOnlyCount++;
+            }
+          });
+          (lin.connections || []).forEach(c => {
+            if (c.status === 'verified') verifiedEdges++;
+            else inferredEdges++;
+          });
+        });
+      }
+
+      let catalogWithHistoryCount = 0;
+      if (typeof AI_MODELS_DATA !== 'undefined') {
+        Object.keys(AI_MODELS_DATA).forEach(id => {
+          if (historyModelIds.has(id)) catalogWithHistoryCount++;
+        });
+      }
+      const coveragePct = catalogCount > 0 ? Math.round((catalogWithHistoryCount / catalogCount) * 100) : 0;
+      const needsReviewCount = inferredEdges; // Conexões inferidas demandam revisão documental contínua
+
+      const totalEvents = MODEL_HISTORY_DATA.events ? MODEL_HISTORY_DATA.events.length : 0;
+      const totalBenchmarks = typeof BENCHMARK_HISTORY_DATA !== 'undefined' ? BENCHMARK_HISTORY_DATA.length : 0;
+
+      kpiContainer.innerHTML = `
+        <div class="history-kpi-card">
+          <div class="history-kpi-label">Modelos no Catálogo</div>
+          <div class="history-kpi-value">${catalogCount}</div>
+          <div class="history-kpi-sub">Ativos contemporâneos</div>
+        </div>
+        <div class="history-kpi-card">
+          <div class="history-kpi-label">Modelos com História</div>
+          <div class="history-kpi-value">${historyModelIds.size}</div>
+          <div class="history-kpi-sub">${catalogWithHistoryCount} catálogo + ${historicalOnlyCount} predecessores</div>
+        </div>
+        <div class="history-kpi-card">
+          <div class="history-kpi-label">Cobertura de Linhagem</div>
+          <div class="history-kpi-value highlight-cyan">${coveragePct}%</div>
+          <div class="history-kpi-sub">${catalogWithHistoryCount}/${catalogCount} modelos mapeados</div>
+        </div>
+        <div class="history-kpi-card kpi-timeline">
+          <div class="history-kpi-label">Eventos Históricos</div>
+          <div class="history-kpi-value highlight-cyan">${totalEvents}</div>
+          <div class="history-kpi-sub">Auditados na timeline</div>
+        </div>
+        <div class="history-kpi-card kpi-benchmarks">
+          <div class="history-kpi-label">Benchmark Runs Históricos</div>
+          <div class="history-kpi-value highlight-purple">${totalBenchmarks}</div>
+          <div class="history-kpi-sub">Execuções metrológicas c/ IC</div>
+        </div>
+        <div class="history-kpi-card kpi-verified">
+          <div class="history-kpi-label">Edges Verificadas</div>
+          <div class="history-kpi-value highlight-green">${verifiedEdges}</div>
+          <div class="history-kpi-sub">Arestas sólidas c/ fonte primária</div>
+        </div>
+        <div class="history-kpi-card kpi-inferred">
+          <div class="history-kpi-label">Edges Inferidas</div>
+          <div class="history-kpi-value highlight-gold">${inferredEdges}</div>
+          <div class="history-kpi-sub">Arestas tracejadas fundamentadas</div>
+        </div>
+        <div class="history-kpi-card kpi-inferred">
+          <div class="history-kpi-label">Itens Needs-Review</div>
+          <div class="history-kpi-value highlight-gold">${needsReviewCount}</div>
+          <div class="history-kpi-sub">Arestas sob revisão técnica</div>
+        </div>
+      `;
+    }
 
     const currentTab = AppState.activeHistoryTab || 'lineages';
 
@@ -5883,125 +6373,377 @@
     const activePanel = document.getElementById(`htab-${currentTab}`);
     if (activePanel) activePanel.style.display = 'block';
 
+    const providerFilterVal = AppState.historyProviderFilter || 'all';
+    const yearFilterVal = AppState.historyYearFilter || 'all';
+    const evidenceFilterVal = AppState.historyEvidenceFilter || 'all';
+    const searchQuery = (AppState.historySearchQuery || '').toLowerCase().trim();
+    const showPredecessors = AppState.historyShowPredecessors !== false;
+
+    // Helper para mapear se provedor bate com o filtro
+    const matchProvider = (familyProvider, familyId, modelId) => {
+      if (providerFilterVal === 'all') return true;
+      const target = providerFilterVal.toLowerCase();
+      if (familyProvider && familyProvider.toLowerCase().includes(target)) return true;
+      if (familyId && familyId.toLowerCase().includes(target)) return true;
+      if (modelId && modelId.toLowerCase().includes(target)) return true;
+      return false;
+    };
+
     if (currentTab === 'lineages') {
       const container = document.getElementById('lineagesListContainer');
-      if (container) {
-        container.innerHTML = MODEL_HISTORY_DATA.lineages.map(lin => {
+      if (container && MODEL_HISTORY_DATA.lineages) {
+        const filteredFamilies = MODEL_HISTORY_DATA.lineages.filter(lin => {
+          // Filtro de provedor
+          if (!matchProvider(lin.provider, lin.familyId, '')) return false;
+
+          // Filtro de busca
+          if (searchQuery) {
+            const familyMatch = (lin.familyName || '').toLowerCase().includes(searchQuery) ||
+                                (lin.description || '').toLowerCase().includes(searchQuery);
+            const allNodes = lin.tracks ? lin.tracks.flatMap(t => t.nodes) : (lin.nodes || []);
+            const nodeMatch = allNodes.some(n =>
+              (n.name || '').toLowerCase().includes(searchQuery) ||
+              (n.modelId || '').toLowerCase().includes(searchQuery) ||
+              (n.notes || '').toLowerCase().includes(searchQuery) ||
+              (n.architecture || '').toLowerCase().includes(searchQuery)
+            );
+            if (!familyMatch && !nodeMatch) return false;
+          }
+
+          // Filtro de evidência
+          if (evidenceFilterVal === 'verified') {
+            const hasVerified = (lin.connections || []).some(c => c.status === 'verified');
+            if (!hasVerified) return false;
+          } else if (evidenceFilterVal === 'inferred') {
+            const hasInferred = (lin.connections || []).some(c => c.status === 'inferred');
+            if (!hasInferred) return false;
+          }
+
+          return true;
+        });
+
+        if (filteredFamilies.length === 0) {
+          container.innerHTML = `
+            <div style="text-align: center; padding: 48px 16px; background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+              <p style="font-size: 1.1rem; color: var(--text-primary); margin-bottom: 8px;">Nenhuma linhagem encontrada com os filtros selecionados.</p>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">Tente alterar o provedor, remover a busca ou habilitar predecessores históricos.</p>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = filteredFamilies.map(lin => {
+          const isCollapsed = Boolean(AppState.historyCollapsedFamilies[lin.familyId]);
           let flowContentHtml = '';
+
+          const filterNodesList = (nodes) => {
+            return nodes.filter(n => {
+              const inCatalog = typeof AI_MODELS_DATA !== 'undefined' && Boolean(AI_MODELS_DATA[n.modelId]);
+              if (!showPredecessors && !inCatalog && !searchQuery) return false;
+              if (yearFilterVal !== 'all') {
+                const year = (n.releaseDate || '').substring(0, 4);
+                if (year !== yearFilterVal) return false;
+              }
+              if (searchQuery) {
+                const text = `${n.name} ${n.modelId} ${n.notes} ${n.architecture}`.toLowerCase();
+                if (!text.includes(searchQuery)) return false;
+              }
+              return true;
+            });
+          };
 
           if (lin.tracks && lin.tracks.length > 0) {
             flowContentHtml = `
               <div class="lineage-tracks-wrapper">
-                ${lin.tracks.map(tr => `
-                  <div class="lineage-track-lane">
-                    <div class="lineage-track-header">
-                      <div class="lineage-track-title">
-                        <span>⚡</span> ${tr.trackName}
-                      </div>
-                      ${tr.trackDesc ? `<div class="lineage-track-desc">${tr.trackDesc}</div>` : ''}
-                    </div>
-                    <div class="lineage-flow" style="display: flex; align-items: center; gap: 12px; overflow-x: auto; padding: 6px 0; margin-top: 0; background: transparent;">
-                      ${tr.nodes.map((n, idx) => {
-                        const inCatalog = typeof AI_MODELS_DATA !== 'undefined' && AI_MODELS_DATA[n.modelId];
-                        return `
-                        <div class="lineage-node ${inCatalog ? '' : 'lineage-node-historical'}" 
-                             ${inCatalog ? `onclick="location.hash='#model/${n.modelId}'"` : ''} 
-                             style="min-width: 200px; flex-shrink: 0; ${inCatalog ? 'cursor: pointer;' : 'cursor: default; opacity: 0.88;'}">
-                          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 6px;">
-                            <strong style="color: var(--text-primary); font-size: 0.92rem;">${n.name}</strong>
-                            <span class="badge-tag ${n.status === 'active' ? 'badge-frontier' : n.status === 'superseded' ? 'badge-warning' : n.status === 'stable' ? 'badge-frontier' : 'badge-subdollar'}">${n.status}</span>
-                          </div>
-                          <div style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 6px;">Lançamento: ${n.releaseDate}</div>
-                          <div style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.35;">${n.notes}</div>
-                          ${!inCatalog ? `<div style="font-size: 0.70rem; color: var(--accent-cyan); margin-top: 6px;">📍 Predecessor Histórico</div>` : ''}
+                ${lin.tracks.map(tr => {
+                  const visibleNodes = filterNodesList(tr.nodes);
+                  if (visibleNodes.length === 0 && (searchQuery || yearFilterVal !== 'all' || !showPredecessors)) {
+                    return '';
+                  }
+                  return `
+                    <div class="lineage-track-lane">
+                      <div class="lineage-track-header">
+                        <div class="lineage-track-title">
+                          <span>⚡</span> ${tr.trackName}
                         </div>
-                        ${idx < tr.nodes.length - 1 ? `<span class="lineage-arrow" style="color: var(--accent-cyan); font-size: 1.3rem; font-weight: bold; flex-shrink: 0;">➔</span>` : ''}
-                      `;
-                      }).join('')}
+                        ${tr.trackDesc ? `<div class="lineage-track-desc">${tr.trackDesc}</div>` : ''}
+                      </div>
+                      <div class="lineage-flow" style="display: flex; align-items: center; gap: 12px; overflow-x: auto; padding: 8px 0; margin-top: 0; background: transparent;">
+                        ${visibleNodes.map((n, idx) => {
+                          const inCatalog = typeof AI_MODELS_DATA !== 'undefined' && Boolean(AI_MODELS_DATA[n.modelId]);
+                          const clickHandler = inCatalog
+                            ? `onclick="location.hash='#model/${n.modelId}'"`
+                            : `onclick="openHistoryModelModal('${n.modelId}', '${lin.familyId}')"`;
+                          return `
+                            <div class="lineage-node ${inCatalog ? '' : 'lineage-node-historical'}" 
+                                 ${clickHandler} 
+                                 style="min-width: 210px; flex-shrink: 0; cursor: pointer;">
+                              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 6px;">
+                                <strong style="color: var(--text-primary); font-size: 0.92rem;">${n.name}</strong>
+                                <span class="badge-tag ${n.status === 'active' ? 'badge-frontier' : n.status === 'superseded' ? 'badge-warning' : n.status === 'stable' ? 'badge-frontier' : 'badge-subdollar'}">${n.status}</span>
+                              </div>
+                              <div style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 6px;">Lançamento: ${n.releaseDate}</div>
+                              <div style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.35;">${n.notes}</div>
+                              <div style="font-size: 0.70rem; color: ${inCatalog ? 'var(--accent-cyan)' : 'var(--accent-amber, #f59e0b)'}; margin-top: 6px; display: flex; justify-content: space-between;">
+                                <span>${inCatalog ? '✓ No Catálogo' : '📍 Predecessor Histórico'}</span>
+                                <span style="text-decoration: underline;">Inspecionar ↗</span>
+                              </div>
+                            </div>
+                            ${idx < visibleNodes.length - 1 ? `<span class="lineage-arrow" style="color: var(--accent-cyan); font-size: 1.3rem; font-weight: bold; flex-shrink: 0;">➔</span>` : ''}
+                          `;
+                        }).join('')}
+                      </div>
                     </div>
-                  </div>
-                `).join('')}
+                  `;
+                }).join('')}
               </div>
             `;
           } else if (lin.nodes && lin.nodes.length > 0) {
+            const visibleNodes = filterNodesList(lin.nodes);
             flowContentHtml = `
-              <div class="lineage-flow" style="margin-top: 16px;">
-                ${lin.nodes.map((n, idx) => `
-                  <div class="lineage-node" onclick="location.hash='#model/${n.modelId}'">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                      <strong style="color: var(--text-primary); font-size: 0.95rem;">${n.name}</strong>
-                      <span class="badge-tag ${n.status === 'active' ? 'badge-frontier' : n.status === 'superseded' ? 'badge-warning' : 'badge-subdollar'}">${n.status}</span>
+              <div class="lineage-flow" style="margin-top: 14px;">
+                ${visibleNodes.map((n, idx) => {
+                  const inCatalog = typeof AI_MODELS_DATA !== 'undefined' && Boolean(AI_MODELS_DATA[n.modelId]);
+                  const clickHandler = inCatalog
+                    ? `onclick="location.hash='#model/${n.modelId}'"`
+                    : `onclick="openHistoryModelModal('${n.modelId}', '${lin.familyId}')"`;
+                  return `
+                    <div class="lineage-node ${inCatalog ? '' : 'lineage-node-historical'}" ${clickHandler}>
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <strong style="color: var(--text-primary); font-size: 0.95rem;">${n.name}</strong>
+                        <span class="badge-tag ${n.status === 'active' ? 'badge-frontier' : n.status === 'superseded' ? 'badge-warning' : 'badge-subdollar'}">${n.status}</span>
+                      </div>
+                      <div style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 6px;">Lançamento: ${n.releaseDate}</div>
+                      <div style="font-size: 0.78rem; color: var(--text-secondary);">${n.notes}</div>
+                      <div style="font-size: 0.70rem; color: ${inCatalog ? 'var(--accent-cyan)' : 'var(--accent-amber, #f59e0b)'}; margin-top: 6px; display: flex; justify-content: space-between;">
+                        <span>${inCatalog ? '✓ No Catálogo' : '📍 Predecessor Histórico'}</span>
+                        <span style="text-decoration: underline;">Inspecionar ↗</span>
+                      </div>
                     </div>
-                    <div style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 6px;">Lançamento: ${n.releaseDate}</div>
-                    <div style="font-size: 0.78rem; color: var(--text-secondary);">${n.notes}</div>
-                  </div>
-                  ${idx < lin.nodes.length - 1 ? `<span class="lineage-arrow">➔</span>` : ''}
-                `).join('')}
+                    ${idx < visibleNodes.length - 1 ? `<span class="lineage-arrow">➔</span>` : ''}
+                  `;
+                }).join('')}
               </div>
             `;
           }
 
-          const connectionsHtml = (lin.connections || []).length > 0 ? `
-            <div style="margin-top: 14px; font-size: 0.82rem; color: var(--text-muted); background: var(--bg-card); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
-              <strong style="color: var(--text-primary);">Evoluções registradas na linhagem:</strong>
-              <ul style="margin-top: 6px; padding-left: 18px; color: var(--text-secondary); line-height: 1.5;">
-                ${lin.connections.map(c => `<li><strong>${c.from} ➔ ${c.to}:</strong> ${c.improvements}</li>`).join('')}
-              </ul>
+          // Conexões com diferenciação verificada (sólida) vs inferida (tracejada)
+          let visibleConnections = lin.connections || [];
+          if (evidenceFilterVal === 'verified') {
+            visibleConnections = visibleConnections.filter(c => c.status === 'verified');
+          } else if (evidenceFilterVal === 'inferred') {
+            visibleConnections = visibleConnections.filter(c => c.status === 'inferred');
+          }
+
+          const connectionsHtml = visibleConnections.length > 0 ? `
+            <div class="lineage-connections-box">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <strong style="color: var(--text-primary);">Conexões Genealógicas & Evoluções Documentadas:</strong>
+                <span style="font-size: 0.72rem; color: var(--text-muted);">Clique na conexão para inspecionar fontes</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 4px;">
+                ${visibleConnections.map(c => {
+                  const isVerified = c.status === 'verified';
+                  let edgeSymbol = '➔';
+                  let symbolClass = 'solid';
+                  if (!isVerified) {
+                    edgeSymbol = '⇢';
+                    symbolClass = 'dashed';
+                  } else if (c.type === 'parallel-branch' || c.type === 'fork') {
+                    edgeSymbol = '↔';
+                    symbolClass = 'fork';
+                  } else if (c.type === 'rename' || c.type === 'identity-reveal') {
+                    edgeSymbol = '≡';
+                    symbolClass = 'rename';
+                  }
+                  return `
+                    <div class="lineage-connection-item ${isVerified ? 'edge-verified' : 'edge-inferred'}" 
+                         onclick="openHistoryEdgeModal('${lin.familyId}', '${c.from}', '${c.to}')"
+                         title="Clique para inspecionar fontes primárias e detalhes técnicos desta conexão">
+                      <div>
+                        <strong style="color: var(--text-primary); font-size: 0.85rem;">
+                          <span class="legend-symbol ${symbolClass}" style="margin-right: 6px; font-size: 1rem;">${edgeSymbol}</span>
+                          ${c.from} ${edgeSymbol} ${c.to}
+                        </strong>
+                        <span style="color: var(--text-secondary); margin-left: 6px; font-size: 0.80rem;">${c.improvements}</span>
+                      </div>
+                      <span class="${isVerified ? 'badge-edge-verified' : 'badge-edge-inferred'}">
+                        ${isVerified ? '✓ Verificada' : `⚠️ Inferida (${c.confidence || 'média'})`}
+                      </span>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
             </div>
           ` : '';
 
           return `
-            <div class="lineage-family-card" style="margin-bottom: 24px;">
-              <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div class="lineage-family-card ${isCollapsed ? 'is-collapsed' : ''}" id="familyCard_${lin.familyId}">
+              <div class="lineage-family-header" onclick="
+                AppState.historyCollapsedFamilies['${lin.familyId}'] = !AppState.historyCollapsedFamilies['${lin.familyId}'];
+                renderHistoryView();
+              ">
                 <div>
-                  <h3 style="color: var(--accent-cyan); margin-bottom: 4px;">${lin.familyName}</h3>
-                  <p style="font-size: 0.85rem; color: var(--text-secondary);">${lin.description}</p>
+                  <h3>
+                    <span>🏢</span> ${lin.familyName}
+                    <span class="badge-tag badge-subdollar" style="font-size: 0.72rem; font-weight: normal; margin-left: 6px;">${lin.provider || 'Oficial'}</span>
+                  </h3>
+                  <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px;">${lin.description}</p>
                 </div>
+                <span class="lineage-family-toggle-icon">▼</span>
               </div>
-              ${flowContentHtml}
-              ${connectionsHtml}
+              <div class="lineage-family-body">
+                ${flowContentHtml}
+                ${connectionsHtml}
+              </div>
             </div>
           `;
         }).join('');
       }
     } else if (currentTab === 'timeline') {
       const container = document.getElementById('timelineStreamContainer');
-      if (container) {
+      if (container && MODEL_HISTORY_DATA.events) {
         const filter = AppState.activeTimelineFilter || 'all';
-        const events = MODEL_HISTORY_DATA.events.filter(ev => filter === 'all' || ev.type === filter);
 
-        container.innerHTML = events.map(ev => `
-          <div class="timeline-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span class="badge-tag badge-frontier" style="font-size: 0.75rem;">${ev.date}</span>
-                <span class="badge-tag badge-subdollar" style="font-size: 0.72rem; text-transform: uppercase;">${ev.type}</span>
-              </div>
-              <strong style="color: var(--accent-cyan); cursor: pointer;" onclick="location.hash='#model/${ev.modelId}'">${ev.modelId}</strong>
+        let events = MODEL_HISTORY_DATA.events.filter(ev => {
+          if (filter !== 'all' && ev.type !== filter) return false;
+          if (yearFilterVal !== 'all' && !ev.date.startsWith(yearFilterVal)) return false;
+          if (providerFilterVal !== 'all' && !matchProvider('', '', ev.modelId)) return false;
+          if (searchQuery) {
+            const str = `${ev.title} ${ev.description} ${ev.modelId} ${ev.type}`.toLowerCase();
+            if (!str.includes(searchQuery)) return false;
+          }
+          return true;
+        });
+
+        if (events.length === 0) {
+          container.innerHTML = `
+            <div style="text-align: center; padding: 48px 16px; background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+              <p style="font-size: 1.1rem; color: var(--text-primary); margin-bottom: 8px;">Nenhum evento registrado com os filtros selecionados.</p>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">Tente selecionar "Todos os Eventos" ou limpar o filtro de busca.</p>
             </div>
-            <h4 style="color: var(--text-primary); margin-bottom: 6px; font-size: 1rem;">${ev.title}</h4>
-            <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.45; margin-bottom: 8px;">${ev.description}</p>
-            <div style="font-size: 0.75rem; color: var(--text-muted);">Fonte auditada: <code>${ev.sourceId}</code></div>
-          </div>
-        `).join('');
+          `;
+          return;
+        }
+
+        let currentPeriod = '';
+        const timelineHtml = [];
+
+        events.forEach(ev => {
+          const period = ev.date.substring(0, 7); // YYYY-MM
+          if (period !== currentPeriod) {
+            currentPeriod = period;
+            timelineHtml.push(`
+              <div class="timeline-period-header">
+                📅 ${currentPeriod}
+              </div>
+            `);
+          }
+
+          const inCatalog = typeof AI_MODELS_DATA !== 'undefined' && Boolean(AI_MODELS_DATA[ev.modelId]);
+          const modelClickHandler = inCatalog
+            ? `onclick="location.hash='#model/${ev.modelId}'"`
+            : `onclick="openHistoryModelModal('${ev.modelId}')"`;
+
+          const src = (typeof DATA_SOURCES !== 'undefined' && DATA_SOURCES[ev.sourceId])
+            || (typeof MODEL_HISTORY_DATA !== 'undefined' && MODEL_HISTORY_DATA.sources && MODEL_HISTORY_DATA.sources[ev.sourceId]);
+
+          let sourceBadge = `<code>${ev.sourceId}</code>`;
+          if (src) {
+            const badgeClass = src.type === 'official' || (src.category && src.category.includes('official'))
+              ? 'badge-source-official'
+              : src.type === 'independent' || (src.category && src.category.includes('independent'))
+                ? 'badge-source-independent'
+                : 'badge-source-community';
+            sourceBadge = `
+              <a href="${src.url}" target="_blank" rel="noopener noreferrer" class="${badgeClass}" style="text-decoration: none;">
+                🔗 ${src.title} ↗
+              </a>
+            `;
+          }
+
+          const eventClass = ev.type === 'release' ? 'event-release'
+            : ev.type === 'preview' ? 'event-preview'
+            : ev.type === 'weights-released' ? 'event-weights'
+            : ev.type === 'pricing-change' ? 'event-pricing'
+            : 'event-audit';
+
+          timelineHtml.push(`
+            <div class="timeline-card ${eventClass}">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="badge-tag badge-frontier" style="font-size: 0.75rem;">${ev.date}</span>
+                  <span class="badge-tag badge-subdollar" style="font-size: 0.72rem; text-transform: uppercase;">${ev.type}</span>
+                </div>
+                <strong style="color: var(--accent-cyan); cursor: pointer; text-decoration: underline;" ${modelClickHandler}>
+                  ${ev.modelId} ${inCatalog ? '↗' : '(Histórico)'}
+                </strong>
+              </div>
+              <h4 style="color: var(--text-primary); margin-bottom: 6px; font-size: 1rem;">${ev.title}</h4>
+              <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.45; margin-bottom: 8px;">${ev.description}</p>
+              <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span>Evidência auditada:</span>
+                ${sourceBadge}
+              </div>
+            </div>
+          `);
+        });
+
+        container.innerHTML = timelineHtml.join('');
       }
     } else if (currentTab === 'benchmarks') {
       const tbody = document.getElementById('benchmarkHistoryTableBody');
       if (tbody && typeof BENCHMARK_HISTORY_DATA !== 'undefined') {
-        tbody.innerHTML = BENCHMARK_HISTORY_DATA.map(b => `
-          <tr>
-            <td><code>${b.date}</code></td>
-            <td><strong style="color: var(--text-primary); cursor: pointer;" onclick="location.hash='#model/${b.modelId}'">${b.modelId}</strong></td>
-            <td><strong>${b.benchmark} ${b.benchmarkVersion}</strong></td>
-            <td><strong class="highlight-green">${b.score.toFixed(1)}%</strong></td>
-            <td>${b.confidenceInterval ? `±${b.confidenceInterval}pp` : '—'}</td>
-            <td>${b.costPerTaskUsd ? `$${b.costPerTaskUsd.toFixed(2)}` : '—'}</td>
-            <td>${b.tokensPerTask ? b.tokensPerTask.toLocaleString() : '—'}</td>
-            <td>${b.agentSteps || '—'}</td>
-            <td><span class="badge-tag ${b.sourceType === 'official' ? 'badge-frontier' : 'badge-subdollar'}">${b.sourceType}</span></td>
-            <td><span style="font-size: 0.78rem; color: var(--text-muted);">${b.sourceId}</span></td>
-          </tr>
-        `).join('');
+        let benchmarks = BENCHMARK_HISTORY_DATA.filter(b => {
+          if (yearFilterVal !== 'all' && !b.date.startsWith(yearFilterVal)) return false;
+          if (providerFilterVal !== 'all' && !matchProvider('', '', b.modelId)) return false;
+          if (searchQuery) {
+            const str = `${b.modelId} ${b.benchmark} ${b.benchmarkVersion} ${b.sourceId}`.toLowerCase();
+            if (!str.includes(searchQuery)) return false;
+          }
+          return true;
+        });
+
+        if (benchmarks.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="10" style="text-align: center; padding: 24px; color: var(--text-muted);">
+                Nenhum registro de benchmark encontrado para os filtros selecionados.
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        tbody.innerHTML = benchmarks.map(b => {
+          const inCatalog = typeof AI_MODELS_DATA !== 'undefined' && Boolean(AI_MODELS_DATA[b.modelId]);
+          const modelClickHandler = inCatalog
+            ? `onclick="location.hash='#model/${b.modelId}'"`
+            : `onclick="openHistoryModelModal('${b.modelId}')"`;
+
+          const src = (typeof DATA_SOURCES !== 'undefined' && DATA_SOURCES[b.sourceId])
+            || (typeof MODEL_HISTORY_DATA !== 'undefined' && MODEL_HISTORY_DATA.sources && MODEL_HISTORY_DATA.sources[b.sourceId]);
+
+          let sourceCell = `<span style="font-size: 0.78rem; color: var(--text-muted);">${b.sourceId}</span>`;
+          if (src) {
+            sourceCell = `<a href="${src.url}" target="_blank" rel="noopener noreferrer" style="color: var(--accent-cyan); text-decoration: underline; font-size: 0.78rem;">${src.title.substring(0, 24)}... ↗</a>`;
+          }
+
+          return `
+            <tr>
+              <td><code>${b.date}</code></td>
+              <td><strong style="color: var(--text-primary); cursor: pointer; text-decoration: underline;" ${modelClickHandler}>${b.modelId}</strong></td>
+              <td><strong>${b.benchmark} ${b.benchmarkVersion}</strong></td>
+              <td><strong class="highlight-green">${b.score.toFixed(1)}%</strong></td>
+              <td>${b.confidenceInterval ? `±${b.confidenceInterval}pp` : '—'}</td>
+              <td>${b.costPerTaskUsd ? `$${b.costPerTaskUsd.toFixed(2)}` : '—'}</td>
+              <td>${b.tokensPerTask ? b.tokensPerTask.toLocaleString() : '—'}</td>
+              <td>${b.agentSteps || '—'}</td>
+              <td><span class="badge-tag ${b.sourceType === 'official' ? 'badge-frontier' : 'badge-subdollar'}">${b.sourceType}</span></td>
+              <td>${sourceCell}</td>
+            </tr>
+          `;
+        }).join('');
       }
     }
   }

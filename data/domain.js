@@ -1575,7 +1575,62 @@
       var totalEvaluated = allFresh.length || 1;
       stats.freshnessRate = Math.round((stats.freshCount / totalEvaluated) * 100);
 
+      // 6. Cobertura Histórica & Linhagens Genealógicas (Prompt 11 / Seções 70, 106, 133)
+      var hist = getHistoryData();
+      var historyModelIds = new Set();
+      var verifiedEdgesCount = 0;
+      var inferredEdgesCount = 0;
+      if (hist && Array.isArray(hist.lineages)) {
+        hist.lineages.forEach(function (lin) {
+          var nodes = lin.tracks ? lin.tracks.flatMap(function (t) { return t.nodes || []; }) : (lin.nodes || []);
+          nodes.forEach(function (n) {
+            if (n && n.modelId) historyModelIds.add(n.modelId);
+          });
+          (lin.connections || []).forEach(function (c) {
+            if (c.status === 'verified') verifiedEdgesCount++;
+            else inferredEdgesCount++;
+          });
+        });
+      }
+
+      var catalogModelList = Object.values(models);
+      var catalogTotal = catalogModelList.length;
+      var catalogWithHistory = [];
+      var modelsWithoutHistory = [];
+
+      catalogModelList.forEach(function (m) {
+        if (historyModelIds.has(m.id)) {
+          catalogWithHistory.push(m);
+        } else {
+          modelsWithoutHistory.push({
+            id: m.id,
+            name: m.name,
+            provider: m.provider,
+            releaseDate: m.releaseDate,
+            notes: 'Modelo proprietário pontual ou tier especializado sem histórico genealógico público documentado. Conforme Seção 133, não é fabricada linhagem artificial.'
+          });
+        }
+      });
+
+      var historyCoveragePct = catalogTotal > 0 ? Math.round((catalogWithHistory.length / catalogTotal) * 100) : 0;
+
+      stats.historyCoverage = {
+        catalogTotal: catalogTotal,
+        catalogWithHistoryCount: catalogWithHistory.length,
+        coveragePct: historyCoveragePct,
+        modelsWithoutHistory: modelsWithoutHistory,
+        allHistoryNodesCount: historyModelIds.size,
+        verifiedEdgesCount: verifiedEdgesCount,
+        inferredEdgesCount: inferredEdgesCount,
+        totalFamilies: (hist && hist.lineages) ? hist.lineages.length : 0,
+        totalEvents: (hist && hist.events) ? hist.events.length : 0
+      };
+
       return stats;
+    },
+
+    getHistoryCoverage: function (options) {
+      return this.getHealthSummary(options).historyCoverage;
     },
 
     getReviewQueue: function () {
@@ -1610,6 +1665,22 @@
           });
         }
       });
+
+      // Seção 133: Modelos contemporâneos sem linhagem auditada para transparência
+      var healthSummary = this.getHealthSummary();
+      if (healthSummary && healthSummary.historyCoverage && healthSummary.historyCoverage.modelsWithoutHistory) {
+        healthSummary.historyCoverage.modelsWithoutHistory.forEach(function (m) {
+          queue.push({
+            entityType: 'model',
+            entityId: m.id,
+            issueType: 'unmapped-lineage',
+            severity: 'low',
+            detectedAt: todayStr,
+            message: 'Modelo contemporâneo sem linhagem genealógica pública mapeada (Seção 133: não inventar genealogia artificial).',
+            sourceIds: []
+          });
+        });
+      }
 
       return queue;
     }

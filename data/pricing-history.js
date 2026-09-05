@@ -66,7 +66,7 @@ const PRICE_HISTORY_DATA = {
       events: [
         {
           type: 'historical-tariff',
-          effectiveFrom: '2026-05-15',
+          effectiveFrom: '2026-06-09',
           effectiveUntil: null,
           inputPerMillion: 10.00,
           outputPerMillion: 50.00,
@@ -74,7 +74,7 @@ const PRICE_HISTORY_DATA = {
           cacheWrite5Min: 12.50,
           cacheWrite1Hour: 20.00,
           isPromotional: false,
-          notes: 'Tarifa padrão histórica do Fable 5 (atualmente em status superseded).'
+          notes: 'Tarifa padrão histórica do Fable 5 no lançamento oficial (atualmente em status superseded).'
         }
       ]
     },
@@ -153,14 +153,14 @@ const PRICE_HISTORY_DATA = {
       events: [
         {
           type: 'standard-list-price',
-          effectiveFrom: '2026-02-16',
+          effectiveFrom: '2026-07-09',
           effectiveUntil: null,
           inputPerMillion: 4.00,
           outputPerMillion: 20.00,
           cacheReadPerMillion: 0.40,
           cacheWritePerMillion: 5.00,
           isPromotional: false,
-          notes: 'Preço canônico vigente de $4/$20 por milhão de tokens.'
+          notes: 'Preço canônico vigente de $4/$20 por milhão de tokens desde o GA em 09/07/2026.'
         }
       ]
     },
@@ -172,15 +172,26 @@ const PRICE_HISTORY_DATA = {
       currency: 'USD',
       events: [
         {
-          type: 'standard-list-price',
-          effectiveFrom: '2026-02-16',
+          type: 'ga-launch-price',
+          effectiveFrom: '2026-07-09',
+          effectiveUntil: '2026-07-30',
+          inputPerMillion: 2.50,
+          outputPerMillion: 15.00,
+          cacheReadPerMillion: 0.25,
+          cacheWritePerMillion: 3.00,
+          isPromotional: false,
+          notes: 'Tarifa inicial no lançamento GA de 09/07/2026.'
+        },
+        {
+          type: 'official-price-cut',
+          effectiveFrom: '2026-07-30',
           effectiveUntil: null,
           inputPerMillion: 2.00,
           outputPerMillion: 12.00,
           cacheReadPerMillion: 0.20,
           cacheWritePerMillion: 2.50,
           isPromotional: false,
-          notes: 'Preço de tabela para o tier balanceado do GPT-5.6.'
+          notes: 'Redução tarifária oficial de -20% em 30/07/2026 estabelecendo o preço atual de $2/$12.'
         }
       ]
     },
@@ -192,15 +203,26 @@ const PRICE_HISTORY_DATA = {
       currency: 'USD',
       events: [
         {
-          type: 'standard-list-price',
-          effectiveFrom: '2026-02-16',
+          type: 'ga-launch-price',
+          effectiveFrom: '2026-07-09',
+          effectiveUntil: '2026-07-30',
+          inputPerMillion: 1.00,
+          outputPerMillion: 6.00,
+          cacheReadPerMillion: 0.10,
+          cacheWritePerMillion: 1.25,
+          isPromotional: false,
+          notes: 'Tarifa inicial no lançamento GA de 09/07/2026.'
+        },
+        {
+          type: 'official-price-cut',
+          effectiveFrom: '2026-07-30',
           effectiveUntil: null,
           inputPerMillion: 0.20,
           outputPerMillion: 1.20,
           cacheReadPerMillion: 0.02,
           cacheWritePerMillion: 0.25,
           isPromotional: false,
-          notes: 'Preço ultra-econômico. Requisições acima de 272k tokens possuem multiplicador de 2x input / 1.5x output.'
+          notes: 'Corte agressivo de -80% em 30/07/2026 reduzindo para nível sub-dólar ($0,20/$1,20). Requisições acima de 272k possuem multiplicador de 2x in / 1.5x out.'
         }
       ]
     }

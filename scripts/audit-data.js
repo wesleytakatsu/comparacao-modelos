@@ -1053,9 +1053,233 @@ assert(astraHarness, 'Asserção 140: HARNESS_COMPATIBILITY_DATA.matrix deve map
 if (astraHarness) {
   assert(astraHarness.cursor && astraHarness.cline && astraHarness.aider, 'Asserção 140: gpt-6-astra deve ter suporte documentado nos principais harnesses (Cursor, Cline, Aider)');
 }
-console.log('   - [Prompt 10 / Asserção 140] Validando matriz de compatibilidade de harnesses para GPT-6 Astra...');
-console.log('   ✅ Todas as 13 asserções normativas do Plano 10 validadas com 100% de sucesso!');
+console.log('   ✅ Todas as 13 asserções normativas do Plano 10 validadas com 100% de sucesso!\n');
 
+// =========================================================================
+// 🚀 VALIDANDO TESTES DO PLANO 11 (AUDITORIA HISTÓRICA, LINHAGENS & GENEALOGIA)
+// =========================================================================
+console.log('🏛️  VALIDANDO TESTES DO PLANO 11 (AUDITORIA HISTÓRICA, LINHAGENS & GENEALOGIA)...');
+
+// Helper para buscar qualquer nó por modelId em MODEL_HISTORY_DATA
+function findHistoryNode(modelId) {
+  for (const lin of MODEL_HISTORY_DATA.lineages) {
+    const nodes = lin.tracks ? lin.tracks.flatMap(t => t.nodes) : (lin.nodes || []);
+    const found = nodes.find(n => n.modelId === modelId);
+    if (found) return found;
+  }
+  return null;
+}
+
+// 1. Asserção 141: Datas críticas auditadas com fontes primárias
+const criticalDates = [
+  { modelId: 'openai-o3', date: '2025-04-16', desc: 'o3 release' },
+  { modelId: 'gpt-oss-120b', date: '2025-08-05', desc: 'gpt-oss release' },
+  { modelId: 'gpt-5-6-sol', date: '2026-07-09', desc: 'GPT-5.6 Sol GA', checkGa: true },
+  { modelId: 'gpt-6-astra', date: '2026-09-03', desc: 'GPT-6 Astra launch' },
+  { modelId: 'claude-fable-5', date: '2026-06-09', desc: 'Claude Fable 5 launch' },
+  { modelId: 'claude-sonnet-5', date: '2026-06-30', desc: 'Claude Sonnet 5 launch' },
+  { modelId: 'claude-opus-5', date: '2026-07-24', desc: 'Claude Opus 5 launch' },
+  { modelId: 'claude-fable-5-1', date: '2026-09-01', desc: 'Claude Fable 5.1 launch' },
+  { modelId: 'gemini-3-1-pro', date: '2026-02-19', desc: 'Gemini 3.1 Pro release' },
+  { modelId: 'gemini-3-7-flash', date: '2026-08-13', desc: 'Gemini 3.7 Flash release' },
+  { modelId: 'gemini-3-8-flash', date: '2026-09-02', desc: 'Gemini 3.8 Flash release' },
+  { modelId: 'grok-4-5', date: '2026-07-16', desc: 'Grok 4.5 release' },
+  { modelId: 'grok-4-6', date: '2026-08-12', desc: 'Grok 4.6 release' },
+  { modelId: 'deepseek-v3-2', date: '2025-12-01', desc: 'DeepSeek V3.2 release' },
+  { modelId: 'qwen-2-5-max', date: '2025-01-28', desc: 'Qwen 2.5 Max release' },
+  { modelId: 'qwen3-8-max', date: '2026-08-02', desc: 'Qwen 3.8 Max release' },
+  { modelId: 'qwen3-8-flash', date: '2026-08-26', desc: 'Qwen 3.8 Flash release' }
+];
+
+criticalDates.forEach(cd => {
+  const node = findHistoryNode(cd.modelId);
+  assert(node, `Asserção 141: Nó histórico '${cd.modelId}' deve existir em MODEL_HISTORY_DATA`);
+  if (node) {
+    if (cd.checkGa) {
+      assert(node.gaAt === cd.date, `Asserção 141: ${cd.desc} deve ter gaAt='${cd.date}' (obtido: '${node.gaAt}')`);
+    } else {
+      assert(node.releaseDate === cd.date, `Asserção 141: ${cd.desc} deve ter releaseDate='${cd.date}' (obtido: '${node.releaseDate}')`);
+    }
+  }
+});
+console.log('   - [Prompt 11 / Asserção 141] Validando 17 datas críticas auditadas com fontes primárias...');
+
+// 2. Asserção 142: Retratação metrológica do evento fake AA v4.2 Astra > Fable 5.1 (61 vs 59.6)
+const fakeEvent = MODEL_HISTORY_DATA.events.find(ev =>
+  ev.type !== 'audit-retraction' && (
+    (ev.title && ev.title.includes('v4.2') && ev.description && ev.description.includes('61 vs 59.6')) ||
+    (ev.description && ev.description.includes('Astra lidera Fable 5.1 com 61 vs 59.6'))
+  )
+);
+assert(!fakeEvent, 'Asserção 142: Evento inventado de Artificial Analysis v4.2 com 61 vs 59.6 DEVE ser totalmente retirado');
+
+const retractionEvent = MODEL_HISTORY_DATA.events.find(ev =>
+  ev.type === 'audit-retraction' || (ev.title && ev.title.includes('Retratação'))
+);
+assert(retractionEvent, 'Asserção 142: Evento de retratação e transparência metrológica deve constar na timeline auditada');
+console.log('   - [Prompt 11 / Asserção 142] Garantindo ausência do fake evento AA v4.2 e presença da retratação...');
+
+// 3. Asserção 143: Correção metrológica do DeepSeek V4 Pro GA DeepSWE para 62.7%
+const deepsweV4Pro = BENCHMARK_HISTORY_DATA.find(b =>
+  b.modelId.includes('deepseek-v4-pro') && b.benchmark.toLowerCase().includes('deepswe') && b.date.startsWith('2026-08')
+);
+assert(deepsweV4Pro, "Asserção 143: Entrada de DeepSWE para 'deepseek-v4-pro' em 08/2026 deve existir");
+if (deepsweV4Pro) {
+  assert(deepsweV4Pro.score === 62.7, `Asserção 143: Score oficial de DeepSWE para DeepSeek V4 Pro GA deve ser 62.7% (obtido: ${deepsweV4Pro.score}%)`);
+}
+console.log('   - [Prompt 11 / Asserção 143] Validando score corrigido do DeepSeek V4 Pro GA no DeepSWE (62.7%)...');
+
+// 4. Asserção 144: Integridade e rigor das conexões genealógicas (Solid vs Dashed)
+const validConfidences = ['high', 'medium', 'low'];
+let totalVerifiedConns = 0;
+let totalInferredConns = 0;
+
+MODEL_HISTORY_DATA.lineages.forEach(lin => {
+  const allNodes = lin.tracks ? lin.tracks.flatMap(t => t.nodes) : (lin.nodes || []);
+  const nodeIds = new Set(allNodes.map(n => n.modelId));
+
+  (lin.connections || []).forEach(c => {
+    assert(nodeIds.has(c.from), `Asserção 144: Conexão from '${c.from}' não existe na família '${lin.familyId}'`);
+    assert(nodeIds.has(c.to), `Asserção 144: Conexão to '${c.to}' não existe na família '${lin.familyId}'`);
+    assert(['verified', 'inferred'].includes(c.status), `Asserção 144: Status da aresta '${c.from} -> ${c.to}' deve ser 'verified' ou 'inferred'`);
+
+    if (c.status === 'verified') {
+      totalVerifiedConns++;
+      assert(Array.isArray(c.sourceIds) && c.sourceIds.length > 0, `Asserção 144: Aresta verificada '${c.from} -> ${c.to}' DEVE ter sourceIds não-vazio`);
+      c.sourceIds.forEach(sId => {
+        const srcExists = (DATA_SOURCES && DATA_SOURCES[sId]) || (MODEL_HISTORY_DATA.sources && MODEL_HISTORY_DATA.sources[sId]);
+        assert(srcExists, `Asserção 144: Fonte '${sId}' da aresta verificada '${c.from} -> ${c.to}' deve existir no registro de fontes`);
+      });
+    } else {
+      totalInferredConns++;
+      assert(validConfidences.includes(c.confidence), `Asserção 144: Aresta inferida '${c.from} -> ${c.to}' deve ter confiança válida ('high', 'medium', 'low')`);
+      const justification = c.notes || c.improvements;
+      assert(justification && justification.length > 10, `Asserção 144: Aresta inferida '${c.from} -> ${c.to}' deve ter justificativa técnica`);
+    }
+  });
+});
+assert(totalVerifiedConns >= 15, `Asserção 144: Mínimo 15 conexões verificadas esperadas (obtidas: ${totalVerifiedConns})`);
+assert(totalInferredConns >= 5, `Asserção 144: Mínimo 5 conexões inferidas documentadas esperadas (obtidas: ${totalInferredConns})`);
+console.log(`   - [Prompt 11 / Asserção 144] Validando integridade de conexões genealógicas (${totalVerifiedConns} verificadas, ${totalInferredConns} inferidas)...`);
+
+// 5. Asserção 145: Integridade factual e resolução de fontes na Timeline de Eventos
+assert(Array.isArray(MODEL_HISTORY_DATA.events) && MODEL_HISTORY_DATA.events.length >= 25, 'Asserção 145: Timeline de eventos deve ter pelo menos 25 eventos auditados');
+MODEL_HISTORY_DATA.events.forEach(ev => {
+  assert(/^\d{4}-\d{2}-\d{2}$/.test(ev.date), `Asserção 145: Data do evento '${ev.title}' deve estar no formato YYYY-MM-DD`);
+  assert(ev.modelId && ev.modelId.length > 0, `Asserção 145: Evento '${ev.title}' deve conter modelId`);
+  assert(ev.type && ev.type.length > 0, `Asserção 145: Evento '${ev.title}' deve conter type`);
+  assert(ev.title && ev.title.length > 0, `Asserção 145: Evento em '${ev.date}' deve conter title`);
+  assert(ev.description && ev.description.length > 0, `Asserção 145: Evento '${ev.title}' deve conter description`);
+  assert(ev.sourceId, `Asserção 145: Evento '${ev.title}' deve conter sourceId`);
+  const srcExists = (DATA_SOURCES && DATA_SOURCES[ev.sourceId]) || (MODEL_HISTORY_DATA.sources && MODEL_HISTORY_DATA.sources[ev.sourceId]);
+  assert(srcExists, `Asserção 145: Fonte '${ev.sourceId}' do evento '${ev.title}' deve existir no registro de fontes`);
+});
+console.log('   - [Prompt 11 / Asserção 145] Validando integridade referencial de todos os eventos da timeline...');
+
+// 6. Asserção 146: Ausência de status inválido ('predecessor') e higienização de notas em nós históricos
+const validNodeStatuses = ['active', 'superseded', 'legacy', 'preview', 'deprecated', 'stable', 'retired', 'stealth-revealed'];
+MODEL_HISTORY_DATA.lineages.forEach(lin => {
+  const allNodes = lin.tracks ? lin.tracks.flatMap(t => t.nodes) : (lin.nodes || []);
+  allNodes.forEach(n => {
+    assert(n.status !== 'predecessor', `Asserção 146: Nó '${n.modelId}' possui status inválido 'predecessor'. Use status canônico e flag historicalOnly`);
+    assert(validNodeStatuses.includes(n.status), `Asserção 146: Status '${n.status}' do nó '${n.modelId}' deve ser um dos válidos: ${validNodeStatuses.join(', ')}`);
+    assert(n.notes && n.notes.length > 10, `Asserção 146: Nó '${n.modelId}' deve possuir notas descritivas estruturadas`);
+    // Proibir termos voláteis de ranking congelado em notas permanentes
+    const prohibitedTerms = ['melhor modelo do mundo', 'destrona', 'imbatível', 'aniquila', 'humilha'];
+    prohibitedTerms.forEach(term => {
+      assert(!n.notes.toLowerCase().includes(term), `Asserção 146: Nó '${n.modelId}' contém termo competitivo proibido '${term}' em notas`);
+    });
+  });
+});
+console.log('   - [Prompt 11 / Asserção 146] Garantindo status canônicos e ausência de claims competitivos voláteis em nós...');
+
+// 7. Asserção 147: Cobertura ampliada de famílias do catálogo contemporâneo
+const expectedFamilies = [
+  'openai-gpt56', 'anthropic-claude', 'google-gemini', 'deepseek-tree',
+  'xai-grok', 'alibaba-qwen', 'zai-glm', 'moonshot-kimi', 'minimax-family',
+  'meta-muse', 'tencent-hunyuan'
+];
+const registeredFamilyIds = MODEL_HISTORY_DATA.lineages.map(l => l.familyId);
+expectedFamilies.forEach(ef => {
+  assert(registeredFamilyIds.includes(ef), `Asserção 147: Família canônica '${ef}' deve estar registrada em MODEL_HISTORY_DATA.lineages`);
+});
+console.log('   - [Prompt 11 / Asserção 147] Validando presença de todas as 11 famílias canônicas mapeadas...');
+
+// 8. Asserção 148: Auditoria do histórico de preços (pricing-history.js)
+const pricingEntries = PRICE_HISTORY_DATA.entries;
+const fablePricing = pricingEntries.find(p => p.modelId === 'claude-fable-5');
+assert(fablePricing, "Asserção 148: Entrada de preço para 'claude-fable-5' deve existir");
+if (fablePricing) {
+  const launchEvent = fablePricing.events.find(e => e.type === 'historical-tariff');
+  assert(launchEvent && launchEvent.effectiveFrom === '2026-06-09', `Asserção 148: Claude Fable 5 deve ter lançamento em '2026-06-09' (obtido: '${launchEvent ? launchEvent.effectiveFrom : 'null'}')`);
+}
+
+const solPricing = pricingEntries.find(p => p.modelId === 'gpt-5-6-sol');
+assert(solPricing, "Asserção 148: Entrada de preço para 'gpt-5-6-sol' deve existir");
+if (solPricing) {
+  assert(solPricing.events[0].effectiveFrom === '2026-07-09', `Asserção 148: GPT-5.6 Sol deve ter vigência inicial de preço em '2026-07-09' (obtido: '${solPricing.events[0].effectiveFrom}')`);
+}
+
+const lunaPricing = pricingEntries.find(p => p.modelId === 'gpt-5-6-luna');
+assert(lunaPricing, "Asserção 148: Entrada de preço para 'gpt-5-6-luna' deve existir");
+if (lunaPricing) {
+  const gaLaunch = lunaPricing.events.find(e => e.type === 'ga-launch-price');
+  assert(gaLaunch && gaLaunch.effectiveFrom === '2026-07-09', "Asserção 148: GPT-5.6 Luna deve ter ga-launch-price em '2026-07-09'");
+  const cutEvent = lunaPricing.events.find(e => e.type === 'official-price-cut' || e.type.includes('price-cut'));
+  assert(cutEvent && cutEvent.effectiveFrom === '2026-07-30', "Asserção 148: GPT-5.6 Luna deve ter corte de preço oficial em '2026-07-30'");
+}
+
+const terraPricing = pricingEntries.find(p => p.modelId === 'gpt-5-6-terra');
+assert(terraPricing, "Asserção 148: Entrada de preço para 'gpt-5-6-terra' deve existir");
+if (terraPricing) {
+  const cutEvent = terraPricing.events.find(e => e.type === 'official-price-cut' || e.type.includes('price-cut'));
+  assert(cutEvent && cutEvent.effectiveFrom === '2026-07-30', "Asserção 148: GPT-5.6 Terra deve ter corte de preço oficial em '2026-07-30'");
+}
+console.log('   - [Prompt 11 / Asserção 148] Validando histórico auditado de tarifas (Fable 5, GPT-5.6 Sol/Luna/Terra)...');
+
+// 9. Asserção 149: Auditoria do acervo de benchmarks (BENCHMARK_HISTORY_DATA)
+assert(Array.isArray(BENCHMARK_HISTORY_DATA) && BENCHMARK_HISTORY_DATA.length >= 15, 'Asserção 149: BENCHMARK_HISTORY_DATA deve possuir pelo menos 15 execuções');
+BENCHMARK_HISTORY_DATA.forEach(b => {
+  assert(b.modelId && b.modelId.length > 0, `Asserção 149: Registro de benchmark em '${b.date}' deve possuir modelId`);
+  assert(b.benchmark && b.benchmark.length > 0, `Asserção 149: Registro para '${b.modelId}' deve possuir benchmark`);
+  assert(typeof b.score === 'number' && !isNaN(b.score), `Asserção 149: Score de '${b.modelId}' em '${b.benchmark}' deve ser numérico`);
+  assert(b.sourceId, `Asserção 149: Registro para '${b.modelId}' deve possuir sourceId`);
+  const srcExists = (DATA_SOURCES && DATA_SOURCES[b.sourceId]) || (MODEL_HISTORY_DATA.sources && MODEL_HISTORY_DATA.sources[b.sourceId]);
+  assert(srcExists, `Asserção 149: Fonte '${b.sourceId}' do benchmark '${b.benchmark}' de '${b.modelId}' deve existir no registro de fontes`);
+});
+const astraBenchmarks = BENCHMARK_HISTORY_DATA.filter(b => b.modelId === 'gpt-6-astra');
+assert(astraBenchmarks.length >= 3, `Asserção 149: GPT-6 Astra deve ter múltiplos snapshots auditados de esforço (encontrados: ${astraBenchmarks.length})`);
+console.log('   - [Prompt 11 / Asserção 149] Validando integridade e fontes metrológicas de BENCHMARK_HISTORY_DATA...');
+
+// 10. Asserção 150: Cobertura genealógica e transparência no Data Health (Prompt 11 / Seções 106 e 133)
+const catalogModelIds = Object.keys(AI_MODELS_DATA);
+const histModelIds = new Set();
+MODEL_HISTORY_DATA.lineages.forEach(lin => {
+  const nodes = lin.tracks ? lin.tracks.flatMap(t => t.nodes || []) : (lin.nodes || []);
+  nodes.forEach(n => {
+    if (n && n.modelId) histModelIds.add(n.modelId);
+  });
+});
+const missingHistoryIds = catalogModelIds.filter(id => !histModelIds.has(id));
+const coveragePercent = Math.round(((catalogModelIds.length - missingHistoryIds.length) / catalogModelIds.length) * 100);
+
+console.log(`   - [Prompt 11 / Asserção 150] Cobertura Genealógica: ${coveragePercent}% (${catalogModelIds.length - missingHistoryIds.length}/${catalogModelIds.length} do catálogo)`);
+console.log(`     Modelos sem linhagem forçada (Critério 133): [${missingHistoryIds.join(', ')}]`);
+
+assert(typeof coveragePercent === 'number' && coveragePercent >= 75, `Asserção 150: Cobertura histórica mínima de 75% esperada (obtida: ${coveragePercent}%)`);
+assert(Array.isArray(missingHistoryIds) && missingHistoryIds.length > 0, 'Asserção 150: Modelos sem linhagem devem ser identificados com transparência sem fabricar genealogias');
+
+// Validando integração com DomainHealth
+const DomainHealth = domainModule.DomainHealth;
+const healthSummary = DomainHealth.getHealthSummary();
+assert(healthSummary && healthSummary.historyCoverage, 'Asserção 150: DomainHealth.getHealthSummary() deve conter historyCoverage');
+assert(healthSummary.historyCoverage.catalogTotal === catalogModelIds.length, 'Asserção 150: total do catálogo em DomainHealth deve bater com AI_MODELS_DATA');
+assert(healthSummary.historyCoverage.coveragePct === coveragePercent, 'Asserção 150: percentual de cobertura em DomainHealth deve bater');
+assert(Array.isArray(healthSummary.historyCoverage.modelsWithoutHistory), 'Asserção 150: modelsWithoutHistory deve ser acessível no Data Health');
+assert(healthSummary.historyCoverage.modelsWithoutHistory.length === missingHistoryIds.length, 'Asserção 150: lista de modelsWithoutHistory deve conter exatamente os modelos sem histórico');
+
+console.log('   - [Prompt 11 / Asserção 150] Validando integração de cobertura genealógica no DomainHealth e Data Health...');
+console.log('   ✅ Todas as 10 asserções normativas do Plano 11 validadas com 100% de sucesso!');
 
 console.log('====================================================\n');
 
