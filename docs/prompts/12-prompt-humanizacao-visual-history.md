@@ -1,2971 +1,1987 @@
-# PROMPT 12 — HUMANIZAÇÃO VISUAL DO PORTAL E REDESIGN EDITORIAL DE `#history`
+# PROMPT 12 — DIREÇÃO VISUAL CONTEMPORÂNEA, HUMANIZAÇÃO DO PORTAL E REDESIGN DE `#history`
 
-> Snapshot do plano: **05/09/2026 — BRT**  
+> Revisão ampliada: **05/09/2026 — BRT**  
 > Página piloto: `https://wesleytakatsu.github.io/comparacao-modelos/#history`  
 > Repositório: `https://github.com/wesleytakatsu/comparacao-modelos`  
 > Branch alvo: `main`  
-> Base técnica observada antes deste plano: commit `01deb90fe9102e13781a0b3301ce1505f8055565` ou posterior.  
-> Objetivo: **retirar a aparência de “dashboard feito por IA”, criar uma identidade visual mais humana, editorial e técnica, e usar `#history` como página-piloto dessa evolução sem destruir a densidade de informação nem reescrever a arquitetura do portal.**
+> Base técnica observada: commit `251ee5405b24824d9b3c8e9ef23c4a51de9e4eaa` ou posterior.  
+> Objetivo: **fazer o portal parecer um produto visualmente sofisticado, contemporâneo, autoral e confiável — não um dashboard genérico, não uma landing page de IA de 2023, e também não uma interface minimalista sem personalidade. `#history` será a página-piloto, mas o trabalho inclui um polish pass global para que o portal inteiro fale a mesma língua visual.**
 
 ---
 
 # 0. PAPEL DO AGENTE
 
-Você é um **designer de produto sênior com forte experiência em interfaces técnicas, visualização de dados, UX editorial, sistemas de design e frontend Vanilla JS**, trabalhando também como engenheiro de frontend responsável pela implementação.
+Você é simultaneamente:
 
-Você está entrando em um projeto que já possui muita funcionalidade e muita informação.
+- Product Designer sênior;
+- UX Designer para produtos técnicos densos em dados;
+- Information Designer;
+- Data Visualization Designer;
+- Design Systems Engineer;
+- Frontend Engineer Vanilla JS/CSS;
+- revisor editorial de microcopy de produto.
 
-A tarefa **não** é adicionar mais enfeites.
+Sua missão não é apenas “deixar bonito”.
 
-A tarefa é fazer o contrário:
+Sua missão é criar **composição, hierarquia, ritmo, identidade e acabamento**.
 
-> **reduzir ruído visual, criar hierarquia real, melhorar legibilidade, transformar dados em narrativa visual e substituir clichês de dashboards gerados por IA por decisões de design deliberadas.**
-
-A página piloto será `#history`.
-
-Se a linguagem visual funcionar bem nessa página, ela poderá depois ser migrada gradualmente para outras áreas do portal.
-
----
-
-# 1. ESTADO ATUAL DO PROJETO
-
-Antes de qualquer alteração:
-
-1. leia o `main` atual;
-2. confirme o último commit;
-3. confirme que o Prompt 11 já foi implementado;
-4. leia a versão atual de:
-   - `index.html`;
-   - `app.js`;
-   - `style.css`;
-   - `data/history.js`;
-   - `data/domain.js`;
-   - `data/data-health-view.js`;
-   - `scripts/audit-data.js`;
-5. preserve toda a semântica histórica e factual já corrigida.
-
-O Prompt 11 já adicionou, entre outros:
-
-- relações verificadas e inferidas;
-- governança temporal;
-- filtros;
-- cobertura histórica;
-- integração com Data Health;
-- melhor rastreabilidade de fontes;
-- novas famílias;
-- KPIs dinâmicos;
-- inspector/modal;
-- testes de integridade.
-
-**Não refazer a pesquisa factual do Prompt 11 nesta tarefa.**
-
-Só alterar dados históricos se houver um bug indispensável e com fonte clara.
-
-O foco agora é **visual, editorial e interacional**.
+O resultado deve parecer feito por uma equipe de produto experiente que tomou decisões deliberadas.
 
 ---
 
-# 2. PROBLEMA VISUAL CENTRAL
+# 1. CORREÇÃO DE DIREÇÃO EM RELAÇÃO À VERSÃO ANTERIOR DESTE PLANO
 
-O portal tem boa quantidade de informação, mas parte da interface apresenta características que hoje são fortemente associadas a dashboards automáticos ou interfaces geradas por IA.
+A versão anterior acertou ao identificar os clichês visuais atuais, mas corria o risco de exagerar na austeridade.
 
-Em `#history`, isso aparece principalmente pela repetição excessiva de:
+Não interprete este trabalho como:
 
-- cards arredondados;
-- cards dentro de cards;
-- bordas em quase todos os elementos;
-- fundos translúcidos;
-- glassmorphism;
-- gradientes;
-- glow cyan;
-- emojis em títulos;
-- emojis em subtítulos;
-- emojis em badges;
-- badges para estados comuns;
-- pills demais;
-- títulos grandiosos;
-- hover com `translateY()`;
-- sombras em elementos pequenos;
-- cor cyan usada como destaque universal;
-- componentes diferentes com o mesmo peso visual;
-- caixas para informações que poderiam ser apenas texto;
-- microcopy excessivamente explicativa;
-- muitos elementos “chamando atenção” ao mesmo tempo.
+- remover toda cor;
+- eliminar toda profundidade;
+- deixar tudo plano;
+- transformar o portal em documentação monocromática;
+- imitar GitHub;
+- imitar Linear;
+- produzir um “terminal de dados” frio;
+- remover toda personalidade.
 
-O resultado é:
+O objetivo correto é:
 
-> **tudo parece importante, logo nada parece realmente importante.**
+> **menos decoração repetitiva, mais composição visual.**
+
+E também:
+
+> **menos efeitos espalhados, mais momentos visuais memoráveis.**
+
+Uma interface pode ser rica, colorida, profunda e bonita sem parecer gerada por IA.
 
 ---
 
-# 3. PRINCÍPIO DE DESIGN
+# 2. AUDITORIA VISUAL GLOBAL OBRIGATÓRIA ANTES DE ALTERAR CÓDIGO
 
-A nova direção deve seguir:
-
-> **Conteúdo primeiro.**
->
-> **Estrutura antes de decoração.**
->
-> **Cor como informação, não como ornamento.**
->
-> **Movimento apenas quando comunica estado.**
->
-> **Bordas somente quando delimitam função.**
->
-> **Cards apenas quando há necessidade real de agrupamento.**
-
-A página deve parecer criada por uma equipe editorial e técnica experiente, e não por um gerador de dashboards.
-
----
-
-# 4. REFERÊNCIA CONCEITUAL
-
-A direção desejada é aproximadamente uma combinação de:
-
-- changelog técnico;
-- documentação de produto madura;
-- observatório de dados;
-- atlas histórico;
-- gráfico de linhagem;
-- interface editorial;
-- ferramentas como GitHub, Linear e documentação técnica bem desenhada.
-
-**Não copiar nenhuma marca específica.**
-
-A referência é o nível de sobriedade, hierarquia e precisão.
-
----
-
-# 5. CONCEITO DA PÁGINA
-
-A rota `#history` deve passar de:
-
-> “dashboard de histórico e linhagens”
-
-para:
-
-> **AI Model Historical Atlas**
-
-ou equivalente em linguagem de produto.
-
-O usuário deve sentir que está explorando:
-
-- quando modelos surgiram;
-- quais linhas evoluíram;
-- quais relações são confirmadas;
-- quais relações são apenas sucessão de produto;
-- quais relações são inferidas;
-- como os benchmarks mudaram;
-- como o mercado acelerou;
-- quais famílias desapareceram, convergiram ou foram substituídas.
-
----
-
-# 6. NÃO TRANSFORMAR EM LANDING PAGE
-
-Evitar completamente:
-
-- hero gigante;
-- headline de marketing;
-- gradiente colorido ocupando o topo;
-- mockup decorativo;
-- números gigantes sem contexto;
-- slogans;
-- frases como “explore o futuro da IA”;
-- fundos com blobs;
-- grids decorativos neon;
-- iluminação simulada;
-- efeitos 3D;
-- parallax gratuito.
-
-A página é uma ferramenta de pesquisa.
-
----
-
-# 7. REDUZIR A “DENSIDADE DE COMPONENTES”
-
-Não confundir densidade de dados com densidade de componentes.
-
-A página pode continuar com muitos dados.
-
-Mas menos dados devem estar encapsulados em caixas.
-
-Regra orientativa:
+Antes de editar qualquer arquivo, abra e navegue de verdade por todas estas rotas no navegador:
 
 ```text
-se uma informação pode ser lida como linha de texto,
-não criar um card para ela.
+#dashboard
+#models
+#model/gpt-6-astra
+#plans
+#plan/<um-plano-real>
+#use-cases
+#use-case/<um-caso-real>
+#compare
+#router
+#benchmarks
+#history
+#community
+#sources
+#privacy
+#platforms
+#platform/<uma-plataforma-real>
+#provider/openai
+#benchmark/<um-benchmark-real>
+#data-health
+#simulator
+#calculator
+#roi
+#harnesses
+#troubleshoot
 ```
 
-Exemplo ruim:
+Não fazer auditoria apenas lendo HTML/CSS.
 
-```text
-[ card ]
-  ACTIVE
-  GPT-6 Astra
-  Sep 03
-[/ card ]
-```
+O agente deve usar navegador real e observar:
 
-Exemplo desejado:
-
-```text
-● GPT-6 Astra
-  Sep 03, 2026 · Active
-```
-
----
-
-# 8. NOVA HIERARQUIA VISUAL
-
-A página deve possuir quatro níveis claros:
-
-## Nível 1 — Página
-
-Título, descrição curta, período histórico.
-
-## Nível 2 — Modo
-
-Lineages / Timeline / Benchmark History.
-
-## Nível 3 — Contexto
-
-Provider, família, ano, benchmark.
-
-## Nível 4 — Dados
-
-Modelos, eventos, edges, runs.
-
-Não inserir containers visuais extras entre esses níveis sem necessidade.
-
----
-
-# 9. CABEÇALHO MAIS SÓBRIO
-
-Substituir a linguagem atual excessivamente explicativa por algo curto.
-
-Exemplo:
-
-```text
-History
-Model releases, lineages and benchmark evolution over time.
-```
-
-Ou em português:
-
-```text
-Histórico
-Lançamentos, linhagens e evolução de benchmarks ao longo do tempo.
-```
-
-Evitar emoji no título principal.
-
-Não usar `📜`.
-
----
-
-# 10. RESUMO NUMÉRICO SEM KPI CARDS TRADICIONAIS
-
-O Prompt 11 adicionou KPIs úteis.
-
-Preservar os valores, mas reconsiderar a apresentação.
-
-Em vez de 8 cards separados, testar uma faixa editorial:
-
-```text
-48 modelos   11 famílias   52 relações   147 eventos   verificado 05 Sep
-```
-
-Com divisores sutis.
-
-Ou duas linhas compactas.
-
-Não usar:
-
-- sombras;
-- glow;
-- ícones em cada número;
-- borda individual em cada KPI.
-
-Os dados são importantes; os containers não são.
-
----
-
-# 11. RÉGUA TEMPORAL GLOBAL
-
-Criar um elemento visual característico da página:
-
-```text
-2024                     2025                     2026          Today
-│────────────────────────│────────────────────────│──────────────│
-```
-
-A régua deve:
-
-- ser discreta;
-- funcionar em dark e light;
-- exibir anos;
-- opcionalmente mostrar quarters quando houver espaço;
-- servir como contexto para as árvores;
-- poder reagir a filtros de período;
-- não parecer um slider de formulário.
-
----
-
-# 12. ABAS PLANAS
-
-Hoje as tabs do histórico usam o mesmo padrão visual de toggles/pills de outras áreas.
-
-Mudar para tabs editoriais planas.
-
-Exemplo:
-
-```text
-Lineages        Timeline        Benchmark history
-────────
-```
-
-Características:
-
-- fundo transparente;
-- sem caixa externa;
-- sem pill;
-- sem preenchimento cyan no item ativo;
-- ativo indicado por underline de 2px;
-- texto ativo com maior contraste;
-- foco de teclado visível.
-
----
-
-# 13. RETIRAR EMOJIS DAS TABS
-
-Não usar:
-
-- `🌳`;
-- `⏱️`;
-- `📊`.
-
-Se ícone for realmente necessário, usar SVG monocromático discreto.
-
-Preferência: somente texto.
-
----
-
-# 14. PROVIDER RAIL
-
-Adicionar uma navegação secundária de providers/famílias à esquerda na visão de linhagens em desktop.
-
-Exemplo:
-
-```text
-All families
-
-OpenAI              12
-Anthropic           11
-Google DeepMind      9
-xAI                  5
-DeepSeek             8
-Alibaba Qwen         7
-Z.ai                 6
-Moonshot             4
-Meta                  3
-Tencent               2
-MiniMax               2
-```
-
-Os números devem ser derivados dinamicamente.
-
-Não hardcodar.
-
----
-
-# 15. PROVIDER RAIL — VISUAL
-
-A rail deve:
-
-- ter fundo da própria página;
-- não ser um card gigante;
-- usar tipografia pequena e clara;
-- mostrar item ativo com barra vertical ou fundo quase imperceptível;
-- evitar pills;
-- evitar ícones coloridos grandes;
-- permitir busca/filtro sem competir com a árvore.
-
----
-
-# 16. ALL FAMILIES DEVE SER COMPACTO
-
-Quando `All families` estiver ativo:
-
-- mostrar versões resumidas de cada família;
-- evitar expandir todas as tracks com todos os detalhes;
-- permitir rápida comparação da indústria;
-- permitir clicar numa família para entrar em modo focado.
-
-Isso evita dezenas de cards empilhados verticalmente.
-
----
-
-# 17. MODO FOCADO DE FAMÍLIA
-
-Ao selecionar OpenAI, Anthropic etc.:
-
-- expandir a visualização;
-- mostrar todas as tracks daquele provider;
-- permitir inspeção das relações;
-- manter breadcrumb/contexto simples;
-- preservar filtros de data.
-
-Exemplo:
-
-```text
-History / OpenAI
-```
-
-Sem caixa ao redor.
-
----
-
-# 18. O PROVIDER DEVE VIRAR ÂNCORA VISUAL
-
-Hoje o cyan funciona como acento genérico do sistema.
-
-Na página History, usar a cor de provider de maneira muito sutil.
-
-Exemplos possíveis:
-
-- barra de 2px;
-- pequeno ponto;
-- trecho da linha;
-- label do provider.
-
-Nunca usar a cor do provider como grande fundo preenchido.
-
----
-
-# 19. REGRA DE COR
-
-Meta aproximada:
-
-```text
-90–95% neutro
-5–10% cor
-```
-
-Cor deve comunicar:
-
-- provider;
-- seleção;
-- warning;
-- relation confidence;
-- evento excepcional.
-
-Cor não deve ser usada simplesmente para “deixar bonito”.
-
----
-
-# 20. REDUZIR CYAN GLOBAL NA HISTORY
-
-O `accent-cyan` continua existindo no sistema.
-
-Mas não deve estar simultaneamente em:
-
-- título;
-- borda;
-- seta;
+- primeira dobra;
+- scroll completo;
 - hover;
-- badge;
-- KPI;
+- focus;
+- modais;
+- drawers;
 - tabs;
-- links;
-- timeline.
-
-Na History, reservar cyan principalmente para:
-
-- seleção;
-- foco;
-- links interativos neutros;
-- alguns indicadores do sistema.
+- tabelas;
+- gráficos;
+- estados vazios;
+- estados com muitos dados;
+- dark mode;
+- light mode;
+- desktop;
+- tablet;
+- mobile.
 
 ---
 
-# 21. LINHAGENS COMO VISUALIZAÇÃO, NÃO COMO LISTA DE CARDS
+# 3. MATRIZ DE SCREENSHOTS OBRIGATÓRIA
 
-A principal alteração visual deve acontecer aqui.
-
-Hoje os modelos são apresentados como pequenos cards em sequência.
-
-Transformar a visão numa visualização de tracks.
-
-Exemplo conceitual:
+Antes e depois da alteração, capturar screenshots pelo menos em:
 
 ```text
-OPENAI
-
-           2024               2025                         2026
-Reasoning  ● o1 ───────────── ● o3 ───────── ● Sol - - - ● Astra
-
-General    ● GPT-4o ─ ● GPT-4.5 ─────────────── ● Terra
-
-Efficient  ● GPT-4o mini ────────────────────── ● Luna
-
-Open       ························· ● gpt-oss 20B
-                                      ● gpt-oss 120B
+1440 × 1000
+1024 × 900
+390 × 844
 ```
 
----
-
-# 22. POSIÇÃO X DEVE TER SIGNIFICADO TEMPORAL
-
-A posição horizontal deve refletir aproximadamente a data.
-
-Não usar espaçamento idêntico para intervalos de tempo muito diferentes.
-
-Criar função de normalização temporal, por exemplo:
-
-```js
-x = scaleDate(releaseDate, minDate, maxDate)
-```
-
-ou equivalente.
-
-A visualização precisa ensinar a velocidade da evolução.
-
----
-
-# 23. EVITAR DEPENDÊNCIA PESADA
-
-Não adicionar React, Vue ou outro framework.
-
-Não adicionar biblioteca de graph visualization gigante sem necessidade.
-
-Preferência:
-
-- HTML;
-- CSS Grid/Flex;
-- SVG nativo para linhas e edges;
-- Vanilla JS.
-
-D3 só deve ser considerada se houver justificativa clara e ganho substancial.
-
----
-
-# 24. NÓ DE MODELO MINIMALISTA
-
-O nó de modelo não deve mais parecer um card SaaS.
-
-Preferência:
+Para estas páginas prioritárias:
 
 ```text
-● GPT-6 Astra
-  Sep 03, 2026
+Dashboard
+Models
+Model dossier
+Plans
+Use Cases
+Comparator
+Benchmarks
+History / Lineages
+History / Timeline
+History / Benchmark History
+Community
+Sources
+Platforms
+Data Health
 ```
 
-Componentes possíveis:
+Salvar screenshots de comparação temporariamente durante o desenvolvimento ou em artefato de CI, se possível.
 
-- pequeno ponto;
-- nome;
+A avaliação visual final deve ser feita pelos screenshots, não apenas pelo código.
+
+---
+
+# 4. O QUE A AUDITORIA ATUAL JÁ MOSTRA
+
+O portal atual possui muitos pontos fortes funcionais, mas repete demais a mesma gramática:
+
+- H2 com emoji;
+- subtítulo explicando tudo;
+- card arredondado;
+- border translúcida;
+- pill/badge;
+- cyan;
+- glow;
+- hover com elevação;
+- bloco interno com mais cards;
+- muitos `style="..."` inline;
+- títulos com termos como “Inteligente”, “Auditado”, “Completo”, “Matriz”, “Hub”, “Explorer”, “Head-to-Head”.
+
+Esse padrão aparece em praticamente todas as rotas.
+
+A sensação artificial vem da **repetição mecânica**, não da existência de cards ou cor em si.
+
+---
+
+# 5. NORTH STAR VISUAL
+
+O portal deve parecer uma mistura coerente de:
+
+- produto analítico premium;
+- observatório técnico;
+- publicação de dados interativa;
+- ferramenta de pesquisa;
+- console de decisão;
+- atlas visual.
+
+Não copiar visualmente nenhuma marca específica.
+
+A referência desejada é a qualidade de composição de produtos maduros: tipografia cuidadosa, ritmo, boas superfícies, visualizações fortes, transições refinadas e informação densa sem parecer barulhenta.
+
+---
+
+# 6. REGRA CENTRAL: BONITO É OBRIGATÓRIO
+
+A implementação final deve ser **visualmente atraente**.
+
+Não aceitar uma solução que apenas seja “mais limpa”.
+
+O redesign deve possuir:
+
+- contraste visual elegante;
+- momentos de profundidade;
+- composição de cor;
+- hierarquia tipográfica;
+- gráficos bem enquadrados;
+- superfícies com materialidade controlada;
+- microinterações refinadas;
+- bons estados selecionados;
+- identidade própria.
+
+A página deve ficar mais bonita do que hoje, não apenas menos chamativa.
+
+---
+
+# 7. NÃO CONFUNDIR SOFISTICAÇÃO COM MINIMALISMO
+
+Minimalismo é uma ferramenta, não o objetivo.
+
+Pode haver:
+
+- gradiente;
+- blur;
+- sombra;
+- brilho;
+- cor saturada;
+- animação;
+- painéis elevados;
+
+Mas somente quando usados como **ponto focal**.
+
+Evitar aplicar todos esses recursos a todos os componentes.
+
+---
+
+# 8. SISTEMA DE ÊNFASE EM 4 NÍVEIS
+
+Criar quatro níveis visuais claros:
+
+## Nível A — Canvas
+
+Fundo principal e estrutura da página.
+
+## Nível B — Surface
+
+Áreas de trabalho: tabela, canvas de gráfico, painel de filtros, inspector.
+
+## Nível C — Elevated
+
+Modal, dropdown, inspector flutuante, command palette.
+
+## Nível D — Spotlight
+
+Elemento especial raro: lançamento atual, seleção crítica, hero de modelo, insight destacado.
+
+Não usar aparência de Nível D em componentes de Nível B.
+
+---
+
+# 9. COR: EXPRESSIVA, MAS COM FUNÇÃO
+
+Remover a regra rígida “90–95% neutro”.
+
+Em vez disso, usar um sistema de cor por camadas:
+
+```text
+Base       = neutros
+Brand UI   = acento principal do portal
+Provider   = identidade de cada fornecedor
+Semantic   = sucesso / warning / erro / informação
+Data Viz   = escala própria para gráficos
+Spotlight  = gradiente ou cor especial rara
+```
+
+A cor pode sim ser usada para beleza, desde que não destrua a hierarquia.
+
+---
+
+# 10. CYAN NÃO DEVE SER O ÚNICO IDIOMA VISUAL
+
+O cyan pode continuar sendo parte da identidade do portal, mas hoje ele aparece em excesso.
+
+Criar uma paleta de apoio mais sofisticada, por exemplo:
+
+- cyan/sky para interação primária;
+- violet/indigo para inteligência/raciocínio;
+- emerald para eficiência/verified;
+- amber para incerteza/custo;
+- rose apenas para risco/erro;
+- cores de provider para identificação.
+
+Não transformar cada componente em arco-íris.
+
+---
+
+# 11. GRADIENTES SÃO PERMITIDOS
+
+Gradientes não são proibidos.
+
+Usar gradiente em:
+
+- hero de um dossier;
+- background atmosférico muito sutil;
+- seleção de série em gráfico;
+- spotlight de release recente;
+- estados especiais.
+
+Evitar:
+
+- gradiente em toda badge;
+- gradiente em todo card;
+- gradiente em todo botão;
+- múltiplos gradientes competindo na mesma dobra.
+
+---
+
+# 12. GLOW É PERMITIDO, MAS RARO
+
+Glow pode ser usado em:
+
+- foco selecionado no canvas histórico;
+- ponto de release atual;
+- hover de uma visualização complexa;
+- estados de spotlight.
+
+Não usar glow em:
+
+- cada card;
+- cada link;
+- cada badge;
+- cada botão;
+- toda borda.
+
+---
+
+# 13. SOMBRAS
+
+Reduzir o número de sombras diferentes.
+
+Criar apenas aproximadamente três níveis:
+
+```text
+shadow-subtle
+shadow-elevated
+shadow-floating
+```
+
+Não usar sombra forte em elementos pequenos.
+
+---
+
+# 14. RAIOS
+
+O problema não é “card arredondado”.
+
+O problema é todos os elementos possuírem o mesmo arredondamento SaaS.
+
+Criar hierarquia:
+
+```text
+4–6px   inputs, tabs, células interativas
+8–10px  cards utilitários
+12–14px painéis principais
+16px+   apenas hero/spotlight quando fizer sentido
+pill    somente chips, status e filtros compactos
+```
+
+---
+
+# 15. TIPOGRAFIA
+
+Reavaliar o uso universal de Inter.
+
+Não trocar fonte por moda, mas testar se uma fonte de interface/editorial com mais personalidade melhora o portal.
+
+Opções aceitáveis, se tecnicamente viáveis:
+
+- manter Inter com melhor escala e tracking;
+- Instrument Sans;
+- IBM Plex Sans;
+- Manrope;
+- combinação de sans principal + JetBrains Mono para dados.
+
+Se trocar, medir impacto em layout e performance.
+
+---
+
+# 16. ESCALA TIPOGRÁFICA
+
+Definir tokens reais:
+
+```text
+Display
+H1
+H2
+H3
+Body Large
+Body
+Small
+Caption
+Mono Data
+```
+
+Hoje há muitos tamanhos arbitrários inline.
+
+Reduzir valores soltos como `0.72rem`, `0.76rem`, `0.78rem`, `0.82rem`, etc. quando não há razão semântica.
+
+---
+
+# 17. NÚMEROS E DADOS
+
+Usar JetBrains Mono ou fonte tabular para:
+
+- preço;
+- score;
+- tokens;
+- datas técnicas;
+- IDs;
+- contexto;
+- latência;
+- throughput.
+
+Usar `font-variant-numeric: tabular-nums` onde fizer sentido.
+
+Isso cria forte identidade de produto analítico.
+
+---
+
+# 18. EMOJIS
+
+Não proibir todos.
+
+Remover emojis principalmente de:
+
+- títulos H1/H2;
+- tabs principais;
+- labels de seção;
+- títulos de cards comuns.
+
+Permitir emoji quando possuir função humana ou comunicativa clara:
+
+- aviso;
+- empty state;
+- onboarding casual;
+- conteúdo comunitário;
+- pequeno detalhe de personalidade.
+
+Preferir SVG consistente para navegação e UI estrutural.
+
+---
+
+# 19. ÍCONES
+
+Criar um sistema coerente de ícones SVG com:
+
+- mesmo `stroke-width`;
+- mesma caixa;
+- mesmo tamanho;
+- mesma linguagem.
+
+Evitar mistura de emoji + SVG + caracteres Unicode + ícones textuais na mesma hierarquia.
+
+---
+
+# 20. MICROCOPY
+
+Reduzir títulos que parecem escritos por LLM.
+
+Exemplos atuais a revisar:
+
+```text
+“Comparador Lado a Lado (Head-to-Head)”
+“Roteador Inteligente de Modelos (Model Router)”
+“Governança, Privacidade, ZDR & Fontes Auditáveis”
+“Relatos da Comunidade & Comportamento de Engenharia”
+“Disponibilidade por Plataforma & Catálogo OpenCode Go”
+“Integridade & Auditoria Contínua (Data Health)”
+```
+
+Preferir títulos de produto curtos:
+
+```text
+Comparar
+Router
+Privacidade
+Comunidade
+Plataformas
+Data Health
+Histórico
+Benchmarks
+Modelos
+Planos
+```
+
+Usar subtítulo para explicar.
+
+---
+
+# 21. NÃO REPETIR NO TÍTULO O QUE A NAVEGAÇÃO JÁ EXPLICA
+
+Se o sidebar diz “Benchmarks & Performance”, o H1 não precisa dizer “Thinking & Benchmarks Explorer”.
+
+Se a rota é `#plans`, o título pode simplesmente ser “Planos”.
+
+---
+
+# 22. MOTION DESIGN
+
+Criar poucas animações, mas boas.
+
+Preferir:
+
+- fade/slide de 120–220ms;
+- interpolação suave de gráfico;
+- destaque de edge;
+- expansão de inspector;
+- underline de tab animada;
+- transitions de seleção.
+
+Evitar:
+
+- card pulando para cima em todo hover;
+- pulsação infinita sem necessidade;
+- shimmer gratuito;
+- animações em dezenas de itens simultaneamente.
+
+Respeitar `prefers-reduced-motion`.
+
+---
+
+# 23. HOVER
+
+Eliminar como padrão universal:
+
+```css
+transform: translateY(-2px)
+```
+
+Substituir conforme contexto por:
+
+- mudança de surface;
+- border contrast;
+- highlight interno;
+- accent line;
+- small scale apenas em elementos realmente clicáveis e destacados.
+
+---
+
+# 24. INLINE STYLES
+
+O portal ainda possui grande quantidade de `style="..."` e estilos gerados via template string.
+
+Nesta tarefa:
+
+- reduzir inline styles nas áreas tocadas;
+- extrair padrões para classes;
+- não fazer migração massiva irrelevante;
+- impedir que `#history` novo seja implementado com dezenas de strings de CSS inline.
+
+---
+
+# 25. DESIGN TOKENS V2
+
+Criar ou consolidar tokens para:
+
+```text
+surface-0
+surface-1
+surface-2
+surface-3
+border-subtle
+border-strong
+text-primary
+text-secondary
+text-muted
+accent-primary
+focus-ring
+provider-*
+shadow-*
+radius-*
+space-*
+```
+
+Compatível com dark e light.
+
+---
+
+# 26. DARK MODE
+
+O dark mode pode continuar premium e atmosférico.
+
+Evitar preto puro.
+
+Usar superfícies com pequenas variações de luminância.
+
+Uma pequena textura/gradiente ambiental no fundo pode ser usada, desde que quase imperceptível e sem efeito “neon AI”.
+
+---
+
+# 27. LIGHT MODE
+
+O light mode não pode ser apenas “cards brancos em cinza claro”.
+
+Criar:
+
+- bom contraste;
+- superfícies com profundidade delicada;
+- borders refinadas;
+- selected states fortes;
+- data visualization legível.
+
+---
+
+# 28. SIDEBAR GLOBAL — POLISH PASS
+
+Não redesenhar completamente a arquitetura de navegação.
+
+Melhorar visualmente:
+
+- reduzir emojis na estrutura principal;
+- usar SVG consistente;
+- diminuir badges promocionais persistentes;
+- tornar grupos mais leves;
+- melhorar active state;
+- suavizar bordas e divisões;
+- manter contadores discretos;
+- melhorar spacing vertical.
+
+---
+
+# 29. HEADER GLOBAL — POLISH PASS
+
+O header pode ficar mais sofisticado com:
+
+- brand mark mais simples;
+- search/command bar refinada;
+- menos glow;
+- melhor border-bottom;
+- dropdowns com superfície elevada real;
+- melhor alinhamento vertical.
+
+Não precisa ficar totalmente flat.
+
+---
+
+# 30. COMPONENTE `VIEW HEADER` GLOBAL
+
+Criar uma estrutura compartilhada para headers das páginas:
+
+```text
+Eyebrow opcional
+H1 curto
+Subtítulo de 1–2 linhas
+Actions à direita
+Metadata opcional
+```
+
+Remover estilos inline específicos de cada rota quando possível.
+
+---
+
+# 31. DASHBOARD — DIREÇÃO VISUAL
+
+A Home deve parecer um “morning brief” de inteligência de modelos.
+
+Priorizar:
+
+1. o que mudou;
+2. principais decisões;
+3. destaques dinâmicos;
+4. acesso rápido ao catálogo.
+
+Reduzir a sensação de mural de KPI cards.
+
+Pode haver um hero visual bonito e compacto, com um background atmosférico sutil.
+
+---
+
+# 32. DASHBOARD — HIERARQUIA
+
+Limitar os highlights acima da dobra.
+
+Não mostrar 8–10 caixas igualmente importantes.
+
+Escolher:
+
+- 1 insight principal;
+- 2–4 supporting insights;
+- demais informações como lista/rail.
+
+---
+
+# 33. MODELOS — DIREÇÃO VISUAL
+
+`#models` deve parecer uma ferramenta de catálogo profissional.
+
+Priorizar:
+
+- tabela excelente;
+- filtros compactos;
+- provider marks;
+- densidade regulável;
+- frozen header;
+- diferença visual entre model tier/status sem carnaval de badges.
+
+---
+
+# 34. MODELOS — TOOLBAR
+
+Unificar busca, filtros e view mode numa toolbar limpa.
+
+Evitar múltiplas linhas de chips competindo entre si.
+
+Filtros raros podem ir em popover/painel “Mais filtros”.
+
+---
+
+# 35. DOSSIÊ DE MODELO — HERO MAIS FORTE
+
+O dossier é um bom lugar para beleza visual.
+
+Pode haver:
+
+- provider color;
+- gradiente muito sutil;
+- logo/mark;
+- nome grande;
+- metadata alinhada;
+- 2–4 métricas principais;
+- badge excepcional (Preview/Open weights/etc.).
+
+Evitar uma coleção de chips para tudo.
+
+---
+
+# 36. DOSSIÊ DE MODELO — ABAS
+
+Remover emoji das tabs principais.
+
+Usar:
+
+```text
+Visão geral
+Desempenho
+Preço & acesso
+Histórico
+Deploy
+```
+
+Com indicador ativo refinado.
+
+---
+
+# 37. PLANOS — DIREÇÃO VISUAL
+
+`#plans` deve parecer um explorador de ofertas, não uma galeria de cards SaaS.
+
+Usar:
+
+- comparação estruturada;
+- destaque para preço/limite;
+- visão por empresa;
+- tables/matrices onde forem superiores a cards;
+- cards somente para resumo de plano.
+
+---
+
+# 38. PLANOS — PROVIDER BRANDING
+
+Usar cores/logos de empresas com moderação para criar identidade.
+
+Não aplicar um gradiente diferente em cada plano.
+
+---
+
+# 39. CASOS DE USO — DIREÇÃO VISUAL
+
+Remover o badge `E — Calibrado` do título principal.
+
+Colocar confidence/evidence dentro da metodologia ou resumo de decisão.
+
+A visão deve parecer uma matriz de decisão, não um painel de classificação automática.
+
+---
+
+# 40. CASO DE USO — DOSSIÊ
+
+Usar um cabeçalho narrativo:
+
+```text
+SaaS System Architecture
+Prioridade: quality + coding + cost
+```
+
+Depois:
+
+- ranking;
+- sensibilidade;
+- tradeoffs;
+- recomendação.
+
+Não colocar tudo em cards iguais.
+
+---
+
+# 41. COMPARADOR — DIREÇÃO VISUAL
+
+`#compare` deve parecer um workspace analítico.
+
+Remover “⚔️ Head-to-Head”.
+
+Usar:
+
+```text
+Comparar
+```
+
+Fortalecer:
+
+- reference model;
+- pinned columns;
+- deltas;
+- highlight de diferenças;
+- confidence strip;
+- tabs de modo.
+
+---
+
+# 42. COMPARADOR — COR
+
+Usar cor do provider/modelo em pequenas linhas, dots e séries de gráfico.
+
+Não colorir toda a coluna.
+
+---
+
+# 43. ROUTER — DIREÇÃO VISUAL
+
+O Router deve parecer um assistente de decisão, não um formulário com dezenas de chips.
+
+Usar progressive disclosure:
+
+1. tarefa;
+2. restrições;
+3. recomendação.
+
+Pode haver stepper elegante.
+
+---
+
+# 44. BENCHMARKS — DIREÇÃO VISUAL
+
+Fazer `#benchmarks` ser **chart-first**.
+
+O gráfico é o protagonista.
+
+Controles devem parecer ferramenta de análise:
+
+- compactos;
+- alinhados;
+- não dominar a página.
+
+---
+
+# 45. BENCHMARKS — CARDS METODOLÓGICOS
+
+Metodologia pode ficar em accordion ou inspector secundário.
+
+Não ocupar a primeira dobra com várias caixas explicativas.
+
+---
+
+# 46. COMUNIDADE — DIREÇÃO VISUAL
+
+A página deve parecer um feed editorial de evidências qualitativas.
+
+Separar visualmente:
+
+- relato;
+- benchmark relacionado;
+- confiança;
+- divergência;
+- caveat.
+
+Evitar labels como `sourceType: community / calibrated` no H1.
+
+---
+
+# 47. FONTES — DIREÇÃO VISUAL
+
+`#sources` deve parecer uma bibliografia interativa / catálogo de evidências.
+
+Usar:
+
+- tabela/lista;
+- filtros;
+- favicon/provider;
+- tipo da fonte;
 - data;
-- status apenas se excepcional;
-- provider implícito pela track/família.
+- confidence;
+- acesso rápido.
+
+Não precisa de um card por fonte.
 
 ---
 
-# 25. NÃO MOSTRAR STATUS COMUM COMO BADGE
+# 48. PRIVACIDADE — DIREÇÃO VISUAL
 
-Não precisa de badge para:
+Priorizar uma matriz comparável:
 
-- active;
-- stable;
-- current.
+```text
+Provider | Training | Retention | ZDR | Enterprise controls
+```
 
-Esses estados podem ser metadata textual.
+Usar semântica de cor apenas onde útil.
 
-Badges devem ficar reservados para exceções:
-
-- Preview;
-- Deprecated;
-- Retired;
-- Disputed;
-- Inferred;
-- Suspended.
+Não exagerar em vermelho/verde.
 
 ---
 
-# 26. BADGES EXCEPCIONAIS DEVEM SER DISCRETOS
+# 49. PLATAFORMAS — DIREÇÃO VISUAL
 
-Mesmo nos estados acima:
+Priorizar disponibilidade e relacionamento:
 
-- fundo quase neutro;
-- borda sutil;
-- sem gradiente;
-- sem glow;
-- radius menor;
-- texto pequeno.
+- plataforma;
+- modelos;
+- quotas;
+- BYOK;
+- região;
+- privacidade.
 
----
-
-# 27. NÃO USAR `translateY(-2px)` EM NÓS
-
-Hover não deve fazer o nó “flutuar”.
-
-Substituir por:
-
-- aumento sutil de contraste;
-- background quase imperceptível;
-- destaque de outline;
-- realce das edges relacionadas.
-
-Movimento deve ser reservado para mudanças reais de layout.
+Uma availability matrix pode ser mais clara que muitos cards.
 
 ---
 
-# 28. HOVER DE NÓ DEVE EXPLICAR RELAÇÕES
+# 50. DATA HEALTH — DIREÇÃO VISUAL
 
-Ao passar sobre um modelo:
+Data Health pode assumir estética de operations console.
 
-- realçar suas edges;
-- reduzir visualmente relações não conectadas;
-- mostrar cursor apropriado;
-- opcionalmente mostrar uma pequena tooltip factual.
+Aqui é aceitável maior densidade.
 
-Não exibir tooltip decorativa com informações redundantes.
+Usar:
+
+- status summary;
+- mini trends;
+- review queue;
+- tabela;
+- severity;
+- freshness.
+
+Não transformar cada métrica em KPI card colorido.
 
 ---
 
-# 29. EDGES COMO PRIMEIRA CLASSE
+# 51. FERRAMENTAS — DIREÇÃO VISUAL
 
-O Prompt 11 já criou semântica de relações.
+Simuladores e calculadoras devem compartilhar:
 
-A visualização deve torná-la evidente.
+- form layout consistente;
+- input groups;
+- resultado destacado;
+- tabela de cenários;
+- warnings claros.
+
+Evitar quatro cards pequenos para cada output quando um painel de resultados resolve.
+
+---
+
+# 52. `#history` É A PÁGINA-PILOTO DE MAIOR TRANSFORMAÇÃO
+
+A estrutura factual do Prompt 11 deve ser preservada integralmente.
+
+O redesign de History deve ser mais profundo que o polish global.
+
+---
+
+# 53. CONCEITO DE HISTORY
+
+Nome conceitual:
+
+> **Model History Atlas**
+
+Não precisa necessariamente aparecer em inglês na UI.
+
+O usuário deve sentir que está explorando um mapa temporal da indústria.
+
+---
+
+# 54. HISTORY — HERO COM PERSONALIDADE
+
+Não fazer um hero enorme.
+
+Mas permitir um topo bonito e distinto.
 
 Sugestão:
 
 ```text
-───  verified direct / confirmed
-- -  generation or role successor
-···  inferred
+Histórico
+Como as famílias de modelos evoluíram — e quando os saltos realmente aconteceram.
+
+2024 ───────── 2025 ───────── 2026 ───── Hoje
 ```
 
-A nomenclatura exata deve vir dos dados.
+Pode haver background atmosférico muito sutil com linhas temporais ou textura procedural leve.
+
+Não usar blob neon.
 
 ---
 
-# 30. ESTILO DAS EDGES
+# 55. HISTORY — KPIs
 
-Relações verificadas:
+Os 8 KPIs criados no Prompt 11 são úteis, mas hoje repetem o padrão de card.
 
-- linha sólida;
-- contraste moderado.
+Substituir por uma `history-stat-strip` ou summary grid leve.
 
-Relações de sucessão funcional/geracional:
-
-- linha tracejada curta.
-
-Relações inferidas:
-
-- pontilhada;
-- menor opacidade.
-
-Disputadas:
-
-- semântica de warning;
-- não necessariamente vermelho saturado.
+Pode possuir cor e ênfase, mas sem 8 caixas iguais com barras coloridas no topo.
 
 ---
 
-# 31. NÃO USAR SETA GRANDE `➔`
+# 56. HISTORY — TABS
 
-Eliminar o padrão de setas textuais entre cards.
-
-Usar SVG/linha contínua.
-
-Seta final pode existir apenas quando a direção for necessária.
-
----
-
-# 32. INSPECTOR LATERAL
-
-Transformar o inspector histórico num elemento central da experiência desktop.
-
-Layout desejado:
+Usar tabs refinadas:
 
 ```text
-[ provider rail ] [ lineage canvas ] [ inspector ]
+Linhagens
+Linha do tempo
+Benchmarks
 ```
 
-O inspector pode ter aproximadamente 280–340px.
+Sem emoji.
+
+Ativo pode usar underline animada ou pequeno background surface.
+
+Não precisa obrigatoriamente ser “completamente flat”.
 
 ---
 
-# 33. INSPECTOR SEM “CARDÃO” DECORATIVO
+# 57. HISTORY — LAYOUT DESKTOP
 
-O inspector deve parecer painel técnico.
+Estrutura recomendada:
+
+```text
+┌ Provider Rail ┐ ┌────────── Temporal Canvas ──────────┐ ┌ Inspector ┐
+│               │ │                                    │ │           │
+│ OpenAI        │ │  tracks / nodes / relations        │ │ selected  │
+│ Anthropic     │ │                                    │ │ node/edge │
+│ Google        │ │                                    │ │           │
+└───────────────┘ └────────────────────────────────────┘ └───────────┘
+```
+
+O inspector pode aparecer somente após seleção.
+
+---
+
+# 58. HISTORY — PROVIDER RAIL
+
+Pode ter um pequeno dot/logo de provider.
+
+Item selecionado pode usar:
+
+- fundo translúcido discreto;
+- barra lateral;
+- provider accent.
+
+Não precisa ser visualmente “invisível”.
+
+---
+
+# 59. HISTORY — CANVAS
+
+O canvas deve ser uma superfície visual forte e bonita.
+
+Pode possuir:
+
+- grid temporal muito sutil;
+- linhas verticais de ano/quarter;
+- surface contrast;
+- clipping;
+- sticky time ruler;
+- hover contextual.
+
+Este é um dos “momentos visuais” permitidos do produto.
+
+---
+
+# 60. HISTORY — POSIÇÃO TEMPORAL REAL
+
+Nós devem ser posicionados por data normalizada.
+
+Não usar gap constante.
+
+Criar `scaleDate()` ou função equivalente.
+
+---
+
+# 61. HISTORY — TRACKS
+
+Tracks devem representar papéis/famílias de maneira clara.
 
 Exemplo:
 
 ```text
+Reasoning
+General
+Fast / Efficient
+Open weights
+Multimodal
+```
+
+Não inferir tracks inexistentes apenas para preencher layout.
+
+---
+
+# 62. HISTORY — NÓ DE MODELO
+
+O nó deve ser compacto, mas bonito.
+
+Não precisa ser somente texto cru.
+
+Uma boa opção:
+
+```text
+● GPT-6 Astra
+  Sep 03 · Flagship
+```
+
+Com:
+
+- dot de provider;
+- label;
+- pequeno surface no selected/hover;
+- halo discreto se atual/selecionado.
+
+---
+
+# 63. HISTORY — NÓ ATUAL
+
+Modelos ativos/frontier atuais podem possuir diferenciação visual leve:
+
+- maior contraste;
+- dot sólido;
+- pequena marca `Current` somente quando útil;
+- halo ou ring sutil.
+
+Não criar badge gigante `ACTIVE`.
+
+---
+
+# 64. HISTORY — EDGES
+
+Representar visualmente a semântica do Prompt 11:
+
+```text
+solid   = relação verificada direta
+short-dash = sucessão funcional/geracional
+long-dash / dotted = inferida
+```
+
+Usar SVG.
+
+---
+
+# 65. HISTORY — EDGE HOVER
+
+Ao hover/selecionar edge:
+
+- aumentar contraste;
+- destacar origem/destino;
+- mostrar tipo;
+- mostrar confidence;
+- mostrar fonte.
+
+Esse detalhe aumenta muito a sensação de ferramenta profissional.
+
+---
+
+# 66. HISTORY — INSPECTOR
+
+Substituir modal genérico por inspector lateral quando possível.
+
+Para modelo:
+
+```text
 GPT-6 Astra
 OpenAI · GPT-6
-
-Released
 03 Sep 2026
 
 Role
 Frontier flagship
 
-Predecessor role
-GPT-5.6 Sol
-
-Relationship
-Flagship successor
+Relation
+Successor to GPT-5.6 Sol
 
 Evidence
-Official · Verified
+Verified · Official
 
-Architectural descent
-Not established
-
-Sources  3
 Open dossier →
 ```
 
----
-
-# 34. INSPECTOR — HIERARQUIA
-
-Usar:
-
-- labels pequenas;
-- valores em tamanho normal;
-- divisores finos;
-- espaço em branco;
-- nenhuma grade de mini-cards.
-
----
-
-# 35. INSPECTOR — FONTES
-
-A fonte precisa estar disponível sem poluir a árvore.
-
-Exibir:
-
-- publisher;
-- título curto;
-- data;
-- provenance;
-- link.
-
-Pode haver “View evidence” expansível.
-
----
-
-# 36. INSPECTOR MOBILE
-
-Em telas estreitas:
-
-- virar bottom sheet ou painel abaixo da visualização;
-- não abrir modal central gigante;
-- preservar contexto da linha do tempo.
-
----
-
-# 37. RELATION INSPECTOR
-
-Ao clicar numa edge, mostrar detalhes da relação.
-
-Exemplo:
+Para edge:
 
 ```text
-GPT-5.6 Sol → GPT-6 Astra
-
-Type
+Sol → Astra
 Flagship-role successor
-
-Confidence
 Verified
-
-What this means
-Astra replaced Sol as the flagship generation.
-
-What it does not mean
-Direct checkpoint lineage is not established.
-
-Evidence
-OpenAI launch documentation
+Source: OpenAI
+Architectural descent: not established
 ```
 
 ---
 
-# 38. LEGENDA DE RELAÇÕES
+# 67. HISTORY — TIMELINE
 
-A legenda deve ser compacta e persistente.
+Abandonar feed de cards idênticos.
 
-Não virar um card grande.
-
-Pode ficar no rodapé do canvas ou acima dele.
-
-Exemplo:
+Usar formato editorial/changelog:
 
 ```text
-Relationships   ─ verified   - - succession   ··· inferred
+SEP 2026
+
+03   OpenAI       GPT-6 Astra released
+02   Google       Gemini 3.8 Flash released
+01   Anthropic    Claude Fable 5.1 released
 ```
 
----
+Eventos maiores podem ter mais espaço.
 
-# 39. TIPOGRAFIA
-
-Manter Inter como fonte principal.
-
-Usar JetBrains Mono somente para dados técnicos.
-
-Exemplos adequados para mono:
-
-- `2026-09-03`;
-- `1.05M`;
-- `74.1%`;
-- `$5.72`;
-- `gpt-6-astra`;
-- versões de benchmark.
+Eventos menores ficam compactos.
 
 ---
 
-# 40. NÃO USAR MONO EM PROSA
+# 68. HISTORY — HIERARQUIA DE EVENTOS
 
-Não usar JetBrains Mono em:
-
-- títulos;
-- descrições;
-- nomes de provider;
-- parágrafos;
-- labels editoriais comuns.
-
----
-
-# 41. ESCALA TIPOGRÁFICA
-
-Criar uma escala mais contida.
-
-Sugestão aproximada:
+Criar níveis:
 
 ```text
-page title       28–32px
-section title    18–20px
-track label      13–14px
-model name       13–14px
-metadata         11–12px
-technical mono   11–12px
+major
+standard
+minor
 ```
 
-Evitar títulos enormes.
-
----
-
-# 42. PESO TIPOGRÁFICO
-
-Não colocar tudo em 700/800.
-
-Preferência:
-
-- page title: 650/700;
-- section: 600;
-- model: 550/600;
-- metadata: 400/500.
-
-A variação de peso deve criar hierarquia.
-
----
-
-# 43. REDUZIR UPPERCASE
-
-Não usar text-transform uppercase como padrão em todos os pequenos labels.
-
-Usar uppercase somente onde tiver função editorial clara.
-
----
-
-# 44. RAIOS MENORES
-
-Para `#history`, reduzir a dependência de `radius-md/lg/xl`.
-
-Meta:
-
-- 4px a 6px para controles;
-- 0px a 6px para painéis;
-- pills apenas quando semanticamente necessárias.
-
----
-
-# 45. GLASSMORPHISM
-
-A página History não deve depender de glassmorphism.
-
-Evitar:
-
-- `backdrop-filter` em conteúdo interno;
-- múltiplas superfícies translúcidas empilhadas;
-- bordas brilhantes.
-
-O header global pode continuar seguindo o sistema existente por enquanto.
-
----
-
-# 46. SOMBRAS
-
-Usar sombra somente quando existir elevação real:
-
-- dropdown;
-- inspector flutuante;
-- modal/bottom sheet.
-
-Não usar sombra em cada nó ou evento.
-
----
-
-# 47. GLOW
-
-History deve ter quase zero glow.
-
-Remover glow de:
-
-- nós;
-- family containers;
-- tabs;
-- timeline;
-- badges;
-- hover.
-
----
-
-# 48. GRADIENTES
-
-Não usar gradiente como decoração da página.
-
-Gradiente pode permanecer no sistema global se necessário, mas não deve definir a identidade visual de History.
-
----
-
-# 49. ESPAÇAMENTO
-
-Usar espaço em branco como ferramenta de hierarquia.
-
-Em vez de:
-
-```text
-border + background + shadow
-```
-
-preferir:
-
-```text
-margin + padding + typographic contrast
-```
-
----
-
-# 50. TIMELINE — ABANDONAR FEED DE CARDS
-
-A timeline deve virar um changelog editorial.
-
-Exemplo:
-
-```text
-SEPTEMBER 2026
-
-03 SEP   OpenAI
-         GPT-6 Astra released
-         Frontier flagship · 1.05M context
-         Official source                                  →
-
-02 SEP   Google DeepMind
-         Gemini 3.8 Flash released
-         Flash series                                     →
-
-01 SEP   Anthropic
-         Claude Fable 5.1 released                        →
-```
-
----
-
-# 51. TIMELINE — COLUNAS
-
-Desktop:
-
-```text
-DATE | PROVIDER | EVENT | META | SOURCE
-```
-
-Mas sem aparência de tabela pesada.
-
-Usar grid e divisores finos.
-
----
-
-# 52. TIMELINE — HIERARQUIA DE EVENTOS
-
-Criar três níveis editoriais:
-
-## Major
+Major:
 
 - nova geração;
-- flagship release;
-- retirada importante;
-- suspensão;
+- flagship;
+- lançamento importante;
+- retirement;
 - identity reveal.
 
-## Standard
-
-- preview;
-- GA;
-- mudança importante de preço;
-- mudança relevante de disponibilidade.
-
-## Minor
+Minor:
 
 - benchmark update;
-- snapshot;
-- documentação;
-- manutenção.
+- pequena mudança de disponibilidade;
+- metadata update.
 
 ---
 
-# 53. IMPORTÂNCIA NÃO PODE SER HARDcode EDITORIAL SOLTO
+# 69. HISTORY — EVENT DETAIL
 
-Definir `importance` ou derivar por tipo de evento.
+Clique num evento abre inspector ou expansão inline.
 
-Exemplo:
+Mostrar:
 
-```js
-importance: 'major' | 'standard' | 'minor'
-```
-
-Se já houver estrutura equivalente, reutilizar.
-
----
-
-# 54. MAJOR EVENT
-
-Pode ocupar mais espaço vertical.
-
-Exemplo:
-
-```text
-03 SEP 2026
-OPENAI
-GPT-6 Astra
-New GPT-6 generation and flagship role.
-```
-
-Sem card colorido gigante.
+- descrição;
+- fonte;
+- tipo;
+- data efetiva;
+- entidade;
+- impacto;
+- links.
 
 ---
 
-# 55. MINOR EVENT
+# 70. HISTORY — BENCHMARK HISTORY
 
-Deve ser compacto.
+Transformar a terceira aba em visualização temporal real.
 
-Exemplo:
+Topo:
 
-```text
-04 SEP · Artificial Analysis · leaderboard snapshot updated
-```
-
----
-
-# 56. AGRUPAR POR MÊS/ANO
-
-Manter headers editoriais:
-
-```text
-September 2026
-August 2026
-July 2026
-```
-
-Não transformar o header mensal em pill cyan.
-
----
-
-# 57. FILTROS DA TIMELINE
-
-Substituir dezenas de chips por controles discretos.
-
-Preferência:
-
-- search;
-- provider select;
-- year select;
-- event type select;
-- evidence status select.
-
-Chips podem existir para filtros rápidos realmente frequentes, mas em número reduzido.
-
----
-
-# 58. BUSCA
-
-A busca de histórico deve procurar:
-
-- modelo;
-- provider;
-- família;
-- evento;
-- benchmark;
-- alias.
-
-Placeholder simples:
-
-```text
-Search history…
-```
-
-ou português equivalente.
-
----
-
-# 59. BENCHMARK HISTORY — VISUALIZAÇÃO PRINCIPAL
-
-Não tratar histórico de benchmark apenas como tabela cronológica.
-
-Criar um gráfico de evolução temporal.
-
-Exemplo conceitual:
-
-```text
-Terminal-Bench 2.1
-
-95 ┤                             ● Fable 5.1
-90 ┤                  ● Grok 4.6      ● Gemini 3.8
-85 ┤
-80 ┤
-   └────────────────────────────────────────────
-       Jun         Jul         Aug         Sep
-```
-
----
-
-# 60. BENCHMARK HISTORY — CONTROLES
-
-Permitir selecionar:
-
-- benchmark;
-- benchmark version;
-- provider;
-- model;
+- benchmark selector;
+- metric;
 - effort;
-- harness.
-
-Não misturar runs incompatíveis silenciosamente.
-
----
-
-# 61. BENCHMARK HISTORY — HARNESSES
-
-Se houver mais de um harness:
-
-- usar série diferente;
-- ou exigir seleção;
-- ou alertar sobre incompatibilidade.
-
-Nunca conectar pontos metodologicamente incomparáveis como uma única série contínua.
-
----
-
-# 62. BENCHMARK HISTORY — TOOLTIP
-
-Tooltip deve mostrar:
-
-```text
-GPT-6 Astra
-DeepSWE 1.1
-XHigh
-74.1%
-2026-09-03
-mini-swe-agent
-Independent
-```
-
-Sem linguagem promocional.
-
----
-
-# 63. BENCHMARK HISTORY — TABELA DE RUNS
-
-Abaixo do gráfico, manter tabela detalhada.
-
-A tabela deve conter:
-
-- date;
-- model;
-- configuration/effort;
-- benchmark version;
 - harness;
-- score;
-- cost, se houver;
-- evidence;
-- source.
+- provider/model filter.
+
+Centro:
+
+- gráfico temporal.
+
+Base:
+
+- runs table.
 
 ---
 
-# 64. “COMPARE ERAS”
+# 71. HISTORY — GRÁFICO DE BENCHMARK
 
-Adicionar uma ferramenta experimental de alto valor editorial.
-
-Usuário seleciona duas datas ou períodos.
-
-Exemplo:
-
-```text
-Compare eras
-Mar 2025 → Sep 2026
-```
-
----
-
-# 65. COMPARE ERAS — RESULTADOS
-
-Exibir mudanças derivadas, como:
-
-```text
-Models tracked          18 → 48
-Providers tracked        6 → 11
-Max context           200k → 1.05M
-Open-weight leaders      … → …
-Flagship transitions     …
-```
-
-Somente mostrar métricas com base canônica suficiente.
-
----
-
-# 66. COMPARE ERAS — EVENTOS
-
-Também mostrar:
-
-- novas famílias;
-- famílias removidas;
-- novos flagships;
-- modelos aposentados;
-- mudanças de preço relevantes;
-- mudanças de benchmark leader quando comparáveis.
-
----
-
-# 67. COMPARE ERAS — NÃO INVENTAR HISTÓRICO RETROATIVO
-
-Se o dataset não possui snapshot suficiente para uma métrica em determinada data:
-
-```text
-Insufficient historical coverage
-```
-
-Não reconstruir artificialmente com dados atuais.
-
----
-
-# 68. LINGUAGEM EDITORIAL
-
-Reduzir frases grandiosas.
-
-Evitar:
-
-- “líder absoluto”;
-- “revolucionário”;
-- “breakthrough” sem ser nome oficial;
-- “ultra” como adjetivo editorial;
-- “máxima densidade”;
-- “dominância”;
-- “campeão” em texto permanente.
-
----
-
-# 69. LINGUAGEM FACTUAL
-
-Preferir:
-
-```text
-Released Sep 3, 2026
-Replaced Sol as OpenAI's flagship role
-Relationship verified by official launch documentation
-```
-
----
-
-# 70. NOMES DE FAMÍLIA
-
-Evitar títulos como:
-
-```text
-OpenAI GPT-5.6 Generation & Open-Weights Tree
-Anthropic Claude Architecture Tree
-```
-
-Preferir:
-
-```text
-OpenAI
-Claude
-Gemini
-Grok
-DeepSeek
-Qwen
-```
-
-Subtítulo curto explica o escopo.
-
----
-
-# 71. SEPARAR MARCA DE LINHAGEM
-
-Provider heading:
-
-```text
-OpenAI
-```
-
-Metadata:
-
-```text
-4 tracks · 9 releases · 2024–2026
-```
-
-Sem título promocional composto.
-
----
-
-# 72. NÃO DUPLICAR INFORMAÇÃO
-
-Se data já aparece no nó, não repetir a mesma data em badge.
-
-Se provider já está no cabeçalho da família, não repetir provider em cada nó.
-
-Se status é normal, não mostrar.
-
----
-
-# 73. MICROCOPY
-
-Remover frases como:
-
-```text
-Clique para explorar o dossiê completo deste incrível modelo
-```
-
-Preferir:
-
-```text
-Open dossier
-```
-
----
-
-# 74. ÍCONES
-
-Regra:
-
-- ícone apenas quando acelera compreensão;
-- preferir SVG monocromático;
-- emoji somente em áreas do portal onde faça parte deliberada da personalidade;
-- em History, quase nenhum emoji.
-
----
-
-# 75. META DE EMOJIS EM `#history`
-
-Após redesign:
-
-- zero emoji em título principal;
-- zero emoji nas tabs;
-- zero emoji nos track headings;
-- zero emoji em badges;
-- no máximo poucos emojis em conteúdos históricos onde forem parte literal do nome/registro, o que é raro.
-
----
-
-# 76. META DE CARDS
-
-Reduzir significativamente a quantidade de `.card`-like surfaces.
-
-Não definir um número arbitrário obrigatório, mas a página deve deixar de ter:
-
-```text
-family card
-  track card
-    model card
-```
-
-A árvore deve usar principalmente layout, linhas e texto.
-
----
-
-# 77. META DE BORDAS
-
-Evitar borda em todo elemento.
-
-Usar borda para:
-
-- separar painel;
-- input;
-- selected state;
-- tabela;
-- inspector.
-
-Não usar borda para cada linha de informação.
-
----
-
-# 78. META DE PILLS
-
-Pills só para:
-
-- filtro removível;
-- estado excepcional;
-- pequena seleção múltipla quando for claramente a melhor interação.
-
-Não usar pill como default de metadata.
-
----
-
-# 79. LIGHT MODE
-
-O redesign deve funcionar em light mode de verdade.
-
-Não apenas inverter cores.
-
-Light mode deve ter:
-
-- branco/cinza neutro;
-- linhas discretas;
-- pouco shadow;
-- provider color com contraste WCAG;
-- sem glow.
-
----
-
-# 80. DARK MODE
-
-Dark mode deve ser sóbrio.
-
-Preferência:
-
-- fundo próximo de preto/cinza;
-- superfícies um pouco mais claras;
-- bordas fracas;
-- texto principal quase branco;
-- texto secundário cinza;
-- cores saturadas apenas em detalhes.
-
----
-
-# 81. NÃO QUEBRAR IDENTIDADE GLOBAL DE UMA VEZ
-
-Este projeto possui muitas páginas.
-
-Não fazer redesign completo do portal neste prompt.
-
-History será piloto.
-
-Pode adicionar tokens novos no design system, mas preservar compatibilidade.
-
----
-
-# 82. TOKENS DE HUMANIZAÇÃO
-
-Criar tokens específicos ou revisar tokens existentes para suportar a nova linguagem.
-
-Exemplo conceitual:
-
-```css
---history-bg
---history-surface
---history-divider
---history-text-muted
---history-selection
---history-node-radius
---history-panel-radius
-```
-
-Evitar criar 30 tokens redundantes.
-
----
-
-# 83. TOKENS GLOBAIS QUE PODEM SER REVISTOS FUTURAMENTE
-
-Documentar candidatos a revisão global:
-
-- `--shadow-glow-cyan`;
-- `--shadow-glow-purple`;
-- `--grad-cyan-blue`;
-- `--grad-card-glow`;
-- excesso de `--radius-pill`.
-
-Mas não remover globalmente se outras páginas dependem deles.
-
----
-
-# 84. CSS ESPECÍFICO DA HISTORY
-
-Preferir classes semânticas:
-
-```text
-.history-page
-.history-summary
-.history-tabs
-.history-provider-rail
-.history-lineage-canvas
-.history-track
-.history-node
-.history-edge
-.history-inspector
-.history-timeline
-.history-event
-.history-benchmark-chart
-```
-
-Evitar inline styles novos.
-
----
-
-# 85. REDUZIR INLINE STYLE EXISTENTE NA HISTORY
-
-O renderer atual possui muito CSS inline.
-
-Migrar progressivamente os estilos da History para classes.
-
-Objetivo:
-
-- legibilidade;
-- consistência;
-- manutenção;
-- suporte a dark/light;
-- media queries limpas.
-
----
-
-# 86. NÃO MIGRAR TODO `app.js` NESTE PROMPT
-
-Focar apenas no código de History afetado.
-
-Não transformar a tarefa numa refatoração geral do SPA.
-
----
-
-# 87. COMPONENTES LÓGICOS
-
-Mesmo em Vanilla JS, separar funções da History.
-
-Sugestão:
-
-```js
-renderHistoryShell()
-renderHistorySummary()
-renderHistoryTabs()
-renderProviderRail()
-renderLineageAtlas()
-renderLineageTrack()
-renderHistoryNode()
-renderHistoryInspector()
-renderHistoryRelationInspector()
-renderEditorialTimeline()
-renderBenchmarkHistoryChart()
-renderCompareEras()
-```
-
-Se já houver modularização equivalente, seguir o padrão atual.
-
----
-
-# 88. ESTADO DA HISTORY
-
-Manter estado específico, por exemplo:
-
-```js
-history: {
-  tab,
-  provider,
-  family,
-  year,
-  eventType,
-  query,
-  selectedNodeId,
-  selectedRelationId,
-  benchmarkId,
-  effort,
-  harness,
-  eraStart,
-  eraEnd
-}
-```
-
-Não aumentar `AppState` global sem necessidade se já houver módulo específico.
-
----
-
-# 89. DEEP LINKS
-
-Preservar e melhorar deep links.
-
-Exemplos:
-
-```text
-#history?tab=lineages&provider=openai
-#history?tab=timeline&year=2026&provider=anthropic
-#history?tab=benchmarks&benchmark=deepswe-1.1
-```
-
-Adicionar, se útil:
-
-```text
-&model=gpt-6-astra
-&relation=gpt56sol-gpt6astra
-```
-
----
-
-# 90. BACK/FORWARD
-
-Browser back/forward deve restaurar:
-
-- tab;
-- provider;
-- filtros;
-- modelo selecionado quando possível.
-
----
-
-# 91. ACESSIBILIDADE — NAVEGAÇÃO
-
-Todos os elementos interativos devem funcionar por teclado.
-
-Nós devem ser:
-
-- buttons;
-- links;
-- ou elementos com semântica e keyboard handling correta.
-
-Não usar `div onclick` como novo padrão.
-
----
-
-# 92. ACESSIBILIDADE — EDGES
-
-Relações importantes precisam de alternativa acessível.
-
-SVG visual sozinho não basta.
-
-Fornecer:
-
-- lista semântica;
-- labels;
-- `aria-label`;
-- relação acessível pelo inspector.
-
----
-
-# 93. ACESSIBILIDADE — CORES
-
-Nunca depender exclusivamente de cor para:
-
-- verified;
-- inferred;
-- disputed;
-- preview;
-- deprecated.
-
-Usar também:
-
-- line style;
-- texto;
-- iconografia mínima;
-- pattern.
-
----
-
-# 94. ACESSIBILIDADE — MOTION
-
-Respeitar:
-
-```css
-@media (prefers-reduced-motion: reduce)
-```
-
-Sem transições de movimento desnecessárias.
-
----
-
-# 95. RESPONSIVIDADE — DESKTOP
-
-Acima de aproximadamente 1200px:
-
-```text
-provider rail | lineage canvas | inspector
-```
-
----
-
-# 96. RESPONSIVIDADE — TABLET
-
-Em tablet:
-
-- provider rail pode virar dropdown;
-- canvas ocupa largura principal;
-- inspector abaixo ou drawer lateral.
-
----
-
-# 97. RESPONSIVIDADE — MOBILE
-
-No mobile:
-
-- tabs horizontais simples;
-- provider select;
-- tracks com scroll horizontal controlado;
-- escala temporal legível;
-- inspector como bottom sheet ou seção expandida;
-- timeline em duas colunas: date + content.
-
----
-
-# 98. NÃO ENCOLHER TUDO NO MOBILE
-
-Não tentar mostrar o desktop inteiro miniaturizado.
-
-Mudar a composição.
-
----
-
-# 99. SCROLL HORIZONTAL
-
-Em lineage tracks, scroll horizontal pode ser apropriado.
-
-Mas:
-
-- deixar claro que há mais conteúdo;
-- manter label da track fixa quando possível;
-- não criar nesting de vários scrolls horizontais.
-
----
-
-# 100. STICKY LABELS
-
-Em desktop largo, considerar:
-
-- provider rail sticky;
-- track label sticky à esquerda;
-- inspector sticky.
-
-Testar para não causar conflitos com header fixo.
-
----
-
-# 101. PERFORMANCE
-
-SVG e DOM precisam suportar muitas famílias sem travar.
-
-Evitar:
-
-- listeners individuais desnecessários;
-- grandes reflows em hover;
-- recalcular todas as posições em cada mousemove.
-
----
-
-# 102. EVENT DELEGATION
-
-Usar event delegation quando fizer sentido.
-
----
-
-# 103. CÁLCULO DE POSIÇÃO TEMPORAL
-
-Centralizar o cálculo de escala de datas.
-
-Exemplo:
-
-```js
-getHistoryTimeScale(events, range)
-getTimePosition(date, range)
-```
-
-Não repetir fórmula em cada track.
-
----
-
-# 104. DATAS DESCONHECIDAS
-
-Se release date não for exata:
-
-- não inventar dia;
-- representar month-only ou year-only;
-- marcar precision.
-
-O layout temporal deve suportar isso.
-
----
-
-# 105. DATA PRECISION
-
-Se necessário, suportar:
-
-```js
-datePrecision: 'day' | 'month' | 'year' | 'approximate'
-```
-
-Reutilizar campo existente se já houver.
-
----
-
-# 106. PREVIEW VS GA
-
-Visualmente diferenciar evento preview de GA sem exagero.
-
-Exemplo:
-
-```text
-○ preview
-● GA/release
-```
-
-Não usar dois cards diferentes.
-
----
-
-# 107. STATUS HISTÓRICO
-
-Modelos antigos podem permanecer na linha.
-
-Não reduzir opacidade a ponto de ficarem ilegíveis.
-
-Usar:
-
-- texto muted;
-- marker hollow;
-- metadata.
-
----
-
-# 108. MODELO ATUAL
-
-O modelo atual de uma track pode ter marker preenchido ou label `current` muito discreta.
-
-Não colocar badge neon.
-
----
-
-# 109. SOURCE QUALITY
-
-Evidence quality deve aparecer principalmente no inspector.
-
-Não poluir cada nó com `O`, `T`, `M`, `D` etc.
-
----
-
-# 110. DATA HEALTH NA HISTORY
-
-Se houver problema de cobertura:
-
-mostrar uma linha discreta:
-
-```text
-Historical coverage: 94% · 3 unresolved relationships
-```
-
-Com link para Data Health.
-
-Não criar warning card gigante a menos que haja problema crítico.
-
----
-
-# 111. EMPTY STATES
-
-Empty state deve ser simples.
-
-Exemplo:
-
-```text
-No events match these filters.
-Clear filters
-```
-
-Sem ilustração genérica.
-
----
-
-# 112. ERROR STATES
-
-Erro de dataset:
-
-```text
-History data could not be loaded.
-```
-
-Mostrar detalhe técnico somente se útil.
-
----
-
-# 113. LOADING
-
-Como é SPA local/static, evitar skeletons artificiais se os dados carregam instantaneamente.
-
-Não adicionar loading animation sem necessidade.
-
----
-
-# 114. LINKS
-
-Links devem ser reconhecíveis, mas não todos cyan forte.
-
-No dark mode, link pode usar tom moderado com underline no hover.
-
----
-
-# 115. BOTÕES
-
-History deve usar poucos botões primários.
-
-A maioria das ações é navegação/filtro.
-
-Não usar `.btn-primary` cyan para cada ação pequena.
-
----
-
-# 116. AÇÃO PRIMÁRIA
-
-Possíveis ações principais:
-
-- Open dossier;
-- View source.
-
-Mesmo essas podem ser links textuais.
-
----
-
-# 117. TOOLTIP VS INSPECTOR
+Mostrar pontos/runs reais por data.
 
 Tooltip:
 
-- 1–3 dados rápidos.
-
-Inspector:
-
-- contexto completo.
-
-Não colocar mini-dossier inteiro num tooltip.
-
----
-
-# 118. FOCUS MODE
-
-Opcionalmente permitir esconder rail/inspector e ampliar canvas.
-
-Somente se simples.
-
-Não priorizar sobre o núcleo da tarefa.
-
----
-
-# 119. PRINT / EXPORT
-
-History deve continuar imprimível.
-
-No print:
-
-- fundo branco;
-- linhas visíveis;
-- sem inspector sticky;
-- sem controles;
-- relações preservadas.
-
----
-
-# 120. EXPORT MARKDOWN
-
-Não quebrar o export global existente.
-
----
-
-# 121. TESTES FUNCIONAIS
-
-Adicionar smoke tests ou asserts para:
-
-- History abre;
-- tabs mudam;
-- provider filter funciona;
-- busca funciona;
-- node selection funciona;
-- relation selection funciona;
-- URL query é restaurada;
-- timeline filtra;
-- benchmark chart troca benchmark;
-- mobile não gera overflow global.
-
----
-
-# 122. TESTES DE DADOS
-
-Não duplicar testes do Prompt 11.
-
-Mas garantir que a nova UI não depende de:
-
-- `nodes` sem data;
-- edges órfãs;
-- provider inexistente;
-- status não reconhecido.
-
----
-
-# 123. TESTE DE RELAÇÃO VISUAL
-
-Fixture com:
-
-- verified;
-- succession;
-- inferred;
-- disputed.
-
-Cada uma precisa gerar estilo distinto e label acessível.
-
----
-
-# 124. TESTE DE ESCALA TEMPORAL
-
-Dado:
-
 ```text
-A = 2024-01-01
-B = 2024-02-01
-C = 2026-01-01
+Model
+Score
+Effort
+Harness
+Run date
+Source
+Cost/task
 ```
 
-C deve aparecer muito mais distante temporalmente de B do que B de A.
+Não ligar pontos de configurações incompatíveis sem explicação.
 
 ---
 
-# 125. TESTE DE DATAS PARCIAIS
+# 72. HISTORY — COMPARE ERAS
 
-Garantir que `2025`, `2025-03` e data completa não causem crash se o schema aceitar precisão parcial.
+Implementar se couber no escopo sem comprometer o principal.
 
----
+Permitir selecionar duas datas/períodos e derivar:
 
-# 126. TESTES VISUAIS MANUAIS
+- modelos ativos;
+- frontier leaders;
+- contexto máximo;
+- custos;
+- famílias novas;
+- modelos retirados;
+- benchmark leaders.
 
-Antes de concluir, revisar em:
-
-- desktop 1440px;
-- desktop 1280px;
-- tablet 768px;
-- mobile 390px;
-- mobile 360px;
-- dark mode;
-- light mode.
+Se ficar grande, deixar preparado como Phase 2.
 
 ---
 
-# 127. CRITÉRIO “PARECE FEITO POR IA”
+# 73. HISTORY — EMPTY STATE
 
-Fazer uma revisão específica após implementar.
+Ao filtrar até zero resultados:
 
-Perguntar visualmente:
+não usar card genérico “Nenhum resultado encontrado”.
 
-- há cards demais?
-- há bordas demais?
-- há emojis demais?
-- há badges demais?
-- há cyan demais?
-- há glow?
-- há gradiente sem função?
-- tudo tem radius grande?
-- todo hover se move?
-- todo bloco tem título + subtítulo + ícone?
-- todos os dados estão em caixas?
-- a linguagem é grandiosa demais?
-
-Se sim, simplificar novamente.
-
----
-
-# 128. ANTI-PATTERN: CARD-IN-CARD-IN-CARD
-
-Proibido manter como estrutura dominante:
+Usar empty state elegante e pequeno:
 
 ```text
-family-card
-  track-card
-    model-card
-```
-
-Substituir por:
-
-```text
-family section
-  track row
-    nodes
+Nenhuma linhagem corresponde a estes filtros.
+Limpar filtros
 ```
 
 ---
 
-# 129. ANTI-PATTERN: EMOJI COMO SISTEMA DE ÍCONES
+# 74. HISTORY — MOBILE
 
-Não utilizar emoji para construir hierarquia funcional nesta página.
+Não tentar comprimir o canvas desktop inteiro.
 
----
+No mobile:
 
-# 130. ANTI-PATTERN: PILL PARA TUDO
-
-Não converter metadata em pills por padrão.
-
----
-
-# 131. ANTI-PATTERN: CYAN = IMPORTANTE
-
-Nem tudo importante deve ficar cyan.
-
-Importância vem de:
-
-- posição;
-- tamanho;
-- peso;
-- espaço;
-- contexto.
+- provider selector horizontal ou select;
+- tracks em lista vertical;
+- nós organizados cronologicamente;
+- edges simplificadas;
+- inspector como bottom sheet;
+- timeline editorial continua vertical.
 
 ---
 
-# 132. ANTI-PATTERN: HOVER COMO “EFEITO BONITO”
+# 75. HISTORY — TABLET
 
-Hover deve revelar affordance ou relação.
+Tablet pode manter canvas horizontal com scroll controlado e time ruler sticky.
 
-Não usar movimento só por estética.
-
----
-
-# 133. ANTI-PATTERN: TODOS OS BLOCOS COM SUBTÍTULO EXPLICATIVO
-
-Se o título já é claro, não adicionar uma frase genérica abaixo.
+Não permitir overflow quebrando a página inteira.
 
 ---
 
-# 134. ANTI-PATTERN: MICROCOPY DE MARKETING
+# 76. POLISH GLOBAL SEM REFAZER TODAS AS PÁGINAS
 
-A History deve soar como documentação técnica.
+Além de `#history`, executar um polish global pequeno e consistente:
 
----
-
-# 135. ANTI-PATTERN: TUDO É “FRONTIER”
-
-Evitar rótulos promocionais repetitivos.
-
----
-
-# 136. ANTI-PATTERN: DASHBOARD DE 8 KPIS
-
-Se KPIs formam apenas contexto, mostrar inline.
-
-Card só se KPI for realmente uma decisão/alerta.
-
----
-
-# 137. ANTI-PATTERN: TABELA DISFARÇADA DE CARDS
-
-Se uma lista possui linhas uniformes com os mesmos campos, considerar tabela/lista editorial.
-
----
-
-# 138. ANTI-PATTERN: MODAL CENTRAL PARA QUALQUER DETALHE
-
-Preferir inspector contextual.
-
-Modal apenas para ação que realmente precisa bloquear contexto.
-
----
-
-# 139. ANTI-PATTERN: ÍCONE + TÍTULO + BADGE + VALOR EM TODO ITEM
-
-Reduzir elementos simultâneos.
-
----
-
-# 140. MIGRAÇÃO GRADUAL DO DESIGN SYSTEM
-
-Após terminar History, produzir uma pequena lista de padrões aprovados que podem ser usados depois em:
-
-- model dossiers;
-- providers;
-- benchmarks;
-- plans;
-- data health.
-
-Não implementar essa migração inteira agora.
-
----
-
-# 141. PADRÕES CANDIDATOS A MIGRAÇÃO
-
-Provavelmente:
-
-- tabs planas;
-- metadata textual em vez de badges;
-- menos cards;
-- menos glow;
-- inspector lateral;
-- cabeçalhos editoriais;
-- listas com divisores;
-- uso restrito de cor.
-
----
-
-# 142. NÃO REMOVER PERSONALIDADE
-
-“Humanizar” não significa tornar o portal genérico ou sem identidade.
-
-A identidade deve vir de:
-
-- rigor dos dados;
-- visualizações específicas;
-- tipografia;
-- relações históricas;
-- clareza;
-- profundidade;
-- pequenas decisões próprias.
-
-Não de efeitos decorativos.
-
----
-
-# 143. ELEMENTO DE IDENTIDADE EXCLUSIVO
-
-A régua temporal + lineage atlas + inspector deve ser o elemento visual característico de History.
-
-Esse trio deve ser memorável.
-
----
-
-# 144. NÃO IMITAR “APPLE CLEAN” SEM CONTEÚDO
-
-Não remover tanta informação a ponto de perder utilidade.
-
-O objetivo é **densidade legível**, não minimalismo vazio.
-
----
-
-# 145. NÃO IMITAR TERMINAL/HACKER UI
-
-Também evitar cair no outro clichê:
-
-- tudo mono;
-- verde neon;
-- grid de terminal;
-- scanlines;
-- console fake.
-
-O produto é técnico, mas não precisa parecer cyberpunk.
-
----
-
-# 146. NÃO CRIAR VISUALIZAÇÃO INCOMPREENSÍVEL
-
-A árvore deve continuar legível para usuário não especialista.
-
-Linhas e relações precisam de legenda.
-
----
-
-# 147. NÃO SACRIFICAR PERFORMANCE POR DESIGN
-
-Se uma visualização sofisticada exige centenas de elementos SVG complexos e animação constante, simplificar.
-
----
-
-# 148. FASE 1 — AUDITORIA VISUAL
-
-Antes de codificar:
-
-1. mapear todos os componentes de `#history`;
-2. contar onde há:
-   - cards;
-   - borders;
-   - badges;
-   - emojis;
-   - pills;
-   - gradients;
-   - shadows;
-   - glow;
-3. identificar estilos inline;
-4. identificar tokens compartilhados;
-5. tirar screenshots de referência local se o ambiente permitir.
-
-Entregar no relatório final uma síntese “antes”.
-
----
-
-# 149. FASE 2 — FUNDAÇÃO VISUAL
-
-Implementar:
-
-- header editorial;
-- summary inline;
-- tabs planas;
-- tokens específicos;
-- remoção de emoji;
-- tipografia;
+- headers;
+- tabs;
+- botões;
+- badges;
+- icons;
+- hover;
+- shadows;
+- border radii;
+- sidebar;
+- typography;
 - spacing;
-- redução de radius/glow;
-- provider rail base.
+- inline styles mais gritantes.
 
-Ainda sem reescrever toda lineage visualization.
-
----
-
-# 150. FASE 3 — LINEAGE ATLAS
-
-Implementar:
-
-- escala temporal;
-- track layout;
-- nós minimalistas;
-- edges semânticas;
-- hover/focus;
-- provider focus;
-- relation legend.
-
-Essa é a fase principal.
+Não reescrever cada view do zero.
 
 ---
 
-# 151. FASE 4 — INSPECTOR
+# 77. BADGES
 
-Implementar:
-
-- node inspector;
-- relation inspector;
-- evidence;
-- desktop sticky;
-- tablet/mobile adaptation.
-
----
-
-# 152. FASE 5 — TIMELINE EDITORIAL
-
-Migrar timeline de cards para changelog/lista editorial.
-
-Implementar hierarquia major/standard/minor.
-
----
-
-# 153. FASE 6 — BENCHMARK HISTORY
-
-Criar gráfico temporal e tabela de runs consistente.
-
----
-
-# 154. FASE 7 — COMPARE ERAS
-
-Adicionar versão inicial somente se os dados históricos permitirem comparações honestas.
-
-Se a cobertura ainda for insuficiente, implementar shell + mensagem de cobertura e não inventar dados.
-
----
-
-# 155. FASE 8 — RESPONSIVO E ACESSIBILIDADE
-
-Revisar:
-
-- keyboard;
-- screen reader;
-- focus;
-- contrast;
-- reduced motion;
-- mobile composition;
-- horizontal scroll.
-
----
-
-# 156. FASE 9 — POLIMENTO ANTI-AI
-
-Executar a checklist específica de humanização.
-
-Remover qualquer elemento que ainda pareça adicionado “porque dashboards costumam ter isso”.
-
----
-
-# 157. FASE 10 — TESTES E RELATÓRIO
-
-Rodar:
-
-```bash
-npm test
-```
-
-E demais scripts existentes relevantes.
-
-Corrigir regressões.
-
----
-
-# 158. CRITÉRIO DE ACEITAÇÃO — HEADER
-
-Aprovado se:
-
-- título sem emoji;
-- descrição curta;
-- resumo numérico compacto;
-- sem hero promocional;
-- sem glow.
-
----
-
-# 159. CRITÉRIO DE ACEITAÇÃO — TABS
-
-Aprovado se:
-
-- tabs planas;
-- sem pill container dominante;
-- sem emoji;
-- ativo por underline/contraste;
-- keyboard acessível.
-
----
-
-# 160. CRITÉRIO DE ACEITAÇÃO — LINEAGES
-
-Aprovado se:
-
-- modelos não são cards tradicionais;
-- posição temporal tem significado;
-- tracks são legíveis;
-- relações possuem estilo semântico;
-- edges inferidas e verificadas não parecem iguais;
-- provider focus funciona;
-- All families é utilizável.
-
----
-
-# 161. CRITÉRIO DE ACEITAÇÃO — INSPECTOR
-
-Aprovado se:
-
-- seleciona nó;
-- seleciona edge;
-- mostra evidência;
-- não ocupa modal desnecessário;
-- funciona no mobile.
-
----
-
-# 162. CRITÉRIO DE ACEITAÇÃO — TIMELINE
-
-Aprovado se:
-
-- não é feed de cards;
-- eventos são agrupados temporalmente;
-- major/standard/minor têm peso distinto;
-- filtros funcionam;
-- fontes continuam acessíveis.
-
----
-
-# 163. CRITÉRIO DE ACEITAÇÃO — BENCHMARK HISTORY
-
-Aprovado se:
-
-- existe leitura temporal real;
-- versões/harnesses não são misturados indevidamente;
-- runs detalhados continuam auditáveis.
-
----
-
-# 164. CRITÉRIO DE ACEITAÇÃO — VISUAL
-
-A página final deve possuir:
-
-- muito menos cards;
-- muito menos badges;
-- muito menos emoji;
-- quase nenhum glow;
-- quase nenhum gradiente decorativo;
-- cores mais controladas;
-- menos radius grande;
-- menos hover com movimento;
-- maior uso de divisores e espaço em branco;
-- tipografia como principal instrumento de hierarquia.
-
----
-
-# 165. CRITÉRIO DE ACEITAÇÃO — CONTEÚDO
-
-Nenhuma informação factual do Prompt 11 deve desaparecer por causa do redesign.
-
-Ela pode migrar para:
-
-- inspector;
-- tooltip;
-- metadata;
-- tabela;
-- source panel.
-
-Mas não pode simplesmente ser removida.
-
----
-
-# 166. CRITÉRIO DE ACEITAÇÃO — SEMÂNTICA
-
-O redesign não pode voltar a sugerir que toda seta é ancestralidade arquitetural direta.
-
----
-
-# 167. CRITÉRIO DE ACEITAÇÃO — PERFORMANCE
-
-History deve continuar fluida com todas as famílias atuais.
-
----
-
-# 168. CRITÉRIO DE ACEITAÇÃO — MOBILE
-
-Nenhum overflow horizontal global.
-
-Scroll horizontal interno somente onde intencional.
-
----
-
-# 169. CRITÉRIO DE ACEITAÇÃO — DARK/LIGHT
-
-Ambos devem parecer projetados, não apenas invertidos.
-
----
-
-# 170. CRITÉRIO DE ACEITAÇÃO — TESTES
-
-Todos os testes existentes devem continuar passando.
-
-Novos testes da History devem passar.
-
----
-
-# 171. CHECKLIST FINAL DE HUMANIZAÇÃO
-
-Antes de concluir, revisar cada item:
+Criar categorias claras:
 
 ```text
-[ ] título sem emoji
-[ ] tabs sem emoji
-[ ] tracks sem emoji decorativo
-[ ] sem card-in-card-in-card
-[ ] sem glow em nós
-[ ] sem translateY em nós
-[ ] sem gradiente decorativo na History
-[ ] provider color usado com moderação
-[ ] badges só para exceções
-[ ] status comum como metadata
-[ ] timeline editorial
-[ ] régua temporal real
-[ ] node inspector
-[ ] relation inspector
-[ ] edges semânticas
-[ ] posição temporal proporcional
-[ ] dark mode sóbrio
-[ ] light mode sóbrio
-[ ] mobile utilizável
-[ ] keyboard acessível
-[ ] fontes preservadas
-[ ] Prompt 11 preservado
+status
+warning
+confidence
+plan/access
+preview
+open-weights
 ```
+
+Não usar badge apenas porque um dado existe.
 
 ---
 
-# 172. MEDIR O “ANTES E DEPOIS”
+# 78. CHIPS
 
-No relatório final, fornecer uma comparação qualitativa e, quando possível, quantitativa.
+Chip deve significar:
+
+- filtro selecionável;
+- token removível;
+- opção compacta.
+
+Não usar chip como decoração ou subtítulo.
+
+---
+
+# 79. BOTÕES
+
+Definir variantes:
+
+```text
+primary
+secondary
+ghost
+danger
+icon
+```
+
+Reduzir botões com estilos improvisados por página.
+
+---
+
+# 80. TABELAS
+
+Melhorar todas as tabelas tocadas:
+
+- header sticky;
+- row hover sutil;
+- alinhamento numérico;
+- zebra apenas se útil;
+- column separators discretos;
+- sort state claro;
+- selected row;
+- density adequada.
+
+---
+
+# 81. GRÁFICOS
+
+Padronizar Chart.js:
+
+- gridlines discretas;
+- tipografia consistente;
+- tooltip premium;
+- provider colors;
+- selected series forte;
+- séries não selecionadas mais silenciosas;
+- legend refinada.
+
+---
+
+# 82. TOOLTIP GLOBAL
+
+Criar estilo coerente para tooltips informativos.
+
+Evitar `title` nativo como única explicação em funcionalidades importantes.
+
+---
+
+# 83. MODAIS E DRAWERS
+
+Unificar:
+
+- backdrop;
+- radius;
+- shadow;
+- header;
+- close button;
+- spacing;
+- mobile behavior.
+
+Não criar um modal visualmente diferente por feature.
+
+---
+
+# 84. FOCUS E TECLADO
+
+Todo elemento interativo novo precisa:
+
+- focus visible;
+- Enter/Space;
+- Escape para fechar inspector/modal;
+- Tab order correto;
+- ARIA apropriada.
+
+---
+
+# 85. ACCESSIBILITY DE COR
+
+Cor nunca deve ser único canal para:
+
+- relation type;
+- status;
+- confidence;
+- selected state.
+
+Usar também:
+
+- padrão de linha;
+- label;
+- ícone;
+- weight;
+- shape.
+
+---
+
+# 86. PERFORMANCE
+
+O redesign não pode tornar a página lenta.
+
+Evitar:
+
+- centenas de box-shadows pesadas;
+- filtros blur em listas grandes;
+- animações simultâneas;
+- SVG com elementos desnecessários;
+- rerender completo em cada hover.
+
+---
+
+# 87. SVG HISTORY
+
+Se usar SVG para edges:
+
+- separar camada de edges e nodes;
+- atualizar somente quando layout/filtro mudar;
+- não redesenhar em cada movimento de mouse;
+- usar `requestAnimationFrame` quando necessário.
+
+---
+
+# 88. RESPONSIVE VISUAL TESTING
+
+Validar manualmente:
+
+```text
+360
+390
+480
+768
+1024
+1280
+1440
+1920
+```
+
+Não precisa screenshot de todas, mas precisa inspeção visual.
+
+---
+
+# 89. CONTEÚDO LONGO
+
+Testar:
+
+- nomes longos de modelos;
+- nomes longos de providers;
+- várias aliases;
+- 10+ tracks;
+- 20+ events no mesmo mês;
+- tabelas largas;
+- muitos filtros ativos.
+
+---
+
+# 90. TEXT WRAPPING
+
+Não permitir:
+
+- badges estourando cards;
+- labels sobrepostas;
+- nodes ilegíveis;
+- datas quebrando em duas linhas sem necessidade.
+
+---
+
+# 91. VISUAL QA — NÃO APROVAR SEM COMPARAÇÃO
+
+Antes de finalizar, colocar screenshots `before` e `after` lado a lado e responder:
+
+1. O foco visual ficou mais claro?
+2. Existe menos repetição de card?
+3. A página continua bonita?
+4. Existe mais identidade?
+5. Os dados principais estão mais rápidos de ler?
+6. O mobile ficou melhor?
+7. Dark e light parecem igualmente intencionais?
+8. Alguma área ficou excessivamente minimalista?
+9. Alguma área ainda parece template de IA?
+10. O portal inteiro ainda parece o mesmo produto?
+
+Se alguma resposta crítica for “não”, iterar.
+
+---
+
+# 92. CHECKLIST “CARA DE IA ANTIGA”
+
+Procurar explicitamente:
+
+- emoji em todo heading;
+- glow em todo hover;
+- cards idênticos em grid automático;
+- gradiente azul/roxo sem função;
+- texto “inteligente”, “poderoso”, “avançado”, “definitivo” sem necessidade;
+- pills para metadata comum;
+- 4 KPIs gigantes em qualquer contexto;
+- border-radius alto em tudo;
+- icon + label + subtitle em cada pequeno bloco;
+- excesso de `rgba(..., 0.1)` colorido;
+- sombras em componentes minúsculos;
+- títulos explicativos demais;
+- excesso de badges de evidência expostos o tempo todo.
+
+Eliminar onde não houver justificativa.
+
+---
+
+# 93. CHECKLIST “MINIMALISMO EXCESSIVO”
+
+Também procurar:
+
+- página sem contraste;
+- tudo cinza;
+- sem foco visual;
+- ausência total de identidade de provider;
+- gráficos sem destaque;
+- hero sem presença;
+- estados selecionados fracos;
+- interface parecendo documentação crua;
+- ausência de profundidade em modal/drawer;
+- nenhum momento visual memorável.
+
+Corrigir igualmente.
+
+---
+
+# 94. BEAUTY BUDGET
+
+Cada página pode ter **1 ou 2 momentos de maior expressão visual**.
 
 Exemplos:
 
 ```text
-Emojis funcionais na History: X → Y
-Card-like surfaces visíveis no estado inicial: X → Y
-Inline styles no renderer da History: X → Y
-Badges no default lineage view: X → Y
-Glow/shadow usages específicos de History: X → Y
+Dashboard   -> hero/insight principal
+Model       -> hero do dossier
+Benchmarks  -> gráfico principal
+History     -> temporal canvas
+Plans       -> comparação de pricing
+Comparator  -> matrix + delta visualization
 ```
 
-Não manipular números para parecer melhor.
+O restante deve apoiar esses momentos.
 
 ---
 
-# 173. DOCUMENTAR PADRÕES APROVADOS
+# 95. IDENTIDADE POR TIPO DE PÁGINA
 
-Criar ou atualizar documento curto em `docs/` com a nova linguagem visual aprovada para History.
+Não forçar todas as views a usar exatamente a mesma composição.
+
+Consistência deve vir de:
+
+- tokens;
+- tipografia;
+- controls;
+- surfaces;
+- motion;
+- spacing.
+
+Personalidade pode variar por função.
+
+---
+
+# 96. COMPONENTIZAÇÃO CSS
+
+Criar classes reutilizáveis reais para padrões que surgirem nesta tarefa.
 
 Sugestão:
 
 ```text
-docs/methodology/visual-language.md
+.page-heading
+.page-heading__eyebrow
+.page-heading__title
+.page-heading__subtitle
+.view-tabs
+.view-tab
+.surface-panel
+.data-toolbar
+.metric-strip
+.entity-mark
+.inspector-panel
+.status-dot
 ```
 
-ou estrutura equivalente já existente.
+Evitar apenas renomear classes antigas sem consolidar comportamento.
 
 ---
 
-# 174. DOCUMENTO DE LINGUAGEM VISUAL
+# 97. NÃO REESCREVER PARA FRAMEWORK
 
-Incluir:
+Continuar Vanilla JS/CSS.
 
-- princípios;
-- quando usar card;
-- quando usar badge;
-- uso de emoji;
-- uso de cor;
-- radius;
-- shadows;
-- typography;
+Não introduzir React, Vue, Tailwind ou framework visual apenas para este redesign.
+
+---
+
+# 98. ORGANIZAÇÃO DO CSS
+
+Ao tocar `style.css`, reduzir duplicações.
+
+Se fizer sentido, extrair estilos da nova gramática para arquivo próprio, por exemplo:
+
+```text
+styles/
+  foundations.css
+  components.css
+  history.css
+```
+
+Somente se o carregamento e GitHub Pages continuarem simples.
+
+Não fazer migração massiva irrelevante.
+
+---
+
+# 99. TESTES FUNCIONAIS
+
+Após redesign validar:
+
+- todas as rotas continuam abrindo;
+- hash navigation funciona;
+- back/forward funciona;
+- deep links de History funcionam;
+- filtros persistem quando esperado;
+- inspector abre/fecha;
+- tabs funcionam;
+- gráficos renderizam;
+- modais não quebram;
+- tema alterna;
+- mobile nav funciona.
+
+---
+
+# 100. TESTES DE HISTORY
+
+Adicionar testes onde viável para:
+
+- `scaleDate()`;
+- ordenação de nodes;
+- edge mapping;
+- filter state;
+- deep link state;
+- seleção de provider;
+- selected model/edge;
+- fallback mobile.
+
+Não testar pixels via unit test.
+
+---
+
+# 101. VISUAL REGRESSION
+
+Se tecnicamente viável com a stack atual, adicionar smoke screenshots com Playwright/Puppeteer em CI.
+
+Prioridade:
+
+```text
+#dashboard
+#models
+#model/gpt-6-astra
+#plans
+#compare
+#benchmarks
+#history
+#data-health
+```
+
+Se adicionar dependência for pesado demais, documentar procedimento manual de screenshots.
+
+---
+
+# 102. CRITÉRIO DE ACEITAÇÃO — HISTORY
+
+History só está concluída se:
+
+- não parecer mais uma lista de cards;
+- datas possuírem posição temporal útil;
+- providers forem fáceis de navegar;
+- relations forem visualmente compreensíveis;
+- verified/inferred forem distinguíveis;
+- seleção abrir contexto detalhado;
+- timeline parecer cronologia editorial;
+- benchmark history mostrar evolução temporal;
+- mobile for utilizável;
+- visual for claramente mais bonito que a versão anterior.
+
+---
+
+# 103. CRITÉRIO DE ACEITAÇÃO — PORTAL GLOBAL
+
+O polish global só está concluído se:
+
+- headers principais estiverem mais curtos;
+- emojis estruturais tiverem sido reduzidos;
+- icons tiverem maior consistência;
+- tabs estiverem mais refinadas;
+- badges tiverem significado real;
+- cyan não dominar todas as views;
+- hover não depender sempre de `translateY`;
+- surfaces possuírem hierarquia;
+- dark/light estiverem coerentes;
+- o portal continuar reconhecível.
+
+---
+
+# 104. CRITÉRIO DE ACEITAÇÃO — BELEZA
+
+Não aceitar “mais clean” como justificativa suficiente.
+
+O agente deve conseguir apontar concretamente:
+
+- qual é o focal point de cada página principal;
+- qual é a assinatura visual de History;
+- onde cor cria identidade;
+- onde profundidade foi preservada;
+- quais microinterações elevam o acabamento;
+- por que a composição parece deliberada.
+
+---
+
+# 105. FASE A — AUDITORIA E SCREENSHOTS
+
+1. navegar todas as rotas;
+2. capturar referências;
+3. listar padrões repetidos;
+4. classificar problemas em global vs local;
+5. não alterar código ainda.
+
+---
+
+# 106. FASE B — FOUNDATIONS
+
+1. refinar tokens;
+2. typography scale;
+3. surfaces;
+4. shadows;
+5. radii;
+6. icons;
+7. buttons;
+8. tabs;
+9. page headings.
+
+---
+
+# 107. FASE C — POLISH GLOBAL
+
+Aplicar foundations em:
+
+- header;
+- sidebar;
+- view headers;
 - tabs;
-- inspectors;
-- timelines;
-- data visualization.
+- buttons;
+- badges;
+- tables.
 
-Esse documento servirá para impedir que futuras features voltem ao visual anterior automaticamente.
-
----
-
-# 175. NÃO CRIAR “DESIGN SYSTEM 3.0” GIGANTE
-
-O documento deve ser curto e operacional.
-
-Não criar burocracia visual excessiva.
+Sem redesenhar features.
 
 ---
 
-# 176. FUTURA MIGRAÇÃO DO PORTAL
-
-No relatório final, sugerir uma ordem de futuras páginas a humanizar, sem implementá-las agora.
-
-Minha prioridade recomendada:
-
-1. `#history`;
-2. model dossier;
-3. benchmark explorer;
-4. provider dossier;
-5. plans;
-6. data health;
-7. dashboard/home.
-
-A ordem pode ser ajustada com justificativa.
-
----
-
-# 177. POR QUE HISTORY PRIMEIRO
-
-History é ideal como piloto porque:
-
-- possui forte narrativa visual própria;
-- contém muitos dos anti-patterns atuais;
-- não é a rota de entrada principal;
-- permite testar nova linguagem sem redesenhar todo o produto;
-- possui dados ricos o suficiente para justificar visualizações únicas.
-
----
-
-# 178. NÃO ALTERAR SIDEBAR GLOBAL NESTA FASE
-
-Preservar sidebar e navegação global.
-
-Podem receber pequenos ajustes locais somente se necessários para consistência.
-
----
-
-# 179. NÃO ALTERAR BRANDING GLOBAL NESTA FASE
-
-Não trocar nome do portal, logo, favicon ou identidade geral.
-
----
-
-# 180. NÃO TROCAR FONTES EXTERNAS SEM NECESSIDADE
-
-Inter + JetBrains Mono são suficientes.
-
----
-
-# 181. NÃO INTRODUZIR IMAGENS DECORATIVAS
-
-History não precisa de ilustração stock ou imagem gerada.
-
-O gráfico em si é a identidade visual.
-
----
-
-# 182. NÃO CRIAR AVATARES FAKE DE PROVIDERS
-
-Se não houver logo oficial consistente e licitamente utilizável, usar texto + cor sutil.
-
----
-
-# 183. NÃO CRIAR LOGOS EM EMOJI
-
-Evitar substituir providers por símbolos genéricos.
-
----
-
-# 184. CÓPIA EDITORIAL
-
-Reescrever textos da UI que soem sintéticos ou exagerados.
-
-Mas não alterar afirmações factuais sem motivo.
-
----
-
-# 185. EXEMPLO DE TOM
-
-Ruim:
-
-```text
-Trilha Frontier de Máxima Densidade Conceitual e Raciocínio Agêntico Revolucionário
-```
-
-Melhor:
-
-```text
-Frontier models
-Long-context reasoning and agentic workloads
-```
-
-Ou português equivalente.
-
----
-
-# 186. EXEMPLO DE METADATA
-
-Ruim:
-
-```text
-👑 ACTIVE FRONTIER LEADER
-```
-
-Melhor:
-
-```text
-Active · released Sep 2026
-```
-
----
-
-# 187. EXEMPLO DE SOURCE LABEL
-
-Ruim:
-
-```text
-✅ OFICIAL AUDITADO
-```
-
-Melhor:
-
-```text
-Official source
-```
-
----
-
-# 188. EXEMPLO DE RELAÇÃO
-
-Ruim:
-
-```text
-🚀 GENERATIONAL UPGRADE
-```
-
-Melhor:
-
-```text
-Generation successor
-Verified
-```
-
----
-
-# 189. EXEMPLO DE WARNING
-
-Ruim:
-
-```text
-🚨 ATENÇÃO CRÍTICA — RELAÇÃO NÃO CONFIRMADA
-```
-
-Melhor:
-
-```text
-Inferred relationship
-No official lineage statement found.
-```
-
-A menos que o risco seja realmente crítico.
-
----
-
-# 190. DENSIDADE DE INFORMAÇÃO
-
-A meta não é esconder detalhes.
-
-A meta é mover detalhes para o nível correto.
-
-```text
-canvas → identificação
-inspector → contexto
-source panel → evidência
-benchmark table → metrologia
-```
-
----
-
-# 191. VISUALIZAR A HISTÓRIA, NÃO DECORAR A HISTÓRIA
-
-A pergunta central de cada decisão deve ser:
-
-> Isso ajuda o usuário a entender evolução temporal, relação ou evidência?
-
-Se não, provavelmente remover.
-
----
-
-# 192. PRIORIDADE DE IMPLEMENTAÇÃO
-
-P0:
-
-- remover card-in-card-in-card;
-- tabs planas;
-- eliminar emojis da History;
-- reduzir glow/gradientes;
-- lineage atlas temporal;
-- edges semânticas;
+# 108. FASE D — HISTORY ATLAS
+
+Implementar:
+
+- hero/history header;
+- stat strip;
+- provider rail;
+- temporal ruler;
+- canvas;
+- nodes;
+- edges;
 - inspector.
 
-P1:
+---
 
-- timeline editorial;
-- benchmark history graph;
-- provider rail;
-- responsive refinado.
+# 109. FASE E — TIMELINE
 
-P2:
-
-- compare eras;
-- polish avançado;
-- futura documentação visual.
+Transformar timeline em changelog editorial hierárquico.
 
 ---
 
-# 193. NÃO BLOQUEAR P0 POR P2
+# 110. FASE F — BENCHMARK HISTORY
 
-Se Compare Eras exigir muita expansão do dataset, não atrasar o redesign principal.
-
----
-
-# 194. RELATÓRIO FINAL DO AGENTE
-
-Ao terminar, fornecer:
-
-## Arquivos alterados
-
-Lista de arquivos.
-
-## Mudanças visuais
-
-Resumo objetivo.
-
-## Mudanças de UX
-
-Resumo das novas interações.
-
-## Antes → Depois
-
-Anti-patterns removidos.
-
-## Semântica preservada
-
-Como Prompt 11 foi mantido.
-
-## Responsividade
-
-Telas testadas.
-
-## Acessibilidade
-
-O que foi verificado.
-
-## Testes
-
-Comandos e resultado.
-
-## Pendências
-
-O que ficou para fase futura.
-
-## Próximas páginas candidatas
-
-Sugestão de rollout da nova linguagem visual.
+Criar visual temporal + run table.
 
 ---
 
-# 195. RESULTADO FINAL ESPERADO
+# 111. FASE G — RESPONSIVE E A11Y
 
-Ao final, `#history` não deve parecer:
-
-> uma coleção de cards de um SaaS de IA.
-
-Deve parecer:
-
-> **uma ferramenta técnica de exploração histórica com identidade própria.**
-
-A sensação desejada é:
-
-- deliberada;
-- editorial;
-- precisa;
-- silenciosa;
-- confiável;
-- densa, mas legível;
-- técnica, sem ser cyberpunk;
-- moderna, sem depender de modismos visuais.
+Testar desktop/tablet/mobile e teclado.
 
 ---
 
-# 196. FRASE-GUIA
+# 112. FASE H — VISUAL QA
 
-Durante toda a implementação, usar esta regra:
+Comparar screenshots antes/depois.
 
-> **Menos componentes. Mais relações. Menos decoração. Mais história.**
+Iterar pelo menos uma vez depois da primeira implementação visual.
+
+Não encerrar no primeiro passe.
 
 ---
 
-# 197. ORDEM RECOMENDADA DE EXECUÇÃO
+# 113. FASE I — TESTES E DOCUMENTAÇÃO
 
-Execute nesta ordem:
+Executar testes existentes, smoke routes e documentar decisões visuais.
+
+---
+
+# 114. RELATÓRIO FINAL DO AGENTE
+
+Ao terminar, entregar:
+
+## Visual audit
+- principais problemas encontrados por rota.
+
+## Foundations
+- tokens e componentes alterados.
+
+## History redesign
+- estrutura e interação implementadas.
+
+## Global polish
+- quais páginas receberam ajustes leves.
+
+## Screenshots
+- before/after ou caminho dos artefatos.
+
+## Accessibility
+- teclado/mobile/reduced-motion.
+
+## Performance
+- impacto e decisões.
+
+## Tests
+- comandos executados e resultado.
+
+## Deferred
+- itens não implementados e motivo.
+
+---
+
+# 115. PRINCÍPIO FINAL
+
+O objetivo não é fazer um portal “sem cara de IA” por meio de remoção indiscriminada.
+
+O objetivo é fazer um produto que demonstre **gosto, intenção e composição**.
+
+A diferença deve ser percebida assim:
 
 ```text
-1. Audit current #history
-2. Establish History visual tokens
-3. Simplify header and summary
-4. Flatten tabs
-5. Build provider rail
-6. Build proportional time scale
-7. Replace model cards with timeline nodes
-8. Replace arrows with semantic SVG edges
-9. Build node/relation inspector
-10. Convert timeline feed into editorial changelog
-11. Add benchmark history chart
-12. Add responsive/mobile composition
-13. Run anti-AI visual audit
-14. Test dark/light/keyboard/mobile
-15. Run project tests
-16. Document visual language
-17. Produce final report
+ANTES
+muitos componentes bonitos isoladamente,
+mas todos usando o mesmo volume visual.
+
+DEPOIS
+uma interface com ritmo,
+foco,
+contraste,
+personalidade,
+visualizações próprias,
+e detalhes refinados.
 ```
 
----
+A frase-guia desta implementação é:
 
-# 198. REGRA FINAL
+> **Menos efeitos repetidos. Mais direção de arte.**
 
-Não interpretar “tirar cara de IA” como “remover IA do conteúdo”.
+E, para `#history` especificamente:
 
-O portal é sobre modelos de IA.
-
-O que deve desaparecer é a **estética automática de template**.
-
-A informação continua profunda.
-
-A interface passa a parecer intencional.
+> **Não mostrar uma lista sobre história. Fazer o usuário enxergar a história.**
