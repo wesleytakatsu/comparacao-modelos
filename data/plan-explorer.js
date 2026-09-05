@@ -127,6 +127,8 @@
       }
     }
   };
+  PLAN_UI_CONFIG.companies = PLAN_UI_CONFIG.companyMetadata;
+  PLAN_UI_CONFIG.accessBadges = PLAN_UI_CONFIG.universalBadges.access;
 
   // =========================================================================
   // 2. HELPERS DE PREÇO LOCALIZADO E FORMATAÇÃO — Seções 50, 51, 52, 53, 54

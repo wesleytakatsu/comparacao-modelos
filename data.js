@@ -5826,8 +5826,10 @@ const AI_DATA_HELPERS = {
       tableName = 'googleApi';
     }
 
+    if (!pricingTable) return 0.0;
+
     // Período promocional vs Pós-promoção
-    const now = options.referenceDate ? new Date(options.referenceDate) : new Date('2026-09-02');
+    const now = options.referenceDate ? new Date(options.referenceDate) : (options.now ? new Date(options.now) : new Date());
     if (model.pricing.promotionalPeriod) {
       const promoUntil = new Date(model.pricing.promotionalPeriod.effectiveUntil);
       if (now <= promoUntil) {
@@ -6552,76 +6554,47 @@ const AA_METHODOLOGY_NOTES = {
   }
 };
 
-// Declaração de referências para módulos carregados sob demanda
-var FX_RATES_DATA = null;
-var FX_HELPERS = null;
-var SUBSCRIPTION_PLANS_DATA = [];
-var BUDGET_STACK_RECOMMENDER = null;
-var OPENCODE_GO_DATA = null;
-var PLATFORM_MODEL_CATALOG = null;
-var PLATFORM_AVAILABILITY_MATRIX = [];
-var CAMELAI_PLATFORM_DATA = null;
-var GROK_BOT_METADATA = null;
-var ZAI_CREDIT_ACCOUNTING = null;
-var MODEL_HISTORY_DATA = null;
-var BENCHMARK_HISTORY_DATA = [];
-var COMMUNITY_REPORTS_DATA = [];
-var BENCHMARK_VS_COMMUNITY_DIVERGENCES = [];
-var ENGINEERING_BEHAVIOR_DATA = null;
-var USE_CASE_COMPARISON_DATA = null;
-var PRICE_HISTORY_DATA = null;
-var PlanExplorer = null;
-var BENCHMARK_REGISTRY = {};
-var SOURCE_REGISTRY = {};
-var MODEL_DOSSIERS_DATA = {};
-var DEEPSWE_INDEPENDENT_LEADERBOARD = [];
-var getModelDossier = null;
-var getDossierBenchmarkSnapshots = null;
-var calculatePerformanceFingerprint = null;
-var getDeepSweLeaderboard = null;
-var getProvenanceBadge = null;
-
 // Carregamento dos módulos data/* em ambiente Node.js
 if (typeof require !== 'undefined') {
   try {
     const fxMod = require('./data/fx.js');
-    FX_RATES_DATA = global.FX_RATES_DATA = fxMod.FX_RATES_DATA;
-    FX_HELPERS = global.FX_HELPERS = fxMod.FX_HELPERS;
+    global.FX_RATES_DATA = fxMod.FX_RATES_DATA;
+    global.FX_HELPERS = fxMod.FX_HELPERS;
     const plansMod = require('./data/plans.js');
-    SUBSCRIPTION_PLANS_DATA = global.SUBSCRIPTION_PLANS_DATA = plansMod.SUBSCRIPTION_PLANS_DATA;
-    BUDGET_STACK_RECOMMENDER = global.BUDGET_STACK_RECOMMENDER = plansMod.BUDGET_STACK_RECOMMENDER;
-    ZAI_CREDIT_ACCOUNTING = global.ZAI_CREDIT_ACCOUNTING = plansMod.ZAI_CREDIT_ACCOUNTING;
+    global.SUBSCRIPTION_PLANS_DATA = plansMod.SUBSCRIPTION_PLANS_DATA;
+    global.BUDGET_STACK_RECOMMENDER = plansMod.BUDGET_STACK_RECOMMENDER;
+    global.ZAI_CREDIT_ACCOUNTING = plansMod.ZAI_CREDIT_ACCOUNTING;
     const platformsMod = require('./data/platforms.js');
-    OPENCODE_GO_DATA = global.OPENCODE_GO_DATA = platformsMod.OPENCODE_GO_DATA;
-    PLATFORM_MODEL_CATALOG = global.PLATFORM_MODEL_CATALOG = platformsMod.PLATFORM_MODEL_CATALOG;
-    PLATFORM_AVAILABILITY_MATRIX = global.PLATFORM_AVAILABILITY_MATRIX = platformsMod.PLATFORM_AVAILABILITY_MATRIX;
-    CAMELAI_PLATFORM_DATA = global.CAMELAI_PLATFORM_DATA = platformsMod.CAMELAI_PLATFORM_DATA;
-    GROK_BOT_METADATA = global.GROK_BOT_METADATA = platformsMod.GROK_BOT_METADATA;
+    global.OPENCODE_GO_DATA = platformsMod.OPENCODE_GO_DATA;
+    global.PLATFORM_MODEL_CATALOG = platformsMod.PLATFORM_MODEL_CATALOG;
+    global.PLATFORM_AVAILABILITY_MATRIX = platformsMod.PLATFORM_AVAILABILITY_MATRIX;
+    global.CAMELAI_PLATFORM_DATA = platformsMod.CAMELAI_PLATFORM_DATA;
+    global.GROK_BOT_METADATA = platformsMod.GROK_BOT_METADATA;
     const historyMod = require('./data/history.js');
-    MODEL_HISTORY_DATA = global.MODEL_HISTORY_DATA = historyMod.MODEL_HISTORY_DATA;
-    BENCHMARK_HISTORY_DATA = global.BENCHMARK_HISTORY_DATA = historyMod.BENCHMARK_HISTORY_DATA;
+    global.MODEL_HISTORY_DATA = historyMod.MODEL_HISTORY_DATA;
+    global.BENCHMARK_HISTORY_DATA = historyMod.BENCHMARK_HISTORY_DATA;
     const commMod = require('./data/community.js');
-    COMMUNITY_REPORTS_DATA = global.COMMUNITY_REPORTS_DATA = commMod.COMMUNITY_REPORTS_DATA;
-    BENCHMARK_VS_COMMUNITY_DIVERGENCES = global.BENCHMARK_VS_COMMUNITY_DIVERGENCES = commMod.BENCHMARK_VS_COMMUNITY_DIVERGENCES;
+    global.COMMUNITY_REPORTS_DATA = commMod.COMMUNITY_REPORTS_DATA;
+    global.BENCHMARK_VS_COMMUNITY_DIVERGENCES = commMod.BENCHMARK_VS_COMMUNITY_DIVERGENCES;
     const behMod = require('./data/behavior.js');
-    ENGINEERING_BEHAVIOR_DATA = global.ENGINEERING_BEHAVIOR_DATA = behMod.ENGINEERING_BEHAVIOR_DATA;
+    global.ENGINEERING_BEHAVIOR_DATA = behMod.ENGINEERING_BEHAVIOR_DATA;
     const ucMod = require('./data/use-cases.js');
-    USE_CASE_COMPARISON_DATA = global.USE_CASE_COMPARISON_DATA = ucMod.USE_CASE_COMPARISON_DATA;
-    USE_CASES_DATA = global.USE_CASES_DATA = ucMod.USE_CASES_DATA || (ucMod.USE_CASE_COMPARISON_DATA ? ucMod.USE_CASE_COMPARISON_DATA.useCases : []);
+    global.USE_CASE_COMPARISON_DATA = ucMod.USE_CASE_COMPARISON_DATA;
+    global.USE_CASES_DATA = ucMod.USE_CASES_DATA || (ucMod.USE_CASE_COMPARISON_DATA ? ucMod.USE_CASE_COMPARISON_DATA.useCases : []);
     const prHistMod = require('./data/pricing-history.js');
-    PRICE_HISTORY_DATA = global.PRICE_HISTORY_DATA = prHistMod.PRICE_HISTORY_DATA;
+    global.PRICE_HISTORY_DATA = prHistMod.PRICE_HISTORY_DATA;
     const planExpMod = require('./data/plan-explorer.js');
-    PlanExplorer = global.PlanExplorer = planExpMod;
+    global.PlanExplorer = planExpMod;
     const dossiersMod = require('./data/dossiers.js');
-    BENCHMARK_REGISTRY = global.BENCHMARK_REGISTRY = dossiersMod.BENCHMARK_REGISTRY;
-    SOURCE_REGISTRY = global.SOURCE_REGISTRY = dossiersMod.SOURCE_REGISTRY;
-    MODEL_DOSSIERS_DATA = global.MODEL_DOSSIERS_DATA = dossiersMod.MODEL_DOSSIERS_DATA;
-    DEEPSWE_INDEPENDENT_LEADERBOARD = global.DEEPSWE_INDEPENDENT_LEADERBOARD = dossiersMod.DEEPSWE_INDEPENDENT_LEADERBOARD;
-    getModelDossier = global.getModelDossier = dossiersMod.getModelDossier;
-    getDossierBenchmarkSnapshots = global.getDossierBenchmarkSnapshots = dossiersMod.getDossierBenchmarkSnapshots;
-    calculatePerformanceFingerprint = global.calculatePerformanceFingerprint = dossiersMod.calculatePerformanceFingerprint;
-    getDeepSweLeaderboard = global.getDeepSweLeaderboard = dossiersMod.getDeepSweLeaderboard;
-    getProvenanceBadge = global.getProvenanceBadge = dossiersMod.getProvenanceBadge;
+    global.BENCHMARK_REGISTRY = dossiersMod.BENCHMARK_REGISTRY;
+    global.SOURCE_REGISTRY = dossiersMod.SOURCE_REGISTRY;
+    global.MODEL_DOSSIERS_DATA = dossiersMod.MODEL_DOSSIERS_DATA;
+    global.DEEPSWE_INDEPENDENT_LEADERBOARD = dossiersMod.DEEPSWE_INDEPENDENT_LEADERBOARD;
+    global.getModelDossier = dossiersMod.getModelDossier;
+    global.getDossierBenchmarkSnapshots = dossiersMod.getDossierBenchmarkSnapshots;
+    global.calculatePerformanceFingerprint = dossiersMod.calculatePerformanceFingerprint;
+    global.getDeepSweLeaderboard = dossiersMod.getDeepSweLeaderboard;
+    global.getProvenanceBadge = dossiersMod.getProvenanceBadge;
   } catch (e) {
     // Silencioso se executado em ambiente sem filesystem local
   }

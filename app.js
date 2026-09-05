@@ -1562,8 +1562,13 @@
     container.innerHTML = filtered.map(model => {
       const isSelected = selectedIds.includes(model.id);
       const topCursor = CURSORBENCH_32_DATA.filter(r => r.modelId === model.id).sort((a, b) => b.score - a.score)[0];
-      const ledger = MULTI_BENCHMARK_LEDGER.find(l => l.modelId === model.id);
-      const priceStr = model.openWeights ? 'Gratuito (Local)' : `$${model.pricing.standard.input.toFixed(2)} in / $${model.pricing.standard.output.toFixed(2)} out`;
+      const priceStr = model.openWeights
+        ? 'Gratuito (Local)'
+        : (model.pricing && model.pricing.standard)
+        ? `$${model.pricing.standard.input.toFixed(2)} in / $${model.pricing.standard.output.toFixed(2)} out`
+        : (model.pricing && model.pricing.subscriptionOnly)
+        ? `Assinatura (${model.pricing.subscriptionPlan || 'Exclusivo'})`
+        : 'Sob consulta';
 
       return `
         <div class="catalog-card" style="border-top: 3px solid ${model.color || 'var(--accent-cyan)'};">
@@ -1635,7 +1640,11 @@
 
       const priceText = model.openWeights && model.pricing.selfHosted
         ? '<span class="badge-tag badge-openweights">Local (Gratuito)</span>'
-        : `$${model.pricing.standard.input.toFixed(2)} / $${model.pricing.standard.output.toFixed(2)}`;
+        : (model.pricing && model.pricing.standard)
+        ? `$${model.pricing.standard.input.toFixed(2)} / $${model.pricing.standard.output.toFixed(2)}`
+        : (model.pricing && model.pricing.subscriptionOnly)
+        ? `<span class="badge-tag badge-subtle" title="${model.pricing.notes || ''}">Assinatura (${model.pricing.subscriptionPlan || 'Exclusivo'})</span>`
+        : '<span class="badge-subtle">Sob consulta</span>';
 
       const goBadge = model.openCodeGo && model.openCodeGo.available
         ? `<span class="badge-tag ${model.openCodeGo.quotaBurnMultiplier === 1 ? 'badge-go-60' : model.openCodeGo.quotaBurnMultiplier === 2 ? 'badge-go-30' : 'badge-go-15'}" title="OpenCode Go: Classe US$${model.openCodeGo.usageAllowanceUsd} (${model.openCodeGo.quotaBurnMultiplier}× Quota Burn)">Go ${model.openCodeGo.quotaBurnMultiplier}× burn (~${(model.openCodeGo.estReqMonth || 0).toLocaleString()} req)</span>`
@@ -1763,7 +1772,7 @@
         <div class="estimator-result-chip" onclick="location.hash='#model/${model.id}'" style="cursor: pointer;">
           <span class="chip-label">${model.name}</span>
           <span class="chip-cost">${costStr}</span>
-          <span class="chip-desc">${model.openWeights ? 'Pesos Abertos' : `$${model.pricing.standard.input}/$${model.pricing.standard.output}`}</span>
+          <span class="chip-desc">${model.openWeights ? 'Pesos Abertos' : (model.pricing && model.pricing.standard ? `$${model.pricing.standard.input}/$${model.pricing.standard.output}` : 'Assinatura')}</span>
         </div>
       `;
     }).join('');
@@ -2173,11 +2182,11 @@
           <div class="content-box" style="margin-bottom: 20px;">
             <h4>💰 Preços de API & Eficiência</h4>
             <div class="specs-grid">
-              <div class="spec-item-card"><div class="spec-label">Preço Padrão (Input / Entrada)</div><div class="spec-value">$${model.pricing.standard.input.toFixed(2)} / milhão</div></div>
-              <div class="spec-item-card"><div class="spec-label">Preço Padrão (Output / Saída)</div><div class="spec-value">$${model.pricing.standard.output.toFixed(2)} / milhão</div></div>
-              <div class="spec-item-card"><div class="spec-label">Prompt Cache Read (Hit)</div><div class="spec-value highlight-green">${model.pricing.standard.cacheRead !== null && model.pricing.standard.cacheRead !== undefined ? `$${model.pricing.standard.cacheRead.toFixed(4)} / milhão` : 'Padrão'}</div></div>
-              <div class="spec-item-card"><div class="spec-label">Cache Write (5 min / 1 hora)</div><div class="spec-value">${model.pricing.standard.cacheWrite5m ? `$${model.pricing.standard.cacheWrite5m.toFixed(2)} / $${model.pricing.standard.cacheWrite1h.toFixed(2)}` : 'N/D'}</div></div>
-              ${model.pricing.batch ? `
+              <div class="spec-item-card"><div class="spec-label">Preço Padrão (Input / Entrada)</div><div class="spec-value">${model.pricing?.standard ? `$${model.pricing.standard.input.toFixed(2)} / milhão` : 'Incluso no plano'}</div></div>
+              <div class="spec-item-card"><div class="spec-label">Preço Padrão (Output / Saída)</div><div class="spec-value">${model.pricing?.standard ? `$${model.pricing.standard.output.toFixed(2)} / milhão` : 'Incluso no plano'}</div></div>
+              <div class="spec-item-card"><div class="spec-label">Prompt Cache Read (Hit)</div><div class="spec-value highlight-green">${model.pricing?.standard && model.pricing.standard.cacheRead !== null && model.pricing.standard.cacheRead !== undefined ? `$${model.pricing.standard.cacheRead.toFixed(4)} / milhão` : 'Padrão'}</div></div>
+              <div class="spec-item-card"><div class="spec-label">Cache Write (5 min / 1 hora)</div><div class="spec-value">${model.pricing?.standard && model.pricing.standard.cacheWrite5m ? `$${model.pricing.standard.cacheWrite5m.toFixed(2)} / $${model.pricing.standard.cacheWrite1h.toFixed(2)}` : 'N/D'}</div></div>
+              ${model.pricing?.batch ? `
                 <div class="spec-item-card" style="border-color: rgba(34, 197, 94, 0.4);"><div class="spec-label">Batch API (50% de Desconto)</div><div class="spec-value highlight-green">$${model.pricing.batch.input.toFixed(2)} in / $${model.pricing.batch.output.toFixed(2)} out</div></div>
               ` : ''}
               <div class="spec-item-card"><div class="spec-label">Pool no Cursor Pro</div><div class="spec-value">${model.cursorPool ? model.cursorPool.poolLabel : 'Standard'}</div></div>
@@ -2187,7 +2196,7 @@
                 <strong style="color: #eab308;">🏷️ Preço Promocional de Lançamento Ativo (Seção 35):</strong>
                 <div style="margin-top: 4px; color: var(--text-primary);">
                   <strong>US$ ${model.pricing.promotionalPeriod.input.toFixed(2)} in / US$ ${model.pricing.promotionalPeriod.output.toFixed(2)} out</strong> até ${model.pricing.promotionalPeriod.effectiveUntil.split('-').reverse().join('/')}
-                  <span style="color: var(--text-muted); margin-left: 6px;">(após esta data: US$ ${model.pricing.standard.input.toFixed(2)} in / US$ ${model.pricing.standard.output.toFixed(2)} out)</span>
+                  <span style="color: var(--text-muted); margin-left: 6px;">(após esta data: ${model.pricing.standard ? `US$ ${model.pricing.standard.input.toFixed(2)} in / US$ ${model.pricing.standard.output.toFixed(2)} out` : 'tarifa regular'})</span>
                 </div>
               </div>
             ` : ''}
@@ -4305,8 +4314,11 @@
       const byComp = PlanExplorer.getPlansByCompany(SUBSCRIPTION_PLANS_DATA);
       const selected = AppState.planSelectedCompanies || [];
 
-      compContainer.innerHTML = PlanExplorer.PLAN_UI_CONFIG.companiesOrder.map(cId => {
-        const conf = PlanExplorer.PLAN_UI_CONFIG.companies[cId] || { name: cId, icon: '🏢' };
+      const compMap = (PlanExplorer.PLAN_UI_CONFIG && (PlanExplorer.PLAN_UI_CONFIG.companies || PlanExplorer.PLAN_UI_CONFIG.companyMetadata)) || {};
+      const compOrder = (PlanExplorer.PLAN_UI_CONFIG && PlanExplorer.PLAN_UI_CONFIG.companiesOrder) || Object.keys(compMap);
+
+      compContainer.innerHTML = compOrder.map(cId => {
+        const conf = compMap[cId] || { name: cId, icon: '🏢' };
         const count = (byComp[cId] || []).length;
         const isActive = selected.includes(cId);
 
@@ -6522,8 +6534,8 @@
       <div class="specs-grid" style="grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px;">
         <div class="spec-item-card"><div class="spec-label">Contexto</div><div class="spec-value">${(model.contextWindow / 1000).toFixed(0)}k</div></div>
         <div class="spec-item-card"><div class="spec-label">Output Máx</div><div class="spec-value">${(model.maxOutputTokens || 16384).toLocaleString()}</div></div>
-        <div class="spec-item-card"><div class="spec-label">Input / M</div><div class="spec-value">${model.openWeights ? 'Grátis (Local)' : `$${model.pricing.standard.input.toFixed(2)}`}</div></div>
-        <div class="spec-item-card"><div class="spec-label">Output / M</div><div class="spec-value">${model.openWeights ? 'Grátis (Local)' : `$${model.pricing.standard.output.toFixed(2)}`}</div></div>
+        <div class="spec-item-card"><div class="spec-label">Input / M</div><div class="spec-value">${model.openWeights ? 'Grátis (Local)' : (model.pricing?.standard ? `$${model.pricing.standard.input.toFixed(2)}` : 'Incluso')}</div></div>
+        <div class="spec-item-card"><div class="spec-label">Output / M</div><div class="spec-value">${model.openWeights ? 'Grátis (Local)' : (model.pricing?.standard ? `$${model.pricing.standard.output.toFixed(2)}` : 'Incluso')}</div></div>
       </div>
 
       <!-- 2-4 Métricas Chave com Proveniência [M] (Seção 8) -->

@@ -48,7 +48,8 @@
 
     // Model Access rows
     var modelRows = (plan.modelAccess || []).map(function (m) {
-      var badge = (typeof PlanExplorer !== 'undefined' && PlanExplorer.PLAN_UI_CONFIG.accessBadges[m.billingMode]) || { label: m.billingMode, class: 'badge-frontier' };
+      var badgeMap = (typeof PlanExplorer !== 'undefined' && PlanExplorer.PLAN_UI_CONFIG && (PlanExplorer.PLAN_UI_CONFIG.accessBadges || (PlanExplorer.PLAN_UI_CONFIG.universalBadges && PlanExplorer.PLAN_UI_CONFIG.universalBadges.access))) || {};
+      var badge = badgeMap[m.billingMode] || { label: m.billingMode || 'Padrão', class: 'badge-frontier' };
       var modelExists = typeof AI_MODELS_DATA !== 'undefined' && Boolean(AI_MODELS_DATA[m.modelId]);
       var modelCell = modelExists
         ? `<a href="#model/${m.modelId}" style="color: var(--accent-cyan); font-weight: 600; text-decoration: underline;" title="Abrir dossiê técnico de ${m.modelId}">${m.modelId} ↗</a>`
