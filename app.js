@@ -74,6 +74,10 @@
     platformSearchQuery: ''
   };
 
+  if (typeof window !== 'undefined') {
+    window.AppState = AppState;
+  }
+
   // ==========================================
   // 2. INICIALIZAÇÃO & ROTEADOR HASH SPA
   // ==========================================
@@ -7314,11 +7318,27 @@
         AppState.useCaseCustomWeights[useCaseId] = Object.assign({}, uc ? uc.weights : { coding: 0.35, agentic: 0.25, reliability: 0.20, cost: 0.10, speed: 0.10 });
       }
       AppState.useCaseCustomWeights[useCaseId][criterion] = Number(val) / 100;
-      renderUseCasesView();
+      AppState.useCaseWeightsBoxOpen = true;
+
+      const detailView = document.getElementById('view-use-case-detail');
+      if (detailView && detailView.classList.contains('active')) {
+        if (typeof EntityViews !== 'undefined' && EntityViews.renderUseCase) {
+          EntityViews.renderUseCase(useCaseId);
+        }
+      } else {
+        renderUseCasesView();
+      }
     },
     resetUseCaseWeights(useCaseId) {
       delete AppState.useCaseCustomWeights[useCaseId];
-      renderUseCasesView();
+      const detailView = document.getElementById('view-use-case-detail');
+      if (detailView && detailView.classList.contains('active')) {
+        if (typeof EntityViews !== 'undefined' && EntityViews.renderUseCase) {
+          EntityViews.renderUseCase(useCaseId);
+        }
+      } else {
+        renderUseCasesView();
+      }
     }
   };
 
