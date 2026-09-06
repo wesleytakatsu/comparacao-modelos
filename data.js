@@ -16,6 +16,10 @@ if (typeof module !== "undefined" && module.exports) {
       global.OPENCODE_GO_DATA = _platforms.OPENCODE_GO_DATA;
       global.PLATFORM_MODEL_CATALOG = _platforms.PLATFORM_MODEL_CATALOG;
     }
+    if (typeof OPENCODE_ZEN_DATA === "undefined") {
+      const _zen = require("./data/opencode-zen");
+      global.OPENCODE_ZEN_DATA = _zen.OPENCODE_ZEN_DATA;
+    }
     if (typeof DomainRankings === "undefined") {
       try {
         const _domain = require("./data/domain");
@@ -484,11 +488,22 @@ const DATA_SOURCES = {
     publisher: 'OpenCode',
     sourceType: 'platform-catalog',
     title: 'OpenCode Go Catalog & Model Access',
-    sourceUrl: 'https://opencode.ai/go',
-    publishedAt: '2026-09-03',
-    retrievedAt: '2026-09-04',
+    sourceUrl: 'https://opencode.ai/docs/pt-br/go/',
+    publishedAt: '2026-09-06',
+    retrievedAt: '2026-09-06',
     official: true,
-    notes: 'Status no catálogo OpenCode Go para novos frontier flagships e políticas de burn rate.'
+    notes: 'Lista curada da documentação Go (27 modelos oficiais, inclui Omen Alpha). Não espelha o dump bruto de /zen/go/v1/models.'
+  },
+  'opencode-zen-catalog-2026': {
+    id: 'opencode-zen-catalog-2026',
+    publisher: 'OpenCode',
+    sourceType: 'platform-catalog',
+    title: 'OpenCode Zen Endpoints, Pricing & Models API',
+    sourceUrl: 'https://opencode.ai/docs/pt-br/zen/',
+    publishedAt: '2026-09-06',
+    retrievedAt: '2026-09-06',
+    official: true,
+    notes: 'Catálogo Zen: 69 IDs da tabela de endpoints da documentação mais SKUs servíveis só em /zen/v1/models. Não espelha models.dev nem o catálogo frontier.'
   },
   'openai-responses-api-docs': {
     id: 'openai-responses-api-docs',
@@ -6232,6 +6247,40 @@ if (typeof OPENCODE_GO_DATA !== "undefined" && OPENCODE_GO_DATA.models) {
   });
 }
 
+const OPENCODE_ZEN_CATALOG = (typeof OPENCODE_ZEN_DATA !== "undefined" && OPENCODE_ZEN_DATA.models)
+  ? OPENCODE_ZEN_DATA.models
+  : [];
+
+if (typeof OPENCODE_ZEN_DATA !== "undefined" && OPENCODE_ZEN_DATA.models) {
+  Object.keys(AI_MODELS_DATA).forEach(modelId => {
+    const m = AI_MODELS_DATA[modelId];
+    const zenModel = OPENCODE_ZEN_DATA.getModel(modelId);
+    if (zenModel) {
+      m.openCodeZen = {
+        available: true,
+        id: zenModel.id,
+        modelId: zenModel.modelId,
+        displayName: zenModel.displayName,
+        endpoint: zenModel.endpoint,
+        sdkPackage: zenModel.sdkPackage,
+        billing: zenModel.billing,
+        status: zenModel.status,
+        listedInDocsEndpoints: zenModel.listedInDocsEndpoints,
+        listedInApi: zenModel.listedInApi,
+        zenPricing: zenModel.zenPricing,
+        contextWindow: zenModel.contextWindow,
+        maxOutputTokens: zenModel.maxOutputTokens,
+        pricingNote: zenModel.pricingNote || null,
+        privacyNote: zenModel.privacyNote || null
+      };
+    } else {
+      m.openCodeZen = {
+        available: false
+      };
+    }
+  });
+}
+
 
 // ==========================================
 // ==========================================
@@ -7437,6 +7486,8 @@ if (typeof require !== 'undefined') {
     global.PLATFORM_AVAILABILITY_MATRIX = platformsMod.PLATFORM_AVAILABILITY_MATRIX;
     global.CAMELAI_PLATFORM_DATA = platformsMod.CAMELAI_PLATFORM_DATA;
     global.GROK_BOT_METADATA = platformsMod.GROK_BOT_METADATA;
+    const zenMod = require('./data/opencode-zen.js');
+    global.OPENCODE_ZEN_DATA = zenMod.OPENCODE_ZEN_DATA;
     const historyMod = require('./data/history.js');
     global.MODEL_HISTORY_DATA = historyMod.MODEL_HISTORY_DATA;
     global.BENCHMARK_HISTORY_DATA = historyMod.BENCHMARK_HISTORY_DATA;
@@ -7479,6 +7530,8 @@ if (typeof module !== 'undefined' && module.exports) {
     CAPABILITY_RADAR_10D,
     OPENCODE_GO_DATA: typeof OPENCODE_GO_DATA !== "undefined" ? OPENCODE_GO_DATA : null,
     OPENCODE_GO_CATALOG,
+    OPENCODE_ZEN_DATA: typeof OPENCODE_ZEN_DATA !== "undefined" ? OPENCODE_ZEN_DATA : null,
+    OPENCODE_ZEN_CATALOG,
     HARDWARE_GPU_DATABASE,
     KV_CACHE_COMPRESSION_FACTORS,
     ANTIGRAVITY_POOLS_DATA,
@@ -7538,6 +7591,7 @@ if (typeof window !== 'undefined') {
   window.HARDWARE_LOCAL_MODELS_DATA = HARDWARE_LOCAL_MODELS_DATA;
   window.AA_METHODOLOGY_NOTES = AA_METHODOLOGY_NOTES;
   if (typeof OPENCODE_GO_DATA !== "undefined") window.OPENCODE_GO_DATA = OPENCODE_GO_DATA;
+  if (typeof OPENCODE_ZEN_DATA !== "undefined") window.OPENCODE_ZEN_DATA = OPENCODE_ZEN_DATA;
   if (typeof PLATFORM_AVAILABILITY_MATRIX !== "undefined") window.PLATFORM_AVAILABILITY_MATRIX = PLATFORM_AVAILABILITY_MATRIX;
   if (typeof PlanExplorer !== "undefined") window.PlanExplorer = PlanExplorer;
   if (typeof BENCHMARK_REGISTRY !== "undefined") window.BENCHMARK_REGISTRY = BENCHMARK_REGISTRY;

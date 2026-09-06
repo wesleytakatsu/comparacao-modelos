@@ -6,14 +6,15 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "test": "node scripts/audit-data.js && node scripts/smoke-test.js && node scripts/test-links.js",
+    "test": "node scripts/audit-data.js && node scripts/smoke-test.js && node scripts/test-links.js && node scripts/test-history.js",
     "test:data": "node scripts/audit-data.js",
     "test:domain": "node -e \"require('./data/domain.js'); console.log('Domain v2 OK');\"",
     "test:routes": "node scripts/smoke-test.js",
     "test:links": "node scripts/test-links.js",
     "test:smoke": "node scripts/smoke-test.js",
     "test:impact": "node -e \"const d = require('./data/domain.js'); const res = d.DomainImpact.simulateNewModel({ id: 'test', name: 'Test' }, [{ benchmarkKey: 'cursorBench', score: 99 }]); console.log('Impact Engine OK:', res.isNewOverallLeader);\"",
-    "lint:data": "node scripts/audit-data.js"
+    "lint:data": "node scripts/audit-data.js",
+    "test:history": "node scripts/test-history.js"
   },
   "keywords": [
     "ai",

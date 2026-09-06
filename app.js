@@ -68,6 +68,9 @@
     activeBudgetStack: 110,
     activeHistoryTab: 'lineages',
     activeTimelineFilter: 'all',
+    atlasFamilyId: null,
+    atlasSelection: null,
+    bhBenchmark: 'all',
     historySearchQuery: '',
     historyProviderFilter: 'all',
     historyYearFilter: 'all',
@@ -114,6 +117,8 @@
   // GESTÃO DE TEMA (DARK / LIGHT / SYSTEM)
   // ==========================================
   function getPreferredTheme() {
+    const qa = /[?&]theme=(light|dark)/.exec(window.location.search);
+    if (qa) return qa[1];
     const saved = localStorage.getItem('ai-portal-theme');
     if (saved === 'light' || saved === 'dark') return saved;
     return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
@@ -223,6 +228,9 @@
         if (urlParams.get('evidence')) AppState.historyEvidenceFilter = urlParams.get('evidence');
         if (urlParams.get('predecessors') !== null) AppState.historyShowPredecessors = urlParams.get('predecessors') !== 'false';
         if (urlParams.get('event')) AppState.activeTimelineFilter = urlParams.get('event');
+        if (urlParams.get('family')) AppState.atlasFamilyId = urlParams.get('family');
+        if (urlParams.get('node')) AppState.atlasSelection = { kind: 'node', id: urlParams.get('node') };
+        if (urlParams.get('bh')) AppState.bhBenchmark = urlParams.get('bh');
       }
       route = 'history';
     }
@@ -957,20 +965,99 @@
       });
     }
 
-    const historyToggleExpandAllBtn = document.getElementById('historyToggleExpandAllBtn');
-    if (historyToggleExpandAllBtn) {
-      historyToggleExpandAllBtn.addEventListener('click', () => {
-        const anyExpanded = Object.values(AppState.historyCollapsedFamilies).some(v => !v);
-        const collapseAll = anyExpanded || Object.keys(AppState.historyCollapsedFamilies).length === 0;
-        if (typeof MODEL_HISTORY_DATA !== 'undefined' && MODEL_HISTORY_DATA.lineages) {
-          MODEL_HISTORY_DATA.lineages.forEach(lin => {
-            AppState.historyCollapsedFamilies[lin.familyId] = collapseAll;
-          });
+    // Atlas do Histórico — eventos (Prompt 12)
+    const atlasRail = document.getElementById('atlasProviderRail');
+    if (atlasRail) {
+      atlasRail.addEventListener('click', (e) => {
+        const item = e.target.closest('.atlas-rail__item');
+        if (item) {
+          AppState.atlasFamilyId = item.getAttribute('data-family');
+          AppState.atlasSelection = null;
+          updateHistoryUrl();
+          renderHistoryView();
         }
-        historyToggleExpandAllBtn.textContent = collapseAll ? 'Expandir Todos' : 'Recolher Todos';
-        renderHistoryView();
       });
     }
+
+    const atlasInnerEl = document.getElementById('atlasInner');
+    if (atlasInnerEl) {
+      atlasInnerEl.addEventListener('click', (e) => {
+        const node = e.target.closest('.atlas-node');
+        if (node) {
+          AppState.atlasSelection = { kind: 'node', id: node.getAttribute('data-model') };
+          updateHistoryUrl();
+          applyAtlasSelection(true);
+          return;
+        }
+        const edgeG = e.target.closest('.atlas-edge-g');
+        if (edgeG) {
+          AppState.atlasSelection = { kind: 'edge', familyId: edgeG.dataset.family, from: edgeG.dataset.from, to: edgeG.dataset.to, idx: edgeG.getAttribute('data-edge') };
+          applyAtlasSelection(false);
+        }
+      });
+    }
+
+    const atlasInspectorEl = document.getElementById('atlasInspector');
+    if (atlasInspectorEl) {
+      atlasInspectorEl.addEventListener('click', (e) => {
+        if (e.target.closest('[data-inspector-close]')) {
+          AppState.atlasSelection = null;
+          applyAtlasSelection(false);
+          updateHistoryUrl();
+          return;
+        }
+        const rel = e.target.closest('[data-edge-open]');
+        if (rel) {
+          AppState.atlasSelection = { kind: 'edge', familyId: rel.dataset.family, from: rel.dataset.from, to: rel.dataset.to };
+          applyAtlasSelection(false);
+        }
+      });
+    }
+
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('#atlasClearFilters, [data-clear-filters]')) {
+        AppState.historySearchQuery = '';
+        AppState.historyProviderFilter = 'all';
+        AppState.historyYearFilter = 'all';
+        AppState.historyEvidenceFilter = 'all';
+        AppState.historyShowPredecessors = true;
+        updateHistoryUrl();
+        renderHistoryView();
+      }
+    });
+
+    const bhSelect = document.getElementById('bhBenchmarkSelect');
+    if (bhSelect) {
+      bhSelect.addEventListener('change', (e) => {
+        AppState.bhBenchmark = e.target.value;
+        updateHistoryUrl();
+        renderBenchmarkHistoryTab();
+      });
+    }
+
+    const timelineStreamEl = document.getElementById('timelineStreamContainer');
+    if (timelineStreamEl) {
+      timelineStreamEl.addEventListener('click', (e) => {
+        const goto = e.target.closest('[data-goto-model]');
+        if (goto) { location.hash = '#model/' + goto.getAttribute('data-goto-model'); return; }
+        const row = e.target.closest('[data-tl-toggle]');
+        if (row) {
+          const ev = row.closest('.tl-event');
+          const open = ev.classList.toggle('is-open');
+          row.setAttribute('aria-expanded', String(open));
+        }
+      });
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const insp = document.getElementById('atlasInspector');
+        if (insp && !insp.hidden && AppState.atlasSelection) {
+          AppState.atlasSelection = null;
+          applyAtlasSelection(false);
+        }
+      }
+    });
 
     // Modal de Inspeção Histórica & Conexões
     const historyInspectModalOverlay = document.getElementById('historyInspectModalOverlay');
@@ -1723,6 +1810,17 @@
 
   // 4. MÓDULO DASHBOARD & CATÁLOGO
   // ==========================================
+  function goQuotaBadgeClass(go) {
+    if (typeof OPENCODE_GO_DATA !== 'undefined' && OPENCODE_GO_DATA.quotaBadgeClass) {
+      return OPENCODE_GO_DATA.quotaBadgeClass(go);
+    }
+    const usd = go && go.usageAllowanceUsd;
+    if (usd === 100) return 'badge-go-100';
+    if (usd === 60) return 'badge-go-60';
+    if (usd === 30) return 'badge-go-30';
+    return 'badge-go-15';
+  }
+
   function renderDashboardTable() {
     const tbody = document.getElementById('dashboardTableBody');
     if (!tbody) return;
@@ -1759,7 +1857,7 @@
         : '<span class="badge-subtle">Sob consulta</span>';
 
       const goBadge = model.openCodeGo && model.openCodeGo.available
-        ? `<span class="badge-tag ${model.openCodeGo.quotaBurnMultiplier === 1 ? 'badge-go-60' : model.openCodeGo.quotaBurnMultiplier === 2 ? 'badge-go-30' : 'badge-go-15'}" title="OpenCode Go: Classe US$${model.openCodeGo.usageAllowanceUsd} (${model.openCodeGo.quotaBurnMultiplier}× Quota Burn)">Go ${model.openCodeGo.quotaBurnMultiplier}× burn (~${(model.openCodeGo.estReqMonth || 0).toLocaleString()} req)</span>`
+        ? `<span class="badge-tag ${goQuotaBadgeClass(model.openCodeGo)}" title="OpenCode Go: Classe US$${model.openCodeGo.usageAllowanceUsd} (${model.openCodeGo.quotaBurnMultiplier}× Quota Burn)">Go ${model.openCodeGo.quotaBurnMultiplier}× burn (~${(model.openCodeGo.estReqMonth || 0).toLocaleString()} req)</span>`
         : '<span class="badge-subtle">Não listado</span>';
 
       const provider = AI_PROVIDERS_DATA[model.provider] || {};
@@ -2069,7 +2167,7 @@
           <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
             <div>
               <h4 style="margin: 0; color: var(--accent-cyan); display: flex; align-items: center; gap: 8px;">
-                🧭 Reasoning Effort Explorer <span class="badge-tag badge-frontier" style="font-size: 0.72rem;">5 Níveis de Esforço</span>
+                Reasoning Effort Explorer <span class="badge-tag badge-frontier" style="font-size: 0.72rem;">5 Níveis de Esforço</span>
               </h4>
               <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 4px 0 0 0;">
                 Trade-offs instrumentados de acurácia, latência, consumo de tokens e custo por tarefa para o ${model.name}.
@@ -2163,7 +2261,7 @@
               <div style="font-size: 0.85rem; color: var(--text-muted);">Desenvolvido por <strong>${model.providerName}</strong> • ${model.architectureType} • Lançamento: ${model.releaseDate || '2026'}</div>
               ${model.aliases && model.aliases.length > 0 ? `
                 <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">
-                  🏷️ <em>Aliases de interface:</em> ${model.aliases.map(a => `<code style="font-size: 0.75rem; background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 3px; margin-right: 4px;">${a}</code>`).join('')}
+                  <em>Aliases de interface:</em> ${model.aliases.map(a => `<code style="font-size: 0.75rem; background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 3px; margin-right: 4px;">${a}</code>`).join('')}
                   ${model.id === 'gpt-6-astra' ? '<span style="color: var(--accent-cyan); font-size: 0.76rem;">(GPT-6 Pro é a denominação comercial na interface ChatGPT)</span>' : ''}
                 </div>
               ` : ''}
@@ -2178,7 +2276,7 @@
             </div>
           </div>
           <div style="display: flex; gap: 8px; align-items: flex-start; flex-wrap: wrap;">
-            <button class="btn-primary" onclick="window.AIApp.openComparatorWith('${model.id}')">⚔️ Comparar Lado a Lado</button>
+            <button class="btn-primary" onclick="window.AIApp.openComparatorWith('${model.id}')">Comparar Lado a Lado</button>
             <button class="btn-secondary" onclick="window.AIApp.toggleModelInComparison('${model.id}')">➕ Bandeja de Comparação</button>
           </div>
         </div>
@@ -2202,11 +2300,11 @@
 
         <!-- 5 Abas de Alto Nível (Seção 9 do Plano 08) -->
         <div class="dossier-subtabs-nav" id="dossierTopTabsNav">
-          <button class="subtab-btn active" data-tab="tab-overview">📋 Visão Geral</button>
-          <button class="subtab-btn" data-tab="tab-performance">📊 Desempenho</button>
-          <button class="subtab-btn" data-tab="tab-pricing-access">💰 Preço & Acesso</button>
-          <button class="subtab-btn" data-tab="tab-history-evidence">📜 Histórico & Evidências</button>
-          ${(model.openWeights || model.vramRequirements) ? `<button class="subtab-btn" data-tab="tab-deploy">🖥️ Deploy & Integração</button>` : ''}
+          <button class="subtab-btn active" data-tab="tab-overview">Visão Geral</button>
+          <button class="subtab-btn" data-tab="tab-performance">Desempenho</button>
+          <button class="subtab-btn" data-tab="tab-pricing-access">Preço & Acesso</button>
+          <button class="subtab-btn" data-tab="tab-history-evidence">Histórico & Evidências</button>
+          ${(model.openWeights || model.vramRequirements) ? `<button class="subtab-btn" data-tab="tab-deploy">Deploy & Integração</button>` : ''}
         </div>
 
         <!-- ABA 1: VISÃO GERAL (Resumo Interpretado & Especificações) -->
@@ -2214,28 +2312,28 @@
           <!-- Resumo Interpretado (Antes das Tabelas) -->
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-bottom: 20px;">
             <div class="content-box" style="margin: 0; border-left: 4px solid #10b981;">
-              <h4 style="color: #10b981; font-size: 0.95rem; margin-bottom: 8px;">🌟 Excelente em</h4>
+              <h4 style="color: #10b981; font-size: 0.95rem; margin-bottom: 8px;">Excelente em</h4>
               <ul style="margin: 0; padding-left: 18px; font-size: 0.85rem; color: var(--text-primary); line-height: 1.5;">
                 ${strengths.slice(0, 4).map(s => `<li>${s}</li>`).join('')}
               </ul>
             </div>
 
             <div class="content-box" style="margin: 0; border-left: 4px solid #ef4444;">
-              <h4 style="color: #ef4444; font-size: 0.95rem; margin-bottom: 8px;">⚠️ Limitações & Trade-offs</h4>
+              <h4 style="color: #ef4444; font-size: 0.95rem; margin-bottom: 8px;">Limitações & Trade-offs</h4>
               <ul style="margin: 0; padding-left: 18px; font-size: 0.85rem; color: var(--text-primary); line-height: 1.5;">
                 ${weaknesses.slice(0, 3).map(w => `<li>${w}</li>`).join('')}
               </ul>
             </div>
 
             <div class="content-box" style="margin: 0; border-left: 4px solid var(--accent-cyan);">
-              <h4 style="color: var(--accent-cyan); font-size: 0.95rem; margin-bottom: 8px;">🎯 Use quando</h4>
+              <h4 style="color: var(--accent-cyan); font-size: 0.95rem; margin-bottom: 8px;">Use quando</h4>
               <ul style="margin: 0; padding-left: 18px; font-size: 0.85rem; color: var(--text-primary); line-height: 1.5;">
                 ${bestFor.slice(0, 3).map(b => `<li>${b}</li>`).join('')}
               </ul>
             </div>
 
             <div class="content-box" style="margin: 0; border-left: 4px solid #f59e0b;">
-              <h4 style="color: #f59e0b; font-size: 0.95rem; margin-bottom: 8px;">🛑 Evite quando</h4>
+              <h4 style="color: #f59e0b; font-size: 0.95rem; margin-bottom: 8px;">Evite quando</h4>
               <ul style="margin: 0; padding-left: 18px; font-size: 0.85rem; color: var(--text-primary); line-height: 1.5;">
                 ${avoidFor.slice(0, 3).map(a => `<li>${a}</li>`).join('')}
               </ul>
@@ -2244,7 +2342,7 @@
 
           <!-- Posição Atual Auditada & Rankings Derivados -->
           <div class="content-box" style="margin-bottom: 20px;">
-            <h4 style="font-size: 0.95rem; margin-bottom: 12px;">🏆 Posição Atual & Rankings Auditados</h4>
+            <h4 style="font-size: 0.95rem; margin-bottom: 12px;">Posição Atual & Rankings Auditados</h4>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
               ${model.officialBenchmarks && model.officialBenchmarks.sweBenchVerified ? `
                 <div style="padding: 10px; background: rgba(255,255,255,0.02); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
@@ -2274,7 +2372,7 @@
 
           <!-- Especificações Fundamentais -->
           <div class="content-box">
-            <h4 style="font-size: 0.95rem; margin-bottom: 12px;">⚙️ Especificações Técnicas Fundamentais</h4>
+            <h4 style="font-size: 0.95rem; margin-bottom: 12px;">Especificações Técnicas Fundamentais</h4>
             <div class="specs-grid">
               <div class="spec-item-card"><div class="spec-label">Janela de Contexto (Nominal)</div><div class="spec-value">${(model.contextWindow).toLocaleString()} tokens (${(model.contextWindow / 1000).toFixed(0)}k)</div></div>
               <div class="spec-item-card"><div class="spec-label">Output Máximo</div><div class="spec-value">${(model.maxOutputTokens || 16384).toLocaleString()} tokens</div></div>
@@ -2295,7 +2393,7 @@
 
           <!-- DeepSWE Leaderboard -->
           <div class="content-box" style="margin-bottom: 20px;">
-            <h4>🏆 DeepSWE 1.1 Leaderboard Independente (Custo por Tarefa Resolvida)</h4>
+            <h4>DeepSWE 1.1 Leaderboard Independente (Custo por Tarefa Resolvida)</h4>
             <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
               Ordenação factual por taxa de sucesso e eficiência. Custo por tarefa resolvida calculado dinamicamente com flag <code>[D]</code> via fórmula <code>costPerTask / (score / 100)</code>.
             </p>
@@ -2355,7 +2453,7 @@
 
           <!-- Snapshots de Benchmarks por Categoria -->
           <div class="content-box">
-            <h4 style="margin-bottom: 12px;">📊 Snapshots Categorizados de Benchmarks Auditados</h4>
+            <h4 style="margin-bottom: 12px;">Snapshots Categorizados de Benchmarks Auditados</h4>
             
             <h5 style="margin-top: 14px; margin-bottom: 6px;">💻 Coding & Engenharia de Software</h5>
             ${renderCategorySnapshots('Coding', 'coding')}
@@ -2384,7 +2482,7 @@
         <div class="subtab-panel" id="tab-pricing-access">
           <!-- Preços de API -->
           <div class="content-box" style="margin-bottom: 20px;">
-            <h4>💰 Preços de API & Eficiência</h4>
+            <h4>Preços de API & Eficiência</h4>
             <div class="specs-grid">
               <div class="spec-item-card"><div class="spec-label">Preço Padrão (Input / Entrada)</div><div class="spec-value">${model.pricing?.standard ? `$${model.pricing.standard.input.toFixed(2)} / milhão` : 'Incluso no plano'}</div></div>
               <div class="spec-item-card"><div class="spec-label">Preço Padrão (Output / Saída)</div><div class="spec-value">${model.pricing?.standard ? `$${model.pricing.standard.output.toFixed(2)} / milhão` : 'Incluso no plano'}</div></div>
@@ -2408,7 +2506,7 @@
 
           <!-- Onde Executar / IDEs -->
           <div class="content-box" style="margin-bottom: 20px;">
-            <h4>🌐 Onde Executar Este Modelo & Plataformas de Desenvolvimento</h4>
+            <h4>Onde Executar Este Modelo & Plataformas de Desenvolvimento</h4>
             <div class="specs-grid" style="margin-bottom: 16px;">
               <div class="spec-item-card"><div class="spec-label">Cursor IDE</div><div class="spec-value">${model.cursorPool ? model.cursorPool.poolLabel : 'Other Models'}</div></div>
               <div class="spec-item-card"><div class="spec-label">OpenCode Go</div><div class="spec-value ${model.openCodeGo && model.openCodeGo.available ? 'highlight-green' : ''}">${model.openCodeGo && model.openCodeGo.available ? `Sim (${model.openCodeGo.quotaBurnMultiplier}× burn)` : 'Consulte OpenRouter'}</div></div>
@@ -2419,7 +2517,7 @@
 
           <!-- Planos que incluem o Modelo (Integrado via DomainEntities) -->
           <div class="content-box" style="margin-bottom: 20px;">
-            <h4>💳 Assinaturas & Planos que Incluem este Modelo</h4>
+            <h4>Assinaturas & Planos que Incluem este Modelo</h4>
             <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
               Planos comerciais de desenvolvedor onde este modelo está disponível em cota inclusa ou créditos.
             </p>
@@ -2455,7 +2553,7 @@
 
           <!-- Governança e Retenção -->
           <div class="content-box">
-            <h4>🔒 Governança, Privacidade & Retenção de Dados</h4>
+            <h4>Governança, Privacidade & Retenção de Dados</h4>
             <div class="specs-grid" style="margin-top: 12px;">
               <div class="spec-item-card"><div class="spec-label">Zero Data Retention (ZDR)</div><div class="spec-value">${model.privacy ? (model.privacy.retentionDays === 0 ? '✅ ZDR Ativo (0 dias)' : `⚠️ Retenção de até ${model.privacy.retentionDays} dias`) : '✅ ZDR Oficial / API'}</div></div>
               <div class="spec-item-card"><div class="spec-label">Status dos Pesos</div><div class="spec-value">${model.openWeights ? 'Pesos Abertos Auditáveis' : 'Proprietário de Código Fechado'}</div></div>
@@ -2469,7 +2567,7 @@
         <div class="subtab-panel" id="tab-history-evidence">
           <!-- Linhagem -->
           <div class="content-box" style="margin-bottom: 20px;">
-            <h4>🧬 Linhagem & Evolução Histórica</h4>
+            <h4>Linhagem & Evolução Histórica</h4>
             <p style="font-size: 0.85rem; color: var(--text-primary);">
               ${model.predecessor ? `Este modelo é o sucessor direto de <strong>${model.predecessor}</strong>, trazendo melhorias substanciais em raciocínio agêntico, síntese de contexto e redução de TTFT.` : `Modelo de linhagem primária na família ${model.providerName}.`}
             </p>
@@ -2477,7 +2575,7 @@
 
           <!-- Relatos de Comunidade e Telemetria -->
           <div class="content-box" style="margin-bottom: 20px;">
-            <h4>💬 Relatos de Desenvolvedores & Telemetria no Mundo Real</h4>
+            <h4>Relatos de Desenvolvedores & Telemetria no Mundo Real</h4>
             <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
               Feedback auditado de engenheiros em uso diário com IDEs (Cursor, Windsurf, Aider, OpenCode) com proveniência [C].
             </p>
@@ -2500,7 +2598,7 @@
           <!-- Divergências Documentadas -->
           ${divergenceItems && divergenceItems.length > 0 ? `
             <div class="content-box" style="margin-bottom: 20px; border-left: 4px solid #f59e0b;">
-              <h4>⚖️ Divergências Documentadas (Benchmark vs Uso Real)</h4>
+              <h4>Divergências Documentadas (Benchmark vs Uso Real)</h4>
               <div style="display: flex; flex-direction: column; gap: 8px;">
                 ${divergenceItems.map(d => `
                   <div style="font-size: 0.84rem;">
@@ -2514,7 +2612,7 @@
 
           <!-- Fontes Auditadas e Metrologia Estrita -->
           <div class="content-box">
-            <h4>📚 Fontes Auditadas, Publicadores & Metrologia Estrita</h4>
+            <h4>Fontes Auditadas, Publicadores & Metrologia Estrita</h4>
             <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
               Rastreabilidade integral das medições utilizadas neste dossiê com distinção estrita de fontes.
             </p>
@@ -2529,7 +2627,7 @@
         ${(model.openWeights || model.vramRequirements) ? `
           <div class="subtab-panel" id="tab-deploy">
             <div class="content-box" style="margin-bottom: 20px;">
-              <h4>🖥️ Requisitos de VRAM & Quantizações para Deploy Local</h4>
+              <h4>Requisitos de VRAM & Quantizações para Deploy Local</h4>
               <div class="specs-grid">
                 <div class="spec-item-card"><div class="spec-label">FP16 / BF16 (Não Quantizado)</div><div class="spec-value highlight-cyan">${model.vramRequirements?.fp16 || '80 GB VRAM (1x A100/H100)'}</div></div>
                 <div class="spec-item-card"><div class="spec-label">Q8 / INT8 (Alta Precisão)</div><div class="spec-value">${model.vramRequirements?.q8 || '48 GB VRAM (2x RTX 3090/4090)'}</div></div>
@@ -2539,7 +2637,7 @@
             </div>
 
             <div class="content-box" style="margin-bottom: 20px;">
-              <h4>🚀 Comandos Rápidos de Execução Local</h4>
+              <h4>Comandos Rápidos de Execução Local</h4>
               <h5 style="margin-top: 10px; margin-bottom: 6px;">Execução via vLLM:</h5>
               <div class="code-snippet-box">
                 <pre><code>vllm serve ${model.hfModelId || model.id} --tensor-parallel-size 1 --max-model-len ${model.contextWindow} --port 8000</code></pre>
@@ -2552,7 +2650,7 @@
             </div>
 
             <div class="content-box">
-              <h4>⚙️ Snippets de Configuração para Ferramentas de Código</h4>
+              <h4>Snippets de Configuração para Ferramentas de Código</h4>
               <h5 style="margin-top: 10px; margin-bottom: 6px;">Configuração para OpenCode (JSON):</h5>
               <div class="code-snippet-box">
                 <button class="btn-copy-code" onclick="window.AIApp.copySnippet('snip-opencode')">Copiar JSON</button>
@@ -2868,7 +2966,7 @@
           </td>
           <td>
             <button class="btn-table-action" onclick="location.hash='#model/${item.modelId}'" title="Ver Dossiê do Modelo">
-              🔍 Dossiê
+              Dossiê
             </button>
           </td>
         </tr>
@@ -3353,7 +3451,7 @@
       <div class="content-box" style="padding: 14px 18px; border-left: 4px solid var(--accent-cyan); margin-bottom: 16px;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
           <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            <span style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary);">🛡️ Metrologia Comparativa:</span>
+            <span style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary);">Metrologia Comparativa:</span>
             <span class="badge-tag ${confBadgeClass}">Confiança ${confLabelPt} (${conf.coveragePct}%)</span>
             <span style="font-size: 0.8rem; color: var(--text-secondary);">${conf.sharedBenchmarks} benchmarks diretamente comparáveis de ${conf.totalComparableMetrics} avaliados</span>
           </div>
@@ -3387,7 +3485,7 @@
         ${tradeOff ? `
           <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-subtle);">
             <div style="font-size: 0.82rem; font-weight: 600; color: var(--accent-cyan); margin-bottom: 4px;">
-              ⚖️ Resumo de Trade-offs (Ao escolher <u>${tradeOff.targetName}</u> em vez de <u>${tradeOff.referenceName}</u>):
+              Resumo de Trade-offs (Ao escolher <u>${tradeOff.targetName}</u> em vez de <u>${tradeOff.referenceName}</u>):
             </div>
             <div style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
               ${tradeOff.bullets && tradeOff.bullets.length > 0 ? tradeOff.bullets.map(b => `• ${b}`).join(' &nbsp;·&nbsp; ') : 'Desempenho equivalente nas métricas diretamente comparáveis.'}
@@ -3591,7 +3689,7 @@
     if (expBox && typeof DomainComparison !== 'undefined' && DomainComparison.getParetoExplanation) {
       expBox.innerHTML = `
         <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 16px;">
-          <h4 style="margin: 0; font-size: 0.9rem; color: var(--text-primary);">📐 Explicação Matemática da Fronteira de Pareto (Seção 30):</h4>
+          <h4 style="margin: 0; font-size: 0.9rem; color: var(--text-primary);">Explicação Matemática da Fronteira de Pareto (Seção 30):</h4>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px;">
             ${activeIds.map(id => {
               const m = AI_MODELS_DATA[id];
@@ -4099,7 +4197,7 @@
           : m.cursorPool && m.cursorPool.pool === 'cursor-models' 
             ? '<span class="badge-tag badge-subdollar">Pool Cursor (Grátis)</span>'
             : m.openCodeGo && m.openCodeGo.available
-              ? `<span class="badge-tag ${m.openCodeGo.quotaBurnMultiplier === 1 ? 'badge-go-60' : m.openCodeGo.quotaBurnMultiplier === 2 ? 'badge-go-30' : 'badge-go-15'}">Go ${m.openCodeGo.quotaBurnMultiplier}× burn</span>`
+              ? `<span class="badge-tag ${goQuotaBadgeClass(m.openCodeGo)}">Go ${m.openCodeGo.quotaBurnMultiplier}× burn</span>`
               : '<span class="badge-tag badge-sweetspot">Pay-as-you-go</span>';
 
         return `
@@ -4221,7 +4319,7 @@
     panel.innerHTML = `
       <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
         <div>
-          <span class="badge-tag badge-frontier" style="margin-bottom: 6px;">🎯 Recomendação Principal</span>
+          <span class="badge-tag badge-frontier" style="margin-bottom: 6px;">Recomendação Principal</span>
           <h3 style="color: var(--accent-cyan); margin: 4px 0 0 0; font-size: 1.35rem;">${rec.primaryModelName}</h3>
           <div style="font-size: 0.84rem; color: var(--text-muted);">${primaryModel.providerName || 'Oficial'} · ${primaryModel.architectureType || 'Arquitetura de Fronteira'}</div>
         </div>
@@ -4232,12 +4330,12 @@
       </div>
 
       <div class="content-box" style="margin-bottom: 16px; background: rgba(6, 182, 212, 0.04); border-left: 4px solid var(--accent-cyan);">
-        <h4 style="margin-bottom: 6px; font-size: 0.95rem; color: var(--accent-cyan);">💡 Justificativa Técnica do Roteador</h4>
+        <h4 style="margin-bottom: 6px; font-size: 0.95rem; color: var(--accent-cyan);">Justificativa Técnica do Roteador</h4>
         <p style="color: var(--text-primary); font-size: 0.88rem; line-height: 1.5; margin: 0;">${rec.rationale}</p>
       </div>
 
       <!-- Arquitetura Agêntica Recomendada -->
-      <h4 style="font-size: 0.9rem; margin-bottom: 8px;">🤖 Divisão de Papéis no Pipeline:</h4>
+      <h4 style="font-size: 0.9rem; margin-bottom: 8px;">Divisão de Papéis no Pipeline:</h4>
       <div class="specs-grid" style="margin-bottom: 16px;">
         <div class="spec-item-card"><div class="spec-label">Agente Planejador (Planner)</div><div class="spec-value highlight-cyan">${rec.planner}</div></div>
         <div class="spec-item-card"><div class="spec-label">Agente Executor de Código</div><div class="spec-value highlight-green">${rec.executor}</div></div>
@@ -4270,7 +4368,7 @@
         </div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
           <button class="btn-secondary btn-sm" onclick="location.hash='#plans?model=${rec.primaryModelId}'">💳 Planos com este Modelo</button>
-          ${fallbackModelId ? `<button class="btn-secondary btn-sm" onclick="window.AIApp.openComparatorWith('${rec.primaryModelId}');">⚔️ Comparar com ${fallbackModel ? fallbackModel.name : 'Alternativa'}</button>` : ''}
+          ${fallbackModelId ? `<button class="btn-secondary btn-sm" onclick="window.AIApp.openComparatorWith('${rec.primaryModelId}');">Comparar com ${fallbackModel ? fallbackModel.name : 'Alternativa'}</button>` : ''}
           <button class="btn-primary btn-sm" onclick="location.hash='#model/${rec.primaryModelId}'">📄 Abrir Dossiê Completo →</button>
         </div>
       </div>
@@ -4383,7 +4481,7 @@
 
     container.innerHTML = items.map(item => `
       <div class="content-box">
-        <h3 style="color: var(--accent-rose); margin-bottom: 6px;">⚠️ ${item.title}</h3>
+        <h3 style="color: var(--accent-rose); margin-bottom: 6px;">${item.title}</h3>
         <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">Harness: <strong>${item.harness}</strong> • Modelos Afetados: ${item.models.join(', ')}</div>
         <p style="color: var(--text-secondary); margin-bottom: 12px;"><strong>Causa Raiz:</strong> ${item.cause}</p>
         <div style="background: var(--bg-surface-dim); border: 1px solid var(--border-subtle); border-left: 3px solid var(--accent-emerald); padding: 12px; border-radius: var(--radius-sm);">
@@ -4456,7 +4554,7 @@
           <td><span class="badge-tag ${m.badgeClass}">${m.valueRank}</span></td>
           <td>
             <button class="btn-table-action" onclick="location.hash='#model/${m.modelId}'" title="Ver Dossiê">
-              🔍 Dossiê
+              Dossiê
             </button>
           </td>
         </tr>
@@ -5223,7 +5321,7 @@
       <div class="budget-slider-box">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
           <div>
-            <h3 style="margin-bottom: 4px;">💰 Planejador Inteligente de Orçamento & Stacks</h3>
+            <h3 style="margin-bottom: 4px;">Planejador Inteligente de Orçamento & Stacks</h3>
             <p style="font-size: 0.85rem; color: var(--text-secondary);">
               Encontre a combinação ideal de ferramentas de IA respeitando seu teto financeiro e separando rigorosamente custo fixo de variáveis.
             </p>
@@ -5442,7 +5540,7 @@
     container.innerHTML = `
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
         <div style="display: flex; align-items: center; gap: 10px;">
-          <h3 style="margin: 0;">⚔️ Comparação Detalhada (${plans.length} planos)</h3>
+          <h3 style="margin: 0;">Comparação Detalhada (${plans.length} planos)</h3>
           <button class="btn-secondary btn-sm" onclick="window.AIApp.clearPlanCompare()">Limpar Comparação</button>
         </div>
         <label style="display: flex; align-items: center; gap: 8px; font-size: 0.84rem; cursor: pointer;">
@@ -5513,11 +5611,11 @@
     container.innerHTML = `
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
         <div>
-          <h3 style="margin-bottom: 2px;">⭐ Meus Planos Favoritos (${favPlans.length})</h3>
+          <h3 style="margin-bottom: 2px;">Meus Planos Favoritos (${favPlans.length})</h3>
           <p style="font-size: 0.82rem; color: var(--text-muted);">Shortlist persistida localmente no seu navegador para tomada de decisão.</p>
         </div>
         <div style="display: flex; gap: 8px;">
-          <button class="btn-primary btn-sm" onclick="window.AIApp.compareAllFavorites()">⚔️ Comparar Todos os Favoritos</button>
+          <button class="btn-primary btn-sm" onclick="window.AIApp.compareAllFavorites()">Comparar Todos os Favoritos</button>
           <button class="btn-secondary btn-sm" onclick="window.AIApp.clearAllFavorites()">Limpar Favoritos</button>
         </div>
       </div>
@@ -5580,7 +5678,7 @@
     bodyEl.innerHTML = `
       <!-- Seção 1: Resumo & Posicionamento -->
       <div class="content-box" style="margin-bottom: 16px;">
-        <h4 style="margin-bottom: 6px;">💡 Posicionamento & Melhor Caso de Uso</h4>
+        <h4 style="margin-bottom: 6px;">Posicionamento & Melhor Caso de Uso</h4>
         <p style="font-size: 0.85rem; color: var(--text-primary); margin-bottom: 8px;">${plan.bestFor}</p>
         <div style="font-size: 0.8rem; color: var(--text-muted);">
           <strong>Tags de Perfil:</strong> ${(plan.profileTags || []).join(', ')}
@@ -5589,7 +5687,7 @@
 
       <!-- Seção 2: Modelos & Superfícies -->
       <div class="content-box" style="margin-bottom: 16px;">
-        <h4 style="margin-bottom: 8px;">🧠 Modelos, Superfícies & Modos de Cobrança</h4>
+        <h4 style="margin-bottom: 8px;">Modelos, Superfícies & Modos de Cobrança</h4>
         <div class="table-responsive">
           <table class="data-table" style="font-size: 0.8rem;">
             <thead>
@@ -5611,7 +5709,7 @@
 
       <!-- Seção 3: Quota & Cobrança -->
       <div class="content-box" style="margin-bottom: 16px;">
-        <h4 style="margin-bottom: 6px;">⚡ Franquia, Quotas & Política de Excedente</h4>
+        <h4 style="margin-bottom: 6px;">Franquia, Quotas & Política de Excedente</h4>
         <p style="font-size: 0.85rem; margin-bottom: 8px;">${plan.quotaDescription}</p>
         <div style="font-size: 0.8rem; color: var(--text-muted);">
           <strong>Previsibilidade:</strong> ${varBilling.predictable ? '✓ Custo 100% fixo' : `⚠ Custos variáveis possíveis: ${varBilling.items.join(', ')}`}
@@ -5634,7 +5732,7 @@
 
       <!-- Seção 4: Plataformas, Superfícies & Cloud Storage -->
       <div class="content-box" style="margin-bottom: 16px;">
-        <h4 style="margin-bottom: 6px;">☁️ Plataformas, Superfícies & Recursos</h4>
+        <h4 style="margin-bottom: 6px;">Plataformas, Superfícies & Recursos</h4>
         <div style="font-size: 0.84rem; margin-bottom: 6px;">
           <strong>Superfícies & Clientes:</strong> ${(plan.surfaces || []).map(s => `<span class="badge-tag badge-subdollar" style="font-size: 0.72rem; margin-right: 4px;">${s}</span>`).join('') || '<span class="badge-tag badge-frontier" style="font-size: 0.72rem;">Chat Web</span>'}
         </div>
@@ -5648,7 +5746,7 @@
 
       <!-- Seção 5: Privacidade & Governança (Seção 83) -->
       <div class="content-box" style="margin-bottom: 16px;">
-        <h4 style="margin-bottom: 6px;">🔒 Privacidade, Treinamento & Retenção de Dados</h4>
+        <h4 style="margin-bottom: 6px;">Privacidade, Treinamento & Retenção de Dados</h4>
         <div style="font-size: 0.82rem; margin-bottom: 4px;">
           <strong>Política de Treinamento:</strong> ${plan.privacy?.noTrainingByDefault ? '🔒 Nenhum dado é usado para treino por padrão' : '⚠ Requer opt-out explícito ou pode ser retido'}
         </div>
@@ -5660,7 +5758,7 @@
 
       <!-- Seção 6: Limitações & Histórico (Seções 8, 85, 86) -->
       <div class="content-box" style="margin-bottom: 16px;">
-        <h4 style="margin-bottom: 6px;">📜 Limitações Conhecidas & Histórico</h4>
+        <h4 style="margin-bottom: 6px;">Limitações Conhecidas & Histórico</h4>
         <div style="font-size: 0.82rem; margin-bottom: 4px;">
           <strong>Limitações:</strong> ${plan.limitations || (plan.usage?.notes ? plan.usage.notes : 'Sem restrições extraordinárias reportadas para a cota nominal.')}
         </div>
@@ -5847,7 +5945,7 @@
           </div>
         </div>
       `;
-      if (nextBtn) nextBtn.textContent = 'Ver Recomendações 🎯';
+      if (nextBtn) nextBtn.textContent = 'Ver Recomendações';
     } else if (step === 6) {
       // Resultados: Executa recomendações determinísticas (Seções 87-89)
       const recs = PlanExplorer.runPlanWizard(AppState.wizardAnswers, SUBSCRIPTION_PLANS_DATA);
@@ -5996,6 +6094,9 @@
     if (AppState.activeTimelineFilter && AppState.activeTimelineFilter !== 'all') {
       params.set('event', AppState.activeTimelineFilter);
     }
+    if (AppState.atlasFamilyId) params.set('family', AppState.atlasFamilyId);
+    if (AppState.atlasSelection && AppState.atlasSelection.kind === 'node') params.set('node', AppState.atlasSelection.id);
+    if (AppState.bhBenchmark && AppState.bhBenchmark !== 'all') params.set('bh', AppState.bhBenchmark);
     const queryString = params.toString();
     const newHash = queryString ? `#history?${queryString}` : '#history';
     if (window.location.hash !== newHash) {
@@ -6265,14 +6366,601 @@
     window.openHistoryEdgeModal = openHistoryEdgeModal;
   }
 
+  // ==========================================
+  // 18b. HELPERS DO HISTORY ATLAS (Prompt 12)
+  // ==========================================
+  const ATLAS_LABEL_W = 172;
+  const ATLAS_ROW_H = 108;
+  const ATLAS_RULER_H = 34;
+  const ATLAS_CHIP_W = 164;
+  const ATLAS_PX_PER_DAY = 3.4;
+
+  const HU = (typeof HistoryUtils !== 'undefined') ? HistoryUtils : null;
+
+  const escHtml = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  const historyAllFamilyNodes = (lin) => (lin && lin.tracks) ? lin.tracks.flatMap(t => t.nodes) : ((lin && lin.nodes) || []);
+
+  const historyModelProviderMap = () => {
+    const map = {};
+    if (typeof MODEL_HISTORY_DATA === 'undefined' || !MODEL_HISTORY_DATA.lineages) return map;
+    MODEL_HISTORY_DATA.lineages.forEach(lin => {
+      const prov = HU ? HU.providerForFamily(lin) : (lin.familyName || '');
+      historyAllFamilyNodes(lin).forEach(n => { map[n.modelId] = { provider: prov, familyId: lin.familyId }; });
+    });
+    return map;
+  };
+
+  const historyEventSource = (sourceId) =>
+    (typeof DATA_SOURCES !== 'undefined' && DATA_SOURCES[sourceId]) || null;
+
+  const historySourceLink = (sourceId) => {
+    const src = historyEventSource(sourceId);
+    if (!src) return '<code class="atlas-src-code">' + escHtml(sourceId || '\u2014') + '</code>';
+    return '<a class="atlas-src-link" href="' + escHtml(src.url) + '" target="_blank" rel="noopener noreferrer">' + escHtml(src.title || sourceId) + ' \u2197</a>';
+  };
+
+  function getAtlasFamilies() {
+    if (typeof MODEL_HISTORY_DATA === 'undefined' || !MODEL_HISTORY_DATA.lineages) return [];
+    const providerFilterVal = (AppState.historyProviderFilter || 'all').toLowerCase();
+    const searchQuery = (AppState.historySearchQuery || '').toLowerCase().trim();
+    const evidenceFilterVal = AppState.historyEvidenceFilter || 'all';
+    const matchProvider = (lin) => {
+      if (providerFilterVal === 'all') return true;
+      const prov = HU ? HU.providerForFamily(lin).toLowerCase() : '';
+      return prov.includes(providerFilterVal)
+        || (lin.familyId || '').toLowerCase().includes(providerFilterVal)
+        || (lin.familyName || '').toLowerCase().includes(providerFilterVal);
+    };
+    return MODEL_HISTORY_DATA.lineages.filter(lin => {
+      if (!matchProvider(lin)) return false;
+      if (searchQuery) {
+        const familyMatch = (lin.familyName || '').toLowerCase().includes(searchQuery)
+          || (lin.description || '').toLowerCase().includes(searchQuery);
+        const nodeMatch = historyAllFamilyNodes(lin).some(n =>
+          (n.name || '').toLowerCase().includes(searchQuery)
+          || (n.modelId || '').toLowerCase().includes(searchQuery)
+          || (n.notes || '').toLowerCase().includes(searchQuery));
+        if (!familyMatch && !nodeMatch) return false;
+      }
+      if (evidenceFilterVal === 'verified' && !(lin.connections || []).some(c => c.status === 'verified')) return false;
+      if (evidenceFilterVal === 'inferred' && !(lin.connections || []).some(c => c.status === 'inferred')) return false;
+      return true;
+    });
+  }
+
+  function renderHistoryHeroScale() {
+    const el = document.getElementById('historyHeroScale');
+    if (!el || !HU || typeof MODEL_HISTORY_DATA === 'undefined') return;
+    const allNodes = (MODEL_HISTORY_DATA.lineages || []).flatMap(lin => historyAllFamilyNodes(lin));
+    const range = HU.computeHistoryRange(allNodes.map(n => n.releaseDate));
+    const providerMap = historyModelProviderMap();
+    let html = '';
+    for (let y = 2024; y <= 2026; y++) {
+      const pct = (HU.scaleDate(y + '-01-01', range, 1000)) / 10;
+      html += '<span class="history-hero__tick" style="left: ' + pct.toFixed(2) + '%">' + y + '</span>';
+    }
+    html += allNodes.map(n => {
+      const pct = (HU.scaleDate(n.releaseDate, range, 1000)) / 10;
+      const color = HU.providerColor((providerMap[n.modelId] || {}).provider);
+      return '<i class="history-hero__dot" style="left: ' + pct.toFixed(2) + '%; background: ' + color + '"></i>';
+    }).join('');
+    const nowPct = (HU.scaleDate('2026-09-06', range, 1000)) / 10;
+    const endMod = nowPct > 88 ? ' history-hero__now--end' : '';
+    el.innerHTML = '<div class="history-hero__line"><span class="history-hero__now' + endMod + '" style="left: ' + Math.min(nowPct, 99.6).toFixed(2) + '%">hoje</span></div>' + html;
+  }
+
+  function renderHistoryStatStrip() {
+    const container = document.getElementById('historyKpiContainer');
+    if (!container || typeof MODEL_HISTORY_DATA === 'undefined') return;
+    const catalogCount = typeof AI_MODELS_DATA !== 'undefined' ? Object.keys(AI_MODELS_DATA).length : 0;
+    const historyModelIds = new Set();
+    let verifiedEdges = 0, inferredEdges = 0, historicalOnlyCount = 0;
+    (MODEL_HISTORY_DATA.lineages || []).forEach(lin => {
+      historyAllFamilyNodes(lin).forEach(n => {
+        historyModelIds.add(n.modelId);
+        if (typeof AI_MODELS_DATA !== 'undefined' && !AI_MODELS_DATA[n.modelId]) historicalOnlyCount++;
+      });
+      (lin.connections || []).forEach(c => { c.status === 'verified' ? verifiedEdges++ : inferredEdges++; });
+    });
+    let catalogWithHistory = 0;
+    if (typeof AI_MODELS_DATA !== 'undefined') Object.keys(AI_MODELS_DATA).forEach(id => { if (historyModelIds.has(id)) catalogWithHistory++; });
+    const coveragePct = catalogCount > 0 ? Math.round((catalogWithHistory / catalogCount) * 100) : 0;
+    const totalEvents = (MODEL_HISTORY_DATA.events || []).length;
+    const totalBenchmarks = typeof BENCHMARK_HISTORY_DATA !== 'undefined' ? BENCHMARK_HISTORY_DATA.length : 0;
+    const item = (value, label, mod) =>
+      '<div class="metric-strip__item' + (mod || '') + '"><span class="metric-strip__value">' + value + '</span><span class="metric-strip__label">' + label + '</span></div>';
+    container.innerHTML = [
+      item(coveragePct + '%', 'cobertura de linhagem', ' metric-strip__item--lead'),
+      item(catalogCount, 'modelos no cat\u00e1logo'),
+      item(historyModelIds.size, 'n\u00f3s mapeados (' + historicalOnlyCount + ' predecessores)'),
+      item(totalEvents, 'eventos auditados'),
+      item(totalBenchmarks, 'runs metrol\u00f3gicos'),
+      item(String(verifiedEdges), 'arestas verificadas \u00b7 ' + inferredEdges + ' inferidas')
+    ].join('');
+  }
+
+  function renderAtlasRail(families) {
+    const rail = document.getElementById('atlasProviderRail');
+    if (!rail) return;
+    rail.innerHTML = families.map(lin => {
+      const prov = HU ? HU.providerForFamily(lin) : (lin.familyName || '');
+      const color = HU ? HU.providerColor(prov) : 'var(--accent-cyan)';
+      const count = historyAllFamilyNodes(lin).length;
+      const active = lin.familyId === AppState.atlasFamilyId;
+      return '<button type="button" class="atlas-rail__item' + (active ? ' is-active' : '') + '" data-family="' + escHtml(lin.familyId) + '" aria-pressed="' + active + '">'
+        + '<span class="atlas-rail__dot" style="--dot-color: ' + color + '"></span>'
+        + '<span class="atlas-rail__body"><span class="atlas-rail__provider">' + escHtml(prov) + '</span>'
+        + '<span class="atlas-rail__family">' + escHtml(lin.familyName) + '</span></span>'
+        + '<span class="atlas-rail__count">' + count + '</span></button>';
+    }).join('');
+  }
+
+  function computeAtlasLayout(family) {
+    const tracks = (family.tracks || []).map(t => {
+      let nodes = t.nodes.slice();
+      const showPredecessors = AppState.historyShowPredecessors !== false;
+      const yearFilterVal = AppState.historyYearFilter || 'all';
+      const searchQuery = (AppState.historySearchQuery || '').toLowerCase().trim();
+      nodes = nodes.filter(n => {
+        const inCatalog = typeof AI_MODELS_DATA !== 'undefined' && Boolean(AI_MODELS_DATA[n.modelId]);
+        if (!showPredecessors && !inCatalog && !searchQuery) return false;
+        if (yearFilterVal !== 'all' && !(n.releaseDate || '').startsWith(yearFilterVal)) return false;
+        return true;
+      });
+      return { trackName: t.trackName, trackDesc: t.trackDesc, nodes: nodes };
+    }).filter(t => t.nodes.length > 0);
+
+    const allDates = tracks.flatMap(t => t.nodes).map(n => n.releaseDate);
+    if (!HU) return { tracks: tracks, range: null, canvasW: 0, positions: {}, height: 0 };
+    const range = HU.computeHistoryRange(allDates);
+    const days = (range.t1 - range.t0) / HU.DAY_MS;
+    const canvasW = Math.max(760, Math.round(days * ATLAS_PX_PER_DAY));
+    const positions = {};
+    tracks.forEach((t, rowIdx) => {
+      let lastCx = -Infinity, tier = 0;
+      t.orderedNodes = HU.orderNodesByDate(t.nodes);
+      t.orderedNodes.forEach(n => {
+        const xRaw = HU.scaleDate(n.releaseDate, range, canvasW);
+        let cx = ATLAS_LABEL_W + 94 + xRaw;
+        if (cx - lastCx < ATLAS_CHIP_W + 14) { tier = tier === 0 ? 1 : 0; cx = Math.max(cx, lastCx + ATLAS_CHIP_W + 14); }
+        else { tier = 0; }
+        const laneTop = ATLAS_RULER_H + rowIdx * ATLAS_ROW_H;
+        const cy = laneTop + (tier === 0 ? 30 : 78);
+        positions[n.modelId] = { cx: cx, cy: cy, rowIdx: rowIdx, tier: tier, node: n };
+        lastCx = cx;
+      });
+    });
+    return { tracks: tracks, range: range, canvasW: canvasW, positions: positions, height: ATLAS_RULER_H + tracks.length * ATLAS_ROW_H + 16 };
+  }
+
+  function renderAtlasCanvas(family) {
+    const inner = document.getElementById('atlasInner');
+    const empty = document.getElementById('atlasEmpty');
+    const canvas = document.getElementById('atlasCanvas');
+    if (!inner || !canvas) return;
+    if (!family || !HU) { if (empty) empty.hidden = true; return; }
+
+    const layout = computeAtlasLayout(family);
+    if (layout.tracks.length === 0) {
+      inner.innerHTML = '';
+      if (empty) empty.hidden = false;
+      return;
+    }
+    if (empty) empty.hidden = true;
+
+    const prov = HU.providerForFamily(family);
+    const provColor = HU.providerColor(prov);
+
+    let rulerHtml = '<div class="atlas-ruler__gutter">Trilhas</div>';
+    let gridHtml = '';
+    const startYear = new Date(layout.range.t0).getUTCFullYear();
+    const endYear = new Date(layout.range.t1).getUTCFullYear();
+    for (let y = startYear; y <= endYear; y++) {
+      const gx = HU.scaleDate(y + '-01-01', layout.range, layout.canvasW) + ATLAS_LABEL_W;
+      if (gx > ATLAS_LABEL_W) gridHtml += '<span class="atlas-gridline" style="left: ' + gx + 'px"></span>';
+      for (let q = 0; q < 12; q += 3) {
+        const x = HU.scaleDate(y + '-' + String(q + 1).padStart(2, '0') + '-01', layout.range, layout.canvasW) + ATLAS_LABEL_W;
+        if (x < ATLAS_LABEL_W - 40) continue;
+        const isYear = q === 0;
+        rulerHtml += '<span class="atlas-ruler__tick' + (isYear ? ' atlas-ruler__tick--year' : '') + '" style="left: ' + x + 'px">' + (isYear ? y : 'Q' + (q / 3 + 1)) + '</span>';
+      }
+    }
+
+    const rowsHtml = layout.tracks.map((t, rowIdx) => {
+      const chipsHtml = t.orderedNodes.map(n => {
+        const pos = layout.positions[n.modelId];
+        if (!pos) return '';
+        const inCatalog = typeof AI_MODELS_DATA !== 'undefined' && Boolean(AI_MODELS_DATA[n.modelId]);
+        const isCurrent = n.status === 'active';
+        const left = Math.max(ATLAS_LABEL_W + 8, pos.cx - ATLAS_CHIP_W / 2);
+        const top = (pos.tier === 0 ? 8 : 56);
+        return '<button type="button" class="atlas-node' + (inCatalog ? '' : ' atlas-node--historical') + (isCurrent ? ' atlas-node--current' : '') + '"'
+          + ' data-model="' + escHtml(n.modelId) + '"'
+          + ' style="left: ' + left + 'px; top: ' + top + 'px; --node-accent: ' + provColor + '"'
+          + ' aria-label="' + escHtml(n.name + ' \u2014 ' + n.releaseDate) + '">'
+          + '<span class="atlas-node__row"><span class="atlas-node__dot"></span><span class="atlas-node__name">' + escHtml(n.name) + '</span></span>'
+          + '<span class="atlas-node__meta"><span class="num">' + escHtml(HU.formatShortDate(n.releaseDate)) + '</span><span class="atlas-node__status">' + escHtml(n.status || '') + '</span></span>'
+          + '</button>';
+      }).join('');
+      return '<div class="atlas-row" style="top: ' + (ATLAS_RULER_H + rowIdx * ATLAS_ROW_H) + 'px; height: ' + ATLAS_ROW_H + 'px">'
+        + '<div class="atlas-row__label"><span class="atlas-row__track">' + escHtml(t.trackName.replace(/^Trilha\s+/i, '')) + '</span>'
+        + (t.trackDesc ? '<span class="atlas-row__desc">' + escHtml(t.trackDesc) + '</span>' : '') + '</div>'
+        + chipsHtml + '</div>';
+    }).join('');
+
+    const atlasTotalW = layout.canvasW + ATLAS_LABEL_W + 200;
+    inner.style.setProperty('--atlas-w', atlasTotalW + 'px');
+    inner.style.setProperty('--atlas-h', layout.height + 'px');
+    inner.innerHTML = gridHtml
+      + '<div class="atlas-ruler">' + rulerHtml + '</div>'
+      + '<svg class="atlas-edges" width="' + atlasTotalW + '" height="' + layout.height + '" viewBox="0 0 ' + atlasTotalW + ' ' + layout.height + '"><g class="atlas-edge-layer"></g></svg>'
+      + '<div class="atlas-rows">' + rowsHtml + '</div>';
+
+    const scrollEl = document.getElementById('atlasScroll');
+    if (scrollEl && !AppState.atlasSelection) scrollEl.scrollLeft = scrollEl.scrollWidth;
+
+    const svg = inner.querySelector('g.atlas-edge-layer');
+    const evidenceFilterVal = AppState.historyEvidenceFilter || 'all';
+    (family.connections || []).forEach((c, idx) => {
+      const a = layout.positions[c.from];
+      const b = layout.positions[c.to];
+      if (!a || !b) return;
+      if (evidenceFilterVal === 'verified' && c.status !== 'verified') return;
+      if (evidenceFilterVal === 'inferred' && c.status !== 'inferred') return;
+      const style = HU.edgeStyleFor(c);
+      const x1 = a.cx + ATLAS_CHIP_W / 2 - 6, y1 = a.cy;
+      const x2 = b.cx - ATLAS_CHIP_W / 2 + 6, y2 = b.cy;
+      let d;
+      if (x2 > x1 + 24) {
+        const dx = (x2 - x1) * 0.5;
+        d = 'M ' + x1 + ' ' + y1 + ' C ' + (x1 + dx) + ' ' + y1 + ', ' + (x2 - dx) + ' ' + y2 + ', ' + x2 + ' ' + y2;
+      } else {
+        const mx = Math.max(x1, x2) + 46;
+        d = 'M ' + x1 + ' ' + y1 + ' C ' + mx + ' ' + y1 + ', ' + mx + ' ' + y2 + ', ' + x2 + ' ' + y2;
+      }
+      drawAtlasEdge(svg, d, style, c, idx);
+    });
+  }
+
+  function drawAtlasEdge(svgLayer, d, style, conn, idx) {
+    if (!svgLayer) return;
+    const ns = 'http://www.w3.org/2000/svg';
+    const g = document.createElementNS(ns, 'g');
+    g.setAttribute('class', 'atlas-edge-g');
+    g.setAttribute('data-edge', String(idx));
+    const hit = document.createElementNS(ns, 'path');
+    hit.setAttribute('d', d);
+    hit.setAttribute('class', 'atlas-edge-hit');
+    hit.setAttribute('fill', 'none');
+    const vis = document.createElementNS(ns, 'path');
+    vis.setAttribute('d', d);
+    vis.setAttribute('class', 'atlas-edge atlas-edge--' + style.kind);
+    vis.setAttribute('fill', 'none');
+    if (style.dash) vis.setAttribute('stroke-dasharray', style.dash);
+    g.appendChild(hit);
+    g.appendChild(vis);
+    g.dataset.from = conn.from;
+    g.dataset.to = conn.to;
+    g.dataset.family = AppState.atlasFamilyId || '';
+    svgLayer.appendChild(g);
+  }
+
+  function applyAtlasSelection(focus) {
+    if (focus === undefined) focus = true;
+    const sel = AppState.atlasSelection;
+    const inner = document.getElementById('atlasInner');
+    const inspector = document.getElementById('atlasInspector');
+    if (!inner || !inspector) return;
+    inner.querySelectorAll('.atlas-node.is-selected').forEach(n => n.classList.remove('is-selected'));
+    inner.querySelectorAll('.atlas-edge-g.is-selected').forEach(n => n.classList.remove('is-selected'));
+    inner.querySelectorAll('.is-adjacent').forEach(n => n.classList.remove('is-adjacent'));
+    if (!sel) { inspector.hidden = true; inspector.innerHTML = ''; return; }
+    if (sel.kind === 'node') {
+      const nodeEl = inner.querySelector('.atlas-node[data-model="' + (window.CSS ? CSS.escape(sel.id) : sel.id) + '"]');
+      if (nodeEl) { nodeEl.classList.add('is-selected'); if (focus) inner.setAttribute('data-atlas-focus', sel.id); }
+      inner.querySelectorAll('[data-from="' + sel.id + '"], [data-to="' + sel.id + '"]').forEach(el => el.classList.add('is-adjacent'));
+      renderNodeInspector(sel.id);
+    } else if (sel.kind === 'edge') {
+      const g = inner.querySelector('.atlas-edge-g[data-edge="' + sel.idx + '"]');
+      if (g) g.classList.add('is-selected');
+      [sel.from, sel.to].forEach(id => {
+        const el = inner.querySelector('.atlas-node[data-model="' + id + '"]');
+        if (el) el.classList.add('is-adjacent');
+      });
+      renderEdgeInspector(sel.familyId, sel.from, sel.to);
+    } else if (sel.kind === 'family') {
+      renderFamilyInspector(sel.id);
+    }
+    inspector.hidden = false;
+    const focusId = inner.getAttribute('data-atlas-focus');
+    if (focusId) {
+      inner.removeAttribute('data-atlas-focus');
+      const target = inner.querySelector('.atlas-node[data-model=' + JSON.stringify(focusId).slice(1, -1) + ']') || inner.querySelector('.atlas-node');
+      const sc = document.getElementById('atlasScroll');
+      if (target && sc) { const t = target.offsetLeft + target.offsetWidth / 2 - sc.clientWidth / 2; sc.scrollLeft = Math.max(0, t); inner.setAttribute('data-dbg', JSON.stringify({ ol: target.offsetLeft, cw: sc.clientWidth, sw: sc.scrollWidth, want: t, after: sc.scrollLeft, id: focusId })); }
+    }
+  }
+
+  function renderNodeInspector(modelId) {
+    const inspector = document.getElementById('atlasInspector');
+    if (!inspector || typeof MODEL_HISTORY_DATA === 'undefined') return;
+    let node = null, family = null;
+    (MODEL_HISTORY_DATA.lineages || []).forEach(lin => {
+      const found = historyAllFamilyNodes(lin).find(n => n.modelId === modelId);
+      if (found) { node = found; family = lin; }
+    });
+    if (!node) { inspector.hidden = true; return; }
+    const prov = HU ? HU.providerForFamily(family) : '';
+    const inCatalog = typeof AI_MODELS_DATA !== 'undefined' && Boolean(AI_MODELS_DATA[modelId]);
+    const track = (family.tracks || []).find(t => t.nodes.some(n => n.modelId === modelId));
+    const rels = (family.connections || []).filter(c => c.from === modelId || c.to === modelId);
+    const field = (label, val) => '<div class="inspector-panel__field"><span class="inspector-panel__label">' + label + '</span><span class="inspector-panel__value">' + val + '</span></div>';
+    inspector.innerHTML = '<div class="inspector-panel__head"><span class="inspector-panel__eyebrow"><span class="atlas-rail__dot" style="--dot-color: ' + (HU ? HU.providerColor(prov) : 'currentColor') + '"></span>' + escHtml(prov) + '</span>'
+      + '<button type="button" class="inspector-panel__close" data-inspector-close aria-label="Fechar inspetor">\u00d7</button></div>'
+      + '<h4 class="inspector-panel__title">' + escHtml(node.name) + '</h4>'
+      + '<p class="inspector-panel__meta num">' + escHtml(node.modelId) + ' \u00b7 ' + escHtml(node.releaseDate) + '</p>'
+      + (track ? field('Papel', escHtml(track.trackName.replace(/^Trilha\s+/i, ''))) : '')
+      + field('Status', escHtml(node.status || '\u2014') + (node.status === 'active' ? ' <span class="atlas-current-mark">current</span>' : ''))
+      + (node.notes ? '<div class="inspector-panel__field"><span class="inspector-panel__label">Registro</span><p class="inspector-panel__value inspector-panel__value--notes">' + escHtml(node.notes) + '</p></div>' : '')
+      + (rels.length ? '<div class="inspector-panel__field"><span class="inspector-panel__label">Rela\u00e7\u00f5es (' + rels.length + ')</span><ul class="inspector-rel-list">'
+          + rels.map(c => {
+              const out = c.from === modelId;
+              return '<li><button type="button" class="inspector-rel-list__item" data-edge-open data-family="' + escHtml(family.familyId) + '" data-from="' + escHtml(c.from) + '" data-to="' + escHtml(c.to) + '">'
+                + (out ? '\u2192 ' : '\u2190 ') + escHtml(out ? c.to : c.from)
+                + ' <span class="inspector-rel-list__kind ' + (c.status === 'verified' ? 'is-verified' : 'is-inferred') + '">' + (c.status === 'verified' ? 'verificada' : 'inferida') + '</span></button></li>';
+            }).join('') + '</ul></div>' : '')
+      + '<div class="inspector-panel__actions">'
+      + (inCatalog ? '<a class="btn-primary btn-sm" href="#model/' + escHtml(modelId) + '">Abrir dossi\u00ea \u2192</a>' : '<span class="inspector-panel__historical">Fora do cat\u00e1logo \u2014 n\u00f3 hist\u00f3rico</span>')
+      + '</div>';
+  }
+
+  function renderEdgeInspector(familyId, fromId, toId) {
+    const inspector = document.getElementById('atlasInspector');
+    if (!inspector || typeof MODEL_HISTORY_DATA === 'undefined') return;
+    const family = (MODEL_HISTORY_DATA.lineages || []).find(l => l.familyId === familyId);
+    if (!family) { inspector.hidden = true; return; }
+    const conn = (family.connections || []).find(c => c.from === fromId && c.to === toId);
+    if (!conn) { inspector.hidden = true; return; }
+    const nameOf = (id) => { const n = historyAllFamilyNodes(family).find(x => x.modelId === id); return n ? n.name : id; };
+    const style = HU ? HU.edgeStyleFor(conn) : { kind: 'solid' };
+    const kindLabel = style.kind === 'inferred' ? 'inferida' : (style.kind === 'branch' ? 'ramifica\u00e7\u00e3o paralela' : (style.kind === 'rename' ? 'renomea\u00e7\u00e3o / identidade' : 'deriva\u00e7\u00e3o direta'));
+    const srcIds = conn.sourceIds || (conn.sourceId ? [conn.sourceId] : []);
+    inspector.innerHTML = '<div class="inspector-panel__head"><span class="inspector-panel__eyebrow">Aresta geneal\u00f3gica</span>'
+      + '<button type="button" class="inspector-panel__close" data-inspector-close aria-label="Fechar inspetor">\u00d7</button></div>'
+      + '<h4 class="inspector-panel__title">' + escHtml(nameOf(fromId)) + ' <span class="inspector-panel__arrow">\u2192</span> ' + escHtml(nameOf(toId)) + '</h4>'
+      + '<div class="inspector-panel__field"><span class="inspector-panel__label">Sem\u00e2ntica</span><span class="inspector-panel__value">' + escHtml(conn.relationType || kindLabel) + '</span></div>'
+      + '<div class="inspector-panel__field"><span class="inspector-panel__label">Tipo de mudan\u00e7a</span><span class="inspector-panel__value">' + escHtml(conn.changeType || '\u2014') + '</span></div>'
+      + '<div class="inspector-panel__field"><span class="inspector-panel__label">Evid\u00eancia</span><span class="inspector-panel__value"><span class="atlas-edge-badge ' + (conn.status === 'verified' ? 'is-verified' : 'is-inferred') + '">' + (conn.status === 'verified' ? 'Verificada' : 'Inferida \u00b7 confian\u00e7a ' + escHtml(conn.confidence || 'm\u00e9dia')) + '</span></span></div>'
+      + (conn.improvements ? '<div class="inspector-panel__field"><span class="inspector-panel__label">Delta documentado</span><p class="inspector-panel__value inspector-panel__value--notes">' + escHtml(conn.improvements) + '</p></div>' : '')
+      + (srcIds.length ? '<div class="inspector-panel__field"><span class="inspector-panel__label">Fontes</span><div class="inspector-src-list">' + srcIds.map(id => '<span>' + historySourceLink(id) + '</span>').join('') + '</div></div>' : '')
+      + (conn.status !== 'verified' ? '<p class="inspector-panel__caveat">Deriva\u00e7\u00e3o arquitetural formal n\u00e3o estabelecida \u2014 rela\u00e7\u00e3o fundamentada em ind\u00edcios documentais.</p>' : '');
+  }
+
+  function renderFamilyInspector(familyId) {
+    const inspector = document.getElementById('atlasInspector');
+    if (!inspector || typeof MODEL_HISTORY_DATA === 'undefined') return;
+    const family = (MODEL_HISTORY_DATA.lineages || []).find(l => l.familyId === familyId);
+    if (!family) { inspector.hidden = true; return; }
+    const nodes = historyAllFamilyNodes(family);
+    const dates = nodes.map(n => n.releaseDate).sort();
+    const prov = HU ? HU.providerForFamily(family) : '';
+    const verified = (family.connections || []).filter(c => c.status === 'verified').length;
+    const totalConns = (family.connections || []).length;
+    inspector.innerHTML = '<div class="inspector-panel__head"><span class="inspector-panel__eyebrow"><span class="atlas-rail__dot" style="--dot-color: ' + (HU ? HU.providerColor(prov) : 'currentColor') + '"></span>' + escHtml(prov) + '</span>'
+      + '<button type="button" class="inspector-panel__close" data-inspector-close aria-label="Fechar inspetor">\u00d7</button></div>'
+      + '<h4 class="inspector-panel__title">' + escHtml(family.familyName) + '</h4>'
+      + '<p class="inspector-panel__meta num">' + nodes.length + ' n\u00f3s \u00b7 ' + escHtml(dates[0] || '') + ' \u2192 ' + escHtml(dates[dates.length - 1] || '') + ' \u00b7 ' + verified + '/' + totalConns + ' arestas verificadas</p>'
+      + (family.description ? '<p class="inspector-panel__value inspector-panel__value--notes">' + escHtml(family.description) + '</p>' : '');
+  }
+
+  function renderTimelineEditorial() {
+    const container = document.getElementById('timelineStreamContainer');
+    if (!container || typeof MODEL_HISTORY_DATA === 'undefined' || !MODEL_HISTORY_DATA.events) return;
+    const filter = AppState.activeTimelineFilter || 'all';
+    const yearFilterVal = AppState.historyYearFilter || 'all';
+    const providerFilterVal = (AppState.historyProviderFilter || 'all').toLowerCase();
+    const searchQuery = (AppState.historySearchQuery || '').toLowerCase().trim();
+    const providerMap = historyModelProviderMap();
+
+    let events = MODEL_HISTORY_DATA.events.filter(ev => {
+      if (filter !== 'all' && ev.type !== filter) return false;
+      if (yearFilterVal !== 'all' && !(ev.date || '').startsWith(yearFilterVal)) return false;
+      if (providerFilterVal !== 'all') {
+        const provName = (providerMap[ev.modelId] || {}).provider || '';
+        if (!provName.toLowerCase().includes(providerFilterVal) && !String(ev.modelId || '').toLowerCase().includes(providerFilterVal)) return false;
+      }
+      if (searchQuery) {
+        const str = (ev.title + ' ' + ev.description + ' ' + ev.modelId + ' ' + ev.type).toLowerCase();
+        if (!str.includes(searchQuery)) return false;
+      }
+      return true;
+    });
+    events = events.slice().sort((a, b) => (a.date < b.date ? 1 : (a.date > b.date ? -1 : 0)));
+
+    if (events.length === 0) {
+      container.innerHTML = '<div class="atlas-empty atlas-empty--inline"><p>Nenhum evento corresponde a estes filtros.</p><button type="button" class="btn-ghost btn-sm" data-clear-filters>Limpar filtros</button></div>';
+      return;
+    }
+
+    let html = '';
+    let currentPeriod = '';
+    events.forEach(ev => {
+      const period = (ev.date || '').substring(0, 7);
+      if (period !== currentPeriod) {
+        currentPeriod = period;
+        html += '<div class="tl-month">' + (HU ? HU.formatMonthHeader(period + '-01') : escHtml(period)) + '</div>';
+      }
+      const tier = HU ? HU.eventTier(ev.type) : 'standard';
+      const info = providerMap[ev.modelId] || {};
+      const prov = info.provider || '';
+      const provColor = HU ? HU.providerColor(prov) : '#64748b';
+      const inCatalog = typeof AI_MODELS_DATA !== 'undefined' && Boolean(AI_MODELS_DATA[ev.modelId]);
+      const srcIds = ev.sourceIds || (ev.sourceId ? [ev.sourceId] : []);
+      html += '<div class="tl-event tl-event--' + tier + '" data-event-id="' + escHtml(ev.id) + '">'
+        + '<button type="button" class="tl-event__row" aria-expanded="false" data-tl-toggle>'
+        + '<span class="tl-event__day num">' + (HU ? HU.formatDay(ev.date) : escHtml((ev.date || '').slice(-2))) + '</span>'
+        + '<span class="tl-event__provider"><span class="atlas-rail__dot" style="--dot-color: ' + provColor + '"></span>' + escHtml(prov || '\u2014') + '</span>'
+        + '<span class="tl-event__main"><span class="tl-event__title">' + escHtml(ev.title) + '</span>'
+        + '<span class="tl-event__entity' + (inCatalog ? ' is-catalog' : '') + '"' + (inCatalog ? ' data-goto-model="' + escHtml(ev.modelId) + '"' : '') + '>' + escHtml(ev.modelId) + '</span></span>'
+        + '<span class="tl-event__type">' + escHtml((ev.type || '').replace(/-/g, ' ')) + '</span>'
+        + '<svg class="tl-event__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>'
+        + '</button>'
+        + '<div class="tl-event__detail"><p>' + escHtml(ev.description) + '</p>'
+        + '<div class="tl-event__facts">'
+        + '<span><b>Data efetiva</b> <span class="num">' + escHtml(ev.date) + '</span></span>'
+        + '<span><b>Entidade</b> ' + (inCatalog ? '<a href="#model/' + escHtml(ev.modelId) + '">' + escHtml(ev.modelId) + '</a>' : escHtml(ev.modelId)) + '</span>'
+        + '<span><b>Proveni\u00eancia</b> ' + escHtml(ev.provenanceType || ev.confidence || 'auditada') + ' \u00b7 ' + escHtml(ev.status || 'verificado') + '</span>'
+        + '</div>'
+        + (srcIds.length ? '<div class="tl-event__sources">' + srcIds.map(id => '<span>' + historySourceLink(id) + '</span>').join('') + '</div>' : '')
+        + '</div></div>';
+    });
+    container.innerHTML = html;
+  }
+
+  function renderBenchmarkHistoryTab() {
+    const tbody = document.getElementById('benchmarkHistoryTableBody');
+    if (!tbody || typeof BENCHMARK_HISTORY_DATA === 'undefined') return;
+    const yearFilterVal = AppState.historyYearFilter || 'all';
+    const providerFilterVal = (AppState.historyProviderFilter || 'all').toLowerCase();
+    const searchQuery = (AppState.historySearchQuery || '').toLowerCase().trim();
+    const bhSelected = AppState.bhBenchmark || 'all';
+
+    const filtered = BENCHMARK_HISTORY_DATA.filter(b => {
+      if (yearFilterVal !== 'all' && !b.date.startsWith(yearFilterVal)) return false;
+      if (providerFilterVal !== 'all' && !String(b.modelId).toLowerCase().includes(providerFilterVal)) return false;
+      if (searchQuery && !(b.modelId + ' ' + b.benchmark + ' ' + b.benchmarkVersion).toLowerCase().includes(searchQuery)) return false;
+      return true;
+    });
+
+    const sel = document.getElementById('bhBenchmarkSelect');
+    if (sel && sel.options.length <= 1) {
+      const names = Array.from(new Set(BENCHMARK_HISTORY_DATA.map(b => b.benchmark + ' ' + (b.benchmarkVersion || '')))).sort();
+      names.forEach(nm => { const o = document.createElement('option'); o.value = nm; o.textContent = nm; sel.appendChild(o); });
+    }
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="10" class="table-empty">Nenhum run de benchmark corresponde aos filtros.</td></tr>';
+    } else {
+      tbody.innerHTML = filtered.map(b => {
+        const inCatalog = typeof AI_MODELS_DATA !== 'undefined' && Boolean(AI_MODELS_DATA[b.modelId]);
+        const src = historyEventSource(b.sourceId);
+        const srcCell = src
+          ? '<a class="atlas-src-link" href="' + escHtml(src.url) + '" target="_blank" rel="noopener noreferrer">' + escHtml((src.title || b.sourceId).substring(0, 30)) + '\u2026 \u2197</a>'
+          : '<code class="atlas-src-code">' + escHtml(b.sourceId) + '</code>';
+        return '<tr>'
+          + '<td class="num">' + escHtml(b.date) + '</td>'
+          + '<td>' + (inCatalog ? '<a class="bh-model-link" href="#model/' + escHtml(b.modelId) + '">' + escHtml(b.modelId) + '</a>' : '<span>' + escHtml(b.modelId) + '</span>') + '</td>'
+          + '<td>' + escHtml(b.benchmark) + ' <span class="bh-version">' + escHtml(b.benchmarkVersion || '') + '</span></td>'
+          + '<td class="num bh-score">' + b.score.toFixed(1) + '%</td>'
+          + '<td class="num">' + (b.confidenceInterval ? '\u00b1' + b.confidenceInterval + 'pp' : '\u2014') + '</td>'
+          + '<td class="num">' + (b.costPerTaskUsd != null ? '$' + b.costPerTaskUsd.toFixed(2) : '\u2014') + '</td>'
+          + '<td class="num">' + (b.tokensPerTask ? b.tokensPerTask.toLocaleString('pt-BR') : '\u2014') + '</td>'
+          + '<td class="num">' + (b.agentSteps || '\u2014') + '</td>'
+          + '<td><span class="badge-tag ' + (b.sourceType === 'official' ? 'badge-source-official' : 'badge-source-independent') + '">' + escHtml(b.sourceType) + '</span></td>'
+          + '<td>' + srcCell + '</td></tr>';
+      }).join('');
+    }
+
+    const canvas = document.getElementById('historyBenchmarkChart');
+    if (!canvas || typeof Chart === 'undefined' || !HU) return;
+    if (AppState.charts.historyBench) { try { AppState.charts.historyBench.destroy(); } catch (e) {} }
+    const chartRows = bhSelected === 'all' ? filtered : filtered.filter(b => (b.benchmark + ' ' + (b.benchmarkVersion || '')) === bhSelected);
+    const meta = document.getElementById('bhChartMeta');
+    if (meta) meta.textContent = chartRows.length + (chartRows.length === 1 ? ' run' : ' runs') + ' \u00b7 posi\u00e7\u00e3o temporal real por data';
+    const providerMap = historyModelProviderMap();
+    const groups = {};
+    chartRows.forEach(b => {
+      const key = bhSelected === 'all' ? (b.benchmark + ' ' + (b.benchmarkVersion || '')) : b.modelId;
+      (groups[key] = groups[key] || []).push({ x: HU.parseDate(b.date), y: b.score, raw: b });
+    });
+    const BH_PALETTE = ['#38bdf8', '#a78bfa', '#34d399', '#fbbf24', '#f472b6', '#2dd4bf', '#818cf8', '#fb923c', '#e879f9', '#94a3b8'];
+    const datasetKeys = Object.keys(groups).sort((a, b) => groups[a][0].x - groups[b][0].x);
+    const datasets = datasetKeys.map((key, i) => {
+      const sample = groups[key][0].raw;
+      const color = bhSelected === 'all'
+        ? BH_PALETTE[i % BH_PALETTE.length]
+        : HU.providerColor((providerMap[sample.modelId] || {}).provider);
+      return {
+        label: bhSelected === 'all' ? key : sample.modelId,
+        data: groups[key].sort((a, b) => a.x - b.x),
+        backgroundColor: color,
+        borderColor: color,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        showLine: bhSelected !== 'all' && groups[key].length > 1,
+        borderWidth: bhSelected !== 'all' ? 1.5 : 0
+      };
+    });
+    // Eixo X determinístico: bounds e ticks derivados dos dados, não do nice-rounding padrão
+    const MON_PT = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+    const allX = chartRows.map(b => HU.parseDate(b.date)).filter(t => t != null).sort((a, b) => a - b);
+    let xLo = allX[0], xHi = allX[allX.length - 1];
+    if (xLo == null) { xLo = Date.UTC(2026, 0, 1); xHi = Date.UTC(2026, 8, 6); }
+    if (xHi - xLo < HU.DAY_MS * 2) { xLo -= HU.DAY_MS * 5; xHi += HU.DAY_MS * 5; }
+    const xTicks = [];
+    const xLabelOf = {};
+    if ((xHi - xLo) / HU.DAY_MS >= 60) {
+      const d0 = new Date(xLo);
+      let t = Date.UTC(d0.getUTCFullYear(), d0.getUTCMonth() + 1, 1);
+      while (t <= xHi) {
+        xTicks.push(t);
+        const m = new Date(t);
+        xLabelOf[t] = MON_PT[m.getUTCMonth()] + '/' + String(m.getUTCFullYear()).slice(2);
+        t = Date.UTC(m.getUTCFullYear(), m.getUTCMonth() + 1, 1);
+      }
+    } else {
+      const uniq = [...new Set(allX)];
+      const stride = Math.max(1, Math.ceil(uniq.length / 7));
+      uniq.forEach((v, i) => {
+        if (i % stride === 0 || i === uniq.length - 1) {
+          xTicks.push(v);
+          const m = new Date(v);
+          xLabelOf[v] = String(m.getUTCDate()).padStart(2, '0') + ' ' + MON_PT[m.getUTCMonth()];
+        }
+      });
+    }
+    const xPad = Math.max((xHi - xLo) * 0.04, HU.DAY_MS * 2);
+    AppState.charts.historyBench = new Chart(canvas.getContext('2d'), {
+      type: 'scatter',
+      data: { datasets: datasets },
+      options: {
+        responsive: true, maintainAspectRatio: false, animation: { duration: 200 },
+        scales: {
+          x: { type: 'linear', min: xLo - xPad, max: xHi + xPad,
+            afterBuildTicks: (axis) => { axis.ticks = xTicks.map(v => ({ value: v })); },
+            ticks: { callback: (v) => xLabelOf[v] || '', color: '#64748b', maxRotation: 0, autoSkip: false },
+            grid: { color: 'rgba(148,163,184,0.08)' } },
+          y: { title: { display: true, text: 'score (%)', color: '#94a3b8' }, grid: { color: 'rgba(148,163,184,0.08)' }, ticks: { color: '#64748b' } }
+        },
+        plugins: {
+          legend: { labels: { usePointStyle: true, boxWidth: 8, color: '#94a3b8' } },
+          tooltip: {
+            callbacks: {
+              title: () => '',
+              label: (item) => {
+                const b = item.raw.raw;
+                const prov = (providerMap[b.modelId] || {}).provider;
+                return [
+                  b.modelId + (prov ? ' \u00b7 ' + prov : ''),
+                  b.benchmark + ' ' + (b.benchmarkVersion || ''),
+                  'score ' + b.score.toFixed(1) + '%' + (b.confidenceInterval ? ' \u00b1' + b.confidenceInterval + 'pp' : ''),
+                  'custo/task ' + (b.costPerTaskUsd != null ? '$' + b.costPerTaskUsd.toFixed(2) : '\u2014'),
+                  b.date
+                ];
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
   function renderHistoryView() {
     if (typeof MODEL_HISTORY_DATA === 'undefined') return;
 
-    // Sincroniza controles de busca e filtros da UI
     const searchInput = document.getElementById('historySearchInput');
-    if (searchInput && document.activeElement !== searchInput) {
-      searchInput.value = AppState.historySearchQuery || '';
-    }
+    if (searchInput && document.activeElement !== searchInput) searchInput.value = AppState.historySearchQuery || '';
     const providerFilter = document.getElementById('historyProviderFilter');
     if (providerFilter) providerFilter.value = AppState.historyProviderFilter || 'all';
     const yearFilter = document.getElementById('historyYearFilter');
@@ -6282,469 +6970,43 @@
     const togglePredecessors = document.getElementById('historyTogglePredecessors');
     if (togglePredecessors) togglePredecessors.checked = AppState.historyShowPredecessors !== false;
 
-    // Renderiza KPIs de Cobertura Histórica (Prompt 11 / Seção 70)
-    const kpiContainer = document.getElementById('historyKpiContainer');
-    if (kpiContainer) {
-      const catalogCount = typeof AI_MODELS_DATA !== 'undefined' ? Object.keys(AI_MODELS_DATA).length : 0;
-      const historyModelIds = new Set();
-      let historicalOnlyCount = 0;
-      let verifiedEdges = 0;
-      let inferredEdges = 0;
-
-      if (MODEL_HISTORY_DATA.lineages) {
-        MODEL_HISTORY_DATA.lineages.forEach(lin => {
-          const allNodes = lin.tracks ? lin.tracks.flatMap(t => t.nodes) : (lin.nodes || []);
-          allNodes.forEach(n => {
-            historyModelIds.add(n.modelId);
-            if (!AI_MODELS_DATA || !AI_MODELS_DATA[n.modelId]) {
-              historicalOnlyCount++;
-            }
-          });
-          (lin.connections || []).forEach(c => {
-            if (c.status === 'verified') verifiedEdges++;
-            else inferredEdges++;
-          });
-        });
-      }
-
-      let catalogWithHistoryCount = 0;
-      if (typeof AI_MODELS_DATA !== 'undefined') {
-        Object.keys(AI_MODELS_DATA).forEach(id => {
-          if (historyModelIds.has(id)) catalogWithHistoryCount++;
-        });
-      }
-      const coveragePct = catalogCount > 0 ? Math.round((catalogWithHistoryCount / catalogCount) * 100) : 0;
-      const needsReviewCount = inferredEdges; // Conexões inferidas demandam revisão documental contínua
-
-      const totalEvents = MODEL_HISTORY_DATA.events ? MODEL_HISTORY_DATA.events.length : 0;
-      const totalBenchmarks = typeof BENCHMARK_HISTORY_DATA !== 'undefined' ? BENCHMARK_HISTORY_DATA.length : 0;
-
-      kpiContainer.innerHTML = `
-        <div class="history-kpi-card">
-          <div class="history-kpi-label">Modelos no Catálogo</div>
-          <div class="history-kpi-value">${catalogCount}</div>
-          <div class="history-kpi-sub">Ativos contemporâneos</div>
-        </div>
-        <div class="history-kpi-card">
-          <div class="history-kpi-label">Modelos com História</div>
-          <div class="history-kpi-value">${historyModelIds.size}</div>
-          <div class="history-kpi-sub">${catalogWithHistoryCount} catálogo + ${historicalOnlyCount} predecessores</div>
-        </div>
-        <div class="history-kpi-card">
-          <div class="history-kpi-label">Cobertura de Linhagem</div>
-          <div class="history-kpi-value highlight-cyan">${coveragePct}%</div>
-          <div class="history-kpi-sub">${catalogWithHistoryCount}/${catalogCount} modelos mapeados</div>
-        </div>
-        <div class="history-kpi-card kpi-timeline">
-          <div class="history-kpi-label">Eventos Históricos</div>
-          <div class="history-kpi-value highlight-cyan">${totalEvents}</div>
-          <div class="history-kpi-sub">Auditados na timeline</div>
-        </div>
-        <div class="history-kpi-card kpi-benchmarks">
-          <div class="history-kpi-label">Benchmark Runs Históricos</div>
-          <div class="history-kpi-value highlight-purple">${totalBenchmarks}</div>
-          <div class="history-kpi-sub">Execuções metrológicas c/ IC</div>
-        </div>
-        <div class="history-kpi-card kpi-verified">
-          <div class="history-kpi-label">Edges Verificadas</div>
-          <div class="history-kpi-value highlight-green">${verifiedEdges}</div>
-          <div class="history-kpi-sub">Arestas sólidas c/ fonte primária</div>
-        </div>
-        <div class="history-kpi-card kpi-inferred">
-          <div class="history-kpi-label">Edges Inferidas</div>
-          <div class="history-kpi-value highlight-gold">${inferredEdges}</div>
-          <div class="history-kpi-sub">Arestas tracejadas fundamentadas</div>
-        </div>
-        <div class="history-kpi-card kpi-inferred">
-          <div class="history-kpi-label">Itens Needs-Review</div>
-          <div class="history-kpi-value highlight-gold">${needsReviewCount}</div>
-          <div class="history-kpi-sub">Arestas sob revisão técnica</div>
-        </div>
-      `;
-    }
+    renderHistoryHeroScale();
+    renderHistoryStatStrip();
 
     const currentTab = AppState.activeHistoryTab || 'lineages';
-
     document.querySelectorAll('.htab-panel').forEach(p => p.style.display = 'none');
     document.querySelectorAll('.history-tabs-nav .btn-toggle').forEach(b => {
-      b.classList.toggle('active', b.getAttribute('data-htab') === currentTab);
+      const isActive = b.getAttribute('data-htab') === currentTab;
+      b.classList.toggle('active', isActive);
+      b.setAttribute('aria-selected', String(isActive));
     });
-
-    const activePanel = document.getElementById(`htab-${currentTab}`);
+    const activePanel = document.getElementById('htab-' + currentTab);
     if (activePanel) activePanel.style.display = 'block';
 
-    const providerFilterVal = AppState.historyProviderFilter || 'all';
-    const yearFilterVal = AppState.historyYearFilter || 'all';
-    const evidenceFilterVal = AppState.historyEvidenceFilter || 'all';
-    const searchQuery = (AppState.historySearchQuery || '').toLowerCase().trim();
-    const showPredecessors = AppState.historyShowPredecessors !== false;
-
-    // Helper para mapear se provedor bate com o filtro
-    const matchProvider = (familyProvider, familyId, modelId) => {
-      if (providerFilterVal === 'all') return true;
-      const target = providerFilterVal.toLowerCase();
-      if (familyProvider && familyProvider.toLowerCase().includes(target)) return true;
-      if (familyId && familyId.toLowerCase().includes(target)) return true;
-      if (modelId && modelId.toLowerCase().includes(target)) return true;
-      return false;
-    };
-
     if (currentTab === 'lineages') {
-      const container = document.getElementById('lineagesListContainer');
-      if (container && MODEL_HISTORY_DATA.lineages) {
-        const filteredFamilies = MODEL_HISTORY_DATA.lineages.filter(lin => {
-          // Filtro de provedor
-          if (!matchProvider(lin.provider, lin.familyId, '')) return false;
-
-          // Filtro de busca
-          if (searchQuery) {
-            const familyMatch = (lin.familyName || '').toLowerCase().includes(searchQuery) ||
-                                (lin.description || '').toLowerCase().includes(searchQuery);
-            const allNodes = lin.tracks ? lin.tracks.flatMap(t => t.nodes) : (lin.nodes || []);
-            const nodeMatch = allNodes.some(n =>
-              (n.name || '').toLowerCase().includes(searchQuery) ||
-              (n.modelId || '').toLowerCase().includes(searchQuery) ||
-              (n.notes || '').toLowerCase().includes(searchQuery) ||
-              (n.architecture || '').toLowerCase().includes(searchQuery)
-            );
-            if (!familyMatch && !nodeMatch) return false;
-          }
-
-          // Filtro de evidência
-          if (evidenceFilterVal === 'verified') {
-            const hasVerified = (lin.connections || []).some(c => c.status === 'verified');
-            if (!hasVerified) return false;
-          } else if (evidenceFilterVal === 'inferred') {
-            const hasInferred = (lin.connections || []).some(c => c.status === 'inferred');
-            if (!hasInferred) return false;
-          }
-
-          return true;
-        });
-
-        if (filteredFamilies.length === 0) {
-          container.innerHTML = `
-            <div style="text-align: center; padding: 48px 16px; background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
-              <p style="font-size: 1.1rem; color: var(--text-primary); margin-bottom: 8px;">Nenhuma linhagem encontrada com os filtros selecionados.</p>
-              <p style="font-size: 0.85rem; color: var(--text-muted);">Tente alterar o provedor, remover a busca ou habilitar predecessores históricos.</p>
-            </div>
-          `;
-          return;
-        }
-
-        container.innerHTML = filteredFamilies.map(lin => {
-          const isCollapsed = Boolean(AppState.historyCollapsedFamilies[lin.familyId]);
-          let flowContentHtml = '';
-
-          const filterNodesList = (nodes) => {
-            return nodes.filter(n => {
-              const inCatalog = typeof AI_MODELS_DATA !== 'undefined' && Boolean(AI_MODELS_DATA[n.modelId]);
-              if (!showPredecessors && !inCatalog && !searchQuery) return false;
-              if (yearFilterVal !== 'all') {
-                const year = (n.releaseDate || '').substring(0, 4);
-                if (year !== yearFilterVal) return false;
-              }
-              if (searchQuery) {
-                const text = `${n.name} ${n.modelId} ${n.notes} ${n.architecture}`.toLowerCase();
-                if (!text.includes(searchQuery)) return false;
-              }
-              return true;
-            });
-          };
-
-          if (lin.tracks && lin.tracks.length > 0) {
-            flowContentHtml = `
-              <div class="lineage-tracks-wrapper">
-                ${lin.tracks.map(tr => {
-                  const visibleNodes = filterNodesList(tr.nodes);
-                  if (visibleNodes.length === 0 && (searchQuery || yearFilterVal !== 'all' || !showPredecessors)) {
-                    return '';
-                  }
-                  return `
-                    <div class="lineage-track-lane">
-                      <div class="lineage-track-header">
-                        <div class="lineage-track-title">
-                          <span>⚡</span> ${tr.trackName}
-                        </div>
-                        ${tr.trackDesc ? `<div class="lineage-track-desc">${tr.trackDesc}</div>` : ''}
-                      </div>
-                      <div class="lineage-flow" style="display: flex; align-items: center; gap: 12px; overflow-x: auto; padding: 8px 0; margin-top: 0; background: transparent;">
-                        ${visibleNodes.map((n, idx) => {
-                          const inCatalog = typeof AI_MODELS_DATA !== 'undefined' && Boolean(AI_MODELS_DATA[n.modelId]);
-                          const clickHandler = inCatalog
-                            ? `onclick="location.hash='#model/${n.modelId}'"`
-                            : `onclick="openHistoryModelModal('${n.modelId}', '${lin.familyId}')"`;
-                          return `
-                            <div class="lineage-node ${inCatalog ? '' : 'lineage-node-historical'}" 
-                                 ${clickHandler} 
-                                 style="min-width: 210px; flex-shrink: 0; cursor: pointer;">
-                              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 6px;">
-                                <strong style="color: var(--text-primary); font-size: 0.92rem;">${n.name}</strong>
-                                <span class="badge-tag ${n.status === 'active' ? 'badge-frontier' : n.status === 'superseded' ? 'badge-warning' : n.status === 'stable' ? 'badge-frontier' : 'badge-subdollar'}">${n.status}</span>
-                              </div>
-                              <div style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 6px;">Lançamento: ${n.releaseDate}</div>
-                              <div style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.35;">${n.notes}</div>
-                              <div style="font-size: 0.70rem; color: ${inCatalog ? 'var(--accent-cyan)' : 'var(--accent-amber, #f59e0b)'}; margin-top: 6px; display: flex; justify-content: space-between;">
-                                <span>${inCatalog ? '✓ No Catálogo' : '📍 Predecessor Histórico'}</span>
-                                <span style="text-decoration: underline;">Inspecionar ↗</span>
-                              </div>
-                            </div>
-                            ${idx < visibleNodes.length - 1 ? `<span class="lineage-arrow" style="color: var(--accent-cyan); font-size: 1.3rem; font-weight: bold; flex-shrink: 0;">➔</span>` : ''}
-                          `;
-                        }).join('')}
-                      </div>
-                    </div>
-                  `;
-                }).join('')}
-              </div>
-            `;
-          } else if (lin.nodes && lin.nodes.length > 0) {
-            const visibleNodes = filterNodesList(lin.nodes);
-            flowContentHtml = `
-              <div class="lineage-flow" style="margin-top: 14px;">
-                ${visibleNodes.map((n, idx) => {
-                  const inCatalog = typeof AI_MODELS_DATA !== 'undefined' && Boolean(AI_MODELS_DATA[n.modelId]);
-                  const clickHandler = inCatalog
-                    ? `onclick="location.hash='#model/${n.modelId}'"`
-                    : `onclick="openHistoryModelModal('${n.modelId}', '${lin.familyId}')"`;
-                  return `
-                    <div class="lineage-node ${inCatalog ? '' : 'lineage-node-historical'}" ${clickHandler}>
-                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                        <strong style="color: var(--text-primary); font-size: 0.95rem;">${n.name}</strong>
-                        <span class="badge-tag ${n.status === 'active' ? 'badge-frontier' : n.status === 'superseded' ? 'badge-warning' : 'badge-subdollar'}">${n.status}</span>
-                      </div>
-                      <div style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 6px;">Lançamento: ${n.releaseDate}</div>
-                      <div style="font-size: 0.78rem; color: var(--text-secondary);">${n.notes}</div>
-                      <div style="font-size: 0.70rem; color: ${inCatalog ? 'var(--accent-cyan)' : 'var(--accent-amber, #f59e0b)'}; margin-top: 6px; display: flex; justify-content: space-between;">
-                        <span>${inCatalog ? '✓ No Catálogo' : '📍 Predecessor Histórico'}</span>
-                        <span style="text-decoration: underline;">Inspecionar ↗</span>
-                      </div>
-                    </div>
-                    ${idx < visibleNodes.length - 1 ? `<span class="lineage-arrow">➔</span>` : ''}
-                  `;
-                }).join('')}
-              </div>
-            `;
-          }
-
-          // Conexões com diferenciação verificada (sólida) vs inferida (tracejada)
-          let visibleConnections = lin.connections || [];
-          if (evidenceFilterVal === 'verified') {
-            visibleConnections = visibleConnections.filter(c => c.status === 'verified');
-          } else if (evidenceFilterVal === 'inferred') {
-            visibleConnections = visibleConnections.filter(c => c.status === 'inferred');
-          }
-
-          const connectionsHtml = visibleConnections.length > 0 ? `
-            <div class="lineage-connections-box">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <strong style="color: var(--text-primary);">Conexões Genealógicas & Evoluções Documentadas:</strong>
-                <span style="font-size: 0.72rem; color: var(--text-muted);">Clique na conexão para inspecionar fontes</span>
-              </div>
-              <div style="display: flex; flex-direction: column; gap: 4px;">
-                ${visibleConnections.map(c => {
-                  const isVerified = c.status === 'verified';
-                  let edgeSymbol = '➔';
-                  let symbolClass = 'solid';
-                  if (!isVerified) {
-                    edgeSymbol = '⇢';
-                    symbolClass = 'dashed';
-                  } else if (c.type === 'parallel-branch' || c.type === 'fork') {
-                    edgeSymbol = '↔';
-                    symbolClass = 'fork';
-                  } else if (c.type === 'rename' || c.type === 'identity-reveal') {
-                    edgeSymbol = '≡';
-                    symbolClass = 'rename';
-                  }
-                  return `
-                    <div class="lineage-connection-item ${isVerified ? 'edge-verified' : 'edge-inferred'}" 
-                         onclick="openHistoryEdgeModal('${lin.familyId}', '${c.from}', '${c.to}')"
-                         title="Clique para inspecionar fontes primárias e detalhes técnicos desta conexão">
-                      <div>
-                        <strong style="color: var(--text-primary); font-size: 0.85rem;">
-                          <span class="legend-symbol ${symbolClass}" style="margin-right: 6px; font-size: 1rem;">${edgeSymbol}</span>
-                          ${c.from} ${edgeSymbol} ${c.to}
-                        </strong>
-                        <span style="color: var(--text-secondary); margin-left: 6px; font-size: 0.80rem;">${c.improvements}</span>
-                      </div>
-                      <span class="${isVerified ? 'badge-edge-verified' : 'badge-edge-inferred'}">
-                        ${isVerified ? '✓ Verificada' : `⚠️ Inferida (${c.confidence || 'média'})`}
-                      </span>
-                    </div>
-                  `;
-                }).join('')}
-              </div>
-            </div>
-          ` : '';
-
-          return `
-            <div class="lineage-family-card ${isCollapsed ? 'is-collapsed' : ''}" id="familyCard_${lin.familyId}">
-              <div class="lineage-family-header" onclick="
-                AppState.historyCollapsedFamilies['${lin.familyId}'] = !AppState.historyCollapsedFamilies['${lin.familyId}'];
-                renderHistoryView();
-              ">
-                <div>
-                  <h3>
-                    <span>🏢</span> ${lin.familyName}
-                    <span class="badge-tag badge-subdollar" style="font-size: 0.72rem; font-weight: normal; margin-left: 6px;">${lin.provider || 'Oficial'}</span>
-                  </h3>
-                  <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px;">${lin.description}</p>
-                </div>
-                <span class="lineage-family-toggle-icon">▼</span>
-              </div>
-              <div class="lineage-family-body">
-                ${flowContentHtml}
-                ${connectionsHtml}
-              </div>
-            </div>
-          `;
-        }).join('');
+      const families = getAtlasFamilies();
+      if (!AppState.atlasFamilyId || !families.some(f => f.familyId === AppState.atlasFamilyId)) {
+        AppState.atlasFamilyId = families.length > 0 ? families[0].familyId : null;
+        AppState.atlasSelection = null;
+      }
+      renderAtlasRail(families);
+      const inspector = document.getElementById('atlasInspector');
+      if (families.length === 0) {
+        const inner = document.getElementById('atlasInner');
+        const empty = document.getElementById('atlasEmpty');
+        if (inner) inner.innerHTML = '';
+        if (empty) empty.hidden = false;
+        if (inspector) { inspector.hidden = true; inspector.innerHTML = ''; }
+      } else {
+        const family = families.find(f => f.familyId === AppState.atlasFamilyId);
+        renderAtlasCanvas(family);
+        if (AppState.atlasSelection && inspector) applyAtlasSelection(true);
+        else if (inspector) { inspector.hidden = true; }
       }
     } else if (currentTab === 'timeline') {
-      const container = document.getElementById('timelineStreamContainer');
-      if (container && MODEL_HISTORY_DATA.events) {
-        const filter = AppState.activeTimelineFilter || 'all';
-
-        let events = MODEL_HISTORY_DATA.events.filter(ev => {
-          if (filter !== 'all' && ev.type !== filter) return false;
-          if (yearFilterVal !== 'all' && !ev.date.startsWith(yearFilterVal)) return false;
-          if (providerFilterVal !== 'all' && !matchProvider('', '', ev.modelId)) return false;
-          if (searchQuery) {
-            const str = `${ev.title} ${ev.description} ${ev.modelId} ${ev.type}`.toLowerCase();
-            if (!str.includes(searchQuery)) return false;
-          }
-          return true;
-        });
-
-        if (events.length === 0) {
-          container.innerHTML = `
-            <div style="text-align: center; padding: 48px 16px; background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
-              <p style="font-size: 1.1rem; color: var(--text-primary); margin-bottom: 8px;">Nenhum evento registrado com os filtros selecionados.</p>
-              <p style="font-size: 0.85rem; color: var(--text-muted);">Tente selecionar "Todos os Eventos" ou limpar o filtro de busca.</p>
-            </div>
-          `;
-          return;
-        }
-
-        let currentPeriod = '';
-        const timelineHtml = [];
-
-        events.forEach(ev => {
-          const period = ev.date.substring(0, 7); // YYYY-MM
-          if (period !== currentPeriod) {
-            currentPeriod = period;
-            timelineHtml.push(`
-              <div class="timeline-period-header">
-                📅 ${currentPeriod}
-              </div>
-            `);
-          }
-
-          const inCatalog = typeof AI_MODELS_DATA !== 'undefined' && Boolean(AI_MODELS_DATA[ev.modelId]);
-          const modelClickHandler = inCatalog
-            ? `onclick="location.hash='#model/${ev.modelId}'"`
-            : `onclick="openHistoryModelModal('${ev.modelId}')"`;
-
-          const src = (typeof DATA_SOURCES !== 'undefined' && DATA_SOURCES[ev.sourceId])
-            || (typeof MODEL_HISTORY_DATA !== 'undefined' && MODEL_HISTORY_DATA.sources && MODEL_HISTORY_DATA.sources[ev.sourceId]);
-
-          let sourceBadge = `<code>${ev.sourceId}</code>`;
-          if (src) {
-            const badgeClass = src.type === 'official' || (src.category && src.category.includes('official'))
-              ? 'badge-source-official'
-              : src.type === 'independent' || (src.category && src.category.includes('independent'))
-                ? 'badge-source-independent'
-                : 'badge-source-community';
-            sourceBadge = `
-              <a href="${src.url}" target="_blank" rel="noopener noreferrer" class="${badgeClass}" style="text-decoration: none;">
-                🔗 ${src.title} ↗
-              </a>
-            `;
-          }
-
-          const eventClass = ev.type === 'release' ? 'event-release'
-            : ev.type === 'preview' ? 'event-preview'
-            : ev.type === 'weights-released' ? 'event-weights'
-            : ev.type === 'pricing-change' ? 'event-pricing'
-            : 'event-audit';
-
-          timelineHtml.push(`
-            <div class="timeline-card ${eventClass}">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <span class="badge-tag badge-frontier" style="font-size: 0.75rem;">${ev.date}</span>
-                  <span class="badge-tag badge-subdollar" style="font-size: 0.72rem; text-transform: uppercase;">${ev.type}</span>
-                </div>
-                <strong style="color: var(--accent-cyan); cursor: pointer; text-decoration: underline;" ${modelClickHandler}>
-                  ${ev.modelId} ${inCatalog ? '↗' : '(Histórico)'}
-                </strong>
-              </div>
-              <h4 style="color: var(--text-primary); margin-bottom: 6px; font-size: 1rem;">${ev.title}</h4>
-              <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.45; margin-bottom: 8px;">${ev.description}</p>
-              <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                <span>Evidência auditada:</span>
-                ${sourceBadge}
-              </div>
-            </div>
-          `);
-        });
-
-        container.innerHTML = timelineHtml.join('');
-      }
+      renderTimelineEditorial();
     } else if (currentTab === 'benchmarks') {
-      const tbody = document.getElementById('benchmarkHistoryTableBody');
-      if (tbody && typeof BENCHMARK_HISTORY_DATA !== 'undefined') {
-        let benchmarks = BENCHMARK_HISTORY_DATA.filter(b => {
-          if (yearFilterVal !== 'all' && !b.date.startsWith(yearFilterVal)) return false;
-          if (providerFilterVal !== 'all' && !matchProvider('', '', b.modelId)) return false;
-          if (searchQuery) {
-            const str = `${b.modelId} ${b.benchmark} ${b.benchmarkVersion} ${b.sourceId}`.toLowerCase();
-            if (!str.includes(searchQuery)) return false;
-          }
-          return true;
-        });
-
-        if (benchmarks.length === 0) {
-          tbody.innerHTML = `
-            <tr>
-              <td colspan="10" style="text-align: center; padding: 24px; color: var(--text-muted);">
-                Nenhum registro de benchmark encontrado para os filtros selecionados.
-              </td>
-            </tr>
-          `;
-          return;
-        }
-
-        tbody.innerHTML = benchmarks.map(b => {
-          const inCatalog = typeof AI_MODELS_DATA !== 'undefined' && Boolean(AI_MODELS_DATA[b.modelId]);
-          const modelClickHandler = inCatalog
-            ? `onclick="location.hash='#model/${b.modelId}'"`
-            : `onclick="openHistoryModelModal('${b.modelId}')"`;
-
-          const src = (typeof DATA_SOURCES !== 'undefined' && DATA_SOURCES[b.sourceId])
-            || (typeof MODEL_HISTORY_DATA !== 'undefined' && MODEL_HISTORY_DATA.sources && MODEL_HISTORY_DATA.sources[b.sourceId]);
-
-          let sourceCell = `<span style="font-size: 0.78rem; color: var(--text-muted);">${b.sourceId}</span>`;
-          if (src) {
-            sourceCell = `<a href="${src.url}" target="_blank" rel="noopener noreferrer" style="color: var(--accent-cyan); text-decoration: underline; font-size: 0.78rem;">${src.title.substring(0, 24)}... ↗</a>`;
-          }
-
-          return `
-            <tr>
-              <td><code>${b.date}</code></td>
-              <td><strong style="color: var(--text-primary); cursor: pointer; text-decoration: underline;" ${modelClickHandler}>${b.modelId}</strong></td>
-              <td><strong>${b.benchmark} ${b.benchmarkVersion}</strong></td>
-              <td><strong class="highlight-green">${b.score.toFixed(1)}%</strong></td>
-              <td>${b.confidenceInterval ? `±${b.confidenceInterval}pp` : '—'}</td>
-              <td>${b.costPerTaskUsd ? `$${b.costPerTaskUsd.toFixed(2)}` : '—'}</td>
-              <td>${b.tokensPerTask ? b.tokensPerTask.toLocaleString() : '—'}</td>
-              <td>${b.agentSteps || '—'}</td>
-              <td><span class="badge-tag ${b.sourceType === 'official' ? 'badge-frontier' : 'badge-subdollar'}">${b.sourceType}</span></td>
-              <td>${sourceCell}</td>
-            </tr>
-          `;
-        }).join('');
-      }
+      renderBenchmarkHistoryTab();
     }
   }
 
@@ -6806,14 +7068,14 @@
               <p style="font-size: 0.88rem; color: var(--text-secondary); margin: 2px 0 0 0;">${activeCase.description}</p>
             </div>
             <div style="display: flex; gap: 8px; align-items: center;">
-              <button class="btn-primary btn-sm" onclick="window.AIApp.openComparatorWith('${topModel.modelId}')">⚔️ Comparar Top Modelos</button>
+              <button class="btn-primary btn-sm" onclick="window.AIApp.openComparatorWith('${topModel.modelId}')">Comparar Top Modelos</button>
             </div>
           </div>
 
           <!-- Metrologia, Cobertura e Confiança -->
           <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin: 16px 0; padding: 10px 14px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 0.82rem;">
             <div>
-              <strong>📊 Cobertura:</strong> ${Object.keys(AI_MODELS_DATA).length} modelos catalogados (${rankings.length} ranqueados neste perfil)
+              <strong>Cobertura:</strong> ${Object.keys(AI_MODELS_DATA).length} modelos catalogados (${rankings.length} ranqueados neste perfil)
             </div>
             <span style="color: var(--border-medium);">•</span>
             <div>
@@ -6884,7 +7146,7 @@
 
           <!-- 6 Categorias de Vencedor (Seção 23 do Plano 08) -->
           <div style="margin-bottom: 24px;">
-            <h4 style="font-size: 0.92rem; margin-bottom: 10px; color: var(--text-primary);">🏆 Perfis de Vencedores Recomendados:</h4>
+            <h4 style="font-size: 0.92rem; margin-bottom: 10px; color: var(--text-primary);">Perfis de Vencedores Recomendados:</h4>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;">
               <div style="padding: 10px; background: rgba(6, 182, 212, 0.06); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: var(--radius-xs);">
                 <div style="font-size: 0.72rem; color: var(--accent-cyan); font-weight: 700;">👑 MELHOR GERAL</div>
@@ -6941,8 +7203,8 @@
                     <td style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.4;">${r.rationale}</td>
                     <td>
                       <div style="display: flex; gap: 4px;">
-                        <button class="btn-table-action" onclick="location.hash='#model/${r.modelId}'" title="Ver Dossiê">🔍 Dossiê</button>
-                        <button class="btn-table-action" onclick="window.AIApp.openComparatorWith('${r.modelId}')" title="Comparar">⚔️</button>
+                        <button class="btn-table-action" onclick="location.hash='#model/${r.modelId}'" title="Ver Dossiê">Dossiê</button>
+                        <button class="btn-table-action" onclick="window.AIApp.openComparatorWith('${r.modelId}')" title="Comparar">vs</button>
                       </div>
                     </td>
                   </tr>
@@ -7003,7 +7265,7 @@
           <div class="divergence-card">
             <div class="divergence-card-header">
               <h4 style="color: var(--text-primary); margin: 0;">${d.modelName}</h4>
-              <button class="btn-table-action" onclick="location.hash='#model/${d.modelId}'">🔍 Dossiê</button>
+              <button class="btn-table-action" onclick="location.hash='#model/${d.modelId}'">Dossiê</button>
             </div>
             <div class="divergence-claim">
               <div style="font-size: 0.72rem; text-transform: uppercase; color: #38bdf8; font-weight: bold; margin-bottom: 2px;">📈 O que o Benchmark Afirma:</div>
@@ -7112,8 +7374,8 @@
 
     if (modelSelect && !_goSimInitialized) {
       modelSelect.innerHTML = OPENCODE_GO_DATA.models.map(m => {
-        const icon = m.usageAllowanceUsd === 60 ? '🟢' : m.usageAllowanceUsd === 30 ? '🟡' : '🔴';
-        const burnLabel = m.usageAllowanceUsd === 60 ? '1× burn' : m.usageAllowanceUsd === 30 ? '2× burn' : '4× burn';
+        const icon = m.usageAllowanceUsd === 100 ? '🟣' : m.usageAllowanceUsd === 60 ? '🟢' : m.usageAllowanceUsd === 30 ? '🟡' : '🔴';
+        const burnLabel = m.usageAllowanceUsd === 100 ? '0,6× burn' : m.usageAllowanceUsd === 60 ? '1× burn' : m.usageAllowanceUsd === 30 ? '2× burn' : '4× burn';
         return `<option value="${m.id}">${icon} ${m.displayName} (US$ ${m.usageAllowanceUsd} • ${burnLabel})</option>`;
       }).join('');
 
@@ -7137,14 +7399,14 @@
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px;">
             <div class="spec-item-card" style="padding: 10px 14px;">
               <div class="spec-label">Classe de Uso & Valor</div>
-              <div class="spec-value ${m.usageAllowanceUsd === 60 ? 'highlight-green' : m.usageAllowanceUsd === 30 ? 'highlight-amber' : 'highlight-rose'}">
+              <div class="spec-value ${m.usageAllowanceUsd === 100 ? 'highlight-cyan' : m.usageAllowanceUsd === 60 ? 'highlight-green' : m.usageAllowanceUsd === 30 ? 'highlight-amber' : 'highlight-rose'}">
                 US$ ${m.usageAllowanceUsd} <small style="font-size: 0.75rem; color: var(--text-muted);">(${m.valueMultiplierVsSubscription}× vs US$ 10)</small>
               </div>
             </div>
             <div class="spec-item-card" style="padding: 10px 14px;">
               <div class="spec-label">Multiplicador Quota Burn</div>
-              <div class="spec-value ${m.quotaBurnMultiplier === 1 ? 'highlight-green' : m.quotaBurnMultiplier === 2 ? 'highlight-amber' : 'highlight-rose'}">
-                ${m.quotaBurnMultiplier}× <small style="font-size: 0.75rem; color: var(--text-muted);">${m.quotaBurnMultiplier === 1 ? 'consumo 1:1' : m.quotaBurnMultiplier + '× mais rápido'}</small>
+              <div class="spec-value ${m.quotaBurnMultiplier < 1 ? 'highlight-cyan' : m.quotaBurnMultiplier === 1 ? 'highlight-green' : m.quotaBurnMultiplier === 2 ? 'highlight-amber' : 'highlight-rose'}">
+                ${m.quotaBurnMultiplier}× <small style="font-size: 0.75rem; color: var(--text-muted);">${m.quotaBurnMultiplier < 1 ? 'queima mais lenta que 1×' : m.quotaBurnMultiplier === 1 ? 'consumo 1:1' : m.quotaBurnMultiplier + '× mais rápido'}</small>
               </div>
             </div>
             <div class="spec-item-card" style="padding: 10px 14px;">
@@ -7186,9 +7448,13 @@
               <div style="padding: 10px 14px; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-sm); font-size: 0.82rem; color: #fcd34d;">
                 ⚠️ <strong>Aviso de Quota Burn (2×):</strong> O modelo <strong>${m.displayName}</strong> pertence à classe <strong>US$ 30</strong>. Ele consome cota aproximadamente <strong>2× mais rápido</strong> que modelos Full Go de US$ 60 (aproveitamento efetivo de até 50% do valor nominal).
               </div>
+            ` : m.quotaBurnMultiplier < 1 ? `
+              <div style="padding: 10px 14px; background: rgba(167, 139, 250, 0.1); border: 1px solid rgba(167, 139, 250, 0.35); border-radius: var(--radius-sm); font-size: 0.82rem; color: #c4b5fd;">
+                🟣 <strong>Classe US$ 100 (0,6× Burn):</strong> O modelo <strong>${m.displayName}</strong> tem allowance de <strong>US$ 100</strong> (10× a assinatura de US$ 10). A queima é mais lenta que 1× (~167% da franquia nominal de US$ 60). Identidade do provedor não publicada (stealth).
+              </div>
             ` : `
               <div style="padding: 10px 14px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-sm); font-size: 0.82rem; color: #6ee7b7;">
-                🟢 <strong>Eficiência Máxima (1× Burn):</strong> O modelo <strong>${m.displayName}</strong> recebe o valor total de <strong>US$ 60</strong> (6× a assinatura de US$ 10) consumindo a franquia na proporção 1:1.
+                🟢 <strong>Eficiência Full Go (1× Burn):</strong> O modelo <strong>${m.displayName}</strong> recebe o valor total de <strong>US$ 60</strong> (6× a assinatura de US$ 10) consumindo a franquia na proporção 1:1.
               </div>
             `}
 
@@ -7231,7 +7497,7 @@
       updateSimulation();
     }
 
-    // --- 2. Tabela Detalhada dos 26 Modelos Oficiais ---
+    // --- 2. Tabela Detalhada dos 27 Modelos Oficiais ---
     const tbodyGo = document.getElementById('opencodeDetailedTableBody');
     const filterClassSelect = document.getElementById('goTableFilterClass');
 
@@ -7244,8 +7510,8 @@
       });
 
       tbodyGo.innerHTML = models.map(item => {
-        const badgeClass = item.usageAllowanceUsd === 60 ? 'badge-go-60' : item.usageAllowanceUsd === 30 ? 'badge-go-30' : 'badge-go-15';
-        const burnPillClass = `burn-pill-${item.quotaBurnMultiplier}x`;
+        const badgeClass = OPENCODE_GO_DATA.quotaBadgeClass(item);
+        const burnPillClass = OPENCODE_GO_DATA.burnPillClass(item.quotaBurnMultiplier);
         
         let privacyBadge = '<span class="badge-tag badge-subdollar" title="Zero Data Retention ativo">✅ ZDR 0-day</span>';
         if (item.privacy.isContributor) {
@@ -7286,6 +7552,61 @@
       filterClassSelect.dataset.listenerBound = 'true';
     }
     renderGoTable();
+
+    // --- 2b. Catálogo OpenCode Zen ---
+    const tbodyZen = document.getElementById('opencodeZenTableBody');
+    const filterZenSelect = document.getElementById('zenTableFilter');
+
+    const renderZenTable = () => {
+      if (!tbodyZen || typeof OPENCODE_ZEN_DATA === 'undefined') return;
+      const filter = filterZenSelect ? filterZenSelect.value : 'all';
+      const models = OPENCODE_ZEN_DATA.models.filter(m => {
+        if (filter === 'all') return true;
+        if (filter === 'free') return m.billing === 'free' || m.status === 'free-limited';
+        if (filter === 'deprecated') return m.status === 'deprecated';
+        if (filter === 'api-only') return m.listedInDocsEndpoints === false;
+        if (filter === 'docs-only') return m.listedInDocsEndpoints === true && m.listedInApi === false;
+        if (filter === 'payg') {
+          return m.billing !== 'free' && m.status !== 'free-limited' && m.status !== 'deprecated';
+        }
+        return true;
+      });
+
+      tbodyZen.innerHTML = models.map(item => {
+        const price = item.zenPricing && item.zenPricing.standard
+          ? `$${item.zenPricing.standard.input} / $${item.zenPricing.standard.output}`
+          : '—';
+        const sourceBits = [];
+        if (item.listedInDocsEndpoints) sourceBits.push('docs');
+        if (item.listedInApi) sourceBits.push('API');
+        const billingLabel = item.billing === 'free' || item.status === 'free-limited' ? 'Gratuito' : 'PAYG';
+        const note = item.pricingNote || item.privacyNote || '';
+        return `
+          <tr>
+            <td>
+              <div style="font-weight: 700; color: var(--text-primary);">${item.displayName}</div>
+              <div style="font-size: 0.72rem; color: var(--accent-cyan);"><code>${item.id}</code></div>
+              ${note ? `<div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">${note}</div>` : ''}
+            </td>
+            <td>${billingLabel}</td>
+            <td>${item.status}</td>
+            <td>${sourceBits.join(' + ') || '—'}</td>
+            <td>${price}</td>
+            <td>${item.contextWindow ? item.contextWindow.toLocaleString() : '—'}</td>
+            <td style="font-size: 0.78rem;">
+              <code>${item.endpoint}</code><br>
+              <span style="color: var(--text-muted);">${item.sdkPackage}</span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    };
+
+    if (filterZenSelect && !filterZenSelect.dataset.listenerBound) {
+      filterZenSelect.addEventListener('change', renderZenTable);
+      filterZenSelect.dataset.listenerBound = 'true';
+    }
+    renderZenTable();
 
     // --- 3. Matriz Geral de Disponibilidade dos 44 Modelos ---
     const tbodyMatrix = document.getElementById('platformMatrixTableBody');

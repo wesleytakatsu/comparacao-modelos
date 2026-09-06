@@ -624,9 +624,18 @@
       publisher: 'OpenCode',
       title: 'OpenCode Go Catalog & Model Access',
       sourceType: 'official',
-      publishedAt: '2026-09-03',
-      retrievedAt: '2026-09-04',
-      sourceUrl: 'https://opencode.ai/go'
+      publishedAt: '2026-09-06',
+      retrievedAt: '2026-09-06',
+      sourceUrl: 'https://opencode.ai/docs/pt-br/go/'
+    },
+    'opencode-zen-catalog-2026': {
+      id: 'opencode-zen-catalog-2026',
+      publisher: 'OpenCode',
+      title: 'OpenCode Zen Endpoints, Pricing & Models API',
+      sourceType: 'official',
+      publishedAt: '2026-09-06',
+      retrievedAt: '2026-09-06',
+      sourceUrl: 'https://opencode.ai/docs/pt-br/zen/'
     },
     'openai-responses-api-docs': {
       id: 'openai-responses-api-docs',

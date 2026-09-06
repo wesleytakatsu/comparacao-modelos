@@ -27,6 +27,7 @@ const {
   MULTI_BENCHMARK_LEDGER,
   CAPABILITY_RADAR_10D,
   OPENCODE_GO_DATA,
+  OPENCODE_ZEN_DATA,
   HARDWARE_LOCAL_MODELS_DATA,
   HARDWARE_GPU_DATABASE,
   KV_CACHE_COMPRESSION_FACTORS,
@@ -332,7 +333,21 @@ BUDGET_STACK_RECOMMENDER.stacks.forEach(stack => {
 // 8. OpenCode Go (Catálogo Canônico Oficial)
 console.log('🚀 Verificando catálogo canônico do OpenCode Go...');
 assert(OPENCODE_GO_DATA && Array.isArray(OPENCODE_GO_DATA.models), 'OPENCODE_GO_DATA.models deve ser um array');
-assert(OPENCODE_GO_DATA.models.length === 26, `OpenCode Go deve conter RIGOROSAMENTE 26 modelos oficiais. Encontrado: ${OPENCODE_GO_DATA.models.length}`);
+assert(OPENCODE_GO_DATA.models.length === 27, `OpenCode Go deve conter RIGOROSAMENTE 27 modelos oficiais (docs Go). Encontrado: ${OPENCODE_GO_DATA.models.length}`);
+assert(OPENCODE_GO_DATA.metadata.totalModels === 27, 'metadata.totalModels deve ser 27');
+const omenAlpha = OPENCODE_GO_DATA.getModel('omen-alpha');
+assert(omenAlpha && omenAlpha.usageAllowanceUsd === 100 && omenAlpha.quotaBurnMultiplier === 0.6, 'Omen Alpha deve ser classe US$ 100 com burn 0.6×');
+assert(!OPENCODE_GO_DATA.getModel('minimax-m2.5'), 'MiniMax M2.5 não entra na lista oficial Go (sem linha de cota nas bullets da docs)');
+
+console.log('🧘 Verificando catálogo OpenCode Zen...');
+assert(OPENCODE_ZEN_DATA && Array.isArray(OPENCODE_ZEN_DATA.models), 'OPENCODE_ZEN_DATA.models deve ser um array');
+assert(OPENCODE_ZEN_DATA.models.length === 72, `OpenCode Zen deve conter 72 IDs (69 docs + 3 API-only). Encontrado: ${OPENCODE_ZEN_DATA.models.length}`);
+const zenDocs = OPENCODE_ZEN_DATA.models.filter(m => m.listedInDocsEndpoints);
+const zenApiOnly = OPENCODE_ZEN_DATA.models.filter(m => !m.listedInDocsEndpoints && m.listedInApi);
+assert(zenDocs.length === 69, `Zen docs endpoints deve ter 69 IDs. Encontrado: ${zenDocs.length}`);
+assert(zenApiOnly.length === 3, `Zen API-only deve ter 3 IDs. Encontrado: ${zenApiOnly.length}`);
+assert(OPENCODE_ZEN_DATA.getModel('gpt-6-astra'), 'Zen deve resolver gpt-6-astra');
+assert(OPENCODE_ZEN_DATA.getModel('claude-sonnet-4') && OPENCODE_ZEN_DATA.getModel('claude-sonnet-4').listedInDocsEndpoints === false, 'claude-sonnet-4 é API-only');
 
 // 9. Detector Universal de Fake SKUs (Seção 114)
 console.log('🛡️ Verificando ausência de Fake SKUs no repositório...');

@@ -100,7 +100,7 @@
         <!-- 1. Visão Geral & Posicionamento -->
         <div class="content-box">
           <div class="box-header">
-            <h3>💡 1. Visão Geral & Arquitetura de Acesso</h3>
+            <h3>1. Visão Geral & Arquitetura de Acesso</h3>
           </div>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 10px;">
             <div>
@@ -125,7 +125,7 @@
         <!-- 2. Preço & Conversão Cambial -->
         <div class="content-box">
           <div class="box-header">
-            <h3>💵 2. Precificação, Moeda & Ciclos de Cobrança</h3>
+            <h3>2. Precificação, Moeda & Ciclos de Cobrança</h3>
           </div>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-top: 10px;">
             <div style="background: var(--bg-surface); padding: 12px; border-radius: var(--radius-xs);">
@@ -156,7 +156,7 @@
         <!-- 3. Modelos Incluídos & Superfícies -->
         <div class="content-box">
           <div class="box-header">
-            <h3>🧠 3. Modelos Incluídos & Modos de Acesso</h3>
+            <h3>3. Modelos Incluídos & Modos de Acesso</h3>
           </div>
           <div class="table-responsive" style="margin-top: 10px;">
             <table class="data-table">
@@ -180,7 +180,7 @@
         <!-- 4. Recursos, Storage & Workspace -->
         <div class="content-box">
           <div class="box-header">
-            <h3>☁️ 4. Recursos, Ferramentas & Armazenamento</h3>
+            <h3>4. Recursos, Ferramentas & Armazenamento</h3>
           </div>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 10px;">
             <div>
@@ -207,7 +207,7 @@
         <!-- 5. Cotas, Janelas & Limites -->
         <div class="content-box">
           <div class="box-header">
-            <h3>⚡ 5. Franquia, Quotas & Janelas de Rate Limit</h3>
+            <h3>5. Franquia, Quotas & Janelas de Rate Limit</h3>
           </div>
           <p style="font-size: 0.9rem; margin-top: 6px; color: var(--text-primary); line-height: 1.5;">${plan.quotaDescription}</p>
           
@@ -242,7 +242,7 @@
         <!-- 6. Custo Variável & Burn Rate -->
         <div class="content-box">
           <div class="box-header">
-            <h3>🔥 6. Dinâmica de Consumo, Excedente & Burn Rate</h3>
+            <h3>6. Dinâmica de Consumo, Excedente & Burn Rate</h3>
           </div>
           <div style="font-size: 0.86rem; color: var(--text-secondary); line-height: 1.5;">
             ${plan.overageAllowed ? '<span style="color: #fbbf24; font-weight: 600;">⚠ Permite faturamento de excedente (overage) por token/tarefa pós-esgotamento de cota.</span>' : '<span style="color: #34d399; font-weight: 600;">✓ Sem cobrança de overage inesperado no cartão. Operação limitada por fila ou cooldown.</span>'}
@@ -262,7 +262,7 @@
         <!-- 7. Privacidade & Governança -->
         <div class="content-box">
           <div class="box-header">
-            <h3>🔒 7. Privacidade, Treinamento & Governança</h3>
+            <h3>7. Privacidade, Treinamento & Governança</h3>
           </div>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 10px;">
             <div>
@@ -284,7 +284,7 @@
         <!-- 8. Histórico de Alterações -->
         <div class="content-box">
           <div class="box-header">
-            <h3>📜 8. Histórico & Evolução do Plano</h3>
+            <h3>8. Histórico & Evolução do Plano</h3>
           </div>
           <p style="font-size: 0.86rem; color: var(--text-secondary); line-height: 1.5; margin-top: 6px;">
             ${plan.historyNotes || `Plano comercialmente ativo e mantido sob a linhagem oficial de ${plan.provider.toUpperCase()} (${plan.product}).`}
@@ -294,7 +294,7 @@
         <!-- 9. Alternativas & Stacks -->
         <div class="content-box">
           <div class="box-header">
-            <h3>⚖️ 9. Alternativas & Stacks de Assinatura Recomendadas</h3>
+            <h3>9. Alternativas & Stacks de Assinatura Recomendadas</h3>
           </div>
           <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 6px;">
             Explore este plano em conjunto com outros no nosso <strong>Planejador de Orçamento</strong> ou compare-o diretamente com outros ecossistemas.
@@ -310,7 +310,7 @@
         <!-- 10. Fontes Auditadas & Rastreabilidade -->
         <div class="content-box">
           <div class="box-header">
-            <h3>🔍 10. Fontes Auditadas & Rastreabilidade</h3>
+            <h3>10. Fontes Auditadas & Rastreabilidade</h3>
           </div>
           <div style="margin-top: 8px; font-size: 0.85rem;">
             <strong>Documentação Oficial do Fornecedor:</strong>

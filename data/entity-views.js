@@ -60,7 +60,7 @@
         <!-- Modelos Ativos e Famílias -->
         <div class="content-box">
           <div class="box-header">
-            <h3>🤖 Modelos de IA Disponibilizados (${models.length})</h3>
+            <h3>Modelos de IA Disponibilizados (${models.length})</h3>
           </div>
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-top: 10px;">
             ${models.map(function (m) {
@@ -84,7 +84,7 @@
         <!-- Planos e Assinaturas Oferecidas -->
         <div class="content-box">
           <div class="box-header">
-            <h3>💳 Planos de Assinatura & Produtos Comerciais (${plans.length})</h3>
+            <h3>Planos de Assinatura & Produtos Comerciais (${plans.length})</h3>
           </div>
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-top: 10px;">
             ${plans.map(function (p) {
@@ -105,7 +105,7 @@
         <!-- Fontes Auditadas -->
         <div class="content-box">
           <div class="box-header">
-            <h3>🔍 Fontes Oficiais & Documentação Técnica</h3>
+            <h3>Fontes Oficiais & Documentação Técnica</h3>
           </div>
           <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
             ${sources.map(function (s) {
@@ -144,7 +144,7 @@
               <a href="#platforms" class="btn-ghost btn-xs" style="color: var(--text-muted);">← Voltar a Plataformas</a>
               <span class="badge-tag badge-frontier">ECOSSISTEMA / PLATAFORMA</span>
             </div>
-            <h1 style="font-size: 1.8rem; margin: 4px 0 6px 0;">🚀 ${platform.name}</h1>
+            <h1 style="font-size: 1.8rem; margin: 4px 0 6px 0;">${platform.name}</h1>
             <p style="color: var(--text-secondary); max-width: 800px; font-size: 0.95rem;">
               ${platform.description || 'Ambiente auditado com suporte a orquestração de modelos de fronteira e agentes autônomos.'}
             </p>
@@ -158,7 +158,7 @@
       <div style="display: flex; flex-direction: column; gap: 18px;">
         <div class="content-box">
           <div class="box-header">
-            <h3>⚙️ Especificações da Plataforma</h3>
+            <h3>Especificações da Plataforma</h3>
           </div>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 10px;">
             <div>
@@ -182,7 +182,7 @@
 
         <div class="content-box">
           <div class="box-header">
-            <h3>💳 Planos com Acesso a esta Plataforma (${plans.length})</h3>
+            <h3>Planos com Acesso a esta Plataforma (${plans.length})</h3>
           </div>
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-top: 10px;">
             ${plans.map(function (p) {
@@ -229,7 +229,7 @@
               <span class="badge-tag badge-frontier">${cat.toUpperCase()}</span>
               <span class="badge-tag badge-subdollar">METROLOGIA AUDITADA</span>
             </div>
-            <h1 style="font-size: 1.8rem; margin: 4px 0 6px 0;">📊 ${name}</h1>
+            <h1 style="font-size: 1.8rem; margin: 4px 0 6px 0;">${name}</h1>
             <p style="color: var(--text-secondary); max-width: 800px; font-size: 0.95rem;">${desc}</p>
           </div>
           <div>
@@ -241,7 +241,7 @@
       <div style="display: flex; flex-direction: column; gap: 18px;">
         <div class="content-box">
           <div class="box-header">
-            <h3>🔬 Metodologia, Sandbox & Harness de Execução</h3>
+            <h3>Metodologia, Sandbox & Harness de Execução</h3>
           </div>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 10px;">
             <div>
@@ -262,7 +262,7 @@
 
         <div class="content-box">
           <div class="box-header">
-            <h3>🏆 Leaderboard & Top Execuções Verificadas</h3>
+            <h3>Leaderboard & Top Execuções Verificadas</h3>
           </div>
           <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 4px;">
             Consulte a visão integrada de comparador para cruzar scores deste benchmark com custos computacionais e latência.
@@ -364,7 +364,7 @@
     var recipesHtml = recipes.length > 0 ? `
       <div class="content-box" style="margin-top: 24px;">
         <div class="box-header">
-          <h3>🔀 Receitas Recomendadas de Orquestração Multi-Modelo</h3>
+          <h3>Receitas Recomendadas de Orquestração Multi-Modelo</h3>
           <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 2px;">
             Padrões de pipeline multi-agente recomendados para otimizar custo e acurácia neste perfil.
           </p>
@@ -441,7 +441,7 @@
 
       <div class="content-box" style="margin-bottom: 20px;">
         <div class="box-header">
-          <h3>⚖️ Critérios & Ponderação Multidimensional</h3>
+          <h3>Critérios & Ponderação Multidimensional</h3>
         </div>
         <div style="margin: 10px 0 14px 0;">
           <strong style="font-size: 0.82rem; color: var(--text-muted); display: block; margin-bottom: 6px;">Critérios Avaliados (Pesos):</strong>
@@ -486,7 +486,7 @@
 
       <!-- Perfis de Vencedores Recomendados -->
       <div style="margin-bottom: 24px;">
-        <h4 style="font-size: 0.95rem; margin-bottom: 10px; color: var(--text-primary);">🏆 Perfis de Vencedores Recomendados:</h4>
+        <h4 style="font-size: 0.95rem; margin-bottom: 10px; color: var(--text-primary);">Perfis de Vencedores Recomendados:</h4>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;">
           <div style="padding: 12px; background: rgba(6, 182, 212, 0.06); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: var(--radius-xs);">
             <div style="font-size: 0.72rem; color: var(--accent-cyan); font-weight: 700;">👑 MELHOR GERAL</div>
@@ -517,7 +517,7 @@
       <!-- Tabela de Rankings Detalhada -->
       <div class="content-box" style="margin-bottom: 24px;">
         <div class="box-header">
-          <h3>📋 Ranking Ordenado por Fit Score (${activeWeights ? 'Recalculado' : 'Calibrado'})</h3>
+          <h3>Ranking Ordenado por Fit Score (${activeWeights ? 'Recalculado' : 'Calibrado'})</h3>
         </div>
         <div class="table-responsive" style="margin-top: 10px;">
           <table class="data-table">

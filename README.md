@@ -142,6 +142,12 @@ npm run test:links
 # Executa simulação determinística do Impact Engine
 npm run test:impact
 
+# Testes puros do History Atlas (escala temporal, tiers, arestas, deep-links)
+npm run test:history
+
+# Screenshots de smoke visual (Chromium headless; requer servidor no :3000)
+./scripts/visual-smoke.sh
+
 # Valida carregamento limpo do Domínio v2
 npm run test:domain
 ```

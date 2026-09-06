@@ -6,8 +6,9 @@
     (function () {
       try {
         var s = localStorage.getItem('ai-portal-theme');
-        var t = (s === 'light' || s === 'dark') ? s
-          : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        var q = /[?&]theme=(light|dark)/.exec(location.search); // override QA/screenshots
+        var t = q ? q[1] : ((s === 'light' || s === 'dark') ? s
+          : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
         document.documentElement.setAttribute('data-theme', t);
         document.documentElement.style.colorScheme = t;
       } catch (e) {}
@@ -39,6 +40,8 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></symbol><symbol id="i-cpu" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/><rect x="9.5" y="9.5" width="5" height="5"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></symbol><symbol id="i-card" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></symbol><symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/></symbol><symbol id="i-compare" viewBox="0 0 24 24"><path d="M3 8h13M13 4.5L16.5 8 13 11.5M21 16H8M11 12.5L7.5 16 11 19.5"/></symbol><symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></symbol><symbol id="i-dollar" viewBox="0 0 24 24"><path d="M12 5.5v13M15.8 8.5c-.9-1.1-2.2-1.7-3.8-1.7-2.1 0-3.8 1.2-3.8 2.9 0 3.5 7.6 2 7.6 5.5 0 1.7-1.7 2.9-3.8 2.9-1.7 0-3.2-.7-4-1.8"/></symbol><symbol id="i-monitor" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol><symbol id="i-plug" viewBox="0 0 24 24"><path d="M9 2.5V8M15 2.5V8M6.5 8h11v3.5a5.5 5.5 0 0 1-11 0zM12 17.5V22"/></symbol><symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a4.6 4.6 0 0 0-6.1 5.9L3 17.7 6.3 21l5.5-5.6a4.6 4.6 0 0 0 5.9-6.1l-3 3-2.6-2.6z"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></symbol><symbol id="i-history" viewBox="0 0 24 24"><path d="M3 4v5h5"/><path d="M3.5 13a8.5 8.5 0 1 0 2.2-7.6L3 9"/><path d="M12 8v4.5l3 1.8"/></symbol><symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol><symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></symbol><symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol><symbol id="i-rocket" viewBox="0 0 24 24"><path d="M5 15.5c-.9.8-1.4 4-1.4 4s3.2-.5 4-1.4c.4-.4.4-1.1 0-1.8-.5-.5-1.6-1.2-2.6-.8zM12.5 15l-3.5-3.5a21 21 0 0 1 12-11 21 21 0 0 1 0 4 21 21 0 0 1-8.5 10.5zM9 12H5.5s.4-2.3 1.7-3.4c.9-.8 2.3-.9 2.3-.9M12 15v3.5s2.3-.4 3.4-1.7c.8-.9.9-2.3.9-2.3"/></symbol><symbol id="i-pulse" viewBox="0 0 24 24"><path d="M22 12h-4l-3 8-4-16-3 8H2"/></symbol></svg>
+
 
   <!-- ========================================== -->
   <!-- 1. HEADER GLOBAL & COMMAND BAR -->
@@ -105,44 +108,44 @@
         
         <!-- NAVEGAÇÃO PRINCIPAL (6 ITENS ESSENCIAIS) -->
         <div class="nav-pinned-zone">
-          <div class="zone-title">⚡ Navegação Principal</div>
+          <div class="zone-title">Navegação Principal</div>
           <ul class="nav-list">
             <li>
               <a href="#dashboard" class="nav-link active" data-route="dashboard" aria-current="page">
-                <span class="nav-icon">🏠</span>
+                <svg class="nav-icon" aria-hidden="true"><use href="#i-home"></use></svg>
                 <span class="nav-label">Início</span>
               </a>
             </li>
             <li>
               <a href="#models" class="nav-link" data-route="models">
-                <span class="nav-icon">🤖</span>
+                <svg class="nav-icon" aria-hidden="true"><use href="#i-cpu"></use></svg>
                 <span class="nav-label">Modelos</span>
                 <span class="nav-counter" id="hdrModelCountBadge">—</span>
               </a>
             </li>
             <li>
               <a href="#plans" class="nav-link" data-route="plans">
-                <span class="nav-icon">💳</span>
+                <svg class="nav-icon" aria-hidden="true"><use href="#i-card"></use></svg>
                 <span class="nav-label">Planos</span>
                 <span class="nav-badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-size: 0.65rem; padding: 2px 5px; border-radius: 4px;">USD/BRL</span>
               </a>
             </li>
             <li>
               <a href="#use-cases" class="nav-link" data-route="use-cases">
-                <span class="nav-icon">🎯</span>
+                <svg class="nav-icon" aria-hidden="true"><use href="#i-target"></use></svg>
                 <span class="nav-label">Casos de Uso</span>
                 <span class="nav-badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; font-size: 0.65rem; padding: 2px 5px; border-radius: 4px;"><span id="navUseCasesBadgeCount">—</span> CASOS</span>
               </a>
             </li>
             <li>
               <a href="#compare" class="nav-link" data-route="compare">
-                <span class="nav-icon">⚔️</span>
+                <svg class="nav-icon" aria-hidden="true"><use href="#i-compare"></use></svg>
                 <span class="nav-label">Comparar</span>
               </a>
             </li>
             <li>
               <a href="#router" class="nav-link" data-route="router">
-                <span class="nav-icon">🧭</span>
+                <svg class="nav-icon" aria-hidden="true"><use href="#i-compass"></use></svg>
                 <span class="nav-label">Decidir (Router)</span>
               </a>
             </li>
@@ -152,37 +155,37 @@
         <!-- GRUPO RECOLHÍVEL: FERRAMENTAS -->
         <details class="nav-zone" id="navZoneTools" open>
           <summary class="zone-summary">
-            <span class="zone-title">⚙️ Ferramentas</span>
+            <span class="zone-title">Ferramentas</span>
             <span class="zone-arrow">▾</span>
           </summary>
           <ul class="nav-list">
             <li>
               <a href="#simulator" class="nav-link" data-route="simulator">
-                <span class="nav-icon">💵</span>
+                <svg class="nav-icon" aria-hidden="true"><use href="#i-dollar"></use></svg>
                 <span class="nav-label">Custos & Simulador</span>
               </a>
             </li>
             <li>
               <a href="#calculator" class="nav-link" data-route="calculator">
-                <span class="nav-icon">🖥️</span>
+                <svg class="nav-icon" aria-hidden="true"><use href="#i-monitor"></use></svg>
                 <span class="nav-label">VRAM & Hardware</span>
               </a>
             </li>
             <li>
               <a href="#roi" class="nav-link" data-route="roi">
-                <span class="nav-icon">⏱️</span>
+                <svg class="nav-icon" aria-hidden="true"><use href="#i-clock"></use></svg>
                 <span class="nav-label">Calculadora de ROI</span>
               </a>
             </li>
             <li>
               <a href="#harnesses" class="nav-link" data-route="harnesses">
-                <span class="nav-icon">🔌</span>
+                <svg class="nav-icon" aria-hidden="true"><use href="#i-plug"></use></svg>
                 <span class="nav-label">Harnesses & Configs</span>
               </a>
             </li>
             <li>
               <a href="#troubleshoot" class="nav-link" data-route="troubleshoot">
-                <span class="nav-icon">🛠️</span>
+                <svg class="nav-icon" aria-hidden="true"><use href="#i-wrench"></use></svg>
                 <span class="nav-label">Troubleshooter</span>
               </a>
             </li>
@@ -192,50 +195,50 @@
         <!-- GRUPO RECOLHÍVEL: PESQUISA & EVIDÊNCIAS -->
         <details class="nav-zone" id="navZoneEvidence" open>
           <summary class="zone-summary">
-            <span class="zone-title">🔬 Pesquisa & Evidências</span>
+            <span class="zone-title">Pesquisa & Evidências</span>
             <span class="zone-arrow">▾</span>
           </summary>
           <ul class="nav-list">
             <li>
               <a href="#benchmarks" class="nav-link" data-route="benchmarks">
-                <span class="nav-icon">📈</span>
+                <svg class="nav-icon" aria-hidden="true"><use href="#i-chart"></use></svg>
                 <span class="nav-label">Benchmarks & Performance</span>
                 <span class="nav-badge aa-badge-nav">AA + DeepSWE</span>
               </a>
             </li>
             <li>
               <a href="#history" class="nav-link" data-route="history">
-                <span class="nav-icon">📜</span>
+                <svg class="nav-icon" aria-hidden="true"><use href="#i-history"></use></svg>
                 <span class="nav-label">Histórico & Linhagens</span>
               </a>
             </li>
             <li>
               <a href="#community" class="nav-link" data-route="community">
-                <span class="nav-icon">💬</span>
+                <svg class="nav-icon" aria-hidden="true"><use href="#i-chat"></use></svg>
                 <span class="nav-label">Comunidade & Relatos</span>
               </a>
             </li>
             <li>
               <a href="#sources" class="nav-link" data-route="sources">
-                <span class="nav-icon">📚</span>
+                <svg class="nav-icon" aria-hidden="true"><use href="#i-book"></use></svg>
                 <span class="nav-label">Metodologia & Fontes</span>
               </a>
             </li>
             <li>
               <a href="#privacy" class="nav-link" data-route="privacy">
-                <span class="nav-icon">🔒</span>
+                <svg class="nav-icon" aria-hidden="true"><use href="#i-lock"></use></svg>
                 <span class="nav-label">Privacidade & Governança</span>
               </a>
             </li>
             <li>
               <a href="#platforms" class="nav-link" data-route="platforms">
-                <span class="nav-icon">🚀</span>
+                <svg class="nav-icon" aria-hidden="true"><use href="#i-rocket"></use></svg>
                 <span class="nav-label">Ecossistema & Plataformas</span>
               </a>
             </li>
             <li>
               <a href="#data-health" class="nav-link" data-route="data-health">
-                <span class="nav-icon">🩺</span>
+                <svg class="nav-icon" aria-hidden="true"><use href="#i-pulse"></use></svg>
                 <span class="nav-label">Data Health & Auditoria</span>
               </a>
             </li>
@@ -279,7 +282,7 @@
           <div class="home-block-header">
             <div>
               <h3 style="margin: 0; font-size: 1.15rem; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
-                <span>⚡</span> O que mudou recentemente?
+                O que mudou recentemente?
               </h3>
               <p style="font-size: 0.82rem; color: var(--text-muted); margin: 2px 0 0 0;">
                 Últimos lançamentos de modelos, atualizações de benchmarks e alterações de preço registradas.
@@ -297,7 +300,7 @@
           <div class="home-block-header">
             <div>
               <h3 style="margin: 0; font-size: 1.15rem; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
-                <span>🎯</span> O que você quer fazer?
+                O que você quer fazer?
               </h3>
               <p style="font-size: 0.82rem; color: var(--text-muted); margin: 2px 0 0 0;">
                 Escolha seu objetivo para acessar diretamente a análise contextual ideal.
@@ -390,7 +393,7 @@
         <details class="content-box quick-estimator-widget-wrapper" style="margin-top: 24px;">
           <summary class="widget-header" style="cursor: pointer; list-style: none;">
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-              <h3 style="margin: 0; font-size: 1rem;">⚡ Simulador Rápido de Custo por Turno (Live Estimator)</h3>
+              <h3 style="margin: 0; font-size: 1rem;">Simulador Rápido de Custo por Turno (Live Estimator)</h3>
               <span class="summary-arrow" style="font-size: 0.9rem; color: var(--text-muted);">▾ Expandir</span>
             </div>
           </summary>
@@ -422,7 +425,7 @@
       <section class="spa-view" id="view-models">
         <div class="view-header">
           <div class="view-title-group">
-            <h2>🤖 Catálogo de Modelos de IA</h2>
+            <h2>Modelos</h2>
             <p class="view-subtitle">Explore os <span id="catTotalCount">—</span> modelos catalogados com filtros de provedor, arquitetura, contexto, status e qualidade de evidência.</p>
           </div>
           <div class="view-actions">
@@ -510,7 +513,7 @@
       <section class="spa-view" id="view-providers">
         <div class="view-header">
           <div class="view-title">
-            <h2>🏢 Hub de Provedores & Fabricantes</h2>
+            <h2>Provedores</h2>
             <p>Explore os 16 laboratórios e seus respectivos catálogos de modelos.</p>
           </div>
         </div>
@@ -598,7 +601,7 @@
       <section class="spa-view" id="view-data-health">
         <div class="view-header">
           <div class="view-title">
-            <h2>🩺 Integridade & Auditoria Contínua (Data Health)</h2>
+            <h2>Data Health</h2>
             <p class="view-subtitle">Monitoramento determinístico de frescor temporal por domínio, referências órfãs, claims competitivos e fila de revisão.</p>
           </div>
         </div>
@@ -614,7 +617,7 @@
         <div class="view-header">
           <div class="view-title">
             <div class="aa-title-wrapper">
-              <h2>🛡️ Auditoria Independente: Artificial Analysis</h2>
+              <h2>Artificial Analysis</h2>
               <span class="aa-badge-official">Intelligence Index v4.1.1</span>
             </div>
             <p>Avaliação neutra e padronizada em 9 dimensões cognitivas e trabalho profissional, auditada diretamente em múltiplos provedores de nuvem.</p>
@@ -702,7 +705,7 @@
 
         <!-- NOTA METODOLÓGICA AA: 48 vs 45 -->
         <div class="callout-box" style="margin-bottom: 24px; border-left: 4px solid var(--accent-cyan); background: rgba(6, 182, 212, 0.08); padding: 16px 20px; border-radius: var(--radius-md);">
-          <h4 style="color: var(--accent-cyan); margin-bottom: 8px; font-size: 1rem;">💡 Nota Metodológica: Por que Sonnet 4.6 obteve nota 48 vs 45 do Opus 4.6?</h4>
+          <h4 style="color: var(--accent-cyan); margin-bottom: 8px; font-size: 1rem;">Nota Metodológica: Por que Sonnet 4.6 obteve nota 48 vs 45 do Opus 4.6?</h4>
           <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; margin: 0;">
             O <strong>Artificial Analysis Intelligence Index v4.1.1</strong> é uma média composta calculada sobre 9 baterias padronizadas. A maior velocidade de inferência do <strong>Claude Sonnet 4.6 (~58 tok/s vs ~39 tok/s do Opus)</strong> e seu desempenho quase idêntico em tarefas cotidianas de engenharia elevam seu score composto global. O <strong>Claude Opus 4.6</strong> mantém superioridade expressiva em desafios cognitivos extremos de fronteira, como <strong>ARC-AGI-2 Verified (68,8% vs 58,3%)</strong>, <strong>HLE com Tools (53,0% vs 49,0%)</strong> e <strong>MRCR v2 1M de Long-Context (78,3% vs 65,8%)</strong>.
           </p>
@@ -714,7 +717,7 @@
           <!-- Painel 1: GDPval-AA v2 -->
           <div class="content-box aa-sub-panel">
             <div class="sub-panel-header">
-              <h3>💼 GDPval-AA v2 (Trabalho Profissional)</h3>
+              <h3>GDPval-AA v2 (Trabalho Profissional)</h3>
               <span class="badge-subtle">Rating Elo • 220 Tarefas</span>
             </div>
             <p class="sub-panel-desc">Avalia entregáveis profissionais (documentos, planilhas, relatórios) sob o harness <em>Stirrup</em> com shell e web.</p>
@@ -726,7 +729,7 @@
           <!-- Painel 2: τ³-Banking -->
           <div class="content-box aa-sub-panel">
             <div class="sub-panel-header">
-              <h3>🏦 τ³-Banking (Tool Use em Finanças)</h3>
+              <h3>τ³-Banking (Tool Use em Finanças)</h3>
               <span class="badge-subtle">700 Documentos • Tool Calling</span>
             </div>
             <p class="sub-panel-desc">Workflows bancários complexos onde o agente navega em grafos de documentos interconectados e executa mutações via tools.</p>
@@ -738,7 +741,7 @@
           <!-- Painel 3: AA-LCR -->
           <div class="content-box aa-sub-panel">
             <div class="sub-panel-header">
-              <h3>📜 AA-LCR (Long-Context Reasoning)</h3>
+              <h3>AA-LCR (Long-Context Reasoning)</h3>
               <span class="badge-subtle">10k – 100k Tokens</span>
             </div>
             <p class="sub-panel-desc">Mede raciocínio profundo e recuperação em documentos extensos, separando modelos que apenas 'aceitam' 1M dos que raciocinam nele.</p>
@@ -750,7 +753,7 @@
           <!-- Painel 4: AA-Omniscience -->
           <div class="content-box aa-sub-panel">
             <div class="sub-panel-header">
-              <h3>🎯 AA-Omniscience (Anti-Alucinação)</h3>
+              <h3>AA-Omniscience (Anti-Alucinação)</h3>
               <span class="badge-subtle">Escala -100 a +100</span>
             </div>
             <p class="sub-panel-desc">Recompensa precisão factual, penaliza severamente alucinações e não penaliza o agente por declarar desconhecimento.</p>
@@ -762,7 +765,7 @@
           <!-- Painel 5: Terminal-Bench 2.1 (AA Independente) -->
           <div class="content-box aa-sub-panel">
             <div class="sub-panel-header">
-              <h3>💻 Terminal-Bench 2.1 [AA Independente]</h3>
+              <h3>Terminal-Bench 2.1 [AA Independente]</h3>
               <span class="badge-subtle">89 Tarefas • Linux Containers</span>
             </div>
             <p class="sub-panel-desc">Bateria independente de coding agêntico em bash/sysadmin, auditada em containers isolados sem contaminação.</p>
@@ -774,7 +777,7 @@
           <!-- Painel 6: SciCode & Algoritmos Científicos -->
           <div class="content-box aa-sub-panel">
             <div class="sub-panel-header">
-              <h3>🔬 SciCode & GPQA Diamond (Ciência)</h3>
+              <h3>SciCode & GPQA Diamond (Ciência)</h3>
               <span class="badge-subtle">Física, Biologia & Math</span>
             </div>
             <p class="sub-panel-desc">Raciocínio científico de fronteira e programação computacional avançada com validação determinística de código.</p>
@@ -792,7 +795,7 @@
       <section class="spa-view" id="view-benchmarks">
         <div class="view-header">
           <div class="view-title">
-            <h2>📈 Thinking & Benchmarks Explorer</h2>
+            <h2>Benchmarks</h2>
             <p>Análise de inteligência do CursorBench 3.2 em cada nível de esforço, curvas de ganho marginal e coding ledger.</p>
           </div>
           <div class="metric-switcher" id="benchmarkMetricSwitcher">
@@ -830,7 +833,7 @@
         <!-- TABELA LEDGER CONSOLIDADO -->
         <div class="content-box" style="margin-top: 24px;">
           <div class="section-subtitle">
-            <h3>📋 Ledger de Coding Agêntico Consolidado</h3>
+            <h3>Ledger de Coding Agêntico Consolidado</h3>
             <p>Scores em benchmarks oficiais nos principais leaderboards de engenharia de software.</p>
           </div>
           <div class="table-container">
@@ -862,7 +865,7 @@
       <section class="spa-view" id="view-radar">
         <div class="view-header">
           <div class="view-title">
-            <h2>🕸️ Radar 10D de Habilidades Técnicas</h2>
+            <h2>Radar 10D</h2>
             <p>Confronte as 10 dimensões de capacidade de até 4 modelos simultâneos no gráfico de teia.</p>
           </div>
         </div>
@@ -884,7 +887,7 @@
       <section class="spa-view" id="view-pareto">
         <div class="view-header">
           <div class="view-title">
-            <h2>⚖️ Fronteira de Pareto & Trade-offs</h2>
+            <h2>Fronteira de Pareto</h2>
             <p>Identifique os modelos dominantes na fronteira ótima entre inteligência, custo por tarefa e velocidade de geração.</p>
           </div>
           <div class="view-actions">
@@ -909,7 +912,7 @@
       <section class="spa-view" id="view-comparator">
         <div class="view-header">
           <div class="view-title">
-            <h2>⚔️ Comparador Lado a Lado (Head-to-Head)</h2>
+            <h2>Comparar</h2>
             <p>Selecione de 2 a 4 modelos para confrontar todas as especificações, benchmarks e custos.</p>
           </div>
           <div class="view-actions">
@@ -943,12 +946,12 @@
 
         <!-- Modos do Comparador: Tabs Unificadas (Seção 25) -->
         <div class="comparator-modes-nav" id="comparatorModesNav">
-          <button type="button" class="comp-mode-btn active" data-mode="specs">📋 Especificações & Resumo</button>
-          <button type="button" class="comp-mode-btn" data-mode="benchmarks">📊 Benchmarks</button>
-          <button type="button" class="comp-mode-btn" data-mode="radar">🕸️ Radar 10D</button>
-          <button type="button" class="comp-mode-btn" data-mode="pareto">⚖️ Fronteira de Pareto</button>
-          <button type="button" class="comp-mode-btn" data-mode="access">🚀 Acesso, Custos & Planos</button>
-          <button type="button" class="comp-mode-btn" data-mode="governance">🛡️ Governança & Privacidade</button>
+          <button type="button" class="comp-mode-btn active" data-mode="specs">Especificações & Resumo</button>
+          <button type="button" class="comp-mode-btn" data-mode="benchmarks">Benchmarks</button>
+          <button type="button" class="comp-mode-btn" data-mode="radar">Radar 10D</button>
+          <button type="button" class="comp-mode-btn" data-mode="pareto">Fronteira de Pareto</button>
+          <button type="button" class="comp-mode-btn" data-mode="access">Acesso, Custos & Planos</button>
+          <button type="button" class="comp-mode-btn" data-mode="governance">Governança & Privacidade</button>
         </div>
 
         <!-- Painel de Inteligência Comparativa (Seções 25, 26, 27, 28, 29) -->
@@ -985,7 +988,7 @@
         <div class="comp-mode-panel" id="compModeRadarPanel" style="display: none;">
           <div class="content-box">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-              <h3 style="margin: 0; font-size: 1.05rem; color: var(--accent-cyan);">🕸️ Radar Multidimensional dos Modelos Selecionados</h3>
+              <h3 style="margin: 0; font-size: 1.05rem; color: var(--accent-cyan);">Radar Multidimensional dos Modelos Selecionados</h3>
               <span style="font-size: 0.8rem; color: var(--text-secondary);">Escala normalizada [0 - 100]</span>
             </div>
             <div class="radar-container" style="max-width: 700px; margin: 0 auto; height: 460px; position: relative;">
@@ -998,7 +1001,7 @@
         <div class="comp-mode-panel" id="compModeParetoPanel" style="display: none;">
           <div class="content-box">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-              <h3 style="margin: 0; font-size: 1.05rem; color: var(--accent-cyan);">⚖️ Eficiência de Pareto: Custo por Tarefa ($) × Qualidade SWE/Benchmark</h3>
+              <h3 style="margin: 0; font-size: 1.05rem; color: var(--accent-cyan);">Eficiência de Pareto: Custo por Tarefa ($) × Qualidade SWE/Benchmark</h3>
               <span style="font-size: 0.8rem; color: var(--text-secondary);">Modelos no topo superior-esquerdo dominam a fronteira</span>
             </div>
             <div class="chart-container" style="height: 480px; position: relative;">
@@ -1029,7 +1032,7 @@
       <section class="spa-view" id="view-calculator">
         <div class="view-header">
           <div class="view-title">
-            <h2>🖥️ Calculadora de Hardware Local & Estimador de VRAM</h2>
+            <h2>Hardware & VRAM</h2>
             <p>Simule a ocupação de memória considerando pesos quantizados, KV Cache comprimido (MLA/DSA/DeltaNet) e buffers CUDA.</p>
           </div>
         </div>
@@ -1037,7 +1040,7 @@
         <div class="calculator-layout-grid">
           <!-- Painel de Controles -->
           <div class="content-box calculator-controls-box">
-            <h3>⚙️ Parâmetros de Simulação</h3>
+            <h3>Parâmetros de Simulação</h3>
             
             <div class="form-group">
               <label for="calcModelSelect">Modelo Selecionado:</label>
@@ -1078,7 +1081,7 @@
 
           <!-- Painel de Resultados & Veredito -->
           <div class="content-box calculator-results-box">
-            <h3>📊 Estimativa de Alocação de Memória <span class="badge-tag badge-subdollar" style="font-size: 0.72rem; vertical-align: middle; margin-left: 6px;">E · Estimado</span></h3>
+            <h3>Estimativa de Alocação de Memória <span class="badge-tag badge-subdollar" style="font-size: 0.72rem; vertical-align: middle; margin-left: 6px;">E · Estimado</span></h3>
             
             <div class="vram-breakdown-container">
               <div class="vram-meter-bar">
@@ -1114,13 +1117,13 @@
       <section class="spa-view" id="view-simulator">
         <div class="view-header">
           <div class="view-title">
-            <h2>💰 Simulador de Custos & Otimizador de Franquias</h2>
+            <h2>Custos & Simulador</h2>
             <p>Modele a projeção mensal de gastos de desenvolvedores solo e times nos planos OpenCode Go, Cursor Pro e API direta.</p>
           </div>
         </div>
 
         <div class="content-box">
-          <h3>🎮 Parâmetros de Uso Mensal da Equipe</h3>
+          <h3>Parâmetros de Uso Mensal da Equipe</h3>
           <div class="simulator-controls-grid">
             <div class="form-group">
               <label for="simDevTasks">Tarefas / Mês por Dev: <strong id="lblSimTasks">500 tarefas</strong></label>
@@ -1158,7 +1161,7 @@
         <!-- SUB-SEÇÃO 2: 5 WORKLOADS PADRONIZADOS DE ENGENHARIA -->
         <div class="content-box" style="margin-top: 24px;">
           <div class="box-header">
-            <h3>🔬 5 Workloads Padronizados de Engenharia de Software</h3>
+            <h3>5 Workloads Padronizados de Engenharia de Software</h3>
             <span class="badge-subtle">Custo Exato por Cenário de Desenvolvimento</span>
           </div>
           <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px;">
@@ -1202,7 +1205,7 @@
         <!-- SUB-SEÇÃO 3: CUSTO DE MULTIMODAL & SCREENSHOTS EM LOOP -->
         <div class="content-box" style="margin-top: 24px;">
           <div class="box-header">
-            <h3>👁️ Simulador de Custo de Visão / Screenshots em Agentes</h3>
+            <h3>Simulador de Custo de Visão / Screenshots em Agentes</h3>
             <span class="badge-subtle">Inspeção de UI em Tempo Real</span>
           </div>
           <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px;">
@@ -1244,7 +1247,7 @@
       <section class="spa-view" id="view-roi">
         <div class="view-header">
           <div class="view-title">
-            <h2>📈 Calculadora de ROI para Times de Engenharia</h2>
+            <h2>ROI de Engenharia</h2>
             <p>Compare o custo anual de infraestrutura entre API direta em nuvem, assinaturas de $30/mês e workstations dedicadas.</p>
           </div>
         </div>
@@ -1305,7 +1308,7 @@
       <section class="spa-view" id="view-router">
         <div class="view-header">
           <div class="view-title">
-            <h2>🧭 Roteador Inteligente de Modelos (Model Router)</h2>
+            <h2>Router</h2>
             <p>Selecione o tipo de tarefa, orçamento e privacidade para receber a recomendação ideal e a cascata de fallback.</p>
           </div>
         </div>
@@ -1352,7 +1355,7 @@
       <section class="spa-view" id="view-harnesses">
         <div class="view-header">
           <div class="view-title">
-            <h2>🔌 Matriz de Harnesses 15×11 & Gerador de JSON</h2>
+            <h2>Harnesses</h2>
             <p>Compatibilidade entre 15 famílias de modelos e 11 clientes de IDE/CLI, com arquivos de configuração prontos para copiar.</p>
           </div>
         </div>
@@ -1367,7 +1370,7 @@
         <!-- RECEITAS & SNIPPETS PRONTOS DE CLI -->
         <div class="content-box" style="margin-top: 24px;">
           <div class="box-header">
-            <h3>💻 Snippets & Receitas de Configuração para CLI / IDE</h3>
+            <h3>Snippets & Receitas de Configuração para CLI / IDE</h3>
             <span class="badge-subtle">Grok Build • OpenCode • Roo Code • Codex • Aider</span>
           </div>
           <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px;">
@@ -1386,14 +1389,14 @@
       <section class="spa-view" id="view-troubleshoot">
         <div class="view-header">
           <div class="view-title">
-            <h2>🛠️ Diagnóstico & Solução de Erros Conhecidos</h2>
+            <h2>Troubleshooter</h2>
             <p>Guia passo a passo para corrigir problemas de tags de pensamento, erros de protocolo e drenagem de franquia.</p>
           </div>
         </div>
 
         <div class="content-box" style="margin-bottom: 20px;">
           <div class="box-header" style="margin-bottom: 0;">
-            <h3>🔍 Filtrar Soluções e Códigos de Erro</h3>
+            <h3>Filtrar Soluções e Códigos de Erro</h3>
             <div class="table-search-bar" style="max-width: 360px; width: 100%;">
               <input type="search" id="troubleshootSearchInput" class="input-search" placeholder="Filtrar por sintoma, erro, modelo...">
             </div>
@@ -1411,7 +1414,7 @@
       <section class="spa-view" id="view-privacy">
         <div class="view-header">
           <div class="view-title">
-            <h2>🔒 Governança, Privacidade, ZDR & Fontes Auditáveis</h2>
+            <h2>Privacidade</h2>
             <p>Políticas de retenção de dados, status de treinamento com prompts e links oficiais dos model cards.</p>
           </div>
         </div>
@@ -1441,7 +1444,7 @@
       <section class="spa-view" id="view-antigravity-pools">
         <div class="view-header">
           <div class="view-title">
-            <h2>🛡️ Arquitetura de Cotas & Governança de Pools no Google Antigravity</h2>
+            <h2>Antigravity</h2>
             <p>Gestão estratégica do Google AI Pro: separação dos pools de inferência, regras de limite de 5h/semanal e funil de preservação.</p>
           </div>
         </div>
@@ -1462,7 +1465,7 @@
           <!-- Pool 1: Gemini Models -->
           <div class="content-box pool-gemini-card" style="border-top: 4px solid var(--accent-cyan);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <h3 style="color: #38bdf8;">🌐 POOL 1: Gemini Models</h3>
+              <h3 style="color: #38bdf8;">POOL 1: Gemini Models</h3>
               <span class="badge-tag badge-subdollar">Cota Isolada & Proporcional</span>
             </div>
             <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 16px;">
@@ -1490,7 +1493,7 @@
           <!-- Pool 2: Claude and GPT models -->
           <div class="content-box pool-claude-card" style="border-top: 4px solid #f97316;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <h3 style="color: #fdba74;">🔥 POOL 2: Claude & GPT models</h3>
+              <h3 style="color: #fdba74;">POOL 2: Claude & GPT models</h3>
               <span class="badge-tag badge-danger">Cota Compartilhada & Concorrente</span>
             </div>
             <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 16px;">
@@ -1519,7 +1522,7 @@
         <!-- Funil Operacional de Decisão -->
         <div class="content-box" style="margin-bottom: 24px;">
           <div class="box-header">
-            <h3>🧭 Funil de Decisão e Preservação de Cota no Google AI Pro</h3>
+            <h3>Funil de Decisão e Preservação de Cota no Google AI Pro</h3>
             <span class="badge-subtle">Orquestração Multi-Pool para Máximo Rendimento</span>
           </div>
           <div class="funnel-steps-container" id="antigravityFunnelSteps">
@@ -1530,7 +1533,7 @@
         <!-- Tabela Comparativa dos Modelos do Antigravity -->
         <div class="content-box">
           <div class="box-header">
-            <h3>📊 Matriz de Retorno por Unidade de Cota no Antigravity ($E = B / Q$)</h3>
+            <h3>Matriz de Retorno por Unidade de Cota no Antigravity ($E = B / Q$)</h3>
           </div>
           <div class="table-responsive">
             <table class="data-table" id="antigravityModelsTable">
@@ -1563,7 +1566,7 @@
           <div class="view-title">
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
               <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                <h2>💳 Explorador de Assinaturas, Modelos e Orçamento</h2>
+                <h2>Planos</h2>
                 <span class="badge-tag badge-frontier" id="planCountersBadge">—</span>
               </div>
               <button class="btn-primary btn-sm" id="btnOpenPlanWizard" style="display: flex; align-items: center; gap: 6px;">
@@ -1592,19 +1595,19 @@
         <div class="plan-explorer-controls">
           <div class="plan-explorer-tabs" id="planExplorerTabs" role="tablist">
             <button type="button" class="tab-btn active" data-tab="plans" role="tab" aria-selected="true">
-              📋 Planos
+              Planos
             </button>
             <button type="button" class="tab-btn" data-tab="models" role="tab" aria-selected="false">
-              🧠 Onde Usar Cada Modelo
+              Onde Usar Cada Modelo
             </button>
             <button type="button" class="tab-btn" data-tab="budget" role="tab" aria-selected="false">
-              💰 Planejador de Orçamento
+              Planejador de Orçamento
             </button>
             <button type="button" class="tab-btn" data-tab="compare" role="tab" aria-selected="false">
-              ⚔️ Comparar <span class="badge-count" id="compareBadgeCount" style="display:none;">0</span>
+              Comparar <span class="badge-count" id="compareBadgeCount" style="display:none;">0</span>
             </button>
             <button type="button" class="tab-btn" data-tab="favorites" role="tab" aria-selected="false">
-              ⭐ Favoritos <span class="badge-count" id="favoritesBadgeCount" style="display:none;">0</span>
+              Favoritos <span class="badge-count" id="favoritesBadgeCount" style="display:none;">0</span>
             </button>
           </div>
 
@@ -1816,7 +1819,7 @@
             <span id="planCompareCount">0 planos selecionados (máx 5)</span>
             <div class="tray-actions">
               <button class="btn-secondary btn-sm" id="btnClearPlanCompare">Limpar</button>
-              <button class="btn-primary btn-sm" id="btnOpenPlanCompareTab">⚔️ Ver Comparação</button>
+              <button class="btn-primary btn-sm" id="btnOpenPlanCompareTab">Ver Comparação</button>
             </div>
           </div>
         </div>
@@ -1826,28 +1829,29 @@
       <!-- VIEW 17: HISTÓRICO, LINHAGENS & TIMELINE -->
       <!-- ========================================== -->
       <section class="spa-view" id="view-history">
-        <div class="view-header">
-          <div class="view-title">
-            <h2>📜 Linhagens de Modelos & Linha do Tempo da Indústria</h2>
-            <p>Evolução de tiers de produtos, linhagens arquiteturais documentadas e histórico metrológico de benchmarks.</p>
+        <!-- HERO — Model History Atlas (Prompt 12 §54) -->
+        <header class="history-hero">
+          <div class="page-heading">
+            <span class="page-heading__eyebrow">Model History Atlas</span>
+            <h1 class="page-heading__title">Histórico</h1>
+            <p class="page-heading__subtitle">Como as famílias de modelos evoluíram — e quando os saltos realmente aconteceram.</p>
           </div>
-        </div>
+          <div class="history-hero__scale" id="historyHeroScale" aria-hidden="true"></div>
+        </header>
 
-        <!-- Historical Coverage KPI container (Prompt 11) -->
-        <div class="history-kpis-grid" id="historyKpiContainer">
-          <!-- Injetado dinamicamente via JS -->
-        </div>
+        <!-- Summary strip (substitui os 8 KPI cards — §55) -->
+        <div class="metric-strip" id="historyKpiContainer"><!-- injetado --></div>
 
-        <!-- Toolbar de Controles & Filtros Históricos (Prompt 11) -->
-        <div class="history-controls-toolbar">
+        <!-- Toolbar de filtros -->
+        <div class="data-toolbar">
           <div class="history-search-box">
             <input type="text" id="historySearchInput" placeholder="Buscar modelos, arquiteturas, tags ou eventos..." aria-label="Buscar no histórico">
           </div>
-          <div class="history-filters-row">
+          <div class="data-toolbar__filters">
             <div class="history-filter-item">
-              <label for="historyProviderFilter">Provedor:</label>
+              <label for="historyProviderFilter">Provedor</label>
               <select id="historyProviderFilter" aria-label="Filtrar por provedor">
-                <option value="all">Todos os Provedores</option>
+                <option value="all">Todos</option>
                 <option value="openai">OpenAI</option>
                 <option value="anthropic">Anthropic</option>
                 <option value="google">Google DeepMind</option>
@@ -1857,14 +1861,14 @@
                 <option value="zai">Zhipu / Z.ai</option>
                 <option value="moonshot">Moonshot AI</option>
                 <option value="minimax">MiniMax</option>
-                <option value="meta">Meta AI</option>
+                <option value="meta">Meta</option>
                 <option value="tencent">Tencent</option>
               </select>
             </div>
             <div class="history-filter-item">
-              <label for="historyYearFilter">Ano:</label>
+              <label for="historyYearFilter">Ano</label>
               <select id="historyYearFilter" aria-label="Filtrar por ano">
-                <option value="all">Todos os Anos</option>
+                <option value="all">Todos</option>
                 <option value="2026">2026</option>
                 <option value="2025">2025</option>
                 <option value="2024">2024</option>
@@ -1872,92 +1876,85 @@
               </select>
             </div>
             <div class="history-filter-item">
-              <label for="historyEvidenceFilter">Conexões / Evidência:</label>
+              <label for="historyEvidenceFilter">Evidência</label>
               <select id="historyEvidenceFilter" aria-label="Filtrar por tipo de evidência">
-                <option value="all">Todas as Conexões</option>
-                <option value="verified">Apenas Verificadas (Sólidas)</option>
-                <option value="inferred">Apenas Inferidas (Tracejadas)</option>
+                <option value="all">Todas as conexões</option>
+                <option value="verified">Verificadas</option>
+                <option value="inferred">Inferidas</option>
               </select>
             </div>
             <label class="history-checkbox-label">
               <input type="checkbox" id="historyTogglePredecessors" checked>
-              <span>Mostrar nós históricos fora do catálogo</span>
+              <span>Predecessores históricos</span>
             </label>
-            <button type="button" class="btn-secondary" id="historyToggleExpandAllBtn">Recolher Todos</button>
           </div>
         </div>
 
-        <!-- Sub-navegação do Histórico -->
-        <div class="history-tabs-nav">
-          <button class="btn-toggle active" data-htab="lineages">🌳 Árvores Genealógicas & Linhagens</button>
-          <button class="btn-toggle" data-htab="timeline">⏱️ Linha do Tempo Cronológica</button>
-          <button class="btn-toggle" data-htab="benchmarks">📊 Histórico Auditado de Benchmarks</button>
-        </div>
+        <!-- Sub-navegação (§56) -->
+        <nav class="view-tabs history-tabs-nav" role="tablist" aria-label="Vistas do histórico">
+          <button class="btn-toggle active" data-htab="lineages" role="tab" aria-selected="true">Linhagens</button>
+          <button class="btn-toggle" data-htab="timeline" role="tab" aria-selected="false">Linha do tempo</button>
+          <button class="btn-toggle" data-htab="benchmarks" role="tab" aria-selected="false">Benchmarks</button>
+        </nav>
 
-        <!-- Painel 1: Linhagens Genealógicas -->
-        <div class="htab-panel active" id="htab-lineages">
-          <!-- Legenda Visual de Conexões Genealógicas (Seção 9) -->
-          <div class="history-edge-legend" id="historyEdgeLegend">
-            <div class="edge-legend-header">
-              <strong>🧭 Legenda de Conexões Genealógicas &amp; Semântica de Arestas</strong>
-              <span class="edge-legend-sub">(Diferenciação estrita entre derivação comprovada e inferência arquitetural)</span>
-            </div>
-            <div class="edge-legend-grid">
-              <div class="edge-legend-item">
-                <span class="legend-symbol solid">➔</span>
-                <div class="legend-text">
-                  <strong>Sucessor Geracional / Verificado</strong>
-                  <p>Aresta sólida verde/ciano: derivação direta atestada por paper ou documentação oficial do provedor.</p>
+        <!-- Painel 1: Atlas temporal de linhagens -->
+        <div class="htab-panel active" id="htab-lineages" role="tabpanel">
+          <div class="atlas-layout">
+            <aside class="atlas-rail" id="atlasProviderRail" aria-label="Famílias de modelos"></aside>
+            <div class="atlas-canvas" id="atlasCanvas">
+              <div class="atlas-scroll" id="atlasScroll">
+                <div class="atlas-inner" id="atlasInner">
+                  <div class="atlas-ruler" id="atlasTimeRuler"></div>
+                  <svg class="atlas-edges" id="atlasEdges" aria-hidden="true"></svg>
+                  <div class="atlas-rows" id="atlasRows"></div>
                 </div>
               </div>
-              <div class="edge-legend-item">
-                <span class="legend-symbol dashed">⇢</span>
-                <div class="legend-text">
-                  <strong>Relação Inferida / Documental</strong>
-                  <p>Aresta tracejada âmbar: linhagem plausível fundamentada em indícios de mercado, sem paper formal.</p>
-                </div>
+              <div class="atlas-foot">
+                <span class="atlas-legend-item"><span class="atlas-line atlas-line--solid"></span> verificada</span>
+                <span class="atlas-legend-item"><span class="atlas-line atlas-line--dashed"></span> inferida</span>
+                <span class="atlas-legend-item"><span class="atlas-hollow-dot"></span> predecessor fora do catálogo</span>
+                <span class="atlas-foot-hint">clique num nó ou aresta para inspecionar</span>
               </div>
-              <div class="edge-legend-item">
-                <span class="legend-symbol fork">↔</span>
-                <div class="legend-text">
-                  <strong>Variante Paralela / Fork</strong>
-                  <p>Ramificação simultânea: especialização de porte (Flash/Pro), destilação ou fork de pesos abertos.</p>
-                </div>
-              </div>
-              <div class="edge-legend-item">
-                <span class="legend-symbol rename">≡</span>
-                <div class="legend-text">
-                  <strong>Rename / Identidade Revelada</strong>
-                  <p>Codinome de teste ou stealth em arenas (ex: LMSYS) cuja identidade foi confirmada pelo laboratório.</p>
-                </div>
+              <div class="atlas-empty" id="atlasEmpty" hidden>
+                <p>Nenhuma linhagem corresponde a estes filtros.</p>
+                <button type="button" class="btn-ghost btn-sm" id="atlasClearFilters">Limpar filtros</button>
               </div>
             </div>
-          </div>
-
-          <div class="lineages-container" id="lineagesListContainer">
-            <!-- Injetado dinamicamente via JS -->
+            <aside class="inspector-panel" id="atlasInspector" hidden aria-label="Inspetor do atlas"></aside>
           </div>
         </div>
 
-        <!-- Painel 2: Timeline de Eventos -->
-        <div class="htab-panel" id="htab-timeline" style="display: none;">
+        <!-- Painel 2: Timeline editorial -->
+        <div class="htab-panel" id="htab-timeline" role="tabpanel" style="display: none;">
           <div class="timeline-filters">
-            <button class="btn-toggle active" data-tfilter="all">Todos os Eventos</button>
-            <button class="btn-toggle" data-tfilter="release">Lançamentos Oficiais</button>
-            <button class="btn-toggle" data-tfilter="identity-reveal">Revelação / Stealth</button>
-            <button class="btn-toggle" data-tfilter="weights-released">Pesos Abertos (Open Weights)</button>
-            <button class="btn-toggle" data-tfilter="pricing-change">Alteração de Tarifas</button>
+            <button class="btn-toggle active" data-tfilter="all">Todos</button>
+            <button class="btn-toggle" data-tfilter="release">Lançamentos</button>
+            <button class="btn-toggle" data-tfilter="identity-reveal">Revelações</button>
+            <button class="btn-toggle" data-tfilter="weights-released">Open Weights</button>
+            <button class="btn-toggle" data-tfilter="pricing-change">Preço</button>
           </div>
-          <div class="timeline-stream" id="timelineStreamContainer">
-            <!-- Injetado dinamicamente via JS -->
-          </div>
+          <div class="timeline-editorial" id="timelineStreamContainer"></div>
         </div>
 
-        <!-- Painel 3: Histórico de Benchmarks -->
-        <div class="htab-panel" id="htab-benchmarks" style="display: none;">
+        <!-- Painel 3: Benchmark History -->
+        <div class="htab-panel" id="htab-benchmarks" role="tabpanel" style="display: none;">
+          <div class="surface-panel bh-chart-panel">
+            <div class="bh-toolbar">
+              <div class="history-filter-item">
+                <label for="bhBenchmarkSelect">Benchmark</label>
+                <select id="bhBenchmarkSelect" aria-label="Selecionar benchmark">
+                  <option value="all">Todos</option>
+                </select>
+              </div>
+              <span class="bh-meta" id="bhChartMeta"></span>
+            </div>
+            <div class="bh-chart-frame">
+              <canvas id="historyBenchmarkChart" aria-label="Gráfico temporal de runs de benchmarks"></canvas>
+            </div>
+          </div>
           <div class="content-box">
             <div class="box-header">
-              <h3>Histórico de Execuções e Corroboração Metrológica</h3>
+              <h3>Runs auditados</h3>
             </div>
             <div class="table-responsive">
               <table class="data-table" id="benchmarkHistoryTable">
@@ -1975,9 +1972,7 @@
                     <th>Fonte</th>
                   </tr>
                 </thead>
-                <tbody id="benchmarkHistoryTableBody">
-                  <!-- Injetado via JS -->
-                </tbody>
+                <tbody id="benchmarkHistoryTableBody"></tbody>
               </table>
             </div>
           </div>
@@ -1991,9 +1986,8 @@
         <div class="view-header">
           <div class="view-title">
             <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-              <h2>🎯 Matriz de Casos de Uso & Seleção por Tipo de Projeto</h2>
-              <span class="badge-tag badge-subdollar">E — Calibrado</span>
-            </div>
+              <h2>Casos de Uso</h2>
+                          </div>
             <p>Classificação técnica balanceada por tipo de desenvolvimento de software, papéis recomendados e pipelines de orquestração multi-agente.</p>
           </div>
         </div>
@@ -2011,7 +2005,7 @@
         <!-- Pipelines & Receitas de Orquestração -->
         <div class="content-box" style="margin-top: 32px;">
           <div class="box-header">
-            <h3>🔀 Receitas Recomendadas de Orquestração Multi-Modelo</h3>
+            <h3>Receitas Recomendadas de Orquestração Multi-Modelo</h3>
             <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 2px;">
               Padrões de trabalho consagrados na comunidade técnica para maximizar inteligência reduzindo custos em até 80%.
             </p>
@@ -2029,7 +2023,7 @@
         <div class="view-header">
           <div class="view-title">
             <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-              <h2>💬 Relatos da Comunidade & Comportamento de Engenharia</h2>
+              <h2>Comunidade</h2>
               <span class="badge-tag badge-warning">sourceType: community / calibrated</span>
             </div>
             <p>Síntese de vivências de engenharia em produção (Reddit, GitHub, Twitter, Fóruns) e confronto metrológico entre o que os benchmarks dizem e o que os desenvolvedores sentem no dia a dia.</p>
@@ -2084,7 +2078,7 @@
       <section class="spa-view" id="view-platforms">
         <div class="view-header">
           <div class="view-title">
-            <h2>🚀 Disponibilidade por Plataforma & Catálogo OpenCode Go</h2>
+            <h2>Plataformas</h2>
             <p>Onde executar cada modelo de IA: API Direta, Cursor IDE, OpenCode Go, Google Antigravity, OpenRouter e clusters locais com limites de requisições calculados.</p>
           </div>
         </div>
@@ -2094,11 +2088,14 @@
           <div style="display: flex; align-items: flex-start; gap: 14px;">
             <div style="font-size: 1.8rem; line-height: 1;">⚡</div>
             <div>
-              <h3 style="color: var(--accent-cyan); margin-bottom: 6px; font-size: 1.05rem;">Economia Real do OpenCode Go: Entendendo as 3 Classes de Quota Burn</h3>
+              <h3 style="color: var(--accent-cyan); margin-bottom: 6px; font-size: 1.05rem;">Economia Real do OpenCode Go: Entendendo as 4 Classes de Quota Burn</h3>
               <p style="font-size: 0.88rem; color: var(--text-primary); line-height: 1.5; margin-bottom: 12px;">
-                <strong>O OpenCode Go custa US$ 10/mês e oferece até US$ 60 de valor de uso nominal, mas esse multiplicador de 6× não vale igualmente para todos os modelos.</strong> Modelos da classe <strong>US$ 60</strong> consomem quota a <strong>1×</strong> (Full Value); modelos <strong>US$ 30</strong> consomem aproximadamente <strong>2× mais rápido</strong> (Half Value); e modelos <strong>US$ 15</strong> consomem aproximadamente <strong>4× mais rápido</strong> (Quarter Value). Consulte a classe de uso antes de escolher o modelo principal para seus coding loops.
+                <strong>O OpenCode Go custa US$ 10/mês e oferece até US$ 60 de valor de uso nominal, mas esse multiplicador de 6× não vale igualmente para todos os modelos.</strong> Modelos da classe <strong>US$ 60</strong> consomem quota a <strong>1×</strong> (Full Value); modelos <strong>US$ 30</strong> consomem aproximadamente <strong>2× mais rápido</strong> (Half Value); modelos <strong>US$ 15</strong> consomem aproximadamente <strong>4× mais rápido</strong> (Quarter Value); e <strong>Omen Alpha</strong> é a classe <strong>US$ 100</strong> (10× valor, 0,6× burn). Consulte a classe de uso antes de escolher o modelo principal para seus coding loops.
               </p>
               <div style="display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.8rem;">
+                <span class="badge-tag badge-go-100">
+                  🟣 <strong>Classe US$ 100 (1 modelo):</strong> 10× Value • 0,6× Burn • 167% Quota Efetiva
+                </span>
                 <span class="badge-tag badge-go-60">
                   🟢 <strong>Classe US$ 60 (13 modelos):</strong> Full 6× Value • 1× Burn • 100% Quota Efetiva
                 </span>
@@ -2128,7 +2125,7 @@
 
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 16px;">
             <div>
-              <label for="goSimModelSelect" style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">1. Selecione o Modelo Go (26 modelos oficiais):</label>
+              <label for="goSimModelSelect" style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">1. Selecione o Modelo Go (27 modelos oficiais):</label>
               <select id="goSimModelSelect" class="filter-select" style="width: 100%;">
                 <!-- Populado dinamicamente via JS -->
               </select>
@@ -2156,18 +2153,19 @@
           </div>
         </div>
 
-        <!-- Seção 2: Catálogo Completo OpenCode Go (26 Modelos Oficiais) -->
+        <!-- Seção 2: Catálogo Completo OpenCode Go (27 Modelos Oficiais) -->
         <div class="content-box" style="margin-bottom: 30px;">
           <div class="box-header">
             <div>
-              <h3>Catálogo Oficial OpenCode Go (26 Modelos) — Metrologia de Uso & Burn</h3>
+              <h3>Catálogo Oficial OpenCode Go (27 Modelos) — Metrologia de Uso & Burn</h3>
               <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 2px;">
-                Snapshot oficial 02/09/2026. Requisições são estimativas baseadas em perfis de token médios de coding. API dedicada (<code>https://opencode.ai/zen/go/v1/</code>).
+                Snapshot oficial 06/09/2026 (lista curada da documentação Go). Requisições são estimativas baseadas em perfis de token médios de coding. API dedicada (<code>https://opencode.ai/zen/go/v1/</code>). SKUs extras da API sem linha de cota não entram aqui.
               </p>
             </div>
             <div style="display: flex; gap: 8px; align-items: center;">
               <select id="goTableFilterClass" class="filter-select" style="min-width: 160px;">
                 <option value="all">Todas as Classes</option>
+                <option value="100">Classe US$ 100 (0,6× burn)</option>
                 <option value="60">Classe US$ 60 (1× burn)</option>
                 <option value="30">Classe US$ 30 (2× burn)</option>
                 <option value="15">Classe US$ 15 (4× burn)</option>
@@ -2191,6 +2189,46 @@
                 </tr>
               </thead>
               <tbody id="opencodeDetailedTableBody">
+                <!-- Injetado dinamicamente via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Seção 2b: Catálogo OpenCode Zen (pay-as-you-go + gratuitos) -->
+        <div class="content-box" style="margin-bottom: 30px;">
+          <div class="box-header">
+            <div>
+              <h3>Catálogo OpenCode Zen (72 IDs) — Pay-as-you-go, Gratuitos e Obsoletos</h3>
+              <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 2px;">
+                Snapshot 06/09/2026. Fonte curada: tabela de endpoints da <a href="https://opencode.ai/docs/pt-br/zen/" target="_blank" rel="noopener">documentação Zen</a> (69 IDs) + 3 SKUs servíveis só em <code>/zen/v1/models</code>. Admins do workspace podem desabilitar modelos. Não é o catálogo frontier deste portal.
+              </p>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <select id="zenTableFilter" class="filter-select" style="min-width: 180px;">
+                <option value="all">Todos</option>
+                <option value="payg">Pay-as-you-go</option>
+                <option value="free">Gratuitos</option>
+                <option value="deprecated">Obsoletos</option>
+                <option value="api-only">Só na API</option>
+                <option value="docs-only">Só na docs</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table" id="opencodeZenDetailedTable">
+              <thead>
+                <tr>
+                  <th>Modelo Zen (SKU)</th>
+                  <th>Cobrança</th>
+                  <th>Status</th>
+                  <th>Fonte</th>
+                  <th>Input / Output</th>
+                  <th>Contexto</th>
+                  <th>Endpoint & SDK</th>
+                </tr>
+              </thead>
+              <tbody id="opencodeZenTableBody">
                 <!-- Injetado dinamicamente via JS -->
               </tbody>
             </table>
@@ -2348,7 +2386,7 @@
       <section class="spa-view" id="view-sources">
         <div class="view-header">
           <div class="view-title">
-            <h2>🔬 Metodologia & Catálogo de Fontes</h2>
+            <h2>Fontes</h2>
             <p>Critérios científicos de avaliação, taxonomia de evidências, calibração de scores e registro de fontes auditáveis.</p>
           </div>
           <div class="view-actions">
@@ -2359,7 +2397,7 @@
         <!-- Bloco 1: Taxonomia Estrita de Evidências -->
         <div class="content-box" style="margin-bottom: 24px;">
           <div class="box-header">
-            <h3>🏷️ Taxonomia de Evidências & Rastreabilidade</h3>
+            <h3>Taxonomia de Evidências & Rastreabilidade</h3>
           </div>
           <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 16px;">
             Cada número e alegação no portal possui um selo de metrologia indicando seu grau de confiança e processo de coleta:
@@ -2426,7 +2464,7 @@
         <div class="content-box">
           <div class="box-header">
             <div>
-              <h3>📚 Catálogo Canônico de Fontes Auditadas (<span id="sourceRegistryTotal">0</span> fontes)</h3>
+              <h3>Catálogo Canônico de Fontes Auditadas (<span id="sourceRegistryTotal">0</span> fontes)</h3>
               <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 2px;">
                 Inventário completo de publicações, technical reports e harness evaluations que alimentam as decisões do portal.
               </p>
@@ -2471,8 +2509,7 @@
   <div class="comparator-floating-bar" id="comparatorFloatingBar" style="display: none;" role="region" aria-label="Bandeja de Comparação Rápida">
     <div class="floating-bar-inner">
       <div class="floating-bar-info">
-        <span class="floating-bar-icon">⚔️</span>
-        <span class="floating-bar-count" id="floatingCompareCount">Comparar 0/4</span>
+                <span class="floating-bar-count" id="floatingCompareCount">Comparar 0/4</span>
         <div class="floating-bar-chips" id="floatingCompareChips"></div>
       </div>
       <div class="floating-bar-actions">
@@ -2494,7 +2531,7 @@
       <!-- Preenchido dinamicamente via JS -->
     </div>
     <div class="drawer-footer" style="display: flex; gap: 8px;">
-      <button type="button" class="btn-secondary" id="btnDrawerCompare" style="flex: 1;">⚔️ Comparar</button>
+      <button type="button" class="btn-secondary" id="btnDrawerCompare" style="flex: 1;">Comparar</button>
       <button type="button" class="btn-primary full-width" id="drawerBtnFullDossier" style="flex: 2;">📄 Abrir Dossiê Completo</button>
     </div>
   </aside>
@@ -2536,7 +2573,7 @@
   <div class="modal-overlay" id="exportModalOverlay" role="dialog" aria-modal="true" aria-label="Copiar Relatório Markdown">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>📋 Copiar Relatório</h3>
+        <h3>Copiar Relatório</h3>
         <button class="modal-close-btn" id="exportModalCloseBtn" aria-label="Fechar Modal">&times;</button>
       </div>
       <div class="modal-body">
@@ -2557,7 +2594,7 @@
     <div class="modal-card modal-card-wide" style="max-width: 1100px; width: 95%;">
       <div class="modal-header">
         <div>
-          <h3>⚔️ Comparador de Assinaturas & Planos Lado a Lado</h3>
+          <h3>Comparador de Assinaturas & Planos Lado a Lado</h3>
           <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">Análise comparativa de franquias, custos (USD/BRL) e modelos incluídos.</p>
         </div>
         <button class="modal-close-btn" id="planCompareModalCloseBtn" aria-label="Fechar Modal">&times;</button>
@@ -2610,7 +2647,7 @@
     <div class="modal-card" style="max-width: 720px; width: 95%;">
       <div class="modal-header">
         <div>
-          <h3>🎯 Qual plano é melhor para você?</h3>
+          <h3>Qual plano é melhor para você?</h3>
           <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">Responda a 5 perguntas rápidas para receber recomendações determinísticas justificadas.</p>
         </div>
         <button class="modal-close-btn" id="planWizardModalCloseBtn" aria-label="Fechar Modal">&times;</button>
@@ -2657,8 +2694,10 @@
   <script src="data/fx.js"></script>
   <script src="data/plans.js"></script>
   <script src="data/platforms.js"></script>
+  <script src="data/opencode-zen.js"></script>
   <script src="data/plan-explorer.js"></script>
   <script src="data/history.js"></script>
+  <script src="history-utils.js"></script>
   <script src="data/community.js"></script>
   <script src="data/behavior.js"></script>
   <script src="data/use-cases.js"></script>

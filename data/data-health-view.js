@@ -155,7 +155,7 @@
       <!-- TABELA 2: FILA DE REVISÃO (Review Queue) -->
       <div class="content-box" style="margin-bottom: 22px;">
         <div class="box-header">
-          <h3>📋 2. Fila de Revisão Operacional (Review Queue)</h3>
+          <h3>2. Fila de Revisão Operacional (Review Queue)</h3>
         </div>
         <div class="table-responsive" style="margin-top: 10px;">
           <table class="data-table">
@@ -178,7 +178,7 @@
       <!-- TABELA 3: LIVRO DE CLAIMS COMPETITIVOS -->
       <div class="content-box" style="margin-bottom: 22px;">
         <div class="box-header">
-          <h3>📜 3. Rastreabilidade de Claims & Transição para Superseded</h3>
+          <h3>3. Rastreabilidade de Claims & Transição para Superseded</h3>
         </div>
         <div class="table-responsive" style="margin-top: 10px;">
           <table class="data-table">
@@ -203,7 +203,7 @@
       <!-- TABELA 4: COBERTURA HISTÓRICA E MODELOS SEM LINHAGEM (Seção 133) -->
       <div class="content-box">
         <div class="box-header">
-          <h3>🌳 4. Cobertura Histórica & Modelos sem Linhagem Genealógica Auditada (Critério 133)</h3>
+          <h3>4. Cobertura Histórica & Modelos sem Linhagem Genealógica Auditada (Critério 133)</h3>
         </div>
         <div style="font-size: 0.82rem; color: var(--text-secondary); margin: 6px 0 14px 0; line-height: 1.45;">
           <strong>Diretriz Normativa de Rigor Metrológico (Seção 133):</strong> Modelos contemporâneos ou especializados que não possuem linhagens genealógicas públicas atestadas por documentação técnica primária <em>não recebem ancestrais artificiais</em> apenas para inflar o percentual para 100%. A tabela abaixo documenta com total transparência os ${histCov.modelsWithoutHistory.length} modelos do catálogo sem linhagem direta mapeada.

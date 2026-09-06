@@ -1,11 +1,25 @@
 /**
  * DATA PACK: DISPONIBILIDADE POR PLATAFORMA & CATÁLOGO OPENCODE GO
- * Snapshot Oficial de Referência: 03/09/2026 (Documentação atualizada em 02/09/2026)
- * Fonte Única Canônica para o OpenCode Go
+ * Snapshot Oficial de Referência: 06/09/2026
+ * Fonte canônica: lista curada da documentação Go (https://opencode.ai/docs/pt-br/go/),
+ * não o dump bruto de /zen/go/v1/models.
  */
 
+var normalizeOpencodeModelKey = (typeof normalizeOpencodeModelKey === 'function')
+  ? normalizeOpencodeModelKey
+  : function normalizeOpencodeModelKey(id) {
+      if (!id) return '';
+      const stripped = String(id).replace(/^opencode-go\//, '').replace(/^opencode\//, '').toLowerCase().replace(/\./g, '-');
+      const aliases = {
+        'deepseek-v4-pro': 'deepseek-v4-pro-0813',
+        'deepseek-v4-flash': 'deepseek-v4-flash-0731',
+        'deepseek-v4-flash-vision-exp': 'deepseek-v4-vision-exp'
+      };
+      return aliases[stripped] || stripped;
+    };
+
 // ============================================================================
-// 1. OPENCODE GO — ESTRUTURA CANÔNICA DE DADOS (26 MODELOS OFICIAIS)
+// 1. OPENCODE GO — ESTRUTURA CANÔNICA DE DADOS (27 MODELOS OFICIAIS)
 // ============================================================================
 
 const OPENCODE_GO_DATA = {
@@ -13,8 +27,9 @@ const OPENCODE_GO_DATA = {
     platformName: 'OpenCode Go',
     sourceType: 'official',
     publisher: 'OpenCode',
-    verifiedAt: '2026-09-03',
-    documentationUpdatedAt: '2026-09-02',
+    verifiedAt: '2026-09-06',
+    documentationUpdatedAt: '2026-09-06',
+    documentationUrl: 'https://opencode.ai/docs/pt-br/go/',
     endpointBaseUrl: 'https://opencode.ai/zen/go/v1/',
     planPriceUsd: 10,
     nominalLimits: {
@@ -27,11 +42,13 @@ const OPENCODE_GO_DATA = {
     zenBalanceFallbackSupported: true,
     zenBalanceFallbackRequiresOptIn: true,
     freeModelsAfterLimit: true,
-    totalModels: 26,
-    rulesSummary: 'OpenCode Go custa US$ 10/mês e oferece até US$ 60 de valor de uso nominal, mas esse multiplicador de 6× não vale igualmente para todos os modelos. Modelos da classe US$ 60 consomem quota a 1×; modelos US$ 30 consomem aproximadamente 2× mais rápido; e modelos US$ 15 consomem aproximadamente 4× mais rápido. Consulte a classe de uso antes de escolher o modelo.'
+    totalModels: 27,
+    officialDocsBulletCount: 27,
+    excludedApiOnlySkus: ['minimax-m2.5', 'kimi-k2.5', 'glm-5', 'qwen3.5-plus', 'mimo-v2-pro', 'mimo-v2-omni', 'hy3-preview', 'grok-4.5'],
+    rulesSummary: 'OpenCode Go custa US$ 10/mês e oferece até US$ 60 de valor de uso nominal, mas esse multiplicador de 6× não vale igualmente para todos os modelos. Classe US$ 60 consome quota a 1×; US$ 30 consome ~2× mais rápido; US$ 15 consome ~4× mais rápido. Omen Alpha é a única classe US$ 100 (10× valor, 0,6× burn, ~167% da franquia nominal). IDs extras da API Go sem linha de cota na documentação não entram neste catálogo.'
   },
 
-  // 26 MODELOS OFICIAIS DO SNAPSHOT 02/09/2026
+  // 27 MODELOS OFICIAIS DO SNAPSHOT 06/09/2026 (docs Go)
   models: [
     // ------------------------------------------------------------------------
     // CLASSE US$ 15 — QUARTER GO / 1,5× VALOR / 4× QUOTA BURN (9 MODELOS)
@@ -764,13 +781,62 @@ const OPENCODE_GO_DATA = {
         notes: 'ZDR estrito 0 dias / sem treinamento.'
       },
       status: 'active'
+    },
+    // ------------------------------------------------------------------------
+    // CLASSE US$ 100 — 10× VALOR / 0,6× QUOTA BURN (1 MODELO)
+    // ------------------------------------------------------------------------
+    {
+      id: 'opencode-go/omen-alpha',
+      canonicalId: 'omen-alpha',
+      platformSku: true,
+      displayName: 'Omen Alpha',
+      provider: 'unknown',
+      usageAllowanceUsd: 100,
+      valueMultiplierVsSubscription: 10,
+      quotaBurnMultiplier: 0.6,
+      effectiveQuotaPct: 167,
+      req5h: 11600,
+      reqWeek: 29000,
+      reqMonth: 57900,
+      context: '500k',
+      tokenProfile: { input: 300, cache: 40000, output: 100 },
+      endpoint: '/chat/completions',
+      sdkPackage: '@ai-sdk/openai-compatible',
+      goPricing: {
+        standard: { input: 0.20, output: 0.66, cacheRead: 0.04 }
+      },
+      privacy: {
+        trainingUsed: false,
+        retentionDays: 0,
+        zdr: true,
+        notes: 'ZDR estrito 0 dias / sem treinamento. Modelo stealth: o provedor de origem não foi publicado.'
+      },
+      status: 'preview',
+      notes: 'Listado na documentação oficial Go (06/09/2026). Identidade do provedor não publicada. Janela 500k e output 128k conforme models.dev provider opencode-go. Sem card no catálogo frontier (sem arquitetura/benchmarks públicos).'
     }
   ],
 
   // Métodos Utilitários e Lógica da Calculadora de Cota Go
   getModel(idOrCanonicalId) {
     if (!idOrCanonicalId) return null;
-    return this.models.find(m => m.id === idOrCanonicalId || m.canonicalId === idOrCanonicalId) || null;
+    const key = normalizeOpencodeModelKey(idOrCanonicalId);
+    return this.models.find(m => {
+      const ids = [m.id, m.canonicalId].filter(Boolean).map(normalizeOpencodeModelKey);
+      return m.id === idOrCanonicalId || m.canonicalId === idOrCanonicalId || ids.includes(key);
+    }) || null;
+  },
+
+  quotaBadgeClass(model) {
+    const usd = model && model.usageAllowanceUsd;
+    if (usd === 100) return 'badge-go-100';
+    if (usd === 60) return 'badge-go-60';
+    if (usd === 30) return 'badge-go-30';
+    return 'badge-go-15';
+  },
+
+  burnPillClass(multiplier) {
+    if (multiplier === 0.6) return 'burn-pill-06x';
+    return 'burn-pill-' + multiplier + 'x';
   },
 
   isModelInGo(idOrCanonicalId) {
